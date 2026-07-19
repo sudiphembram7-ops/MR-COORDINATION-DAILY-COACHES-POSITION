@@ -1,83 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR Coach Coordination Daily Coaches Position</title>
 
-<title>MR Coach Coordination System</title>
+    <link rel="stylesheet" href="style.css">
 
-<link rel="stylesheet" href="css/style.css">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
 <body>
 
-<header>
-    <h1>🚆 MR Coach Coordination System</h1>
-    <p>Liluah Railway Workshop</p>
-</header>
+<div class="container-fluid p-3">
 
+    <!-- Header -->
+    <div class="header shadow">
 
-<nav>
-    <a href="index.html">Dashboard</a>
-    <a href="coaches.html">Coaches</a>
-    <a href="reports.html">Reports</a>
-    <a href="login.html">Login</a>
-</nav>
+        <div>
+            <h2>MR CO-ORDINATION DAILY COACHES POSITION</h2>
+            <small>Mechanical Workshop Dashboard</small>
+        </div>
 
+        <div class="text-end">
 
-<section class="cards">
+            <div id="currentDate"></div>
 
-<div class="card">
-<h2>Total Coach</h2>
-<p id="totalCoach">0</p>
+            <div id="currentTime"></div>
+
+        </div>
+
+    </div>
+
+    <!-- Toolbar -->
+
+    <div class="toolbar mt-3">
+
+        <input type="text"
+               id="searchBox"
+               class="form-control"
+               placeholder="🔍 Search Coach Number">
+
+        <button id="fullscreenBtn"
+                class="btn btn-primary">
+            <i class="bi bi-arrows-fullscreen"></i>
+            Full Screen
+        </button>
+
+        <button id="exportExcel"
+                class="btn btn-success">
+            <i class="bi bi-file-earmark-excel"></i>
+            Excel
+        </button>
+
+        <button id="downloadPdf"
+                class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf"></i>
+            PDF
+        </button>
+
+        <button id="printBtn"
+                class="btn btn-secondary">
+            <i class="bi bi-printer"></i>
+            Print
+        </button>
+
+    </div>
+
+    <!-- Row 1 -->
+
+    <div class="row mt-4">
+
+        <div class="col-lg-6">
+
+            <div class="shop-card">
+
+                <h4>N SHOP</h4>
+
+                <table class="table table-bordered coach-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>N2</th>
+                        <th>N5</th>
+                        <th>N7</th>
+                        <th>N8</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="nshop">
+
+                    <!-- Data from script.js -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="shop-card">
+
+                <h4>MR SCR SHOP</h4>
+
+                <table class="table table-bordered coach-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>SCR9</th>
+                        <th>SCR10</th>
+                        <th>SCR11</th>
+                        <th>SCR12</th>
+                        <th>SCR13</th>
+                        <th>SCR14</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="scrshop">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- M SHOP -->
+
+    <div class="shop-card mt-4">
+
+        <h4>M SHOP</h4>
+
+        <table class="table table-bordered coach-table">
+
+            <thead>
+
+            <tr>
+
+                <th>M2</th>
+                <th>M3</th>
+                <th>M4</th>
+                <th>M5</th>
+                <th>M6</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="mshop">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- CB SHOP -->
+
+    <div class="shop-card mt-4">
+
+        <h4>CB SHOP</h4>
+
+        <table class="table table-bordered coach-table">
+
+            <thead>
+
+            <tr>
+
+                <th>F1</th>
+                <th>F2</th>
+                <th>F3</th>
+                <th>F4</th>
+                <th>F5</th>
+                <th>F6</th>
+                <th>F7</th>
+                <th>F8</th>
+                <th>F9</th>
+                <th>F10</th>
+                <th>F11</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="cbshop">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Bottom -->
+
+    <div class="row mt-4">
+
+        <div class="col-lg-5">
+
+            <div class="shop-card">
+
+                <h4>LIFTING BAY</h4>
+
+                <table class="table table-bordered coach-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>L10</th>
+                        <th>L9</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="lifting">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-7">
+
+            <div class="shop-card">
+
+                <h4>J SHOP</h4>
+
+                <table class="table table-bordered coach-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>J1</th>
+                        <th>J2</th>
+                        <th>J3</th>
+                        <th>J4</th>
+                        <th>J5</th>
+                        <th>J6</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="jshop">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
+<!-- Libraries -->
 
-<div class="card">
-<h2>In Shop</h2>
-<p id="inShop">0</p>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<div class="card">
-<h2>Ready</h2>
-<p id="ready">0</p>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-
-<div class="card">
-<h2>Dispatch</h2>
-<p id="dispatch">0</p>
-</div>
-
-</section>
-
-
-<section>
-
-<h2>Coach Position</h2>
-
-<table>
-
-<tr>
-<th>Coach No</th>
-<th>Shop</th>
-<th>Status</th>
-<th>SSE</th>
-</tr>
-
-
-<tbody id="coachData">
-
-</tbody>
-
-</table>
-
-</section>
-
-
-<script src="js/app.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
