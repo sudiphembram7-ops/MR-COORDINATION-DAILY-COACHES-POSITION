@@ -1,268 +1,127 @@
-/* ============================================
-   MR Coach Coordination Daily Coaches Position
-   Professional Dashboard Script
-============================================= */
+// MR Coach Coordination System
+// Version 1.0
 
-// ----------------------------
-// Sample Data
-// ----------------------------
-const data = {
-  nshop: [
-    ["082713", "171873", "091175", "227900/C"],
-    ["183481/C", "EC084872", "072831", "227881/C"],
-    ["062061/C", "154851", "094019", "221836/C"]
-  ],
 
-  scrshop: [
-    ["194274/C", "072439", "132451", "111018", "-", "-"],
-    ["071134", "064011", "-", "144226", "-", "-"]
-  ],
+const coaches = [
 
-  mshop: [
-    ["091181", "NF045207", "194528/C", "201142/C", "082444"],
-    ["201147/C", "104382", "197320/C", "154810/C", "091174"]
-  ],
+{
+    coachNo:"03125",
+    shop:"LLH",
+    status:"In Shop",
+    sse:"S. Hembram"
+},
 
-  cbshop: [
-    ["-", "-", "-", "-", "051066/C", "102109", "193025/C", "162144/C", "102201", "162145/C", "052107/C"]
-  ],
+{
+    coachNo:"04108",
+    shop:"Bogie",
+    status:"Repair",
+    sse:"A. Das"
+},
 
-  lifting: [
-    ["102408", "EC124203"],
-    ["121624", "NF101047"]
-  ],
+{
+    coachNo:"06112",
+    shop:"Air Brake",
+    status:"Ready",
+    sse:"P. Roy"
+},
 
-  jshop: [
-    ["231529", "235299", "235320", "235300", "194567/C", ""],
-    ["235298", "231530", "235297", "235321", "194085/C", ""]
-  ]
-};
-
-// ----------------------------
-// Render Table
-// ----------------------------
-function renderTable(id, rows) {
-  const tbody = document.getElementById(id);
-  tbody.innerHTML = "";
-
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-
-    row.forEach(value => {
-      const td = document.createElement("td");
-      td.contentEditable = true;
-      td.textContent = value;
-
-      td.addEventListener("input", saveData);
-
-      tr.appendChild(td);
-    });
-
-    tbody.appendChild(tr);
-  });
+{
+    coachNo:"07135",
+    shop:"Paint",
+    status:"Dispatched",
+    sse:"R. Singh"
 }
 
-// ----------------------------
-// Render All
-// ----------------------------
-function renderAll() {
-  renderTable("nshop", data.nshop);
-  renderTable("scrshop", data.scrshop);
-  renderTable("mshop", data.mshop);
-  renderTable("cbshop", data.cbshop);
-  renderTable("lifting", data.lifting);
-  renderTable("jshop", data.jshop);
-}
+];
 
-renderAll();
 
-// ----------------------------
-// Date & Time
-// ----------------------------
-function updateClock() {
+// Load Coach Data
 
-  const now = new Date();
+function loadCoach(){
 
-  document.getElementById("currentDate").innerHTML =
-      now.toLocaleDateString();
+let table = document.getElementById("coachData");
 
-  document.getElementById("currentTime").innerHTML =
-      now.toLocaleTimeString();
+if(table){
 
-}
+table.innerHTML="";
 
-updateClock();
+coaches.forEach(function(c){
 
-setInterval(updateClock,1000);
+let row = `
+<tr>
+<td>${c.coachNo}</td>
+<td>${c.shop}</td>
+<td>${c.status}</td>
+<td>${c.sse}</td>
+</tr>
+`;
 
-// ----------------------------
-// Live Search
-// ----------------------------
-
-document.getElementById("searchBox")
-.addEventListener("keyup",function(){
-
-let value=this.value.toLowerCase();
-
-document.querySelectorAll("td").forEach(td=>{
-
-td.classList.remove("highlight");
-
-if(td.innerText.toLowerCase().includes(value) && value!=""){
-
-td.classList.add("highlight");
-
-}
+table.innerHTML += row;
 
 });
 
-});
+}
 
-// ----------------------------
-// Full Screen
-// ----------------------------
 
-document
-.getElementById("fullscreenBtn")
-.addEventListener("click",()=>{
+// Dashboard Count
 
-if(!document.fullscreenElement){
+let total = document.getElementById("totalCoach");
+let shop = document.getElementById("inShop");
+let ready = document.getElementById("ready");
+let dispatch = document.getElementById("dispatch");
 
-document.documentElement.requestFullscreen();
 
-}else{
+if(total){
 
-document.exitFullscreen();
+total.innerHTML = coaches.length;
 
 }
 
-});
 
-// ----------------------------
-// Print
-// ----------------------------
+if(shop){
 
-document
-.getElementById("printBtn")
-.addEventListener("click",()=>{
+shop.innerHTML =
+coaches.filter(c=>c.status=="In Shop").length;
 
-window.print();
+}
 
-});
 
-// ----------------------------
-// Auto Save
-// ----------------------------
+if(ready){
 
-function saveData(){
+ready.innerHTML =
+coaches.filter(c=>c.status=="Ready").length;
 
-localStorage.setItem(
+}
 
-"coachData",
 
-document.body.innerHTML
+if(dispatch){
 
+dispatch.innerHTML =
+coaches.filter(c=>c.status=="Dispatched").length;
+
+}
+
+
+}
+
+
+// Search Function
+
+function searchCoach(){
+
+let input =
+document.getElementById("search").value.toLowerCase();
+
+
+let result =
+coaches.filter(c=>
+c.coachNo.toLowerCase().includes(input)
 );
 
-}
 
-// ----------------------------
-// Restore
-// ----------------------------
-
-window.onload=()=>{
-
-const backup=localStorage.getItem("coachData");
-
-if(backup){
-
-console.log("Auto Save Loaded");
+console.log(result);
 
 }
 
-};
 
-// ----------------------------
-// Excel Export
-// ----------------------------
-
-document
-.getElementById("exportExcel")
-.addEventListener("click",()=>{
-
-const wb=XLSX.utils.book_new();
-
-document.querySelectorAll("table").forEach((table,index)=>{
-
-const ws=XLSX.utils.table_to_sheet(table);
-
-XLSX.utils.book_append_sheet(
-wb,
-ws,
-"Sheet"+(index+1)
-);
-
-});
-
-XLSX.writeFile(
-wb,
-"MR_Coach_Position.xlsx"
-);
-
-});
-
-// ----------------------------
-// PDF
-// ----------------------------
-
-document
-.getElementById("downloadPdf")
-.addEventListener("click",()=>{
-
-window.print();
-
-});
-
-// ----------------------------
-// Dark Mode
-// ----------------------------
-
-document.addEventListener("keydown",e=>{
-
-if(e.key==="d"){
-
-document.body.classList.toggle("dark-mode");
-
-}
-
-});
-
-// ----------------------------
-// Double Click Edit Colour
-// ----------------------------
-
-document.addEventListener("dblclick",e=>{
-
-if(e.target.tagName==="TD"){
-
-e.target.style.background="#90EE90";
-
-}
-
-});
-
-// ----------------------------
-// Keyboard Shortcuts
-// ----------------------------
-
-document.addEventListener("keydown",e=>{
-
-if(e.ctrlKey && e.key==="f"){
-
-e.preventDefault();
-
-document.getElementById("searchBox").focus();
-
-}
-
-});
+window.onload = loadCoach;
