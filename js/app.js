@@ -2,7 +2,8 @@
 // Version 1.0
 
 
-const coaches = [
+const coaches =
+JSON.parse(localStorage.getItem("coaches")) || [];
 
 {
     coachNo:"03125",
