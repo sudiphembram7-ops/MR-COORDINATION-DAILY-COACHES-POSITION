@@ -1,57 +1,428 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MR Coach Coordination System</title>
+<title>
+MR CO-ORDINATION DAILY COACHES POSITION
+</title>
 
-<link rel="stylesheet" href="css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 
 </head>
 
+
 <body>
 
-<header class="bg-primary text-white p-3 shadow">
-    <div class="container">
-        <h2>🚆 MR Coach Coordination System</h2>
-        <p class="mb-0">Liluah Railway Workshop</p>
-    </div>
-</header>
+
+<div class="board">
 
 
-<nav>
-    <a href="index.html">Dashboard</a>
-    <a href="coaches.html">Coaches</a>
-    <a href="reports.html">Reports</a>
-    <a href="login.html">Login</a>
-</nav>
-
-<div class="container mt-4">
-
-<div class="row">
-
-<div class="col-md-3 col-6 mb-3">
-<div class="card text-center shadow">
-<div class="card-body">
-<h5>Total Coach</h5>
-<h1 id="totalCoach">0</h1>
-</div>
-</div>
+<div class="title">
+MR CO-ORDINATION DAILY COACHES POSITION
 </div>
 
-<div class="col-md-3 col-6 mb-3">
-<div class="card text-center shadow">
-<div class="card-body">
-<h5>In Shop</h5>
-<h1 id="inShop">0</h1>
-</div>
-</div>
+
+<div class="subtitle">
+LILUAH WORKSHOP
 </div>
 
-<div class="col-md-3 col-6 mb-3">
-<div class="card text-center shadow">
-<div class="card-body">
-<h5>Ready</h5>
-<h1 id="ready">0</h1
+
+<div class="date-box">
+Date : <span id="date"></span>
+</div>
+
+
+
+<!-- SEARCH -->
+
+<div class="search-panel">
+
+<input type="text"
+id="search"
+placeholder="Search Coach No">
+
+<button onclick="searchCoach()">
+SEARCH
+</button>
+
+<button onclick="fullScreen()">
+FULL SCREEN
+</button>
+
+</div>
+
+
+<div class="result" id="result"></div>
+
+
+
+<!-- ALL SHOPS -->
+
+<div class="shop-container">
+
+
+
+<!-- N SHOP -->
+
+<div class="shop">
+
+<div class="shop-title">
+N SHOP
+</div>
+
+
+<table>
+
+<tr>
+<th>N2</th>
+<th>N5</th>
+<th>N7</th>
+<th>N8</th>
+</tr>
+
+
+<tr>
+<td>082713</td>
+<td>171873</td>
+<td>091175</td>
+<td>227900/C</td>
+</tr>
+
+
+<tr>
+<td>183481/C</td>
+<td>EC084872</td>
+<td>072831</td>
+<td>227881/C</td>
+</tr>
+
+
+<tr>
+<td>062061/C</td>
+<td>154851</td>
+<td>094019</td>
+<td>221836/C</td>
+</tr>
+
+</table>
+
+</div>
+
+
+
+
+<!-- M SHOP -->
+
+
+<div class="shop">
+
+<div class="shop-title">
+M SHOP
+</div>
+
+
+<table>
+
+<tr>
+<th>M2</th>
+<th>M3</th>
+<th>M4</th>
+<th>M5</th>
+<th>M6</th>
+</tr>
+
+
+<tr>
+<td>091181</td>
+<td>NF045207</td>
+<td>194528/C</td>
+<td>201142/C</td>
+<td>082444</td>
+</tr>
+
+
+<tr>
+<td>162128/C</td>
+<td>104382</td>
+<td>196953/C</td>
+<td>196945/C</td>
+<td>091174</td>
+</tr>
+
+</table>
+
+</div>
+
+
+
+
+
+<!-- MR SCR SHOP -->
+
+
+<div class="shop">
+
+<div class="shop-title">
+MR SCR SHOP
+</div>
+
+
+<table>
+
+<tr>
+<th>SCR9</th>
+<th>SCR10</th>
+<th>SCR11</th>
+<th>SCR12</th>
+</tr>
+
+
+<tr>
+<td>194274/C</td>
+<td>072439</td>
+<td>132451</td>
+<td>111018</td>
+</tr>
+
+
+<tr>
+<td>071134</td>
+<td>064011</td>
+<td>082437</td>
+<td>062224</td>
+</tr>
+
+
+</table>
+
+</div>
+
+
+
+
+
+<!-- CR SHOP -->
+
+
+<div class="shop">
+
+<div class="shop-title">
+CR SHOP
+</div>
+
+
+<table>
+
+<tr>
+
+<th>F1</th>
+<th>F2</th>
+<th>F3</th>
+<th>F4</th>
+<th>F5</th>
+
+</tr>
+
+
+<tr>
+
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>051066/C</td>
+
+</tr>
+
+
+</table>
+
+</div>
+
+
+
+
+
+<!-- LIFTING BAY -->
+
+
+<div class="shop">
+
+<div class="shop-title">
+LIFTING BAY
+</div>
+
+
+<table>
+
+<tr>
+<th>L1</th>
+<th>L2</th>
+<th>L3</th>
+<th>L4</th>
+</tr>
+
+
+<tr>
+<td>235300</td>
+<td>193025/C</td>
+<td>---</td>
+<td>---</td>
+</tr>
+
+
+</table>
+
+</div>
+
+
+
+
+
+<!-- J SHOP -->
+
+
+<div class="shop">
+
+<div class="shop-title">
+J SHOP
+</div>
+
+
+<table>
+
+<tr>
+
+<th>J1</th>
+<th>J2</th>
+<th>J3</th>
+<th>J4</th>
+<th>J5</th>
+
+</tr>
+
+
+<tr>
+
+<td>---</td>
+<td>---</td>
+<td>---</td>
+<td>---</td>
+<td>---</td>
+
+</tr>
+
+
+</table>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+<script>
+
+
+// DATE
+
+document.getElementById("date").innerHTML =
+new Date().toLocaleDateString("en-GB");
+
+
+
+
+// LIVE SEARCH
+
+function searchCoach(){
+
+let value =
+document.getElementById("search")
+.value
+.toUpperCase();
+
+
+let found=false;
+
+
+document.querySelectorAll("td")
+.forEach(cell=>{
+
+
+cell.classList.remove("highlight");
+
+
+if(cell.innerText
+.toUpperCase()
+.includes(value)
+&& value!=""){
+
+
+cell.classList.add("highlight");
+
+
+document.getElementById("result")
+.innerHTML=
+"Coach Found : "
++cell.innerText;
+
+
+found=true;
+
+
+}
+
+
+});
+
+
+if(!found){
+
+document.getElementById("result")
+.innerHTML=
+"Coach Not Found";
+
+}
+
+}
+
+
+
+
+// FULL SCREEN
+
+
+function fullScreen(){
+
+if(!document.fullscreenElement){
+
+document.documentElement.requestFullscreen();
+
+}
+
+else{
+
+document.exitFullscreen();
+
+}
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
