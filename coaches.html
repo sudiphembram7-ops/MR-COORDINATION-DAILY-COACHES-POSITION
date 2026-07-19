@@ -1,1 +1,132 @@
 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Coach Management</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<h1>🚆 Coach Management</h1>
+
+<p>MR Coach Coordination System</p>
+
+</header>
+
+
+
+<nav>
+
+<a href="index.html">Dashboard</a>
+<a href="coaches.html">Coaches</a>
+<a href="reports.html">Reports</a>
+
+</nav>
+
+
+
+<section class="login-box">
+
+
+<h2>Add Coach</h2>
+
+
+<input 
+id="coachNo"
+placeholder="Coach Number">
+
+
+
+<select id="shop">
+
+<option>LLH</option>
+<option>POH</option>
+<option>Bogie</option>
+<option>Air Brake</option>
+<option>Paint</option>
+
+</select>
+
+
+
+<select id="status">
+
+<option>In Shop</option>
+<option>Repair</option>
+<option>Ready</option>
+<option>Dispatched</option>
+
+</select>
+
+
+
+<input 
+id="sse"
+placeholder="SSE Name">
+
+
+
+<button onclick="addCoach()">
+Add Coach
+</button>
+
+
+</section>
+
+
+
+
+<section>
+
+<h2>Coach List</h2>
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>Coach No</th>
+<th>Shop</th>
+<th>Status</th>
+<th>SSE</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="coachList">
+
+
+</tbody>
+
+
+</table>
+
+
+</section>
+
+
+
+<script src="js/coach.js"></script>
+
+
+</body>
+
+</html>
