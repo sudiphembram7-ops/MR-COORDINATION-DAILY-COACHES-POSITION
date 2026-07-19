@@ -436,9 +436,10 @@ const { jsPDF } = window.jspdf;
 let index =
 document.querySelector(".shop-container") ||
 document.body;
+margin:10,//10mm margin
+filename:'single-page.pdf',
 
-
-html2canvas(board,{
+html2canvas(index,{
     scale:2
 }).then(canvas=>{
 
