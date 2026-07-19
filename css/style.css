@@ -1,439 +1,137 @@
-/* =====================================================
-   MR CO-ORDINATION DAILY COACHES POSITION
-   Professional Railway Workshop Theme
-===================================================== */
-
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:Arial, sans-serif;
 }
 
+
 body{
-    background:#eef2f7;
-    font-family:Arial, Helvetica, sans-serif;
+    background:#f2f5f8;
     color:#222;
 }
 
-/* Container */
 
-.container-fluid{
-    max-width:1800px;
-    margin:auto;
-}
+/* Header */
 
-/* ===========================
-        HEADER
-=========================== */
-
-.header{
+header{
     background:#003366;
-    color:#fff;
-    border-radius:10px;
-    padding:18px 25px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    border:3px solid #001d3d;
-}
-
-.header h2{
-    font-size:28px;
-    font-weight:bold;
-    letter-spacing:1px;
-}
-
-.header small{
-    color:#d5d5d5;
-}
-
-#currentDate,
-#currentTime{
-    font-size:18px;
-    font-weight:bold;
-}
-
-/* ===========================
-        TOOLBAR
-=========================== */
-
-.toolbar{
-
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-
-    align-items:center;
-}
-
-.toolbar input{
-
-    width:320px;
-
-    font-size:17px;
-
-    border-radius:8px;
-
-}
-
-.toolbar button{
-
-    font-weight:bold;
-
-    min-width:140px;
-
-}
-
-/* ===========================
-        SHOP CARDS
-=========================== */
-
-.shop-card{
-
-    background:#fff;
-
-    border-radius:10px;
-
-    border:3px solid #003366;
-
-    padding:15px;
-
-    margin-bottom:20px;
-
-    box-shadow:0 4px 12px rgba(0,0,0,.15);
-
-}
-
-.shop-card h4{
-
-    text-align:center;
-
-    background:#00509d;
-
     color:white;
-
-    padding:10px;
-
-    margin:-15px -15px 15px;
-
-    font-size:22px;
-
-    font-weight:bold;
-
-    letter-spacing:1px;
-
-}
-
-/* ===========================
-        TABLE
-=========================== */
-
-.coach-table{
-
-    table-layout:fixed;
-
-    width:100%;
-
-}
-
-.coach-table th{
-
-    background:#003366;
-
-    color:white;
-
     text-align:center;
-
-    font-size:16px;
-
-    border:2px solid #000;
-
-    vertical-align:middle;
-
-}
-
-.coach-table td{
-
-    text-align:center;
-
-    vertical-align:middle;
-
-    font-weight:bold;
-
-    font-size:15px;
-
-    height:45px;
-
-    cursor:pointer;
-
-    border:1px solid #444;
-
-    transition:.3s;
-
-}
-
-.coach-table td:hover{
-
-    background:#fff7b2;
-
-}
-
-/* ===========================
-        SEARCH HIGHLIGHT
-=========================== */
-
-.highlight{
-
-    background:#ffff00 !important;
-
-    color:#000;
-
-    animation:blink .8s infinite;
-
-}
-
-@keyframes blink{
-
-    50%{
-
-        background:#ff9800;
-
-    }
-
-}
-
-/* ===========================
-      STATUS COLOURS
-=========================== */
-
-.status-running{
-
-    background:#d4edda;
-
-}
-
-.status-repair{
-
-    background:#ffeeba;
-
-}
-
-.status-hold{
-
-    background:#f8d7da;
-
-}
-
-.status-finished{
-
-    background:#cce5ff;
-
-}
-
-/* ===========================
-        BUTTONS
-=========================== */
-
-.btn{
-
-    font-weight:bold;
-
-    border-radius:8px;
-
-}
-
-/* ===========================
-      FULL SCREEN MODE
-=========================== */
-
-:fullscreen{
-
-    background:white;
-
-}
-
-:fullscreen .container-fluid{
-
-    max-width:100%;
-
     padding:20px;
-
 }
 
-:fullscreen table{
-
-    font-size:20px;
-
-}
-
-:fullscreen h4{
-
+header h1{
     font-size:28px;
-
 }
 
-/* ===========================
-      PRINT
-=========================== */
-
-@media print{
-
-.toolbar{
-
-display:none;
-
+header p{
+    margin-top:8px;
 }
 
-body{
 
-background:white;
+/* Navigation */
 
+nav{
+    background:#00509e;
+    padding:12px;
+    text-align:center;
 }
 
-.shop-card{
-
-box-shadow:none;
-
-page-break-inside:avoid;
-
+nav a{
+    color:white;
+    text-decoration:none;
+    margin:10px;
+    font-weight:bold;
 }
 
+
+/* Dashboard Cards */
+
+.cards{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    padding:20px;
 }
 
-/* ===========================
-      MOBILE
-=========================== */
 
-@media(max-width:992px){
-
-.header{
-
-flex-direction:column;
-
-gap:15px;
-
-text-align:center;
-
+.card{
+    background:white;
+    width:220px;
+    padding:25px;
+    text-align:center;
+    border-radius:10px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15);
 }
 
-.toolbar{
 
-justify-content:center;
-
+.card h2{
+    font-size:18px;
+    color:#003366;
 }
 
-.toolbar input{
 
-width:100%;
-
+.card p{
+    font-size:35px;
+    font-weight:bold;
+    margin-top:15px;
+    color:#00509e;
 }
 
-.shop-card h4{
 
-font-size:20px;
+/* Table */
 
+section{
+    padding:20px;
 }
 
-.coach-table th{
 
-font-size:14px;
-
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
 }
 
-.coach-table td{
 
-font-size:13px;
-
-height:40px;
-
+th{
+    background:#003366;
+    color:white;
+    padding:12px;
 }
 
+
+td{
+    padding:10px;
+    text-align:center;
+    border:1px solid #ddd;
 }
 
-/* ===========================
-      TV DISPLAY
-=========================== */
 
-@media(min-width:1600px){
+/* Mobile */
 
-.header h2{
+@media(max-width:600px){
 
-font-size:36px;
-
+header h1{
+    font-size:20px;
 }
 
-.shop-card h4{
 
-font-size:28px;
-
+.cards{
+    flex-direction:column;
+    align-items:center;
 }
 
-.coach-table th{
 
-font-size:22px;
-
+.card{
+    width:90%;
 }
 
-.coach-table td{
 
-font-size:20px;
-
-height:60px;
-
+nav a{
+    display:block;
+    margin:8px;
 }
-
-}
-
-/* ===========================
-      DARK MODE
-=========================== */
-
-.dark-mode{
-
-background:#121212;
-
-color:white;
-
-}
-
-.dark-mode .shop-card{
-
-background:#222;
-
-border-color:#00bfff;
-
-}
-
-.dark-mode .shop-card h4{
-
-background:#00bfff;
-
-color:black;
-
-}
-
-.dark-mode table{
-
-color:white;
-
-}
-
-.dark-mode th{
-
-background:#0d47a1;
-
-}
-
-.dark-mode td{
-
-background:#2c2c2c;
-
-}
-
-.dark-mode .header{
-
-background:#000814;
 
 }
