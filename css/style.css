@@ -1,0 +1,60 @@
+/* ==========================
+   RAILWAY COACH STATUS COLOR
+========================== */
+
+.status-released{
+    background:#28a745 !important;
+    color:white;
+    font-weight:bold;
+}
+
+.status-repair{
+    background:#ffc107 !important;
+    color:black;
+    font-weight:bold;
+}
+
+.status-pending{
+    background:#dc3545 !important;
+    color:white;
+    font-weight:bold;
+}
+
+.status-inspection{
+    background:#0d6efd !important;
+    color:white;
+    font-weight:bold;
+}
+
+.status-hold{
+    background:#6c757d !important;
+    color:white;
+    font-weight:bold;
+}
+
+.status-lifting{
+    background:#6f42c1 !important;
+    color:white;
+    font-weight:bold;
+}
+
+
+/* Status Legend */
+
+.legend{
+
+display:flex;
+gap:15px;
+justify-content:center;
+margin:15px;
+flex-wrap:wrap;
+
+}
+
+.legend span{
+
+padding:8px 15px;
+border-radius:5px;
+font-weight:bold;
+
+}
