@@ -56,3 +56,40 @@ function deleteCoach(index) {
 }
 
 window.onload = renderCoaches;
+function searchCoach(){
+
+const input =
+document.getElementById("searchCoach").value.toLowerCase();
+
+const table =
+document.getElementById("coachList");
+
+table.innerHTML="";
+
+coaches
+.filter(c=>c.coachNo.toLowerCase().includes(input))
+.forEach((coach,index)=>{
+
+table.innerHTML += `
+<tr>
+<td>${coach.coachNo}</td>
+<td>${coach.shop}</td>
+<td>${coach.status}</td>
+<td>${coach.sse}</td>
+
+<td>
+
+<button onclick="deleteCoach(${index})">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+}
