@@ -1,56 +1,113 @@
+<script>
+
 // ===============================
-// PDF DOWNLOAD
+// Live Date & Time
+// ===============================
+function updateDateTime() {
+
+    const now = new Date();
+
+    document.getElementById("date").innerHTML =
+        now.toLocaleDateString("en-GB");
+
+    document.getElementById("time").innerHTML =
+        now.toLocaleTimeString();
+}
+
+setInterval(updateDateTime,1000);
+updateDateTime();
+
+
+// ===============================
+// Live Search + Highlight + Scroll
 // ===============================
 
-async function downloadPDF(){
+const searchBox = document.getElementById("search");
 
-const { jsPDF } = window.jspdf;
+searchBox.addEventListener("keyup",function(){
 
-let board =
-document.querySelector(".shop-container") ||
-document.body;
+    let value = this.value.trim().toUpperCase();
 
+    let found = false;
 
-html2canvas(board,{
-    scale:2
-}).then(canvas=>{
+    document.querySelectorAll("td").forEach(td=>{
 
-let imgData =
-canvas.toDataURL("image/png");
+        td.classList.remove("highlight");
 
+        if(value!=="" &&
+           td.innerText.toUpperCase().includes(value)){
 
-let pdf =
-new jsPDF(
-    "landscape",
-    "mm",
-    "a3"
-);
+            td.classList.add("highlight");
 
+            td.scrollIntoView({
+                behavior:"smooth",
+                block:"center"
+            });
 
-let width =
-pdf.internal.pageSize.getWidth();
+            found = true;
+        }
 
-
-let height =
-(canvas.height * width) /
-canvas.width;
-
-
-pdf.addImage(
-    imgData,
-    "PNG",
-    5,
-    10,
-    width-10,
-    height
-);
-
-
-pdf.save(
-"MR_Coach_Position_Board.pdf"
-);
-
+    });
 
 });
 
+
+// ===============================
+// Coach Statistics
+// ===============================
+
+function updateStatistics(){
+
+    const total =
+    document.querySelectorAll("td").length;
+
+    document.getElementById("totalCoach").innerHTML =
+    total;
+
 }
+
+updateStatistics();
+
+
+// ===============================
+// Full Screen
+// ===============================
+
+function fullScreen(){
+
+    if(!document.fullscreenElement){
+
+        document.documentElement.requestFullscreen();
+
+    }else{
+
+        document.exitFullscreen();
+
+    }
+
+}
+
+
+// ===============================
+// Auto Refresh
+// ===============================
+
+// Refresh every 30 seconds
+setInterval(function(){
+
+    console.log("Board Refreshed");
+
+},30000);
+
+
+// ===============================
+// Print Board
+// ===============================
+
+function printBoard(){
+
+    window.print();
+
+}
+
+</script>
