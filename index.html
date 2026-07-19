@@ -13,9 +13,11 @@
 
 <body>
 
-<header>
-    <h1>🚆 MR Coach Coordination System</h1>
-    <p>Liluah Railway Workshop</p>
+<header class="bg-primary text-white p-3 shadow">
+    <div class="container">
+        <h2>🚆 MR Coach Coordination System</h2>
+        <p class="mb-0">Liluah Railway Workshop</p>
+    </div>
 </header>
 
 
@@ -26,45 +28,49 @@
     <a href="login.html">Login</a>
 </nav>
 
+<div class="container mt-4">
 
-<section class="cards">
+<div class="row">
 
-<div class="card">
-<h2>Total Coach</h2>
-<p id="totalCoach">0</p>
+<div class="col-md-3 col-6 mb-3">
+<div class="card text-center shadow">
+<div class="card-body">
+<h5>Total Coach</h5>
+<h1 id="totalCoach">0</h1>
+</div>
+</div>
 </div>
 
-
-<div class="card">
-<h2>In Shop</h2>
-<p id="inShop">0</p>
+<div class="col-md-3 col-6 mb-3">
+<div class="card text-center shadow">
+<div class="card-body">
+<h5>In Shop</h5>
+<h1 id="inShop">0</h1>
+</div>
+</div>
 </div>
 
-
-<div class="card">
-<h2>Ready</h2>
-<p id="ready">0</p>
+<div class="col-md-3 col-6 mb-3">
+<div class="card text-center shadow">
+<div class="card-body">
+<h5>Ready</h5>
+<h1 id="ready">0</h1>
+</div>
+</div>
 </div>
 
-
-<div class="card">
-<h2>Dispatch</h2>
-<p id="dispatch">0</p>
+<div class="col-md-3 col-6 mb-3">
+<div class="card text-center shadow">
+<div class="card-body">
+<h5>Dispatch</h5>
+<h1 id="dispatch">0</h1>
+</div>
+</div>
 </div>
 
-</section>
+</div>
 
-
-<section>
-
-<h2>Coach Position</h2>
-<section class="search">
-    <input
-        type="text"
-        id="search"
-        placeholder="Search Coach Number..."
-        onkeyup="searchCoach()">
-</section>
+</div>
 
 <table>
 
