@@ -1,1 +1,137 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
 
+
+body{
+    background:#f2f5f8;
+    color:#222;
+}
+
+
+/* Header */
+
+header{
+    background:#003366;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+header h1{
+    font-size:28px;
+}
+
+header p{
+    margin-top:8px;
+}
+
+
+/* Navigation */
+
+nav{
+    background:#00509e;
+    padding:12px;
+    text-align:center;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin:10px;
+    font-weight:bold;
+}
+
+
+/* Dashboard Cards */
+
+.cards{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    padding:20px;
+}
+
+
+.card{
+    background:white;
+    width:220px;
+    padding:25px;
+    text-align:center;
+    border-radius:10px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15);
+}
+
+
+.card h2{
+    font-size:18px;
+    color:#003366;
+}
+
+
+.card p{
+    font-size:35px;
+    font-weight:bold;
+    margin-top:15px;
+    color:#00509e;
+}
+
+
+/* Table */
+
+section{
+    padding:20px;
+}
+
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+
+th{
+    background:#003366;
+    color:white;
+    padding:12px;
+}
+
+
+td{
+    padding:10px;
+    text-align:center;
+    border:1px solid #ddd;
+}
+
+
+/* Mobile */
+
+@media(max-width:600px){
+
+header h1{
+    font-size:20px;
+}
+
+
+.cards{
+    flex-direction:column;
+    align-items:center;
+}
+
+
+.card{
+    width:90%;
+}
+
+
+nav a{
+    display:block;
+    margin:8px;
+}
+
+}
