@@ -11,8 +11,7 @@ MR CO-ORDINATION DAILY COACHES POSITION
 
 <link rel="stylesheet" href="style.css">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 table{
@@ -91,6 +90,10 @@ FULL SCREEN
 
 <div class="result" id="result"></div>
 
+
+<div id="printArea">
+    <h2>MR Coach Coordination Daily Coaches Position</h2>
+    <p>Date: <span id="date"></span></p>
 
 
 
@@ -435,6 +438,7 @@ J SHOP
 
 
 </div>
+</div>
 
 
 
@@ -528,6 +532,29 @@ document.exitFullscreen();
 
 
 
+</script>
+<script>
+
+document.getElementById("date").innerHTML =
+    new Date().toLocaleDateString("en-GB");
+
+function downloadPDF() {
+    const element = document.getElementById("printArea");
+
+    const options = {
+        margin: 0.5,
+        filename: "MR_Coach_Position.pdf",
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: { scale: 2 },
+        jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "landscape"
+        }
+    };
+
+    html2pdf().set(options).from(element).save();
+}
 </script>
 
 
