@@ -141,6 +141,28 @@ N SHOP
 <td>221836/C</td>
 </tr>
 
+<tr>
+<td>091181</td>
+<td>NF045207</td>
+<td>194528/C</td>
+<td>201142/C</td>
+</tr>
+
+<tr>
+<td>091181</td>
+<td>NF045207</td>
+<td>194528/C</td>
+<td>201142/C</td>
+</tr>
+
+<tr>
+<td>091181</td>
+<td>NF045207</td>
+<td>194528/C</td>
+<td>201142/C</td>
+<td>082444</td>
+</tr>
+
 </table>
 
 </div>
@@ -185,6 +207,16 @@ M SHOP
 <td>196945/C</td>
 <td>091174</td>
 </tr>
+
+<tr>
+<td>091181</td>
+<td>NF045207</td>
+<td>194528/C</td>
+<td>201142/C</td>
+<td>082444</td>
+</tr>
+
+
 
 </table>
 
@@ -257,6 +289,12 @@ CR SHOP
 <th>F3</th>
 <th>F4</th>
 <th>F5</th>
+<th>F6</th>
+<th>F7</th>
+<th>F8</th>
+<th>F9</th>
+<th>F10</th>
+<th>F11</th>
 
 </tr>
 
@@ -268,9 +306,29 @@ CR SHOP
 <td>-</td>
 <td>-</td>
 <td>051066/C</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>051066/C</td>
+<td>-</td>
 
 </tr>
+<tr>
 
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>051066/C</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>051066/C</td>
+<td>-</td>
+
+</tr>
 
 </table>
 
@@ -295,16 +353,20 @@ LIFTING BAY
 <tr>
 <th>L1</th>
 <th>L2</th>
-<th>L3</th>
-<th>L4</th>
 </tr>
 
 
 <tr>
 <td>235300</td>
 <td>193025/C</td>
-<td>---</td>
-<td>---</td>
+</tr>
+<tr>
+<td>235300</td>
+<td>193025/C</td>
+</tr>
+<tr>
+<td>235300</td>
+<td>193025/C</td>
 </tr>
 
 
@@ -335,12 +397,24 @@ J SHOP
 <th>J3</th>
 <th>J4</th>
 <th>J5</th>
+<th>J6</th>
 
 </tr>
 
 
 <tr>
 
+<td>---</td>
+<td>---</td>
+<td>---</td>
+<td>---</td>
+<td>---</td>
+<td>---</td>
+
+</tr>
+<tr>
+
+<td>---</td>
 <td>---</td>
 <td>---</td>
 <td>---</td>
@@ -451,63 +525,7 @@ document.exitFullscreen();
 
 
 
-// ===============================
-// PDF DOWNLOAD
-// ===============================
 
-async function downloadPDF(){
-
-const { jsPDF } = window.jspdf;
-
-let index =
-document.querySelector(".shop-container") ||
-document.body;
-margin:10,//10mm margin
-filename:'single-page.pdf',
-
-html2canvas(index,{
-    scale:2
-}).then(canvas=>{
-
-let imgData =
-canvas.toDataURL("image/png");
-
-
-let pdf =
-new jsPDF(
-    "landscape",
-    "mm",
-    "a4"
-);
-
-
-let width =
-pdf.internal.pageSize.getWidth();
-
-
-let height =
-(canvas.height * width) /
-canvas.width;
-
-
-pdf.addImage(
-    imgData,
-    "PNG",
-    5,
-    10,
-    width-10,
-    height
-);
-
-
-pdf.save(
-"MR_Coach_Position_Board.pdf"
-);
-
-
-});
-
-}
 
 </script>
 
