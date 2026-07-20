@@ -89,13 +89,11 @@ Date : <span id="date"></span>
 
 <div class="search-panel">
 
-<input type="text"
-id="search"
-placeholder="Search Coach No">
+<input type="text" id="searchBox" placeholder="Enter Coach Number">
 
-<button onclick="searchCoach()">
-SEARCH
-</button>
+<button onclick="searchCoach()">SEARCH</button>
+
+<h3 id="result"></h3>
 
 <button onclick="fullScreen()">
 FULL SCREEN
@@ -519,59 +517,46 @@ new Date().toLocaleDateString("en-GB");
 
 <script>
 
-// LIVE SEARCH
+// Coach Database
+const coachData = [
+    { coach: "141132", location: "N2", type: "AC MED" },
+    { coach: "122851/C", location: "N3", type: "LHB PC" },
+    { coach: "231354/C", location: "N5", type: "LHB AC" },
+    { coach: "102443/C", location: "N5", type: "GS MED" },
+    { coach: "091181", location: "N3", type: "" },
+    { coach: "NF045207", location: "N5", type: "" }
+];
 
-function searchCoach(){
+function searchCoach() {
 
-let value =
-document.getElementById("search")
-.value
-.toUpperCase();
+    let search = document.getElementById("searchBox")
+        .value
+        .trim()
+        .toUpperCase();
 
+    let result = document.getElementById("result");
 
-let found=false;
+    let found = coachData.find(item =>
+        item.coach.toUpperCase() === search
+    );
 
+    if(found){
 
-document.querySelectorAll("td")
-.forEach(cell=>{
+        result.innerHTML =
+        "Coach Found : <b>" + found.coach +
+        "</b> (" + found.type + ")" +
+        "<br>Location : <span style='color:red;font-size:28px;font-weight:bold;'>"
+        + found.location +
+        "</span>";
 
+    }else{
 
-cell.classList.remove("highlight");
+        result.innerHTML =
+        "<span style='color:red'>Coach Not Found</span>";
 
-
-if(cell.innerText
-.toUpperCase()
-.includes(value)
-&& value!=""){
-
-
-cell.classList.add("highlight");
-
-
-document.getElementById("result")
-.innerHTML=
-"Coach Found : "
-+cell.innerText;
-
-
-found=true;
-
-
+    }
 }
 
-
-});
-
-
-if(!found){
-
-document.getElementById("result")
-.innerHTML=
-"Coach Not Found";
-
-}
-
-}
 
 </script>
 <script>
