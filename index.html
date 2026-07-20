@@ -551,26 +551,44 @@ document.exitFullscreen();
 </script>
 <script>
 
-document.getElementById("date").innerHTML =
-    new Date().toLocaleDateString("en-GB");
-
 function downloadPDF() {
+
     const element = document.getElementById("printArea");
 
-    const options = {
-        margin: 0.5,
+    const opt = {
+
+        margin: 0.2,
+
         filename: "MR_Coach_Position.pdf",
+
         image: { type: "jpeg", quality: 1 },
-        html2canvas: { scale: 2 },
+
+        html2canvas: {
+
+            scale: 1,
+
+            useCORS: true
+
+        },
+
         jsPDF: {
-            unit: "in",
+
+            unit: "mm",
+
             format: "a4",
+
             orientation: "landscape"
-        }
+
+        },
+
+        pagebreak: { mode: ["avoid-all"] }
+
     };
 
-    html2pdf().set(options).from(element).save();
+    html2pdf().set(opt).from(element).save();
+
 }
+
 </script>
 
 
