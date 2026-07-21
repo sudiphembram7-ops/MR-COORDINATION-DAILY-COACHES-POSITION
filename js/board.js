@@ -1,205 +1,27 @@
-/* ==========================================
-   MR COACH COORDINATION DAILY POSITION
-   Live Board Controller
-========================================== */
+async function loadCoaches() {
+    try {
+        const response = await fetch("data/coaches.json");
+        const coaches = await response.json();
 
+        const tbody = document.getElementById("coachTable");
+        tbody.innerHTML = "";
 
-const shopList = [
-
-"N SHOP",
-"M SHOP",
-"SCR SHOP",
-"CR SHOP",
-"LIFTING BAY",
-"J SHOP"
-
-];
-
-
-
-function loadBoard(){
-
-
-let coaches = JSON.parse(
-
-localStorage.getItem("COACH_POSITION_DATA")
-
-) || [];
-
-
-
-let board = document.getElementById("board");
-
-
-if(!board) return;
-
-
-
-board.innerHTML = "";
-
-
-
-
-shopList.forEach(function(shop){
-
-
-
-let shopData = coaches.filter(
-
-coach => coach.shop === shop
-
-);
-
-
-
-let html = `
-
-
-<div class="shop-board">
-
-
-<h2>${shop}</h2>
-
-
-<table>
-
-
-<tr>
-
-<th>Coach No</th>
-<th>Status</th>
-<th>Remarks</th>
-<th>Time</th>
-
-</tr>
-
-
-`;
-
-
-
-
-
-if(shopData.length === 0){
-
-
-html += `
-
-
-<tr>
-
-<td colspan="4">
-NO COACH AVAILABLE
-</td>
-
-</tr>
-
-
-`;
-
-
+        coaches.forEach(coach => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${coach.coachNo}</td>
+                    <td>${coach.shop}</td>
+                    <td>${coach.position}</td>
+                    <td>${coach.status}</td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        console.error("Unable to load coach data:", err);
+    }
 }
 
-else{
+loadCoaches();
 
-
-shopData.forEach(function(coach){
-
-
-let status =
-coach.status.toUpperCase();
-
-
-
-html += `
-
-
-<tr>
-
-
-<td>
-${coach.coachNo}
-</td>
-
-
-<td class="${status}">
-${status}
-</td>
-
-
-
-<td>
-${coach.remarks}
-</td>
-
-
-
-<td>
-${coach.time}
-</td>
-
-
-
-</tr>
-
-
-`;
-
-
-
-});
-
-
-}
-
-
-
-html += `
-
-
-</table>
-
-</div>
-
-
-`;
-
-
-
-board.innerHTML += html;
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-// Auto Refresh
-
-setInterval(function(){
-
-
-loadBoard();
-
-
-},5000);
-
-
-
-
-
-// First Load
-
-window.onload=function(){
-
-
-loadBoard();
-
-
-};
+// Refresh every 30 seconds
+setInterval(loadCoaches, 30000);
