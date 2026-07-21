@@ -6,9 +6,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MR Coach Board Admin Panel</title>
+<title>
+MR Coach Admin Panel
+</title>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">
 
 </head>
 
@@ -16,20 +18,43 @@
 <body>
 
 
-<header>
+<header class="header">
 
-<h1>
-MR COACH POSITION ADMIN PANEL
-</h1>
+<h1>🇮🇳 INDIAN RAILWAYS</h1>
+
+<h2>
+MR COACH COORDINATION ADMIN PANEL
+</h2>
+
+<p>Liluah Workshop</p>
 
 </header>
+
+
+
+<nav>
+
+<a href="dashboard.html">Dashboard</a>
+
+<a href="board.html">Board</a>
+
+<a href="admin.html">Admin</a>
+
+<a href="index.html">Home</a>
+
+</nav>
+
+
 
 
 
 <div class="admin-box">
 
 
-<h2>Coach Entry Form</h2>
+<h2>
+Coach Entry Form
+</h2>
+
 
 
 <label>
@@ -39,26 +64,53 @@ Coach Number
 <input 
 type="text"
 id="coachNo"
-placeholder="Enter Coach No."
->
+placeholder="Enter Coach No.">
+
+
 
 
 
 <label>
-Shop Selection
+Coach Type
 </label>
 
 
-<select id="shopName">
+<select id="coachType">
 
-<option>N SHOP</option>
-<option>M SHOP</option>
-<option>SCR SHOP</option>
-<option>CR SHOP</option>
-<option>LIFTING BAY</option>
-<option>J SHOP</option>
+<option>LHB</option>
+<option>ICF</option>
+<option>MEMU</option>
+<option>DEMU</option>
 
 </select>
+
+
+
+
+
+<label>
+Shop Name
+</label>
+
+
+<select id="shop">
+
+
+<option>N SHOP</option>
+
+<option>M SHOP</option>
+
+<option>SCR SHOP</option>
+
+<option>CR SHOP</option>
+
+<option>LIFTING BAY</option>
+
+<option>J SHOP</option>
+
+
+</select>
+
 
 
 
@@ -72,12 +124,63 @@ Status
 
 
 <option>READY</option>
+
 <option>WORKING</option>
+
 <option>HOLD</option>
+
 <option>COMPLETE</option>
 
 
 </select>
+
+
+
+
+
+<label>
+Priority
+</label>
+
+
+<select id="priority">
+
+
+<option>Normal</option>
+
+<option>Urgent</option>
+
+
+</select>
+
+
+
+
+
+<label>
+SSE In-Charge
+</label>
+
+
+<input 
+type="text"
+id="sse"
+placeholder="Enter SSE Name">
+
+
+
+
+
+<label>
+Expected Release Date
+</label>
+
+
+<input 
+type="date"
+id="releaseDate">
+
+
 
 
 
@@ -90,28 +193,30 @@ Remarks
 <textarea 
 id="remarks"
 placeholder="Enter Remarks">
+
 </textarea>
 
 
 
+
+
 <button onclick="saveCoach()">
+
 SAVE COACH
+
 </button>
 
 
 
-<button onclick="clearForm()">
-CLEAR
+<button onclick="resetForm()">
+
+RESET
+
 </button>
 
 
 
-<br><br>
-
-
-<button onclick="openBoard()">
-OPEN BOARD
-</button>
+<p id="message"></p>
 
 
 
@@ -119,11 +224,9 @@ OPEN BOARD
 
 
 
-<script src="admin.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 
-<script src="firebase-config.js"></script>
+
+<script src="js/admin.js"></script>
 
 
 </body>
