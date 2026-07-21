@@ -1,184 +1,116 @@
-// MR Coach Coordination System
-// Version 1.0
+/* ==========================================
+   MR COORDINATION DAILY COACHES POSITION
+   Main Application Script
+========================================== */
 
+// ==============================
+// Live Date & Time
+// ==============================
 
-const coaches =
-JSON.parse(localStorage.getItem("coaches")) || [];
+function updateDateTime() {
 
-{
-    coachNo:"03125",
-    shop:"LLH",
-    status:"In Shop",
-    sse:"S. Hembram"
-},
+    const now = new Date();
 
-{
-    coachNo:"04108",
-    shop:"Bogie",
-    status:"Repair",
-    sse:"A. Das"
-},
+    const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    };
 
-{
-    coachNo:"06112",
-    shop:"Air Brake",
-    status:"Ready",
-    sse:"P. Roy"
-},
+    const date = now.toLocaleDateString("en-IN", options);
+    const time = now.toLocaleTimeString("en-IN");
 
-{
-    coachNo:"07135",
-    shop:"Paint",
-    status:"Dispatched",
-    sse:"R. Singh"
+    const dateTime = document.getElementById("dateTime");
+
+    if (dateTime) {
+        dateTime.innerHTML =
+            `📅 ${date} | 🕒 ${time}`;
+    }
 }
 
-];
+updateDateTime();
+setInterval(updateDateTime, 1000);
 
 
-// Load Coach Data
+// ==============================
+// Welcome Message
+// ==============================
 
-function loadCoach(){
+window.addEventListener("load", () => {
 
-let table = document.getElementById("coachData");
-
-if(table){
-
-table.innerHTML="";
-
-coaches.forEach(function(c){
-
-let row = `
-<tr>
-<td>${c.coachNo}</td>
-<td>${c.shop}</td>
-<td>${c.status}</td>
-<td>${c.sse}</td>
-</tr>
-`;
-
-table.innerHTML += row;
+    console.log("MR Coach Coordination System Started");
 
 });
 
+
+// ==============================
+// Full Screen Mode
+// ==============================
+
+function openFullScreen() {
+
+    const element = document.documentElement;
+
+    if (element.requestFullscreen) {
+        element.requestFullscreen();
+    } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+    }
 }
 
 
-// Dashboard Count
+// ==============================
+// Exit Full Screen
+// ==============================
 
-let total = document.getElementById("totalCoach");
-let shop = document.getElementById("inShop");
-let ready = document.getElementById("ready");
-let dispatch = document.getElementById("dispatch");
+function closeFullScreen() {
 
-
-if(total){
-
-total.innerHTML = coaches.length;
-
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    }
 }
 
 
-if(shop){
+// ==============================
+// Auto Refresh Every 60 Seconds
+// ==============================
 
-shop.innerHTML =
-coaches.filter(c=>c.status=="In Shop").length;
+setInterval(() => {
 
-}
+    console.log("System Running...");
 
-
-if(ready){
-
-ready.innerHTML =
-coaches.filter(c=>c.status=="Ready").length;
-
-}
+}, 60000);
 
 
-if(dispatch){
+// ==============================
+// Railway Greeting
+// ==============================
 
-dispatch.innerHTML =
-coaches.filter(c=>c.status=="Dispatched").length;
+function showGreeting() {
 
-}
+    const hour = new Date().getHours();
 
+    let greeting = "";
 
-}
+    if (hour < 12) {
 
+        greeting = "Good Morning";
 
-// Search Function
+    } else if (hour < 17) {
 
-function searchCoach(){
+        greeting = "Good Afternoon";
 
-let input =
-document.getElementById("search").value.toLowerCase();
+    } else {
 
+        greeting = "Good Evening";
 
-let result =
-coaches.filter(c=>
-c.coachNo.toLowerCase().includes(input)
-);
+    }
 
-
-console.log(result);
-
-}
-// ===============================
-// PDF DOWNLOAD
-// ===============================
-
-async function downloadPDF(){
-
-const { jsPDF } = window.jspdf;
-
-let board =
-document.querySelector(".shop-container") ||
-document.body;
-
-
-html2canvas(board,{
-    scale:2
-}).then(canvas=>{
-
-let imgData =
-canvas.toDataURL("image/png");
-
-
-let pdf =
-new jsPDF(
-    "landscape",
-    "mm",
-    "a3"
-);
-
-
-let width =
-pdf.internal.pageSize.getWidth();
-
-
-let height =
-(canvas.height * width) /
-canvas.width;
-
-
-pdf.addImage(
-    imgData,
-    "PNG",
-    5,
-    10,
-    width-10,
-    height
-);
-
-
-pdf.save(
-"MR_Coach_Position_Board.pdf"
-);
-
-
-});
+    console.log(greeting);
 
 }
 
-
-window.onload = loadCoach;
+showGreeting();
