@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+Coach Reports - MR Coordination
+</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+<h1>🇮🇳 INDIAN RAILWAYS</h1>
+
+<h2>MR COACH COORDINATION REPORT</h2>
+
+<p>Liluah Workshop</p>
+
+</header>
+
+
+
+<nav>
+
+<a href="dashboard.html">Dashboard</a>
+
+<a href="board.html">Board</a>
+
+<a href="admin.html">Admin</a>
+
+<a href="reports.html">Reports</a>
+
+<a href="index.html">Home</a>
+
+</nav>
+
+
+
+
+<div class="admin-box">
+
+
+<h2>
+Daily Coach Report
+</h2>
+
+
+
+<label>
+Search Coach No
+</label>
+
+
+<input 
+type="text"
+id="reportSearch"
+placeholder="Enter Coach Number"
+onkeyup="loadReport()">
+
+
+
+
+
+<label>
+Select Shop
+</label>
+
+
+<select id="reportShop"
+onchange="loadReport()">
+
+<option value="">
+All Shop
+</option>
+
+<option>N SHOP</option>
+
+<option>M SHOP</option>
+
+<option>SCR SHOP</option>
+
+<option>CR SHOP</option>
+
+<option>LIFTING BAY</option>
+
+<option>J SHOP</option>
+
+</select>
+
+
+
+
+
+<label>
+Select Status
+</label>
+
+
+<select id="reportStatus"
+onchange="loadReport()">
+
+
+<option value="">
+All Status
+</option>
+
+
+<option>
+READY
+</option>
+
+
+<option>
+WORKING
+</option>
+
+
+<option>
+HOLD
+</option>
+
+
+<option>
+COMPLETE
+</option>
+
+
+</select>
+
+
+<br><br>
+
+
+
+<button onclick="window.print()">
+
+PRINT REPORT
+
+</button>
+
+
+
+<br><br>
+
+
+
+<table border="3" width="100%">
+
+
+<thead>
+
+<tr>
+
+<th>Coach No</th>
+<th>Shop</th>
+<th>Status</th>
+<th>Priority</th>
+<th>SSE</th>
+<th>Remarks</th>
+<th>Updated Time</th>
+
+
+</tr>
+
+</thead>
+
+
+<tbody id="reportTable">
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+
+<script src="js/reports.js"></script>
+
+
+</body>
+
+</html>
