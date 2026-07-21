@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+Audit History - MR Coach Coordination
+</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+<h1>🇮🇳 INDIAN RAILWAYS</h1>
+
+<h2>AUDIT HISTORY</h2>
+
+<p>MR Coach Coordination System</p>
+
+</header>
+
+
+
+<nav>
+
+<a href="dashboard.html">Dashboard</a>
+
+<a href="board.html">Board</a>
+
+<a href="admin.html">Admin</a>
+
+<a href="index.html">Home</a>
+
+</nav>
+
+
+
+
+<div class="admin-box">
+
+
+<h2>
+System Activity Log
+</h2>
+
+
+
+<table border="3" width="100%">
+
+
+<thead>
+
+<tr>
+
+<th>User</th>
+
+<th>Action</th>
+
+<th>Coach No</th>
+
+<th>Old Status</th>
+
+<th>New Status</th>
+
+<th>Time</th>
+
+
+</tr>
+
+</thead>
+
+
+
+<tbody id="auditTable">
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+
+<script src="js/audit.js"></script>
+
+
+</body>
+
+</html>
