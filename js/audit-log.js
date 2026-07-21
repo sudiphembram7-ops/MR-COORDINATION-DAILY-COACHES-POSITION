@@ -112,3 +112,105 @@ console.log(logs);
 
 
 }
+
+
+/* ==========================================
+   MR COACH COORDINATION SYSTEM
+   Audit History Controller
+========================================== */
+
+
+function loadAuditHistory(){
+
+
+db.collection("AUDIT_LOGS")
+
+.orderBy("time","desc")
+
+.onSnapshot(snapshot=>{
+
+
+let table =
+document.getElementById("auditTable");
+
+
+table.innerHTML="";
+
+
+
+snapshot.forEach(doc=>{
+
+
+let log = doc.data();
+
+
+
+let time = "-";
+
+
+if(log.time){
+
+time =
+log.time.toDate()
+.toLocaleString();
+
+}
+
+
+
+table.innerHTML += `
+
+
+<tr>
+
+
+<td>
+${log.user || "-"}
+</td>
+
+
+<td>
+${log.action || "-"}
+</td>
+
+
+<td>
+${log.coachNo || "-"}
+</td>
+
+
+<td>
+${log.oldStatus || "-"}
+</td>
+
+
+<td>
+${log.newStatus || "-"}
+</td>
+
+
+<td>
+${time}
+</td>
+
+
+</tr>
+
+
+`;
+
+
+
+});
+
+
+});
+
+
+}
+
+
+
+
+
+loadAuditHistory();
