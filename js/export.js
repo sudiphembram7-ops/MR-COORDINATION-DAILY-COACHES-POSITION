@@ -75,3 +75,51 @@ URL.revokeObjectURL(url);
 
 
 }
+
+
+function exportPDF(){
+
+const { jsPDF } = window.jspdf;
+
+let doc = new jsPDF();
+
+
+doc.text(
+"MR Coach Coordination Daily Coaches Position",
+10,
+20
+);
+
+
+let coaches = getExportData();
+
+
+let y = 35;
+
+
+coaches.forEach(function(c){
+
+
+doc.text(
+
+`${c.coachNo} | ${c.shop} | ${c.status}`,
+
+10,
+
+y
+
+);
+
+
+y +=10;
+
+
+});
+
+
+doc.save(
+"MR_Coach_Report.pdf"
+);
+
+
+}
