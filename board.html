@@ -769,5 +769,17 @@ pdf.save(
 });
 
 }
+db.collection("coachPosition")
+.onSnapshot((snapshot) => {
+
+    let coachData = [];
+
+    snapshot.forEach((doc) => {
+        coachData.push(doc.data());
+    });
+
+    displayBoard(coachData);
+
+});
 </body>
 </html>
