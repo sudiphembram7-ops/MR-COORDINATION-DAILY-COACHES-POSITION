@@ -1,0 +1,20 @@
+[
+  {
+    "coachNo": "082713",
+    "shop": "N SHOP",
+    "position": "N2",
+    "status": "Released"
+  },
+  {
+    "coachNo": "194274/C",
+    "shop": "MR SCR",
+    "position": "SCR9",
+    "status": "Under Repair"
+  },
+  {
+    "coachNo": "091181",
+    "shop": "M SHOP",
+    "position": "M2",
+    "status": "Inspection"
+  }
+]
