@@ -1,40 +1,78 @@
-// MR Coach Coordination Login System
-// Version 1.0
+/*
+ MR COACH BOARD ADMIN LOGIN
+*/
 
 
 function login(){
 
-let username =
+
+let user =
 document.getElementById("username").value;
 
 
-let password =
+let pass =
 document.getElementById("password").value;
 
 
 
-// Demo Login
-// পরে Firebase Authentication যোগ করা হবে
+// Default Admin Login
 
-if(username==="admin" && password==="12345"){
+let adminUser = "admin";
+
+let adminPass = "12345";
 
 
-localStorage.setItem(
-"user",
-"admin"
+
+if(user === adminUser && pass === adminPass){
+
+
+sessionStorage.setItem(
+"ADMIN_LOGIN",
+"YES"
 );
 
 
-window.location.href="index.html";
+
+window.location.href="admin.html";
 
 
 }
 
+
 else{
 
 
-document.getElementById("message").innerHTML =
-"❌ Invalid Username or Password";
+alert(
+"Invalid Username or Password"
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+// Protect Admin Page
+
+function checkLogin(){
+
+
+let login =
+sessionStorage.getItem(
+"ADMIN_LOGIN"
+);
+
+
+
+if(login!="YES"){
+
+
+window.location.href="login.html";
 
 
 }
