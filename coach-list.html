@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+Coach List Management
+</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+<h1>🇮🇳 INDIAN RAILWAYS</h1>
+
+<h2>COACH LIST MANAGEMENT</h2>
+
+<p>MR Coordination System</p>
+
+</header>
+
+
+
+<nav>
+
+<a href="dashboard.html">Dashboard</a>
+
+<a href="board.html">Board</a>
+
+<a href="admin.html">Add Coach</a>
+
+<a href="index.html">Home</a>
+
+</nav>
+
+
+
+<div class="admin-box">
+
+
+<h2>Coach Database</h2>
+
+
+<input 
+type="text"
+id="search"
+placeholder="Search Coach Number"
+onkeyup="loadCoachList()"
+>
+
+
+
+<select id="shopFilter" onchange="loadCoachList()">
+
+<option value="">All Shop</option>
+
+<option>N SHOP</option>
+<option>M SHOP</option>
+<option>SCR SHOP</option>
+<option>CR SHOP</option>
+<option>LIFTING BAY</option>
+<option>J SHOP</option>
+
+</select>
+
+
+
+<select id="statusFilter" onchange="loadCoachList()">
+
+<option value="">All Status</option>
+
+<option>READY</option>
+<option>WORKING</option>
+<option>HOLD</option>
+<option>COMPLETE</option>
+
+</select>
+
+
+
+<br><br>
+
+
+
+<table border="3" width="100%">
+
+
+<thead>
+
+<tr>
+
+<th>Coach No</th>
+<th>Shop</th>
+<th>Status</th>
+<th>SSE</th>
+<th>Remarks</th>
+<th>Time</th>
+<th>Action</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+<tbody id="coachTable">
+
+
+</tbody>
+
+
+
+</table>
+
+
+
+</div>
+
+
+
+<script src="js/coach-list.js"></script>
+
+
+</body>
+
+</html>
