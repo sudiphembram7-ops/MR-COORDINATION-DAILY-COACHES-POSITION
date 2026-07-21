@@ -1,785 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MR Coach Position Board</title>
+<title>
+MR Coach Live Position Board
+</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<link rel="stylesheet" href="css/style.css">
+
+
 <style>
 
-body{
-    background:#f3f6fa;
-    font-family:Arial,Helvetica,sans-serif;
-    margin:0;
-    // ===============================
-// PDF DOWNLOAD
-// ===============================
+.board-title{
 
-async function downloadPDF(){
-
-const { jsPDF } = window.jspdf;
-
-let board =
-document.querySelector(".shop-container") ||
-document.body;
-
-
-html2canvas(board,{
-    scale:2
-}).then(canvas=>{
-
-let imgData =
-canvas.toDataURL("image/png");
-
-
-let pdf =
-new jsPDF(
-    "landscape",
-    "mm",
-    "a3"
-);
-
-
-let width =
-pdf.internal.pageSize.getWidth();
-
-
-let height =
-(canvas.height * width) /
-canvas.width;
-
-
-pdf.addImage(
-    imgData,
-    "PNG",
-    5,
-    10,
-    width-10,
-    height
-);
-
-
-pdf.save(
-"MR_Coach_Position_Board.pdf"
-);
-
-
-});
+background:#003366;
+color:white;
+text-align:center;
+padding:15px;
 
 }
+
+
+.board-container{
+
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:15px;
+padding:15px;
+
 }
 
-.header{
-    background:#003366;
-    color:white;
-    padding:15px;
-    text-align:center;
+
+
+.shop-board{
+
+background:white;
+border:5px solid #003366;
+border-radius:8px;
+overflow:hidden;
+
 }
 
-.topbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:white;
-    padding:10px 20px;
-    box-shadow:0 2px 6px rgba(0,0,0,.15);
-    flex-wrap:wrap;
+
+
+.shop-board h2{
+
+background:#003366;
+color:white;
+text-align:center;
+padding:10px;
+
 }
 
-.stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:15px;
-    padding:20px;
-}
 
-.card{
-    text-align:center;
-    border:none;
-    border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,.15);
-}
-
-.card h3{
-    color:#003366;
-    margin-top:15px;
-}
-<button class="btn btn-danger" onclick="downloadPDF()">
-📄 PDF Download
-</button>
-.search{
-    padding:0 20px 20px;
-}
-
-.search input{
-    width:100%;
-    padding:12px;
-    border-radius:6px;
-    border:1px solid #bbb;
-}<div class="legend">
-
-<span class="status-released">
-🟢 Released
-</span>
-
-<span class="status-repair">
-🟡 Under Repair
-</span>
-
-<span class="status-pending">
-🔴 Pending
-</span>
-
-<span class="status-inspection">
-🔵 Inspection
-</span>
-
-<span class="status-lifting">
-🟣 Lifting Bay
-</span>
-
-<span class="status-hold">
-⚪ Hold
-</span>
-
-</div>
-
-.shop{
-    margin:20px;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
-    box-shadow:0 2px 6px rgba(0,0,0,.15);
-}
-
-.shop-title{
-    background:#003366;
-    color:white;
-    text-align:center;
-    padding:10px;
-    font-size:20px;
-    font-weight:bold;
-}
 
 table{
-    width:100%;
-    border-collapse:collapse;
+
+width:100%;
+border-collapse:collapse;
+font-size:20px;
+
 }
 
-th,td{
-    border:1px solid #000;
-    text-align:center;
-    padding:8px;
-}
+
 
 th{
-    background:#dbe7f5;
-}
 
-.highlight{
-    background:yellow !important;
-}
-
-button{
-    margin-left:5px;
-}
-
-@media(max-width:768px){
-
-.topbar{
-    flex-direction:column;
-    gap:10px;
-}
+background:#666;
+color:white;
+border:2px solid black;
+padding:8px;
 
 }
+
+
+
+td{
+
+border:2px solid black;
+padding:8px;
+text-align:center;
+font-weight:bold;
+
+}
+
+
+
+.READY{
+
+background:#00b050;
+color:white;
+
+}
+
+
+.WORKING{
+
+background:#ffc000;
+
+}
+
+
+.HOLD{
+
+background:#ff0000;
+color:white;
+
+}
+
+
+.COMPLETE{
+
+background:#0070c0;
+color:white;
+
+}
+
+
+
+.fullscreen-btn{
+
+position:fixed;
+right:20px;
+top:20px;
+
+padding:12px;
+
+background:#ffcc00;
+border:none;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+
+
+@media(max-width:900px){
+
+.board-container{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
 
 </style>
 
+
 </head>
+
 
 <body>
 
-<div class="header">
-<h2>MR CO-ORDINATION DAILY COACHES POSITION</h2>
-</div>
 
-<div class="topbar">
+<button class="fullscreen-btn"
+onclick="openFullScreen()">
 
-<div>
-<b>Date :</b>
-<span id="date"></span>
+FULL SCREEN
 
-&nbsp;&nbsp;
-
-<b>Time :</b>
-<span id="time"></span>
-</div>
-
-<div>
-
-<button class="btn btn-primary">
-Full Screen
 </button>
 
-<button class="btn btn-success">
-Excel
-</button>
 
-<button class="btn btn-danger">
-PDF
-</button>
 
-</div>
+<div class="board-title">
 
-</div>
 
-<div class="stats">
+<h1>
+🇮🇳 INDIAN RAILWAYS
+</h1>
 
-<div class="card">
-<h3 id="totalCoach">0</h3>
-<p>Total Coaches</p>
-</div>
 
-<div class="card">
-<h3>78</h3>
-<p>In Shop</p>
-</div>
+<h2>
+MR COACH COORDINATION DAILY COACHES POSITION
+</h2>
 
-<div class="card">
-<h3>32</h3>
-<p>Released</p>
-</div>
 
-<div class="card">
-<h3>10</h3>
-<p>Pending</p>
-</div>
+<p id="dateTime"></p>
 
-<div class="card">
-<h3>5</h3>
-<p>Lifting Bay</p>
-</div>
 
 </div>
 
-<div class="search">
 
-<input
-type="text"
-id="search"
-placeholder="Search Coach Number...">
 
-</div>
+<div id="board"
+class="board-container">
 
-<!-- N SHOP -->
-
-<div class="shop">
-
-<div class="shop-title">
-
-N SHOP
-
-</div>
-
-<table>
-
-<tr>
-
-<th>N2</th>
-<th>N5</th>
-<th>N7</th>
-<th>N8</th>
-
-</tr>
-
-<tr>
-
-<td>082713</td>
-<td>171873</td>
-<td>091175</td>
-<td>227900/C</td>
-
-</tr>
-
-<tr>
-
-<td>183481/C</td>
-<td>EC084872</td>
-<td>072831</td>
-<td>227881/C</td>
-
-</tr>
-
-<tr>
-
-<td>062061/C</td>
-<td>154851</td>
-<td>094019</td>
-<td>221836/C</td>
-
-</tr>
-
-</table>
-
-</div>
-
-<!-- M SHOP -->
-
-<div class="shop">
-
-<div class="shop-title">
-
-M SHOP
-
-</div>
-
-<table>
-
-<tr>
-
-<th>M2</th>
-<th>M3</th>
-<th>M4</th>
-<th>M5</th>
-<th>M6</th>
-
-</tr>
-
-<tr>
-
-<td>091181</td>
-<td>NF045207</td>
-<td>194528/C</td>
-<td>201142/C</td>
-<td>082444</td>
-
-</tr>
-
-<tr>
-
-<td>162128/C</td>
-<td>104382</td>
-<td>196953/C</td>
-<td>196945/C</td>
-<td>091174</td>
-
-</tr>
-
-</table>
-
-</div>
-
-<script>
-
-document.getElementById("date").innerHTML =
-new Date().toLocaleDateString("en-GB");
-
-function clock(){
-
-document.getElementById("time").innerHTML =
-new Date().toLocaleTimeString();
-
-}
-
-setInterval(clock,1000);
-
-clock();
-
-document.getElementById("search")
-.addEventListener("keyup",function(){
-
-let value=this.value.toUpperCase();
-
-document.querySelectorAll("td").forEach(td=>{
-
-td.classList.remove("highlight");
-
-if(td.innerText.toUpperCase().includes(value) && value!=""){
-
-td.classList.add("highlight");
-
-}
-
-});
-
-});
-<!-- ================= MR SCR SHOP ================= -->
-
-<div class="shop">
-
-    <div class="shop-title">
-        MR SCR SHOP
-    </div>
-
-    <table>
-
-        <tr>
-            <th>SCR9</th>
-            <th>SCR10</th>
-            <th>SCR11</th>
-            <th>SCR12</th>
-        </tr>
-
-        <tr>
-            <td>194274/C</td>
-            <td>072439</td>
-            <td>132451</td>
-            <td>111018</td>
-        </tr>
-
-        <tr>
-            <td>071134</td>
-            <td>064011</td>
-            <td>082437</td>
-            <td>062224</td>
-        </tr>
-
-    </table>
 
 </div>
 
 
-<!-- ================= CR SHOP ================= -->
 
-<div class="shop">
 
-    <div class="shop-title">
-        CR SHOP
-    </div>
+<script src="js/app.js"></script>
 
-    <table>
+<script src="js/board.js"></script>
 
-        <tr>
-            <th>F1</th>
-            <th>F2</th>
-            <th>F3</th>
-            <th>F4</th>
-            <th>F5</th>
-        </tr>
 
-        <tr>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>051066/C</td>
-        </tr>
 
-        <tr>
-            <td>194830/C</td>
-            <td>082901</td>
-            <td>091991</td>
-            <td>062003</td>
-            <td>071552</td>
-        </tr>
-
-    </table>
-
-</div>
-
-
-<!-- ================= LIFTING BAY ================= -->
-
-<div class="shop">
-
-    <div class="shop-title">
-        LIFTING BAY
-    </div>
-
-    <table>
-
-        <tr>
-            <th>L1</th>
-            <th>L2</th>
-            <th>L3</th>
-            <th>L4</th>
-        </tr>
-
-        <tr>
-            <td>235300</td>
-            <td>193025/C</td>
-            <td>---</td>
-            <td>---</td>
-        </tr>
-
-    </table>
-
-</div>
-
-
-<!-- ================= J SHOP ================= -->
-
-<div class="shop">
-
-    <div class="shop-title">
-        J SHOP
-    </div>
-
-    <table>
-
-        <tr>
-            <th>J1</th>
-            <th>J2</th>
-            <th>J3</th>
-            <th>J4</th>
-            <th>J5</th>
-            <th>J6</th>
-        </tr>
-
-        <tr>
-            <td>---</td>
-            <td>---</td>
-            <td>---</td>
-            <td>---</td>
-            <td>---</td>
-            <td>---</td>
-        </tr>
-
-    </table>
-
-</div>
-
-</script>
-<script>
-
-// ===============================
-// Live Date & Time
-// ===============================
-function updateDateTime() {
-
-    const now = new Date();
-
-    document.getElementById("date").innerHTML =
-        now.toLocaleDateString("en-GB");
-
-    document.getElementById("time").innerHTML =
-        now.toLocaleTimeString();
-}
-
-setInterval(updateDateTime,1000);
-updateDateTime();
-
-
-// ===============================
-// Live Search + Highlight + Scroll
-// ===============================
-
-const searchBox = document.getElementById("search");
-
-searchBox.addEventListener("keyup",function(){
-
-    let value = this.value.trim().toUpperCase();
-
-    let found = false;
-
-    document.querySelectorAll("td").forEach(td=>{
-
-        td.classList.remove("highlight");
-
-        if(value!=="" &&
-           td.innerText.toUpperCase().includes(value)){
-
-            td.classList.add("highlight");
-
-            td.scrollIntoView({
-                behavior:"smooth",
-                block:"center"
-            });
-
-            found = true;
-        }
-
-    });
-
-});
-
-
-// ===============================
-// Coach Statistics
-// ===============================
-
-function updateStatistics(){
-
-    const total =
-    document.querySelectorAll("td").length;
-
-    document.getElementById("totalCoach").innerHTML =
-    total;
-
-}
-
-updateStatistics();
-
-
-// ===============================
-// Full Screen
-// ===============================
-
-function fullScreen(){
-
-    if(!document.fullscreenElement){
-
-        document.documentElement.requestFullscreen();
-
-    }else{
-
-        document.exitFullscreen();
-
-    }
-
-}
-
-
-// ===============================
-// Auto Refresh
-// ===============================
-
-// Refresh every 30 seconds
-setInterval(function(){
-
-    console.log("Board Refreshed");
-
-},30000);
-
-
-// ===============================
-// Print Board
-// ===============================
-
-function printBoard(){
-
-    window.print();
-
-}
-
-
-</script>
-// ===============================
-// PDF DOWNLOAD
-// ===============================
-
-async function downloadPDF(){
-
-const { jsPDF } = window.jspdf;
-
-let board =
-document.querySelector(".shop-container") ||
-document.body;
-
-
-html2canvas(board,{
-    scale:2
-}).then(canvas=>{
-
-let imgData =
-canvas.toDataURL("image/png");
-
-
-let pdf =
-new jsPDF(
-    "landscape",
-    "mm",
-    "a3"
-);
-
-
-let width =
-pdf.internal.pageSize.getWidth();
-
-
-let height =
-(canvas.height * width) /
-canvas.width;
-
-
-pdf.addImage(
-    imgData,
-    "PNG",
-    5,
-    10,
-    width-10,
-    height
-);
-
-
-pdf.save(
-"MR_Coach_Position_Board.pdf"
-);
-
-
-});
-
-}// ===============================
-// PDF DOWNLOAD
-// ===============================
-
-async function downloadPDF(){
-
-const { jsPDF } = window.jspdf;
-
-let board =
-document.querySelector(".shop-container") ||
-document.body;
-
-
-html2canvas(board,{
-    scale:2
-}).then(canvas=>{
-
-let imgData =
-canvas.toDataURL("image/png");
-
-
-let pdf =
-new jsPDF(
-    "landscape",
-    "mm",
-    "a3"
-);
-
-
-let width =
-pdf.internal.pageSize.getWidth();
-
-
-let height =
-(canvas.height * width) /
-canvas.width;
-
-
-pdf.addImage(
-    imgData,
-    "PNG",
-    5,
-    10,
-    width-10,
-    height
-);
-
-
-pdf.save(
-"MR_Coach_Position_Board.pdf"
-);
-
-
-});
-
-}
-db.collection("coachPosition")
-.onSnapshot((snapshot) => {
-
-    let coachData = [];
-
-    snapshot.forEach((doc) => {
-        coachData.push(doc.data());
-    });
-
-    displayBoard(coachData);
-
-});
 </body>
+
 </html>
