@@ -1,56 +1,127 @@
-// ===============================
-// PDF DOWNLOAD
-// ===============================
+<!DOCTYPE html>
+<html lang="en">
 
-async function downloadPDF(){
+<head>
 
-const { jsPDF } = window.jspdf;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-let board =
-document.querySelector(".shop-container") ||
-document.body;
+<title>MR Coach Board Admin Panel</title>
 
+<link rel="stylesheet" href="style.css">
 
-html2canvas(board,{
-    scale:2
-}).then(canvas=>{
-
-let imgData =
-canvas.toDataURL("image/png");
+</head>
 
 
-let pdf =
-new jsPDF(
-    "landscape",
-    "mm",
-    "a3"
-);
+<body>
 
 
-let width =
-pdf.internal.pageSize.getWidth();
+<header>
+
+<h1>
+MR COACH POSITION ADMIN PANEL
+</h1>
+
+</header>
 
 
-let height =
-(canvas.height * width) /
-canvas.width;
+
+<div class="admin-box">
 
 
-pdf.addImage(
-    imgData,
-    "PNG",
-    5,
-    10,
-    width-10,
-    height
-);
+<h2>Coach Entry Form</h2>
 
 
-pdf.save(
-"MR_Coach_Position_Board.pdf"
-);
+<label>
+Coach Number
+</label>
+
+<input 
+type="text"
+id="coachNo"
+placeholder="Enter Coach No."
+>
 
 
-});
 
-}
+<label>
+Shop Selection
+</label>
+
+
+<select id="shopName">
+
+<option>N SHOP</option>
+<option>M SHOP</option>
+<option>SCR SHOP</option>
+<option>CR SHOP</option>
+<option>LIFTING BAY</option>
+<option>J SHOP</option>
+
+</select>
+
+
+
+
+<label>
+Status
+</label>
+
+
+<select id="status">
+
+
+<option>READY</option>
+<option>WORKING</option>
+<option>HOLD</option>
+<option>COMPLETE</option>
+
+
+</select>
+
+
+
+
+<label>
+Remarks
+</label>
+
+
+<textarea 
+id="remarks"
+placeholder="Enter Remarks">
+</textarea>
+
+
+
+<button onclick="saveCoach()">
+SAVE COACH
+</button>
+
+
+
+<button onclick="clearForm()">
+CLEAR
+</button>
+
+
+
+<br><br>
+
+
+<button onclick="openBoard()">
+OPEN BOARD
+</button>
+
+
+
+</div>
+
+
+
+<script src="admin.js"></script>
+
+
+</body>
+
+</html>
