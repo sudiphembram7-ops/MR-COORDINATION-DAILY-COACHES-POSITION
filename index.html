@@ -624,6 +624,183 @@ function downloadPDF() {
 }
 
 </script>
+<script>
+
+let shops = [
+"N SHOP",
+"M SHOP",
+"SCR SHOP",
+"CR SHOP",
+"LIFTING BAY",
+"J SHOP"
+];
+
+
+function loadCoachBoard(){
+
+
+let data = JSON.parse(
+localStorage.getItem("COACH_POSITION_DATA")
+) || [];
+
+
+
+let board =
+document.getElementById("board");
+
+
+
+board.innerHTML="";
+
+
+
+shops.forEach(function(shop){
+
+
+
+let section = document.createElement("section");
+
+section.className="shop";
+
+
+
+let html = `
+
+<h2>${shop}</h2>
+
+<table>
+
+<tr>
+<th>SL</th>
+<th>Coach No.</th>
+<th>Status</th>
+<th>Remarks</th>
+<th>Update Time</th>
+</tr>
+
+`;
+
+
+
+let count=1;
+
+
+
+let shopData =
+data.filter(
+item => item.shop === shop
+);
+
+
+
+if(shopData.length==0){
+
+
+html += `
+
+<tr>
+
+<td colspan="5">
+NO COACH AVAILABLE
+</td>
+
+</tr>
+
+`;
+
+
+}
+
+
+
+else{
+
+
+shopData.forEach(function(item){
+
+
+
+let statusClass="";
+
+
+
+if(item.status=="READY")
+statusClass="status-ready";
+
+
+if(item.status=="WORKING")
+statusClass="status-progress";
+
+
+if(item.status=="HOLD")
+statusClass="status-hold";
+
+
+if(item.status=="COMPLETE")
+statusClass="status-complete";
+
+
+
+html += `
+
+
+<tr>
+
+<td>${count++}</td>
+
+<td>${item.coachNo}</td>
+
+<td class="${statusClass}">
+${item.status}
+</td>
+
+<td>${item.remarks}</td>
+
+<td>${item.time}</td>
+
+
+</tr>
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+html += "</table>";
+
+
+
+section.innerHTML=html;
+
+
+board.appendChild(section);
+
+
+
+});
+
+
+}
+
+
+
+window.onload=function(){
+
+loadCoachBoard();
+
+};
+
+
+
+</script>
 
 
 
