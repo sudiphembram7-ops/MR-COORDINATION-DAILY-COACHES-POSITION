@@ -237,3 +237,15 @@ board.innerHTML += html;
 // Start Live Board
 
 loadFirebaseBoard();
+
+createAuditLog({
+
+action:"Status Change",
+
+coachNo:coach.coachNo,
+
+oldStatus:oldStatus,
+
+newStatus:newStatus
+
+});
