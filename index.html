@@ -1218,6 +1218,20 @@ showSavedData();
 
 <script src="firebase-config.js"></script>
 
+<script>
+db.collection("coachPosition")
+.onSnapshot((snapshot) => {
+
+    let coachData = [];
+
+    snapshot.forEach((doc) => {
+        coachData.push(doc.data());
+    });
+
+    displayBoard(coachData);
+
+});
+</script>
 
 
 </body>
