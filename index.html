@@ -8,6 +8,12 @@
 <title>
 MR CO-ORDINATION DAILY COACHES POSITION
 </title>
+
+
+<title>MR Coach Board Admin Panel</title>
+
+<link rel="stylesheet" href="style.css">
+    
 <link rel="stylesheet" href="style.css">
 
 <link rel="stylesheet" href="style.css">
@@ -128,6 +134,115 @@ LOGIN
 </div>
 
 <script src="login.js"></script>
+
+
+<header>
+
+<h1>
+
+MR COACH POSITION ADMIN PANEL
+
+</h1>
+
+</header>
+
+<div class="admin-box">
+
+<h2>Coach Entry Form</h2>
+
+<label>
+
+Coach Number
+
+</label>
+
+<input 
+
+type="text"
+
+id="coachNo"
+
+placeholder="Enter Coach No."
+
+>
+
+<label>
+
+Shop Selection
+
+</label>
+
+<select id="shopName">
+
+<option>N SHOP</option>
+
+<option>M SHOP</option>
+
+<option>SCR SHOP</option>
+
+<option>CR SHOP</option>
+
+<option>LIFTING BAY</option>
+
+<option>J SHOP</option>
+
+</select>
+
+<label>
+
+Status
+
+</label>
+
+<select id="status">
+
+<option>READY</option>
+
+<option>WORKING</option>
+
+<option>HOLD</option>
+
+<option>COMPLETE</option>
+
+</select>
+
+<label>
+
+Remarks
+
+</label>
+
+<textarea 
+
+id="remarks"
+
+placeholder="Enter Remarks">
+
+</textarea>
+
+<button onclick="saveCoach()">
+
+SAVE COACH
+
+</button>
+
+<button onclick="clearForm()">
+
+CLEAR
+
+</button>
+
+<br><br>
+
+<button onclick="openBoard()">
+
+OPEN BOARD
+
+</button>
+
+</div>
+
+<script src="admin.js"></script>
 
 
 <div class="subtitle">
