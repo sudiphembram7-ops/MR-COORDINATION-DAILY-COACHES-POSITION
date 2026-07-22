@@ -1,27 +1,29 @@
-async function loadCoaches() {
-    try {
-        const response = await fetch("data/coaches.json");
-        const coaches = await response.json();
+// ======================
+// Load Coach Board
+// ======================
 
-        const tbody = document.getElementById("coachTable");
-        tbody.innerHTML = "";
+function loadBoard() {
 
-        coaches.forEach(coach => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${coach.coachNo}</td>
-                    <td>${coach.shop}</td>
-                    <td>${coach.position}</td>
-                    <td>${coach.status}</td>
-                </tr>
-            `;
-        });
-    } catch (err) {
-        console.error("Unable to load coach data:", err);
-    }
+    let database = JSON.parse(localStorage.getItem("CoachDB")) || {};
+
+    Object.keys(database).forEach(function(key){
+
+        let coach = database[key];
+
+        let cell = document.getElementById(coach.id);
+
+        if(cell){
+
+            cell.innerHTML =
+
+            "<b>"+coach.coachNo+"</b><br>" +
+
+            "<small>"+coach.status+"</small>";
+
+        }
+
+    });
+
 }
 
-loadCoaches();
-
-// Refresh every 30 seconds
-setInterval(loadCoaches, 30000);
+window.onload = loadBoard;
