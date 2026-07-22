@@ -1,0 +1,56 @@
+/* =========================
+   Mobile Responsive
+========================= */
+
+@media (max-width:768px){
+
+body{
+    margin:5px;
+    font-size:14px;
+}
+
+.top-bar{
+    flex-direction:column;
+    gap:10px;
+    text-align:center;
+}
+
+.shop-container{
+    display:block;
+}
+
+.shop-card{
+    width:100%;
+    margin-bottom:15px;
+}
+
+.coach-table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+}
+
+.coach-table th,
+.coach-table td{
+
+    min-width:80px;
+    height:50px;
+    font-size:13px;
+
+}
+
+button{
+
+    width:100%;
+    margin-top:8px;
+
+}
+
+input,
+select{
+
+    width:100%;
+
+}
+
+}
