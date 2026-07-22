@@ -27,3 +27,31 @@ function loadBoard() {
 }
 
 window.onload = loadBoard;
+
+onValue(
+
+ref(db,"CoachDB"),
+
+(snapshot)=>{
+
+let data=snapshot.val();
+
+for(let id in data){
+
+let cell=document.getElementById(id);
+
+if(cell){
+
+cell.innerHTML=
+
+"<b>"+data[id].coachNo+"</b><br>"+
+
+data[id].status;
+
+}
+
+}
+
+}
+
+);
