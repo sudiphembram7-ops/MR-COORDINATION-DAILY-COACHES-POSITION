@@ -1,55 +1,33 @@
-// ==========================
-// Save Coach Entry
-// ==========================
+function saveCoach(){
 
-function saveCoach() {
+let id = column.value + "_" + position.value;
 
-    const shop = document.getElementById("shop").value;
-    const column = document.getElementById("column").value;
-    const position = document.getElementById("position").value;
-    const coachNo = document.getElementById("coachNo").value;
-    const coachType = document.getElementById("coachType").value;
-    const status = document.getElementById("status").value;
-    const remarks = document.getElementById("remarks").value;
+set(
 
-    if (coachNo == "") {
+ref(db,"CoachDB/"+id),
 
-        alert("Enter Coach Number");
+{
 
-        return;
+shop:shop.value,
 
-    }
+column:column.value,
 
-    let id = column + "_" + position;
+position:position.value,
 
-    let coach = {
+coachNo:coachNo.value,
 
-        id: id,
+coachType:coachType.value,
 
-        shop: shop,
+status:status.value,
 
-        column: column,
+remarks:remarks.value,
 
-        position: position,
+updated:new Date().toLocaleString()
 
-        coachNo: coachNo,
+}
 
-        coachType: coachType,
+);
 
-        status: status,
-
-        remarks: remarks,
-
-        updated: new Date().toLocaleString()
-
-    };
-
-    let database = JSON.parse(localStorage.getItem("CoachDB")) || {};
-
-    database[id] = coach;
-
-    localStorage.setItem("CoachDB", JSON.stringify(database));
-
-    alert("Coach Saved Successfully");
+alert("Coach Saved");
 
 }
