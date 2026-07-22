@@ -43,9 +43,80 @@ placeholder="Search Coach Number">
 </tbody>
 
 </table>
+<script>
 addHistory("NEW ENTRY", coach);
+</script>
+<script>
 addHistory("UPDATED", coach);
+</script>
+<script>
 addHistory("DELETED", coach);
+</script>
+<script>
+function loadHistory(){
+
+let history=
+JSON.parse(localStorage.getItem("CoachHistory"))||[];
+
+let html="";
+
+history.forEach(function(h){
+
+html+=`
+
+<tr>
+
+<td>${h.date}</td>
+
+<td>${h.time}</td>
+
+<td>${h.shop}</td>
+
+<td>${h.column}</td>
+
+<td>${h.position}</td>
+
+<td>${h.coachNo}</td>
+
+<td>${h.status}</td>
+
+<td>${h.user}</td>
+
+<td>${h.action}</td>
+
+</tr>
+
+`;
+
+});
+
+historyBody.innerHTML=html;
+
+}
+
+window.onload=loadHistory;
+</script>
+<script>
+searchHistory.onkeyup=function(){
+
+let filter=this.value.toUpperCase();
+
+let rows=document.querySelectorAll("#historyTable tbody tr");
+
+rows.forEach(function(r){
+
+if(r.innerText.toUpperCase().includes(filter))
+
+r.style.display="";
+
+else
+
+r.style.display="none";
+
+});
+
+}
+</script>
 
 </body>
 
