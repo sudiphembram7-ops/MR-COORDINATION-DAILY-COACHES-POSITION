@@ -199,6 +199,48 @@ document.exitFullscreen();
 }
 
 </script>
+<script>
+
+import {
+
+getAuth,
+
+signInWithEmailAndPassword
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const auth=getAuth(app);
+
+function login(){
+
+signInWithEmailAndPassword(
+
+auth,
+
+email.value,
+
+password.value
+
+)
+
+.then(()=>{
+
+window.location="dashboard.html";
+
+})
+
+.catch((error)=>{
+
+alert(error.message);
+
+});
+
+}
+</script>
 
 </body>
 </html>
