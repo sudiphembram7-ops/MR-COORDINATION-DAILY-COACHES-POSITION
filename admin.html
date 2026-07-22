@@ -1,106 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+<div class="container">
 
-<head>
+<div class="card">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div class="card-header bg-primary text-white">
 
-<title>
-MR Coach Admin Panel
-</title>
+<h3>MR CO-ORDINATION ADMIN PANEL</h3>
 
-<link rel="stylesheet" href="css/style.css">
+</div>
 
-</head>
+<div class="card-body">
 
+<div class="row">
 
-<body>
+<div class="col-md-4">
 
+<label>Shop</label>
 
-<header class="header">
-
-<h1>🇮🇳 INDIAN RAILWAYS</h1>
-
-<h2>
-MR COACH COORDINATION ADMIN PANEL
-</h2>
-
-<p>Liluah Workshop</p>
-
-</header>
-
-
-
-<nav>
-
-<a href="dashboard.html">Dashboard</a>
-
-<a href="board.html">Board</a>
-
-<a href="admin.html">Admin</a>
-
-<a href="index.html">Home</a>
-
-</nav>
-
-
-
-
-
-<div class="admin-box">
-
-
-<h2>
-Coach Entry Form
-</h2>
-
-
-
-<label>
-Coach Number
-</label>
-
-<input 
-type="text"
-id="coachNo"
-placeholder="Enter Coach No.">
-
-
-
-
-
-<label>
-Coach Type
-</label>
-
-
-<select id="coachType">
-
-<option>LHB</option>
-<option>ICF</option>
-<option>MEMU</option>
-<option>DEMU</option>
-
-</select>
-
-
-
-
-
-<label>
-Shop Name
-</label>
-
-
-<select id="shop">
-
+<select id="shop" class="form-select">
 
 <option>N SHOP</option>
 
 <option>M SHOP</option>
 
-<option>SCR SHOP</option>
+<option>MR SCR SHOP</option>
 
 <option>CR SHOP</option>
 
@@ -108,132 +30,129 @@ Shop Name
 
 <option>J SHOP</option>
 
-
 </select>
-
-
-
-
-
-<label>
-Status
-</label>
-
-
-<select id="status">
-
-
-<option>READY</option>
-
-<option>WORKING</option>
-
-<option>HOLD</option>
-
-<option>COMPLETE</option>
-
-
-</select>
-
-
-
-
-
-<label>
-Priority
-</label>
-
-
-<select id="priority">
-
-
-<option>Normal</option>
-
-<option>Urgent</option>
-
-
-</select>
-
-
-
-
-
-<label>
-SSE In-Charge
-</label>
-
-
-<input 
-type="text"
-id="sse"
-placeholder="Enter SSE Name">
-
-
-
-
-
-<label>
-Expected Release Date
-</label>
-
-
-<input 
-type="date"
-id="releaseDate">
-
-
-
-
-
-
-<label>
-Remarks
-</label>
-
-
-<textarea 
-id="remarks"
-placeholder="Enter Remarks">
-
-</textarea>
-
-
-
-
-
-<button onclick="saveCoach()">
-
-SAVE COACH
-
-</button>
-
-
-
-<button onclick="resetForm()">
-
-RESET
-
-</button>
-
-
-
-<p id="message"></p>
-
-
 
 </div>
 
+<div class="col-md-4">
 
+<label>Column</label>
 
+<select id="column" class="form-select"></select>
 
+</div>
 
-<script src="js/admin.js"></script>
+<div class="col-md-4">
 
+<label>Position</label>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<select id="position" class="form-select">
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<option>H1</option>
 
+<option>H2</option>
 
-</body>
+<option>D2</option>
 
-</html>
+<option>D1</option>
+
+</select>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>Coach Number</label>
+
+<input
+type="text"
+id="coachNo"
+class="form-control">
+
+</div>
+
+<div class="col-md-4">
+
+<label>Coach Type</label>
+
+<select id="coachType" class="form-select">
+
+<option>LHB AC</option>
+
+<option>LHB NAC</option>
+
+<option>GS</option>
+
+<option>SLR</option>
+
+<option>RCC</option>
+
+</select>
+
+</div>
+
+<div class="col-md-4">
+
+<label>Status</label>
+
+<select id="status" class="form-select">
+
+<option>PO</option>
+
+<option>LM</option>
+
+<option>MED</option>
+
+<option>RL</option>
+
+</select>
+
+</div>
+
+</div>
+
+<br>
+
+<label>Remarks</label>
+
+<textarea
+id="remarks"
+class="form-control"></textarea>
+
+<br>
+
+<button
+class="btn btn-success"
+onclick="saveCoach()">
+
+💾 SAVE
+
+</button>
+
+<button
+class="btn btn-warning"
+onclick="updateCoach()">
+
+✏ UPDATE
+
+</button>
+
+<button
+class="btn btn-danger"
+onclick="deleteCoach()">
+
+🗑 DELETE
+
+</button>
+
+</div>
+
+</div>
+
+</div>
