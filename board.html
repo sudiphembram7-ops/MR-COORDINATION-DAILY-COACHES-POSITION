@@ -152,7 +152,11 @@ Time: <span id="time"></span>
 <button class="btn btn-primary" onclick="toggleFullscreen()">
 Full Screen
 </button>
+<button onclick="logout()">
 
+Logout
+
+</button>
 </div>
 
 </div>
@@ -265,6 +269,25 @@ window.location="login.html";
 }
 
 });
+</script>
+<script>
+import{
+
+signOut
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+function logout(){
+
+signOut(auth);
+
+window.location="login.html";
+
+}
 </script>
 
 </body>
