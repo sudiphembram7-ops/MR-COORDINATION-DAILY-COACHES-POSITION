@@ -1,767 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>
-MR Coach Live Position Board
-</title>
+<title>MR Coach Coordination Daily Coaches Position</title>
 
-
-<link rel="stylesheet" href="css/style.css">
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 
-.board-title{
-
-background:#003366;
-color:white;
-text-align:center;
-padding:15px;
-
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-
-.board-container{
-
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:15px;
-padding:15px;
-
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#e9ecef;
 }
 
+/* Header */
 
-
-.shop-board{
-
-background:white;
-border:5px solid #003366;
-border-radius:8px;
-overflow:hidden;
-
+.header{
+    background:#003366;
+    color:#fff;
+    padding:15px;
+    text-align:center;
+    border-bottom:4px solid #ffc107;
 }
 
-
-
-.shop-board h2{
-
-background:#003366;
-color:white;
-text-align:center;
-padding:10px;
-
+.header h2{
+    margin:0;
+    font-weight:bold;
 }
 
+/* Toolbar */
 
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    background:#ffffff;
+    padding:12px 20px;
+    box-shadow:0 2px 5px rgba(0,0,0,.2);
+}
+
+.left{
+    font-weight:bold;
+}
+
+.right button{
+    margin-left:6px;
+}
+
+/* Search */
+
+.search-bar{
+    padding:15px;
+    background:#f8f9fa;
+}
+
+.search-bar input{
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    border:2px solid #003366;
+    border-radius:6px;
+}
+
+/* Shop Card */
+
+.shop{
+    margin:20px;
+    background:#fff;
+    border:3px solid #000;
+}
+
+.shop-title{
+    background:#003366;
+    color:white;
+    text-align:center;
+    padding:10px;
+    font-size:20px;
+    font-weight:bold;
+}
 
 table{
-
-width:100%;
-border-collapse:collapse;
-font-size:20px;
-
+    width:100%;
+    border-collapse:collapse;
 }
 
-
+th,td{
+    border:2px solid #000;
+    padding:10px;
+    text-align:center;
+}
 
 th{
-
-
-color:black;
-border:2px solid black;
-padding:8px;
-
+    background:#d9d9d9;
 }
 
-
-
-td{
-
-border:2px solid black;
-padding:8px;
-text-align:center;
-font-weight:bold;
-
+.highlight{
+    background:yellow !important;
 }
 
+@media(max-width:768px){
 
-
-.READY{
-
-background:#00b050;
-color:white;
-
+.toolbar{
+    flex-direction:column;
+    align-items:flex-start;
 }
 
-
-.WORKING{
-
-background:#ffc000;
-
+.right{
+    width:100%;
 }
 
-
-.HOLD{
-
-background:#ff0000;
-color:white;
-
-}
-
-
-.COMPLETE{
-
-background:#0070c0;
-color:white;
-
-}
-
-
-
-.fullscreen-btn{
-
-position:fixed;
-right:20px;
-top:20px;
-
-padding:12px;
-
-background:#ffcc00;
-border:none;
-
-cursor:pointer;
-
-font-weight:bold;
-
-}
-
-
-
-@media(max-width:900px){
-
-.board-container{
-
-grid-template-columns:1fr;
-
+.right button{
+    width:100%;
+    margin:5px 0;
 }
 
 }
-
 
 </style>
 
-
 </head>
-
 
 <body>
 
+<div class="header">
+<h2>MR CO-ORDINATION DAILY COACHES POSITION</h2>
+</div>
 
-<button class="fullscreen-btn"
-onclick="openFullScreen()">
+<div class="toolbar">
 
-FULL SCREEN
+<div class="left">
+Date: <span id="date"></span> |
+Time: <span id="time"></span>
+</div>
 
+<div class="right">
+
+<button class="btn btn-success">Excel</button>
+
+<button class="btn btn-danger">PDF</button>
+
+<button class="btn btn-primary" onclick="toggleFullscreen()">
+Full Screen
 </button>
 
-
-
-<div class="board-title">
-
-
-
-
-<h2>
-MR COACH COORDINATION DAILY COACHES POSITION
-</h2>
-
-
-<p id="dateTime"></p>
-
+</div>
 
 </div>
 
+<div class="search-bar">
 
-
-<div id="board"
-class="board-container">
-
-
-</div>
-<div class="shop-card">
-
-    <div class="shop-header">
-        N SHOP
-    </div>
-
-    <table class="coach-table">
-
-        <thead>
-            <tr>
-                <th>Position</th>
-                <th>N2</th>
-                <th>N5</th>
-                <th>N7</th>
-                <th>N8</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <th>H1</th>
-
-                <td id="N2_H1" class="editable"></td>
-                <td id="N5_H1" class="editable"></td>
-                <td id="N7_H1" class="editable"></td>
-                <td id="N8_H1" class="editable"></td>
-
-            </tr>
-
-            <tr>
-
-                <th>H2</th>
-
-                <td id="N2_H2" class="editable"></td>
-                <td id="N5_H2" class="editable"></td>
-                <td id="N7_H2" class="editable"></td>
-                <td id="N8_H2" class="editable"></td>
-
-            </tr>
-
-            <tr>
-
-                <th>D2</th>
-
-                <td id="N2_D2" class="editable"></td>
-                <td id="N5_D2" class="editable"></td>
-                <td id="N7_D2" class="editable"></td>
-                <td id="N8_D2" class="editable"></td>
-
-            </tr>
-
-            <tr>
-
-                <th>D1</th>
-
-                <td id="N2_D1" class="editable"></td>
-                <td id="N5_D1" class="editable"></td>
-                <td id="N7_D1" class="editable"></td>
-                <td id="N8_D1" class="editable"></td>
-
-            </tr>
-
-        </tbody>
-
-    </table>
+<input
+type="text"
+id="searchBox"
+placeholder="Search Coach Number...">
 
 </div>
 
-<!-- ================= M SHOP ================= -->
+<script>
 
-<div class="shop-card">
+function updateClock(){
 
-    <div class="shop-header">
-        M SHOP
-    </div>
+const now=new Date();
 
-    <table class="coach-table">
+document.getElementById("date").innerHTML=
+now.toLocaleDateString("en-GB");
 
-        <thead>
-            <tr>
-                <th>Position</th>
-                <th>M2</th>
-                <th>M3</th>
-                <th>M4</th>
-                <th>M5</th>
-                <th>M6</th>
-            </tr>
-        </thead>
+document.getElementById("time").innerHTML=
+now.toLocaleTimeString();
 
-        <tbody>
+}
 
-            <tr>
-                <th>H1</th>
-                <td id="M2_H1" class="editable"></td>
-                <td id="M3_H1" class="editable"></td>
-                <td id="M4_H1" class="editable"></td>
-                <td id="M5_H1" class="editable"></td>
-                <td id="M6_H1" class="editable"></td>
-            </tr>
+setInterval(updateClock,1000);
 
-            <tr>
-                <th>H2</th>
-                <td id="M2_H2" class="editable"></td>
-                <td id="M3_H2" class="editable"></td>
-                <td id="M4_H2" class="editable"></td>
-                <td id="M5_H2" class="editable"></td>
-                <td id="M6_H2" class="editable"></td>
-            </tr>
+updateClock();
 
-            <tr>
-                <th>D2</th>
-                <td id="M2_D2" class="editable"></td>
-                <td id="M3_D2" class="editable"></td>
-                <td id="M4_D2" class="editable"></td>
-                <td id="M5_D2" class="editable"></td>
-                <td id="M6_D2" class="editable"></td>
-            </tr>
+function toggleFullscreen(){
 
-            <tr>
-                <th>D1</th>
-                <td id="M2_D1" class="editable"></td>
-                <td id="M3_D1" class="editable"></td>
-                <td id="M4_D1" class="editable"></td>
-                <td id="M5_D1" class="editable"></td>
-                <td id="M6_D1" class="editable"></td>
-            </tr>
+if(!document.fullscreenElement){
 
-        </tbody>
+document.documentElement.requestFullscreen();
 
-    </table>
+}else{
 
-</div>
+document.exitFullscreen();
 
+}
 
+}
 
-
-<!-- ================= MR SCR SHOP ================= -->
-
-<div class="shop-card">
-
-<div class="shop-header">
-MR SCR SHOP
-</div>
-
-<table class="coach-table">
-
-<thead>
-
-<tr>
-
-<th>Position</th>
-
-<th>SCR9</th>
-<th>SCR10</th>
-<th>SCR11</th>
-<th>SCR12</th>
-<th>SCR13</th>
-<th>SCR14</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<th>H1</th>
-
-<td id="SCR9_H1"></td>
-<td id="SCR10_H1"></td>
-<td id="SCR11_H1"></td>
-<td id="SCR12_H1"></td>
-<td id="SCR13_H1"></td>
-<td id="SCR14_H1"></td>
-
-</tr>
-
-<tr>
-
-<th>H2</th>
-
-<td id="SCR9_H2"></td>
-<td id="SCR10_H2"></td>
-<td id="SCR11_H2"></td>
-<td id="SCR12_H2"></td>
-<td id="SCR13_H2"></td>
-<td id="SCR14_H2"></td>
-
-</tr>
-
-<tr>
-
-<th>D2</th>
-
-<td id="SCR9_D2"></td>
-<td id="SCR10_D2"></td>
-<td id="SCR11_D2"></td>
-<td id="SCR12_D2"></td>
-<td id="SCR13_D2"></td>
-<td id="SCR14_D2"></td>
-
-</tr>
-
-<tr>
-
-<th>D1</th>
-
-<td id="SCR9_D1"></td>
-<td id="SCR10_D1"></td>
-<td id="SCR11_D1"></td>
-<td id="SCR12_D1"></td>
-<td id="SCR13_D1"></td>
-<td id="SCR14_D1"></td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-<div class="shop-card">
-
-<table class="coach-table">
-
-<thead>
-
-<tr>
-
-<th>Position</th>
-
-<th>SCR15</th>
-<th>SCR16</th>
-<th>SCR18</th>
-<th>SCR19</th>
-<th>SCR21</th>
-<th>SCR22</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<th>H1</th>
-
-<td id="SCR15_H1"></td>
-<td id="SCR16_H1"></td>
-<td id="SCR18_H1"></td>
-<td id="SCR19_H1"></td>
-<td id="SCR21_H1"></td>
-<td id="SCR22_H1"></td>
-
-</tr>
-
-<tr>
-
-<th>H2</th>
-
-<td id="SCR15_H2"></td>
-<td id="SCR16_H2"></td>
-<td id="SCR18_H2"></td>
-<td id="SCR19_H2"></td>
-<td id="SCR21_H2"></td>
-<td id="SCR22_H2"></td>
-
-</tr>
-
-<tr>
-
-<th>D2</th>
-
-<td id="SCR15_D2"></td>
-<td id="SCR16_D2"></td>
-<td id="SCR18_D2"></td>
-<td id="SCR19_D2"></td>
-<td id="SCR21_D2"></td>
-<td id="SCR22_D2"></td>
-
-</tr>
-
-<tr>
-
-<th>D1</th>
-
-<td id="SCR15_D1"></td>
-<td id="SCR16_D1"></td>
-<td id="SCR18_D1"></td>
-<td id="SCR19_D1"></td>
-<td id="SCR21_D1"></td>
-<td id="SCR22_D1"></td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-<!-- ================= CR SHOP ================= -->
-
-<div class="shop-card">
-
-<div class="shop-header">
-CR SHOP
-</div>
-
-<table class="coach-table">
-
-<thead>
-
-<tr>
-
-<th>Position</th>
-
-<th>F1</th>
-<th>F2</th>
-<th>F3</th>
-<th>F4</th>
-<th>F5</th>
-<th>F6</th>
-<th>F7</th>
-<th>F8</th>
-<th>F9</th>
-<th>F10</th>
-<th>F11</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<th>H1</th>
-
-<td id="F1_H1"></td>
-<td id="F2_H1"></td>
-<td id="F3_H1"></td>
-<td id="F4_H1"></td>
-<td id="F5_H1"></td>
-<td id="F6_H1"></td>
-<td id="F7_H1"></td>
-<td id="F8_H1"></td>
-<td id="F9_H1"></td>
-<td id="F10_H1"></td>
-<td id="F11_H1"></td>
-
-</tr>
-
-<tr>
-
-<th>H2</th>
-
-<td id="F1_H2"></td>
-<td id="F2_H2"></td>
-<td id="F3_H2"></td>
-<td id="F4_H2"></td>
-<td id="F5_H2"></td>
-<td id="F6_H2"></td>
-<td id="F7_H2"></td>
-<td id="F8_H2"></td>
-<td id="F9_H2"></td>
-<td id="F10_H2"></td>
-<td id="F11_H2"></td>
-
-</tr>
-
-<tr>
-
-<th>D2</th>
-
-<td id="F1_D2"></td>
-<td id="F2_D2"></td>
-<td id="F3_D2"></td>
-<td id="F4_D2"></td>
-<td id="F5_D2"></td>
-<td id="F6_D2"></td>
-<td id="F7_D2"></td>
-<td id="F8_D2"></td>
-<td id="F9_D2"></td>
-<td id="F10_D2"></td>
-<td id="F11_D2"></td>
-
-</tr>
-
-<tr>
-
-<th>D1</th>
-
-<td id="F1_D1"></td>
-<td id="F2_D1"></td>
-<td id="F3_D1"></td>
-<td id="F4_D1"></td>
-<td id="F5_D1"></td>
-<td id="F6_D1"></td>
-<td id="F7_D1"></td>
-<td id="F8_D1"></td>
-<td id="F9_D1"></td>
-<td id="F10_D1"></td>
-<td id="F11_D1"></td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-<!-- ================= LIFTING BAY ================= -->
-
-<div class="shop-card">
-
-    <div class="shop-header">
-        LIFTING BAY
-    </div>
-
-    <table class="coach-table">
-
-        <thead>
-
-            <tr>
-                <th>Position</th>
-                <th>L9</th>
-                <th>L10</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <th>H1</th>
-
-                <td id="L9_H1" class="editable"></td>
-                <td id="L10_H1" class="editable"></td>
-
-            </tr>
-
-            <tr>
-                <th>H2</th>
-
-                <td id="L9_H2" class="editable"></td>
-                <td id="L10_H2" class="editable"></td>
-
-            </tr>
-
-            <tr>
-                <th>D2</th>
-
-                <td id="L9_D2" class="editable"></td>
-                <td id="L10_D2" class="editable"></td>
-
-            </tr>
-
-            <tr>
-                <th>D1</th>
-
-                <td id="L9_D1" class="editable"></td>
-                <td id="L10_D1" class="editable"></td>
-
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-<!-- ================= J SHOP ================= -->
-
-<div class="shop-card">
-
-    <div class="shop-header">
-        J SHOP
-    </div>
-
-    <table class="coach-table">
-
-        <thead>
-
-            <tr>
-                <th>Position</th>
-
-                <th>J1</th>
-                <th>J2</th>
-                <th>J3</th>
-                <th>J4</th>
-                <th>J5</th>
-                <th>J6</th>
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <th>H1</th>
-
-                <td id="J1_H1"></td>
-                <td id="J2_H1"></td>
-                <td id="J3_H1"></td>
-                <td id="J4_H1"></td>
-                <td id="J5_H1"></td>
-                <td id="J6_H1"></td>
-
-            </tr>
-
-            <tr>
-                <th>H2</th>
-
-                <td id="J1_H2"></td>
-                <td id="J2_H2"></td>
-                <td id="J3_H2"></td>
-                <td id="J4_H2"></td>
-                <td id="J5_H2"></td>
-                <td id="J6_H2"></td>
-
-            </tr>
-
-            <tr>
-                <th>D2</th>
-
-                <td id="J1_D2"></td>
-                <td id="J2_D2"></td>
-                <td id="J3_D2"></td>
-                <td id="J4_D2"></td>
-                <td id="J5_D2"></td>
-                <td id="J6_D2"></td>
-
-            </tr>
-
-            <tr>
-                <th>D1</th>
-
-                <td id="J1_D1"></td>
-                <td id="J2_D1"></td>
-                <td id="J3_D1"></td>
-                <td id="J4_D1"></td>
-                <td id="J5_D1"></td>
-                <td id="J6_D1"></td>
-
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<script src="js/app.js"></script>
-
-
-
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-
-
+</script>
 
 </body>
-
 </html>
