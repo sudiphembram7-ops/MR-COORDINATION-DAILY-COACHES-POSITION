@@ -1,18 +1,99 @@
-.shop-card{
-    border:3px solid #000;
-    margin:15px;
+/* ===========================
+   MR CO-ORDINATION SYSTEM
+   LILUAH WORKSHOP
+=========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f2f5f8;
+    color:#222;
+}
+
+/* Header */
+.header{
+    background:#003366;
+    color:#fff;
+    padding:15px;
+    text-align:center;
+    border-bottom:4px solid #ffcc00;
+}
+
+.header h1{
+    font-size:30px;
+}
+
+.header h2{
+    font-size:18px;
+    margin-top:5px;
+}
+
+/* Navigation */
+.navbar{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    background:#004b8d;
+    padding:10px;
+}
+
+.navbar a{
+    color:#fff;
+    text-decoration:none;
+    padding:10px 18px;
+    border-radius:5px;
+    transition:.3s;
+}
+
+.navbar a:hover{
+    background:#ffcc00;
+    color:#000;
+}
+
+/* Dashboard Cards */
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    padding:20px;
+}
+
+.card{
     background:#fff;
+    border-radius:8px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+.card h3{
+    margin-bottom:10px;
+}
+
+/* Shop Cards */
+.shop-card{
+    background:#fff;
+    margin:15px;
+    border:2px solid #003366;
+    border-radius:8px;
+    overflow:hidden;
 }
 
 .shop-header{
     background:#003366;
     color:#fff;
-    font-size:22px;
-    font-weight:bold;
     text-align:center;
     padding:10px;
+    font-size:20px;
+    font-weight:bold;
 }
 
+/* Table */
 .coach-table{
     width:100%;
     border-collapse:collapse;
@@ -20,86 +101,96 @@
 
 .coach-table th,
 .coach-table td{
-    border:2px solid #000;
+    border:1px solid #000;
     text-align:center;
-    height:60px;
-    font-size:18px;
+    padding:8px;
+    min-width:80px;
+    height:55px;
 }
 
+.coach-table th{
+    background:#d9e8ff;
+}
+
+/* Editable Cell */
 .editable{
     cursor:pointer;
+    transition:.2s;
 }
 
 .editable:hover{
-    background:#fff8b3;
-
+    background:#dff6ff;
 }
 
-
-
-
-.login-box{
-
-width:350px;
-
-margin:100px auto;
-
-padding:25px;
-
-background:white;
-
-border-radius:10px;
-
-box-shadow:0 0 15px gray;
-
+/* Railway Status */
+.status-PO{
+    background:#28a745;
+    color:#fff;
 }
 
-.login-box input{
-
-width:100%;
-
-padding:12px;
-
-margin:10px 0;
-
+.status-LM{
+    background:#ffc107;
+    color:#000;
 }
 
-.login-box button{
-
-width:100%;
-
-padding:12px;
-
-background:#003366;
-
-color:white;
-
-border:none;
-
-font-size:18px;
-
+.status-MED{
+    background:#dc3545;
+    color:#fff;
 }
 
-
-
-
-
-.search-match{
-
-    border:4px solid red !important;
-
-    background:#ffff66 !important;
-
-    animation:blink 1s infinite;
-
+.status-RL{
+    background:#0d6efd;
+    color:#fff;
 }
 
-@keyframes blink{
+/* Buttons */
+.btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+}
 
-0%{opacity:1;}
+.btn-primary{
+    background:#003366;
+    color:#fff;
+}
 
-50%{opacity:.4;}
+.btn-success{
+    background:#28a745;
+    color:#fff;
+}
 
-100%{opacity:1;}
+.btn-danger{
+    background:#dc3545;
+    color:#fff;
+}
+
+/* Footer */
+.footer{
+    text-align:center;
+    padding:15px;
+    background:#003366;
+    color:#fff;
+    margin-top:20px;
+}
+
+/* Mobile */
+@media(max-width:768px){
+
+.navbar{
+    flex-direction:column;
+}
+
+.coach-table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+}
+
+.shop-card{
+    margin:8px;
+}
 
 }
