@@ -79,3 +79,27 @@ border:none;
 font-size:18px;
 
 }
+
+
+
+
+
+.search-match{
+
+    border:4px solid red !important;
+
+    background:#ffff66 !important;
+
+    animation:blink 1s infinite;
+
+}
+
+@keyframes blink{
+
+0%{opacity:1;}
+
+50%{opacity:.4;}
+
+100%{opacity:1;}
+
+}
