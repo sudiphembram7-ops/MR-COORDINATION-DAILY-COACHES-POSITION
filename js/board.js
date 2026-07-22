@@ -55,3 +55,20 @@ data[id].status;
 }
 
 );
+
+
+
+function updateCell(coach){
+
+    const cell = document.getElementById(coach.id);
+
+    if(!cell) return;
+
+    cell.className = "editable status-" + coach.status;
+
+    cell.innerHTML = `
+        <div class="coach-no">${coach.coachNo}</div>
+        <div class="coach-type">${coach.coachType}</div>
+        <div class="coach-status">${coach.status}</div>
+    `;
+}
