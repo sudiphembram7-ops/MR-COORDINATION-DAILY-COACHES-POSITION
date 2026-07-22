@@ -32,10 +32,14 @@ body{
 
 <div class="container">
 
+<div class="container">
+
 <div class="card">
 
-<div class="card-header">
-MR CO-ORDINATION DAILY COACHES POSITION
+<div class="card-header bg-primary text-white">
+
+<h3>MR CO-ORDINATION ADMIN PANEL</h3>
+
 </div>
 
 <div class="card-body">
@@ -43,47 +47,49 @@ MR CO-ORDINATION DAILY COACHES POSITION
 <div class="row">
 
 <div class="col-md-4">
+
 <label>Shop</label>
 
 <select id="shop" class="form-select">
-<option>N Shop</option>
-<option>M Shop</option>
-<option>MR SCR Shop</option>
-<option>CR Shop</option>
-<option>Lifting Bay</option>
-<option>J Shop</option>
+
+<option>N SHOP</option>
+
+<option>M SHOP</option>
+
+<option>MR SCR SHOP</option>
+
+<option>CR SHOP</option>
+
+<option>LIFTING BAY</option>
+
+<option>J SHOP</option>
+
 </select>
+
 </div>
 
 <div class="col-md-4">
+
 <label>Column</label>
 
-<select id="column" class="form-select">
+<select id="column" class="form-select"></select>
 
-<option>SCR9</option>
-<option>SCR10</option>
-<option>SCR11</option>
-<option>SCR12</option>
-<option>SCR13</option>
-<option>SCR14</option>
-<option>SCR15</option>
-<option>SCR16</option>
-<option>SCR18</option>
-<option>SCR19</option>
-<option>SCR21</option>
-<option>SCR22</option>
-
-</select>
 </div>
 
 <div class="col-md-4">
+
 <label>Position</label>
 
 <select id="position" class="form-select">
+
 <option>H1</option>
+
 <option>H2</option>
+
 <option>D2</option>
+
 <option>D1</option>
+
 </select>
 
 </div>
@@ -94,48 +100,49 @@ MR CO-ORDINATION DAILY COACHES POSITION
 
 <div class="row">
 
-<div class="col-md-6">
+<div class="col-md-4">
 
 <label>Coach Number</label>
 
 <input
 type="text"
 id="coachNo"
-class="form-control"
-placeholder="Enter Coach Number">
+class="form-control">
 
 </div>
 
-<div class="col-md-3">
+<div class="col-md-4">
 
 <label>Coach Type</label>
 
-<select
-id="coachType"
-class="form-select">
+<select id="coachType" class="form-select">
 
 <option>LHB AC</option>
+
 <option>LHB NAC</option>
+
 <option>GS</option>
+
 <option>SLR</option>
+
 <option>RCC</option>
-<option>NMG</option>
 
 </select>
 
 </div>
 
-<div class="col-md-3">
+<div class="col-md-4">
 
 <label>Status</label>
 
-<select
-id="status"
-class="form-select">
+<select id="status" class="form-select">
 
 <option>PO</option>
+
 <option>LM</option>
+
 <option>MED</option>
+
 <option>RL</option>
 
 </select>
@@ -143,6 +150,14 @@ class="form-select">
 </div>
 
 </div>
+
+<br>
+
+<label>Remarks</label>
+
+<textarea
+id="remarks"
+class="form-control"></textarea>
 
 <br>
 
@@ -155,14 +170,16 @@ onclick="saveCoach()">
 </button>
 
 <button
-class="btn btn-warning">
+class="btn btn-warning"
+onclick="updateCoach()">
 
 ✏ UPDATE
 
 </button>
 
 <button
-class="btn btn-danger">
+class="btn btn-danger"
+onclick="deleteCoach()">
 
 🗑 DELETE
 
@@ -210,5 +227,52 @@ alert("Coach Saved Successfully");
 
 </script>
 
+<script>
+const shopColumns={
+
+"N SHOP":[
+"N2","N5","N7","N8"
+],
+
+"M SHOP":[
+"M2","M3","M4","M5","M6"
+],
+
+"MR SCR SHOP":[
+"SCR9","SCR10","SCR11","SCR12",
+"SCR13","SCR14","SCR15","SCR16",
+"SCR18","SCR19","SCR21","SCR22"
+],
+
+"CR SHOP":[
+"F1","F2","F3","F4","F5",
+"F6","F7","F8","F9","F10","F11"
+],
+
+"LIFTING BAY":[
+"L9","L10"
+],
+
+"J SHOP":[
+"J1","J2","J3","J4","J5","J6"
+]
+
+};
+
+shop.onchange=function(){
+
+column.innerHTML="";
+
+shopColumns[this.value].forEach(function(c){
+
+column.innerHTML+=
+`<option>${c}</option>`;
+
+});
+
+};
+
+shop.dispatchEvent(new Event("change"));
+</script>
 </body>
 </html>
