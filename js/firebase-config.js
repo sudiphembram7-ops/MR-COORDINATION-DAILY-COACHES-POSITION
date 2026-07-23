@@ -2,20 +2,20 @@
 
 const firebaseConfig = {
 
-apiKey: "YOUR_API_KEY",
+apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
 
-authDomain: "YOUR_PROJECT.firebaseapp.com",
+authDomain: "mr-coordi-coach.firebaseapp.com",
 
-projectId: "YOUR_PROJECT_ID",
+projectId: "mr-coordi-coach",
 
 storageBucket:
-"YOUR_PROJECT.appspot.com",
+"mr-coordi-coach.firebasestorage.app",
 
 messagingSenderId:
-"YOUR_SENDER_ID",
+"955185707268",
 
 appId:
-"YOUR_APP_ID"
+"1:955185707268:web:31d017094ffc97da65f851"
 
 };
 
