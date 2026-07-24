@@ -462,3 +462,180 @@ setInterval(() => {
     updateLastTime();
 
 }, 30000);
+
+
+/* =====================================================
+   PDF EXPORT
+===================================================== */
+
+function downloadPDF() {
+
+    window.print();
+
+}
+
+const pdfBtn = document.getElementById("pdfBtn");
+
+if (pdfBtn) {
+
+    pdfBtn.addEventListener("click", downloadPDF);
+
+}
+
+/* =====================================================
+   EXCEL EXPORT
+===================================================== */
+
+function exportExcel() {
+
+    let csv = "";
+
+    document.querySelectorAll(".coach-table tr").forEach(row => {
+
+        let cols = [];
+
+        row.querySelectorAll("th,td").forEach(col => {
+
+            cols.push(col.innerText.replace(/\n/g, " "));
+
+        });
+
+        csv += cols.join(",") + "\n";
+
+    });
+
+    const blob = new Blob([csv], {
+
+        type: "text/csv"
+
+    });
+
+    const a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+
+    a.download = "MR_Coach_Position.csv";
+
+    a.click();
+
+}
+
+const excelBtn = document.getElementById("excelBtn");
+
+if (excelBtn) {
+
+    excelBtn.addEventListener("click", exportExcel);
+
+}
+
+/* =====================================================
+   AUTO REFRESH
+===================================================== */
+
+setInterval(() => {
+
+    startBoardListener();
+
+}, 30000);
+
+/* =====================================================
+   TV MODE
+===================================================== */
+
+function enableTVMode() {
+
+    document.body.classList.add("tv-mode");
+
+}
+
+if (window.innerWidth >= 1920) {
+
+    enableTVMode();
+
+}
+
+/* =====================================================
+   LIVE COUNTERS
+===================================================== */
+
+function updateCounters() {
+
+    const total = document.querySelectorAll(".coach-table td").length;
+
+    let occupied = 0;
+
+    document.querySelectorAll(".coach-table td").forEach(td => {
+
+        if (td.innerText.trim() !== "") {
+
+            occupied++;
+
+        }
+
+    });
+
+    const totalEl = document.getElementById("totalCoach");
+
+    const occEl = document.getElementById("occupiedCoach");
+
+    const freeEl = document.getElementById("freeCoach");
+
+    if (totalEl) totalEl.innerText = total;
+
+    if (occEl) occEl.innerText = occupied;
+
+    if (freeEl) freeEl.innerText = total - occupied;
+
+}
+
+setInterval(updateCounters, 5000);
+
+/* =====================================================
+   KEYBOARD SHORTCUTS
+===================================================== */
+
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === "F11") {
+
+        e.preventDefault();
+
+        if (!document.fullscreenElement) {
+
+            document.documentElement.requestFullscreen();
+
+        } else {
+
+            document.exitFullscreen();
+
+        }
+
+    }
+
+    if (e.ctrlKey && e.key === "f") {
+
+        e.preventDefault();
+
+        document.getElementById("searchBox")?.focus();
+
+    }
+
+});
+
+/* =====================================================
+   SYSTEM START
+===================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    startClock();
+
+    networkStatus();
+
+    startBoardListener();
+
+    updateCounters();
+
+    console.log("MR Coach Coordination Board Started");
+
+});
