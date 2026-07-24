@@ -1,251 +1,169 @@
-/* ==========================================
-   MR COACH COORDINATION SYSTEM
-   Firebase Live Board Controller
-========================================== */
+/* =====================================================
+   firebase-board.js
+   Live Board Sync
+===================================================== */
 
+import { database } from "./firebase-config.js";
 
-const boardShops = [
+import {
+    ref,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-"N SHOP",
-"M SHOP",
-"SCR SHOP",
-"CR SHOP",
-"LIFTING BAY",
-"J SHOP"
+/* =====================================================
+   START LIVE BOARD
+===================================================== */
 
-];
+function startLiveBoard() {
 
+    const boardRef = ref(database, "coachBoard");
 
+    onValue(boardRef, (snapshot) => {
 
-function loadFirebaseBoard(){
+        if (!snapshot.exists()) {
 
+            console.log("No coach data available.");
 
+            clearBoard();
 
-db.collection("COACHES")
+            return;
+        }
 
-.onSnapshot(snapshot=>{
+        loadBoard(snapshot.val());
 
+    }, (error) => {
 
-let coaches=[];
+        console.error("Firebase Error:", error);
 
+        updateConnection(false);
 
-
-snapshot.forEach(doc=>{
-
-
-let data = doc.data();
-
-data.id = doc.id;
-
-coaches.push(data);
-
-
-});
-
-
-
-displayFirebaseBoard(coaches);
-
-
-
-});
-
+    });
 
 }
 
+/* =====================================================
+   LOAD BOARD
+===================================================== */
 
+function loadBoard(board) {
 
+    clearBoard();
 
+    Object.keys(board).forEach(line => {
 
+        Object.keys(board[line]).forEach(position => {
 
+            const coach = board[line][position];
 
-function displayFirebaseBoard(coaches){
+            const cellId = `${line}_${position}`;
 
+            const cell = document.getElementById(cellId);
 
+            if (!cell) return;
 
-let board =
-document.getElementById("board");
+            cell.innerHTML = `
+                <div class="coach-number">
+                    ${coach.coachNo ?? "-"}
+                </div>
 
+                <div class="coach-status">
+                    ${coach.status ?? ""}
+                </div>
+            `;
 
+            cell.className = "";
 
-if(!board)
-return;
+            cell.classList.add(getStatusClass(coach.status));
 
+        });
 
+    });
 
-board.innerHTML="";
-
-
-
-
-boardShops.forEach(function(shop){
-
-
-
-let shopCoach =
-coaches.filter(
-
-coach=>coach.shop===shop
-
-);
-
-
-
-
-let html = `
-
-
-<div class="shop-board">
-
-
-<h2>
-${shop}
-</h2>
-
-
-<table>
-
-
-<tr>
-
-<th>
-Coach No
-</th>
-
-<th>
-Status
-</th>
-
-<th>
-SSE
-</th>
-
-<th>
-Remarks
-</th>
-
-
-</tr>
-
-
-`;
-
-
-
-
-if(shopCoach.length===0){
-
-
-
-html += `
-
-<tr>
-
-<td colspan="4">
-NO COACH AVAILABLE
-</td>
-
-</tr>
-
-`;
-
-
+    updateConnection(true);
 
 }
 
-else{
+/* =====================================================
+   STATUS COLOR
+===================================================== */
 
+function getStatusClass(status) {
 
+    switch (status) {
 
-shopCoach.forEach(function(coach){
+        case "PO":
+            return "status-po";
 
+        case "LM":
+            return "status-lm";
 
+        case "MED":
+            return "status-med";
 
-let status =
-coach.status.toUpperCase();
+        case "RL":
+            return "status-rl";
 
+        case "WIP":
+            return "status-wip";
 
+        case "HOLD":
+            return "status-hold";
 
-html += `
-
-
-<tr>
-
-
-<td>
-${coach.coachNo}
-</td>
-
-
-<td class="${status}">
-${status}
-</td>
-
-
-<td>
-${coach.sse || "-"}
-</td>
-
-
-<td>
-${coach.remarks || "-"}
-</td>
-
-
-</tr>
-
-
-`;
-
-
-
-});
-
+        default:
+            return "";
+    }
 
 }
 
+/* =====================================================
+   CLEAR BOARD
+===================================================== */
 
+function clearBoard() {
 
+    document.querySelectorAll(".coach-table td")
 
+        .forEach(td => {
 
-html += `
+            td.innerHTML = "";
 
-</table>
+            td.className = "";
 
-</div>
-
-`;
-
-
-
-board.innerHTML += html;
-
-
-
-});
-
-
+        });
 
 }
 
+/* =====================================================
+   CONNECTION STATUS
+===================================================== */
 
+function updateConnection(ok) {
 
+    const status =
+        document.getElementById("databaseStatus");
 
+    if (!status) return;
 
+    if (ok) {
 
+        status.innerHTML =
+            '<span class="text-success">● Connected</span>';
 
-// Start Live Board
+    } else {
 
-loadFirebaseBoard();
+        status.innerHTML =
+            '<span class="text-danger">● Offline</span>';
 
-createAuditLog({
+    }
 
-action:"Status Change",
+}
 
-coachNo:coach.coachNo,
+/* =====================================================
+   START
+===================================================== */
 
-oldStatus:oldStatus,
+document.addEventListener("DOMContentLoaded", () => {
 
-newStatus:newStatus
+    startLiveBoard();
 
 });
