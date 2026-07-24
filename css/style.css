@@ -194,3 +194,141 @@ body{
 }
 
 }
+
+/* ===========================================
+   MR CO-ORDINATION SYSTEM
+   Production UI v2.0
+=========================================== */
+:root{
+    --rail-blue:#003366;
+    --rail-red:#c62828;
+    --rail-green:#2e7d32;
+    --rail-yellow:#f9a825;
+    --rail-gray:#eceff1;
+    --card-radius:12px;
+    --shadow:0 4px 15px rgba(0,0,0,.15);
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    background:#f4f6f9;
+    font-family:Segoe UI,Arial,sans-serif;
+    color:#222;
+}
+/* HEADER */
+.header{
+    background:var(--rail-blue);
+    color:white;
+    padding:18px;
+    text-align:center;
+    box-shadow:var(--shadow);
+}
+.header h2{
+    font-weight:bold;
+}
+/* CARD */
+.card{
+    border:none;
+    border-radius:var(--card-radius);
+    box-shadow:var(--shadow);
+}
+/* BUTTON */
+.btn{
+    border-radius:8px;
+    font-weight:600;
+}
+/* TABLE */
+.coach-table{
+    background:white;
+}
+.coach-table th{
+    background:var(--rail-blue);
+    color:white;
+    text-align:center;
+}
+.coach-table td{
+    height:60px;
+    text-align:center;
+    vertical-align:middle;
+    font-weight:bold;
+    transition:.2s;
+}
+.coach-table td:hover{
+    background:#fff8dc;
+    cursor:pointer;
+}
+/* STATUS */
+.status-po{
+    background:#28a745;
+    color:white;
+}
+.status-lm{
+    background:#ffc107;
+    color:black;
+}
+.status-med{
+    background:#dc3545;
+    color:white;
+}
+.status-rl{
+    background:#0d6efd;
+    color:white;
+}
+.status-wip{
+    background:#17a2b8;
+    color:white;
+}
+.status-hold{
+    background:#6c757d;
+    color:white;
+}
+/* DASHBOARD CARD */
+.summary-card{
+    border-left:6px solid var(--rail-blue);
+}
+.summary-card h2{
+    font-size:32px;
+    font-weight:bold;
+}
+/* SEARCH */
+#searchBox{
+    border-radius:25px;
+}
+/* FOOTER */
+footer{
+    background:var(--rail-blue);
+    color:white;
+    padding:12px;
+    text-align:center;
+    margin-top:20px;
+}
+/* TV MODE */
+.tv-mode{
+    zoom:1.2;
+}
+/* MOBILE */
+@media(max-width:768px){
+    .coach-table{
+        font-size:12px;
+    }
+    .coach-table td{
+        height:42px;
+    }
+    .header h2{
+        font-size:20px;
+    }
+}
+/* PRINT */
+@media print{
+    .btn,
+    nav,
+    footer{
+        display:none;
+    }
+    body{
+        background:white;
+    }
+}
