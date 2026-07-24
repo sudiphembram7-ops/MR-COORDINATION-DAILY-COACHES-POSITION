@@ -574,3 +574,40 @@ if (exportBtn) {
     };
 
 }
+
+
+import {
+    saveCoach,
+    updateCoach,
+    deleteCoach,
+    getCoach,
+    listenBoard
+} from "./firebase-admin.js";
+
+
+await saveCoach({
+    shop,
+    line,
+    position,
+    coachNo,
+    status
+});
+
+
+await updateCoach({
+    shop,
+    line,
+    position,
+    coachNo,
+    status
+});
+
+await deleteCoach(line, position);
+
+listenBoard((data) => {
+
+    console.log(data);
+
+    // Update History Table
+    // Update Dashboard
+});
