@@ -1,202 +1,256 @@
-/* ==========================================
-   MR COORDINATION DAILY COACHES POSITION
-   Dashboard Controller
-========================================== */
+/* =====================================================
+   dashboard.js
+   MR CO-ORDINATION DASHBOARD
+===================================================== */
 
+import { database } from "./firebase-config.js";
 
-function loadDashboard(){
+import {
+    ref,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+/* =====================================================
+   START
+===================================================== */
 
-let coaches = JSON.parse(
+document.addEventListener("DOMContentLoaded", () => {
 
-localStorage.getItem("COACH_POSITION_DATA")
-
-) || [];
-
-
-
-// Status Counter
-
-let total = coaches.length;
-
-let ready = 0;
-let working = 0;
-let hold = 0;
-let complete = 0;
-
-
-
-coaches.forEach(function(coach){
-
-
-let status = coach.status.toUpperCase();
-
-
-
-if(status === "READY"){
-
-ready++;
-
-}
-
-else if(status === "WORKING"){
-
-working++;
-
-}
-
-else if(status === "HOLD"){
-
-hold++;
-
-}
-
-else if(status === "COMPLETE"){
-
-complete++;
-
-}
-
+    loadDashboard();
 
 });
 
+/* =====================================================
+   LOAD DASHBOARD
+===================================================== */
 
+function loadDashboard() {
 
-// Main Cards Update
+    const boardRef = ref(database, "coachBoard");
 
-document.getElementById("totalCoach").innerHTML = total;
+    onValue(boardRef, (snapshot) => {
 
-document.getElementById("readyCoach").innerHTML = ready;
+        if (!snapshot.exists()) {
 
-document.getElementById("workingCoach").innerHTML = working;
+            clearDashboard();
 
-document.getElementById("holdCoach").innerHTML = hold;
+            return;
 
-document.getElementById("completeCoach").innerHTML = complete;
+        }
 
+        updateDashboard(snapshot.val());
 
-
-
-
-// Shop Data
-
-let shops = [
-
-"N SHOP",
-"M SHOP",
-"SCR SHOP",
-"CR SHOP",
-"LIFTING BAY",
-"J SHOP"
-
-];
-
-
-
-shops.forEach(function(shop){
-
-
-let data = coaches.filter(
-
-coach => coach.shop === shop
-
-);
-
-
-
-let count = {
-
-total:data.length,
-
-READY:0,
-
-WORKING:0,
-
-HOLD:0,
-
-COMPLETE:0
-
-};
-
-
-
-data.forEach(function(item){
-
-
-let status = item.status.toUpperCase();
-
-
-if(count[status] !== undefined){
-
-count[status]++;
+    });
 
 }
 
+/* =====================================================
+   UPDATE DASHBOARD
+===================================================== */
+
+function updateDashboard(board) {
+
+    let total = 0;
+    let occupied = 0;
+
+    const shopCount = {
+        "N SHOP":0,
+        "M SHOP":0,
+        "SCR SHOP":0,
+        "CR SHOP":0,
+        "J SHOP":0,
+        "LIFTING BAY":0
+    };
+
+    const statusCount = {
+        PO:0,
+        LM:0,
+        MED:0,
+        RL:0,
+        WIP:0,
+        HOLD:0
+    };
+
+    const recent = [];
+
+    Object.keys(board).forEach(line=>{
+
+        Object.keys(board[line]).forEach(position=>{
+
+            total++;
+
+            const coach=board[line][position];
+
+            if(coach.coachNo){
+
+                occupied++;
+
+            }
+
+            if(shopCount[coach.shop]!=null){
+
+                shopCount[coach.shop]++;
+
+            }
+
+            if(statusCount[coach.status]!=null){
+
+                statusCount[coach.status]++;
+
+            }
+
+            recent.push({
+
+                time:coach.updatedAt,
+
+                shop:coach.shop,
+
+                line:line,
+
+                position:position,
+
+                coach:coach.coachNo,
+
+                status:coach.status
+
+            });
+
+        });
+
+    });
+
+    document.getElementById("totalPosition").innerText=total;
+
+    document.getElementById("occupiedPosition").innerText=occupied;
+
+    document.getElementById("freePosition").innerText=total-occupied;
+
+    document.getElementById("todayUpdate").innerText=recent.length;
+
+    document.getElementById("nCount").innerText=shopCount["N SHOP"];
+
+    document.getElementById("mCount").innerText=shopCount["M SHOP"];
+
+    document.getElementById("scrCount").innerText=shopCount["SCR SHOP"];
+
+    document.getElementById("crCount").innerText=shopCount["CR SHOP"];
+
+    document.getElementById("jCount").innerText=shopCount["J SHOP"];
+
+    document.getElementById("liftCount").innerText=shopCount["LIFTING BAY"];
+
+    document.getElementById("poCount").innerText=statusCount.PO;
+
+    document.getElementById("lmCount").innerText=statusCount.LM;
+
+    document.getElementById("medCount").innerText=statusCount.MED;
+
+    document.getElementById("rlCount").innerText=statusCount.RL;
+
+    document.getElementById("wipCount").innerText=statusCount.WIP;
+
+    document.getElementById("holdCount").innerText=statusCount.HOLD;
+
+    loadRecent(recent);
+
+}
+
+/* =====================================================
+   RECENT TABLE
+===================================================== */
+
+function loadRecent(list){
+
+    list.sort((a,b)=>new Date(b.time)-new Date(a.time));
+
+    const tbody=document.getElementById("recentTable");
+
+    tbody.innerHTML="";
+
+    list.slice(0,10).forEach(item=>{
+
+        tbody.innerHTML+=`
+
+        <tr>
+
+        <td>${item.time ?? ""}</td>
+
+        <td>${item.shop ?? ""}</td>
+
+        <td>${item.line}</td>
+
+        <td>${item.position}</td>
+
+        <td>${item.coach}</td>
+
+        <td>${item.status}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+/* =====================================================
+   CLEAR
+===================================================== */
+
+function clearDashboard(){
+
+    document.getElementById("totalPosition").innerText=0;
+
+    document.getElementById("occupiedPosition").innerText=0;
+
+    document.getElementById("freePosition").innerText=0;
+
+    document.getElementById("todayUpdate").innerText=0;
+
+    document.getElementById("recentTable").innerHTML="";
+
+}
+
+/* =====================================================
+   EXPORT CSV
+===================================================== */
+
+document.getElementById("exportCSV")?.addEventListener("click",()=>{
+
+    let csv="Time,Shop,Line,Position,Coach,Status\n";
+
+    document.querySelectorAll("#recentTable tr").forEach(row=>{
+
+        let cols=[];
+
+        row.querySelectorAll("td").forEach(td=>{
+
+            cols.push(td.innerText);
+
+        });
+
+        csv+=cols.join(",")+"\n";
+
+    });
+
+    const blob=new Blob([csv],{type:"text/csv"});
+
+    const a=document.createElement("a");
+
+    a.href=URL.createObjectURL(blob);
+
+    a.download="Dashboard_Report.csv";
+
+    a.click();
 
 });
 
+/* =====================================================
+   PRINT
+===================================================== */
 
+document.getElementById("printDashboard")?.addEventListener("click",()=>{
 
-
-// ID Prefix
-
-let prefix="";
-
-
-switch(shop){
-
-case "N SHOP":
-prefix="n";
-break;
-
-case "M SHOP":
-prefix="m";
-break;
-
-case "SCR SHOP":
-prefix="scr";
-break;
-
-case "CR SHOP":
-prefix="cr";
-break;
-
-case "LIFTING BAY":
-prefix="lift";
-break;
-
-case "J SHOP":
-prefix="j";
-break;
-
-}
-
-
-
-
-document.getElementById(prefix+"Total").innerHTML=count.total;
-
-document.getElementById(prefix+"Ready").innerHTML=count.READY;
-
-document.getElementById(prefix+"Working").innerHTML=count.WORKING;
-
-document.getElementById(prefix+"Hold").innerHTML=count.HOLD;
-
-document.getElementById(prefix+"Complete").innerHTML=count.COMPLETE;
-
-
+    window.print();
 
 });
-
-
-}
-
-
-
-// Load Dashboard
-
-window.onload=function(){
-
-loadDashboard();
-
-};
