@@ -1,28 +1,49 @@
-// Firebase Configuration
+/* =====================================================
+   firebase-config.js
+   Firebase v11 Configuration
+===================================================== */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+
+import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+/* =====================================================
+   YOUR FIREBASE CONFIG
+   Replace these values with your own project settings.
+===================================================== */
 
 const firebaseConfig = {
 
-apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
+    apiKey: "YOUR_API_KEY",
 
-authDomain: "mr-coordi-coach.firebaseapp.com",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
 
-projectId: "mr-coordi-coach",
+    databaseURL: "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-storageBucket:
-"mr-coordi-coach.firebasestorage.app",
+    projectId: "YOUR_PROJECT",
 
-messagingSenderId:
-"955185707268",
+    storageBucket: "YOUR_PROJECT.appspot.com",
 
-appId:
-"1:955185707268:web:31d017094ffc97da65f851"
+    messagingSenderId: "123456789012",
+
+    appId: "1:123456789012:web:xxxxxxxxxxxxxxxx"
 
 };
 
+/* =====================================================
+   INITIALIZE FIREBASE
+===================================================== */
 
-// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-firebase.initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
+const auth = getAuth(app);
 
-const db = firebase.firestore();
+/* =====================================================
+   EXPORT
+===================================================== */
+
+export { app, database, auth };
