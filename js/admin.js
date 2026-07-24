@@ -358,3 +358,219 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCoachData();
 
 });
+
+/* ==========================================
+   ADMIN AUTH CHECK
+========================================== */
+
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+const auth = getAuth();
+
+onAuthStateChanged(auth, (user) => {
+
+    if (!user) {
+
+        window.location.href = "login.html";
+        return;
+
+    }
+
+    const adminName = document.getElementById("adminName");
+
+    if (adminName) {
+
+        adminName.textContent =
+            user.email;
+
+    }
+
+});
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+
+    logoutBtn.onclick = async () => {
+
+        await signOut(auth);
+
+    };
+
+}
+
+/* ==========================================
+   AUDIT LOG
+========================================== */
+
+import {
+    push
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+async function writeAudit(action, coach) {
+
+    await push(
+
+        ref(database, "auditLog"),
+
+        {
+
+            action,
+
+            shop: coach.shop,
+
+            line: coach.line,
+
+            position: coach.position,
+
+            coachNo: coach.coachNo,
+
+            status: coach.status,
+
+            user: auth.currentUser?.email || "Unknown",
+
+            time: new Date().toISOString()
+
+        }
+
+    );
+
+}
+
+/* ==========================================
+   MODIFY SAVE FUNCTION
+========================================== */
+
+const oldSaveCoach = saveCoach;
+
+saveCoach = async function () {
+
+    await oldSaveCoach();
+
+    await writeAudit(
+        "SAVE",
+        getFormData()
+    );
+
+};
+
+/* ==========================================
+   MODIFY DELETE FUNCTION
+========================================== */
+
+const oldDeleteCoach = deleteCoach;
+
+deleteCoach = async function () {
+
+    await writeAudit(
+        "DELETE",
+        getFormData()
+    );
+
+    await oldDeleteCoach();
+
+};
+
+/* ==========================================
+   DASHBOARD COUNTERS
+========================================== */
+
+function updateDashboardStats() {
+
+    const rows =
+        document.querySelectorAll(
+            "#historyTable tr"
+        );
+
+    document.getElementById("totalEntry").textContent =
+        rows.length;
+
+    let po = 0;
+
+    let lm = 0;
+
+    let med = 0;
+
+    rows.forEach(r => {
+
+        const s = r.cells[4].innerText;
+
+        if (s === "PO") po++;
+
+        if (s === "LM") lm++;
+
+        if (s === "MED") med++;
+
+    });
+
+    document.getElementById("poCount").textContent = po;
+
+    document.getElementById("lmCount").textContent = lm;
+
+    document.getElementById("medCount").textContent = med;
+
+}
+
+setInterval(updateDashboardStats, 2000);
+
+/* ==========================================
+   EXPORT CSV
+========================================== */
+
+const exportBtn =
+    document.getElementById("exportHistory");
+
+if (exportBtn) {
+
+    exportBtn.onclick = () => {
+
+        let csv =
+            "Shop,Line,Position,Coach,Status,Time\n";
+
+        document
+            .querySelectorAll("#historyTable tr")
+
+            .forEach(row => {
+
+                let cols = [];
+
+                row.querySelectorAll("td")
+
+                    .forEach(td => {
+
+                        cols.push(
+                            td.innerText
+                        );
+
+                    });
+
+                csv += cols.join(",") + "\n";
+
+            });
+
+        const blob =
+            new Blob([csv]);
+
+        const a =
+            document.createElement("a");
+
+        a.href =
+            URL.createObjectURL(blob);
+
+        a.download =
+            "CoachHistory.csv";
+
+        a.click();
+
+    };
+
+}
