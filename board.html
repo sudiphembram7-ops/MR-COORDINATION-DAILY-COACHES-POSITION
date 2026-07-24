@@ -1,327 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR CO-ORDINATION DAILY COACHES POSITION</title>
 
-<title>MR Coach Coordination Daily Coaches Position</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#e9ecef;
-}
-
-/* Header */
-
-.header{
-    background:#003366;
-    color:#fff;
-    padding:15px;
-    text-align:center;
-    border-bottom:4px solid #ffc107;
-}
-
-.header h2{
-    margin:0;
-    font-weight:bold;
-}
-
-/* Toolbar */
-
-.toolbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
-    background:#ffffff;
-    padding:12px 20px;
-    box-shadow:0 2px 5px rgba(0,0,0,.2);
-}
-
-.left{
-    font-weight:bold;
-}
-
-.right button{
-    margin-left:6px;
-}
-
-/* Search */
-
-.search-bar{
-    padding:15px;
-    background:#f8f9fa;
-}
-
-.search-bar input{
-    width:100%;
-    padding:12px;
-    font-size:16px;
-    border:2px solid #003366;
-    border-radius:6px;
-}
-
-/* Shop Card */
-
-.shop{
-    margin:20px;
-    background:#fff;
-    border:3px solid #000;
-}
-
-.shop-title{
-    background:#003366;
-    color:white;
-    text-align:center;
-    padding:10px;
-    font-size:20px;
-    font-weight:bold;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-th,td{
-    border:2px solid #000;
-    padding:10px;
-    text-align:center;
-}
-
-th{
-    background:#d9d9d9;
-}
-
-.highlight{
-    background:yellow !important;
-}
-
-@media(max-width:768px){
-
-.toolbar{
-    flex-direction:column;
-    align-items:flex-start;
-}
-
-.right{
-    width:100%;
-}
-
-.right button{
-    width:100%;
-    margin:5px 0;
-}
-
-}
-
-</style>
-
+    <!-- JS -->
+    <script defer src="js/board.js"></script>
+    <script defer src="js/search.js"></script>
+    <script defer src="js/pdf.js"></script>
 </head>
 
 <body>
 
-<div class="header">
-<h2>MR CO-ORDINATION DAILY COACHES POSITION</h2>
+<header class="header bg-primary text-white p-3 text-center">
+    <h2>🇮🇳 INDIAN RAILWAYS</h2>
+    <h3>MR CO-ORDINATION DAILY COACHES POSITION</h3>
+    <h5>LILUAH WORKSHOP</h5>
+
+    <div class="d-flex justify-content-center gap-4 mt-2">
+        <span id="liveDate"></span>
+        <span id="liveTime"></span>
+        <span id="lastUpdate"></span>
+    </div>
+</header>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<div class="container-fluid">
+
+<a class="navbar-brand" href="#">MR BOARD</a>
+
+<button class="navbar-toggler"
+type="button"
+data-bs-toggle="collapse"
+data-bs-target="#menu">
+
+<span class="navbar-toggler-icon"></span>
+
+</button>
+
+<div class="collapse navbar-collapse"
+id="menu">
+
+<ul class="navbar-nav ms-auto">
+
+<li class="nav-item">
+<a class="nav-link" href="dashboard.html">Dashboard</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="admin.html">Admin</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="history.html">History</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="reports.html">Reports</a>
+</li>
+
+</ul>
+
 </div>
 
-<div class="toolbar">
-
-<div class="left">
-Date: <span id="date"></span> |
-Time: <span id="time"></span>
 </div>
-<div class="search-bar">
+</nav>
+
+<div class="container-fluid mt-3">
+
+<div class="row">
+
+<div class="col-md-5">
 
 <input
 type="text"
-id="searchBox"
 class="form-control"
-placeholder="🔍 Search Coach Number / Shop / Status..."
-onkeyup="searchCoach()">
+id="searchBox"
+placeholder="Search Coach Number">
 
 </div>
-<div class="right">
-    
 
-<button class="btn btn-success">Excel</button>
+<div class="col-md-7 text-end">
 
-<button class="btn btn-danger">PDF</button>
+<button class="btn btn-success">
+Excel
+</button>
 
-<button class="btn btn-primary" onclick="toggleFullscreen()">
+<button class="btn btn-danger">
+PDF
+</button>
+
+<button class="btn btn-primary">
+Refresh
+</button>
+
+<button class="btn btn-dark">
 Full Screen
 </button>
-<button onclick="logout()">
 
-Logout
-
-</button>
 </div>
 
 </div>
 
-<div class="search-bar">
-
-<input
-type="text"
-id="searchBox"
-placeholder="Search Coach Number...">
-
-</div>
-<div class="shop-card">
-
-    <div class="shop-header">
-        N SHOP
-    </div>
-
-    <table class="coach-table">
-
-        <thead>
-            <tr>
-                <th>Position</th>
-                <th>N2</th>
-                <th>N5</th>
-                <th>N7</th>
-                <th>N8</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <th>H1</th>
-
-                <td id="N2_H1" class="editable"></td>
-                <td id="N5_H1" class="editable"></td>
-                <td id="N7_H1" class="editable"></td>
-                <td id="N8_H1" class="editable"></td>
-
-            </tr>
-
-            <tr>
-
-                <th>H2</th>
-
-                <td id="N2_H2" class="editable"></td>
-                <td id="N5_H2" class="editable"></td>
-                <td id="N7_H2" class="editable"></td>
-                <td id="N8_H2" class="editable"></td>
-
-            </tr>
-
-            <tr>
-
-                <th>D2</th>
-
-                <td id="N2_D2" class="editable"></td>
-                <td id="N5_D2" class="editable"></td>
-                <td id="N7_D2" class="editable"></td>
-                <td id="N8_D2" class="editable"></td>
-
-            </tr>
-
-            <tr>
-
-                <th>D1</th>
-
-                <td id="N2_D1" class="editable"></td>
-                <td id="N5_D1" class="editable"></td>
-                <td id="N7_D1" class="editable"></td>
-                <td id="N8_D1" class="editable"></td>
-
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-<!-- ================= M SHOP ================= -->
+<hr>
 
 <div class="shop-card">
 
-    <div class="shop-header">
-        M SHOP
-    </div>
+<h3 class="shop-title">N SHOP</h3>
 
-    <table class="coach-table">
-
-        <thead>
-            <tr>
-                <th>Position</th>
-                <th>M2</th>
-                <th>M3</th>
-                <th>M4</th>
-                <th>M5</th>
-                <th>M6</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <th>H1</th>
-                <td id="M2_H1" class="editable"></td>
-                <td id="M3_H1" class="editable"></td>
-                <td id="M4_H1" class="editable"></td>
-                <td id="M5_H1" class="editable"></td>
-                <td id="M6_H1" class="editable"></td>
-            </tr>
-
-            <tr>
-                <th>H2</th>
-                <td id="M2_H2" class="editable"></td>
-                <td id="M3_H2" class="editable"></td>
-                <td id="M4_H2" class="editable"></td>
-                <td id="M5_H2" class="editable"></td>
-                <td id="M6_H2" class="editable"></td>
-            </tr>
-
-            <tr>
-                <th>D2</th>
-                <td id="M2_D2" class="editable"></td>
-                <td id="M3_D2" class="editable"></td>
-                <td id="M4_D2" class="editable"></td>
-                <td id="M5_D2" class="editable"></td>
-                <td id="M6_D2" class="editable"></td>
-            </tr>
-
-            <tr>
-                <th>D1</th>
-                <td id="M2_D1" class="editable"></td>
-                <td id="M3_D1" class="editable"></td>
-                <td id="M4_D1" class="editable"></td>
-                <td id="M5_D1" class="editable"></td>
-                <td id="M6_D1" class="editable"></td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-<!-- ================= MR SCR SHOP ================= -->
-
-<div class="shop-card">
-
-<div class="shop-header">
-MR SCR SHOP
-</div>
-
-<table class="coach-table">
+<table class="table table-bordered coach-table">
 
 <thead>
 
@@ -329,12 +124,15 @@ MR SCR SHOP
 
 <th>Position</th>
 
-<th>SCR9</th>
-<th>SCR10</th>
-<th>SCR11</th>
-<th>SCR12</th>
-<th>SCR13</th>
-<th>SCR14</th>
+<th>N2</th>
+
+<th>N3</th>
+
+<th>N5</th>
+
+<th>N7</th>
+
+<th>N8</th>
 
 </tr>
 
@@ -346,12 +144,11 @@ MR SCR SHOP
 
 <th>H1</th>
 
-<td id="SCR9_H1"></td>
-<td id="SCR10_H1"></td>
-<td id="SCR11_H1"></td>
-<td id="SCR12_H1"></td>
-<td id="SCR13_H1"></td>
-<td id="SCR14_H1"></td>
+<td id="N2_H1"></td>
+<td id="N3_H1"></td>
+<td id="N5_H1"></td>
+<td id="N7_H1"></td>
+<td id="N8_H1"></td>
 
 </tr>
 
@@ -359,12 +156,11 @@ MR SCR SHOP
 
 <th>H2</th>
 
-<td id="SCR9_H2"></td>
-<td id="SCR10_H2"></td>
-<td id="SCR11_H2"></td>
-<td id="SCR12_H2"></td>
-<td id="SCR13_H2"></td>
-<td id="SCR14_H2"></td>
+<td id="N2_H2"></td>
+<td id="N3_H2"></td>
+<td id="N5_H2"></td>
+<td id="N7_H2"></td>
+<td id="N8_H2"></td>
 
 </tr>
 
@@ -372,12 +168,11 @@ MR SCR SHOP
 
 <th>D2</th>
 
-<td id="SCR9_D2"></td>
-<td id="SCR10_D2"></td>
-<td id="SCR11_D2"></td>
-<td id="SCR12_D2"></td>
-<td id="SCR13_D2"></td>
-<td id="SCR14_D2"></td>
+<td id="N2_D2"></td>
+<td id="N3_D2"></td>
+<td id="N5_D2"></td>
+<td id="N7_D2"></td>
+<td id="N8_D2"></td>
 
 </tr>
 
@@ -385,12 +180,11 @@ MR SCR SHOP
 
 <th>D1</th>
 
-<td id="SCR9_D1"></td>
-<td id="SCR10_D1"></td>
-<td id="SCR11_D1"></td>
-<td id="SCR12_D1"></td>
-<td id="SCR13_D1"></td>
-<td id="SCR14_D1"></td>
+<td id="N2_D1"></td>
+<td id="N3_D1"></td>
+<td id="N5_D1"></td>
+<td id="N7_D1"></td>
+<td id="N8_D1"></td>
 
 </tr>
 
@@ -399,9 +193,12 @@ MR SCR SHOP
 </table>
 
 </div>
+
 <div class="shop-card">
 
-<table class="coach-table">
+<h3 class="shop-title">M SHOP</h3>
+
+<table class="table table-bordered coach-table">
 
 <thead>
 
@@ -409,12 +206,15 @@ MR SCR SHOP
 
 <th>Position</th>
 
-<th>SCR15</th>
-<th>SCR16</th>
-<th>SCR18</th>
-<th>SCR19</th>
-<th>SCR21</th>
-<th>SCR22</th>
+<th>M2</th>
+
+<th>M3</th>
+
+<th>M4</th>
+
+<th>M5</th>
+
+<th>M6</th>
 
 </tr>
 
@@ -426,12 +226,11 @@ MR SCR SHOP
 
 <th>H1</th>
 
-<td id="SCR15_H1"></td>
-<td id="SCR16_H1"></td>
-<td id="SCR18_H1"></td>
-<td id="SCR19_H1"></td>
-<td id="SCR21_H1"></td>
-<td id="SCR22_H1"></td>
+<td id="M2_H1"></td>
+<td id="M3_H1"></td>
+<td id="M4_H1"></td>
+<td id="M5_H1"></td>
+<td id="M6_H1"></td>
 
 </tr>
 
@@ -439,12 +238,11 @@ MR SCR SHOP
 
 <th>H2</th>
 
-<td id="SCR15_H2"></td>
-<td id="SCR16_H2"></td>
-<td id="SCR18_H2"></td>
-<td id="SCR19_H2"></td>
-<td id="SCR21_H2"></td>
-<td id="SCR22_H2"></td>
+<td id="M2_H2"></td>
+<td id="M3_H2"></td>
+<td id="M4_H2"></td>
+<td id="M5_H2"></td>
+<td id="M6_H2"></td>
 
 </tr>
 
@@ -452,12 +250,11 @@ MR SCR SHOP
 
 <th>D2</th>
 
-<td id="SCR15_D2"></td>
-<td id="SCR16_D2"></td>
-<td id="SCR18_D2"></td>
-<td id="SCR19_D2"></td>
-<td id="SCR21_D2"></td>
-<td id="SCR22_D2"></td>
+<td id="M2_D2"></td>
+<td id="M3_D2"></td>
+<td id="M4_D2"></td>
+<td id="M5_D2"></td>
+<td id="M6_D2"></td>
 
 </tr>
 
@@ -465,12 +262,11 @@ MR SCR SHOP
 
 <th>D1</th>
 
-<td id="SCR15_D1"></td>
-<td id="SCR16_D1"></td>
-<td id="SCR18_D1"></td>
-<td id="SCR19_D1"></td>
-<td id="SCR21_D1"></td>
-<td id="SCR22_D1"></td>
+<td id="M2_D1"></td>
+<td id="M3_D1"></td>
+<td id="M4_D1"></td>
+<td id="M5_D1"></td>
+<td id="M6_D1"></td>
 
 </tr>
 
@@ -479,15 +275,12 @@ MR SCR SHOP
 </table>
 
 </div>
-<!-- ================= CR SHOP ================= -->
 
 <div class="shop-card">
 
-<div class="shop-header">
-CR SHOP
-</div>
+<h3 class="shop-title">LIFTING BAY</h3>
 
-<table class="coach-table">
+<table class="table table-bordered coach-table">
 
 <thead>
 
@@ -495,17 +288,9 @@ CR SHOP
 
 <th>Position</th>
 
-<th>F1</th>
-<th>F2</th>
-<th>F3</th>
-<th>F4</th>
-<th>F5</th>
-<th>F6</th>
-<th>F7</th>
-<th>F8</th>
-<th>F9</th>
-<th>F10</th>
-<th>F11</th>
+<th>L9</th>
+
+<th>L10</th>
 
 </tr>
 
@@ -514,75 +299,27 @@ CR SHOP
 <tbody>
 
 <tr>
-
 <th>H1</th>
-
-<td id="F1_H1"></td>
-<td id="F2_H1"></td>
-<td id="F3_H1"></td>
-<td id="F4_H1"></td>
-<td id="F5_H1"></td>
-<td id="F6_H1"></td>
-<td id="F7_H1"></td>
-<td id="F8_H1"></td>
-<td id="F9_H1"></td>
-<td id="F10_H1"></td>
-<td id="F11_H1"></td>
-
+<td id="L9_H1"></td>
+<td id="L10_H1"></td>
 </tr>
 
 <tr>
-
 <th>H2</th>
-
-<td id="F1_H2"></td>
-<td id="F2_H2"></td>
-<td id="F3_H2"></td>
-<td id="F4_H2"></td>
-<td id="F5_H2"></td>
-<td id="F6_H2"></td>
-<td id="F7_H2"></td>
-<td id="F8_H2"></td>
-<td id="F9_H2"></td>
-<td id="F10_H2"></td>
-<td id="F11_H2"></td>
-
+<td id="L9_H2"></td>
+<td id="L10_H2"></td>
 </tr>
 
 <tr>
-
 <th>D2</th>
-
-<td id="F1_D2"></td>
-<td id="F2_D2"></td>
-<td id="F3_D2"></td>
-<td id="F4_D2"></td>
-<td id="F5_D2"></td>
-<td id="F6_D2"></td>
-<td id="F7_D2"></td>
-<td id="F8_D2"></td>
-<td id="F9_D2"></td>
-<td id="F10_D2"></td>
-<td id="F11_D2"></td>
-
+<td id="L9_D2"></td>
+<td id="L10_D2"></td>
 </tr>
 
 <tr>
-
 <th>D1</th>
-
-<td id="F1_D1"></td>
-<td id="F2_D1"></td>
-<td id="F3_D1"></td>
-<td id="F4_D1"></td>
-<td id="F5_D1"></td>
-<td id="F6_D1"></td>
-<td id="F7_D1"></td>
-<td id="F8_D1"></td>
-<td id="F9_D1"></td>
-<td id="F10_D1"></td>
-<td id="F11_D1"></td>
-
+<td id="L9_D1"></td>
+<td id="L10_D1"></td>
 </tr>
 
 </tbody>
@@ -590,268 +327,402 @@ CR SHOP
 </table>
 
 </div>
-<!-- ================= LIFTING BAY ================= -->
 
-<div class="shop-card">
+<!-- =========================
+     MR SCR SHOP
+========================== -->
 
-    <div class="shop-header">
-        LIFTING BAY
-    </div>
+<div class="shop-card mt-4">
 
-    <table class="coach-table">
+    <h3 class="shop-title text-center bg-warning p-2">
+        MR SCR SHOP
+    </h3>
 
-        <thead>
+    <div class="table-responsive">
+
+        <table class="table table-bordered text-center coach-table">
+
+            <thead class="table-dark">
 
             <tr>
-                <th>Position</th>
-                <th>L9</th>
-                <th>L10</th>
+
+                <th>POSITION</th>
+
+                <th>SCR9</th>
+                <th>SCR10</th>
+                <th>SCR11</th>
+                <th>SCR12</th>
+                <th>SCR13</th>
+                <th>SCR14</th>
+                <th>SCR15</th>
+                <th>SCR16</th>
+                <th>SCR18</th>
+                <th>SCR19</th>
+                <th>SCR21</th>
+                <th>SCR22</th>
+
             </tr>
 
-        </thead>
+            </thead>
 
-        <tbody>
+            <tbody>
+
+            <!-- H1 -->
 
             <tr>
+
                 <th>H1</th>
 
-                <td id="L9_H1" class="editable"></td>
-                <td id="L10_H1" class="editable"></td>
+                <td id="SCR9_H1"></td>
+                <td id="SCR10_H1"></td>
+                <td id="SCR11_H1"></td>
+                <td id="SCR12_H1"></td>
+                <td id="SCR13_H1"></td>
+                <td id="SCR14_H1"></td>
+                <td id="SCR15_H1"></td>
+                <td id="SCR16_H1"></td>
+                <td id="SCR18_H1"></td>
+                <td id="SCR19_H1"></td>
+                <td id="SCR21_H1"></td>
+                <td id="SCR22_H1"></td>
 
             </tr>
 
+            <!-- H2 -->
+
             <tr>
+
                 <th>H2</th>
 
-                <td id="L9_H2" class="editable"></td>
-                <td id="L10_H2" class="editable"></td>
+                <td id="SCR9_H2"></td>
+                <td id="SCR10_H2"></td>
+                <td id="SCR11_H2"></td>
+                <td id="SCR12_H2"></td>
+                <td id="SCR13_H2"></td>
+                <td id="SCR14_H2"></td>
+                <td id="SCR15_H2"></td>
+                <td id="SCR16_H2"></td>
+                <td id="SCR18_H2"></td>
+                <td id="SCR19_H2"></td>
+                <td id="SCR21_H2"></td>
+                <td id="SCR22_H2"></td>
 
             </tr>
 
+            <!-- D2 -->
+
             <tr>
+
                 <th>D2</th>
 
-                <td id="L9_D2" class="editable"></td>
-                <td id="L10_D2" class="editable"></td>
+                <td id="SCR9_D2"></td>
+                <td id="SCR10_D2"></td>
+                <td id="SCR11_D2"></td>
+                <td id="SCR12_D2"></td>
+                <td id="SCR13_D2"></td>
+                <td id="SCR14_D2"></td>
+                <td id="SCR15_D2"></td>
+                <td id="SCR16_D2"></td>
+                <td id="SCR18_D2"></td>
+                <td id="SCR19_D2"></td>
+                <td id="SCR21_D2"></td>
+                <td id="SCR22_D2"></td>
 
             </tr>
+
+            <!-- D1 -->
 
             <tr>
+
                 <th>D1</th>
 
-                <td id="L9_D1" class="editable"></td>
-                <td id="L10_D1" class="editable"></td>
+                <td id="SCR9_D1"></td>
+                <td id="SCR10_D1"></td>
+                <td id="SCR11_D1"></td>
+                <td id="SCR12_D1"></td>
+                <td id="SCR13_D1"></td>
+                <td id="SCR14_D1"></td>
+                <td id="SCR15_D1"></td>
+                <td id="SCR16_D1"></td>
+                <td id="SCR18_D1"></td>
+                <td id="SCR19_D1"></td>
+                <td id="SCR21_D1"></td>
+                <td id="SCR22_D1"></td>
 
             </tr>
 
-        </tbody>
+            </tbody>
 
-    </table>
+        </table>
+
+    </div>
 
 </div>
-<!-- ================= J SHOP ================= -->
 
-<div class="shop-card">
+<!-- ===================================
+     CR SHOP
+=================================== -->
 
-    <div class="shop-header">
+<div class="shop-card mt-4">
+
+    <h3 class="shop-title text-center bg-info text-white p-2">
+        CR SHOP
+    </h3>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered text-center coach-table">
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>POSITION</th>
+
+                    <th>F1</th>
+                    <th>F2</th>
+                    <th>F3</th>
+                    <th>F4</th>
+                    <th>F5</th>
+                    <th>F6</th>
+                    <th>F7</th>
+                    <th>F8</th>
+                    <th>F9</th>
+                    <th>F10</th>
+                    <th>F11</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <!-- H1 -->
+
+                <tr>
+
+                    <th>H1</th>
+
+                    <td id="F1_H1"></td>
+                    <td id="F2_H1"></td>
+                    <td id="F3_H1"></td>
+                    <td id="F4_H1"></td>
+                    <td id="F5_H1"></td>
+                    <td id="F6_H1"></td>
+                    <td id="F7_H1"></td>
+                    <td id="F8_H1"></td>
+                    <td id="F9_H1"></td>
+                    <td id="F10_H1"></td>
+                    <td id="F11_H1"></td>
+
+                </tr>
+
+                <!-- H2 -->
+
+                <tr>
+
+                    <th>H2</th>
+
+                    <td id="F1_H2"></td>
+                    <td id="F2_H2"></td>
+                    <td id="F3_H2"></td>
+                    <td id="F4_H2"></td>
+                    <td id="F5_H2"></td>
+                    <td id="F6_H2"></td>
+                    <td id="F7_H2"></td>
+                    <td id="F8_H2"></td>
+                    <td id="F9_H2"></td>
+                    <td id="F10_H2"></td>
+                    <td id="F11_H2"></td>
+
+                </tr>
+
+                <!-- D2 -->
+
+                <tr>
+
+                    <th>D2</th>
+
+                    <td id="F1_D2"></td>
+                    <td id="F2_D2"></td>
+                    <td id="F3_D2"></td>
+                    <td id="F4_D2"></td>
+                    <td id="F5_D2"></td>
+                    <td id="F6_D2"></td>
+                    <td id="F7_D2"></td>
+                    <td id="F8_D2"></td>
+                    <td id="F9_D2"></td>
+                    <td id="F10_D2"></td>
+                    <td id="F11_D2"></td>
+
+                </tr>
+
+                <!-- D1 -->
+
+                <tr>
+
+                    <th>D1</th>
+
+                    <td id="F1_D1"></td>
+                    <td id="F2_D1"></td>
+                    <td id="F3_D1"></td>
+                    <td id="F4_D1"></td>
+                    <td id="F5_D1"></td>
+                    <td id="F6_D1"></td>
+                    <td id="F7_D1"></td>
+                    <td id="F8_D1"></td>
+                    <td id="F9_D1"></td>
+                    <td id="F10_D1"></td>
+                    <td id="F11_D1"></td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- ===================================
+     J SHOP
+=================================== -->
+
+<div class="shop-card mt-4">
+
+    <h3 class="shop-title text-center bg-success text-white p-2">
         J SHOP
+    </h3>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered text-center coach-table">
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>POSITION</th>
+
+                    <th>J1</th>
+                    <th>J2</th>
+                    <th>J3</th>
+                    <th>J4</th>
+                    <th>J5</th>
+                    <th>J6</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <th>H1</th>
+                    <td id="J1_H1"></td>
+                    <td id="J2_H1"></td>
+                    <td id="J3_H1"></td>
+                    <td id="J4_H1"></td>
+                    <td id="J5_H1"></td>
+                    <td id="J6_H1"></td>
+                </tr>
+
+                <tr>
+                    <th>H2</th>
+                    <td id="J1_H2"></td>
+                    <td id="J2_H2"></td>
+                    <td id="J3_H2"></td>
+                    <td id="J4_H2"></td>
+                    <td id="J5_H2"></td>
+                    <td id="J6_H2"></td>
+                </tr>
+
+                <tr>
+                    <th>D2</th>
+                    <td id="J1_D2"></td>
+                    <td id="J2_D2"></td>
+                    <td id="J3_D2"></td>
+                    <td id="J4_D2"></td>
+                    <td id="J5_D2"></td>
+                    <td id="J6_D2"></td>
+                </tr>
+
+                <tr>
+                    <th>D1</th>
+                    <td id="J1_D1"></td>
+                    <td id="J2_D1"></td>
+                    <td id="J3_D1"></td>
+                    <td id="J4_D1"></td>
+                    <td id="J5_D1"></td>
+                    <td id="J6_D1"></td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
     </div>
-
-    <table class="coach-table">
-
-        <thead>
-
-            <tr>
-                <th>Position</th>
-
-                <th>J1</th>
-                <th>J2</th>
-                <th>J3</th>
-                <th>J4</th>
-                <th>J5</th>
-                <th>J6</th>
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <th>H1</th>
-
-                <td id="J1_H1"></td>
-                <td id="J2_H1"></td>
-                <td id="J3_H1"></td>
-                <td id="J4_H1"></td>
-                <td id="J5_H1"></td>
-                <td id="J6_H1"></td>
-
-            </tr>
-
-            <tr>
-                <th>H2</th>
-
-                <td id="J1_H2"></td>
-                <td id="J2_H2"></td>
-                <td id="J3_H2"></td>
-                <td id="J4_H2"></td>
-                <td id="J5_H2"></td>
-                <td id="J6_H2"></td>
-
-            </tr>
-
-            <tr>
-                <th>D2</th>
-
-                <td id="J1_D2"></td>
-                <td id="J2_D2"></td>
-                <td id="J3_D2"></td>
-                <td id="J4_D2"></td>
-                <td id="J5_D2"></td>
-                <td id="J6_D2"></td>
-
-            </tr>
-
-            <tr>
-                <th>D1</th>
-
-                <td id="J1_D1"></td>
-                <td id="J2_D1"></td>
-                <td id="J3_D1"></td>
-                <td id="J4_D1"></td>
-                <td id="J5_D1"></td>
-                <td id="J6_D1"></td>
-
-            </tr>
-
-        </tbody>
-
-    </table>
 
 </div>
 
+<!-- ===================================
+     STATUS LEGEND
+=================================== -->
 
+<div class="card mt-4">
 
-<script>
+    <div class="card-header bg-dark text-white">
+        Railway Status Legend
+    </div>
 
-function updateClock(){
+    <div class="card-body">
 
-const now=new Date();
+        <span class="badge bg-success">PO</span>
+        <span class="badge bg-warning text-dark">LM</span>
+        <span class="badge bg-danger">MED</span>
+        <span class="badge bg-primary">RL</span>
+        <span class="badge bg-secondary">HOLD</span>
+        <span class="badge bg-info text-dark">WIP</span>
 
-document.getElementById("date").innerHTML=
-now.toLocaleDateString("en-GB");
+    </div>
 
-document.getElementById("time").innerHTML=
-now.toLocaleTimeString();
+</div>
 
-}
+<!-- ===================================
+     FOOTER
+=================================== -->
 
-setInterval(updateClock,1000);
+<footer class="mt-4 bg-dark text-white p-3">
 
-updateClock();
+    <div class="row">
 
-function toggleFullscreen(){
+        <div class="col-md-4">
+            <strong>MR CO-ORDINATION</strong><br>
+            Liluah Workshop
+        </div>
 
-if(!document.fullscreenElement){
+        <div class="col-md-4 text-center">
+            Last Update :
+            <span id="lastUpdateTime">--</span>
+        </div>
 
-document.documentElement.requestFullscreen();
+        <div class="col-md-4 text-end">
+            Database :
+            <span class="text-success">
+                ● Connected
+            </span>
+        </div>
 
-}else{
+    </div>
 
-document.exitFullscreen();
+</footer>
 
-}
+</div>
 
-}
+<!-- Bootstrap -->
 
-</script>
-<script>
-
-import {
-
-getAuth,
-
-signInWithEmailAndPassword
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const auth=getAuth(app);
-
-function login(){
-
-signInWithEmailAndPassword(
-
-auth,
-
-email.value,
-
-password.value
-
-)
-
-.then(()=>{
-
-window.location="dashboard.html";
-
-})
-
-.catch((error)=>{
-
-alert(error.message);
-
-});
-
-}
-</script>
-<script>
-import{
-
-onAuthStateChanged
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-onAuthStateChanged(
-
-auth,
-
-(user)=>{
-
-if(!user){
-
-window.location="login.html";
-
-}
-
-});
-</script>
-<script>
-import{
-
-signOut
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-function logout(){
-
-signOut(auth);
-
-window.location="login.html";
-
-}
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
