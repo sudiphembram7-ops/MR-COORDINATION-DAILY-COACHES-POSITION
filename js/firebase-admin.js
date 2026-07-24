@@ -1,228 +1,94 @@
-/* ==========================================
-   MR COACH COORDINATION SYSTEM
-   Firebase Admin Controller
-========================================== */
+/* =====================================================
+   firebase-admin.js
+   MR Coach Coordination
+===================================================== */
 
+import { database } from "./firebase-config.js";
 
-// Add Coach
+import {
+    ref,
+    set,
+    get,
+    remove,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-function addCoachToFirebase(){
+/* =====================================================
+   SAVE COACH
+===================================================== */
 
+export async function saveCoach(data) {
 
-let coachData = {
+    const coachRef = ref(
+        database,
+        `coachBoard/${data.line}/${data.position}`
+    );
 
-coachNo:
-document.getElementById("coachNo").value,
-
-coachType:
-document.getElementById("coachType").value,
-
-shop:
-document.getElementById("shop").value,
-
-status:
-document.getElementById("status").value,
-
-priority:
-document.getElementById("priority").value,
-
-sse:
-document.getElementById("sse").value,
-
-releaseDate:
-document.getElementById("releaseDate").value,
-
-remarks:
-document.getElementById("remarks").value,
-
-updateTime:
-new Date()
-
-};
-
-
-
-// Save to Firestore
-
-db.collection("COACHES")
-
-.add(coachData)
-
-.then(()=>{
-
-
-alert(
-"Coach Saved Successfully"
-);
-
-
-resetForm();
-
-
-})
-
-.catch(error=>{
-
-
-console.log(error);
-
-
-alert(
-"Error Saving Data"
-);
-
-
-});
-
+    await set(coachRef, {
+        shop: data.shop,
+        coachNo: data.coachNo,
+        status: data.status,
+        updatedAt: new Date().toISOString()
+    });
 
 }
 
+/* =====================================================
+   UPDATE COACH
+===================================================== */
 
+export async function updateCoach(data) {
 
-
-
-
-// Load Coach Data
-
-
-function loadFirebaseCoach(){
-
-
-
-db.collection("COACHES")
-
-.orderBy("updateTime","desc")
-
-.onSnapshot(snapshot=>{
-
-
-let coaches=[];
-
-
-
-snapshot.forEach(doc=>{
-
-
-let data=doc.data();
-
-
-data.id=doc.id;
-
-
-coaches.push(data);
-
-
-});
-
-
-
-console.log(
-coaches
-);
-
-
-// এখানে Dashboard এবং Board Update হবে
-
-
-
-});
-
+    await saveCoach(data);
 
 }
 
+/* =====================================================
+   DELETE COACH
+===================================================== */
 
+export async function deleteCoach(line, position) {
 
-
-
-
-
-// Update Status
-
-
-function updateFirebaseStatus(id,status){
-
-
-
-db.collection("COACHES")
-
-.doc(id)
-
-.update({
-
-
-status:status,
-
-updateTime:new Date()
-
-
-})
-
-
-.then(()=>{
-
-
-console.log(
-"Status Updated"
-);
-
-
-});
-
+    await remove(
+        ref(database, `coachBoard/${line}/${position}`)
+    );
 
 }
 
+/* =====================================================
+   LOAD SINGLE COACH
+===================================================== */
 
+export async function getCoach(line, position) {
 
+    const snapshot = await get(
+        ref(database, `coachBoard/${line}/${position}`)
+    );
 
-
-
-
-
-// Delete Coach
-
-
-function deleteFirebaseCoach(id){
-
-
-
-let confirmDelete =
-confirm(
-"Delete Coach?"
-);
-
-
-
-if(!confirmDelete)
-return;
-
-
-
-db.collection("COACHES")
-
-.doc(id)
-
-.delete()
-
-.then(()=>{
-
-
-alert(
-"Coach Deleted"
-);
-
-
-});
-
+    return snapshot.exists() ? snapshot.val() : null;
 
 }
 
+/* =====================================================
+   LIVE HISTORY
+===================================================== */
 
+export function listenBoard(callback) {
 
+    const boardRef = ref(database, "coachBoard");
 
+    onValue(boardRef, (snapshot) => {
 
+        if (!snapshot.exists()) {
 
+            callback({});
 
-// Start Firebase Listener
+            return;
 
+        }
 
-loadFirebaseCoach();
+        callback(snapshot.val());
+
+    });
+
+}
