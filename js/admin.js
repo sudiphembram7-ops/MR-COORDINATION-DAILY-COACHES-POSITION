@@ -194,3 +194,167 @@ function addHistoryRow(data) {
         new Date().toLocaleString("en-IN");
 
 }
+
+/* ==========================================
+   LOAD BOARD DATA FROM FIREBASE
+========================================== */
+
+import {
+    ref,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+function loadCoachData() {
+
+    const boardRef = ref(database, "coachBoard");
+
+    onValue(boardRef, (snapshot) => {
+
+        if (!snapshot.exists()) return;
+
+        const data = snapshot.val();
+
+        renderHistory(data);
+
+    });
+
+}
+
+/* ==========================================
+   RENDER HISTORY TABLE
+========================================== */
+
+function renderHistory(data) {
+
+    const table = document.getElementById("historyTable");
+
+    table.innerHTML = "";
+
+    Object.keys(data).forEach(line => {
+
+        Object.keys(data[line]).forEach(position => {
+
+            const coach = data[line][position];
+
+            const row = table.insertRow();
+
+            row.innerHTML = `
+                <td>${coach.shop || "-"}</td>
+                <td>${line}</td>
+                <td>${position}</td>
+                <td>${coach.coachNo}</td>
+                <td>${coach.status}</td>
+                <td>${coach.updatedAt || "-"}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary"
+                        onclick="editCoach('${line}','${position}')">
+                        Edit
+                    </button>
+                </td>
+            `;
+        });
+
+    });
+
+}
+
+/* ==========================================
+   EDIT COACH
+========================================== */
+
+window.editCoach = function(line, position) {
+
+    get(ref(database, "coachBoard/" + line + "/" + position))
+
+    .then((snapshot) => {
+
+        if (!snapshot.exists()) return;
+
+        const coach = snapshot.val();
+
+        document.getElementById("shop").value = coach.shop;
+
+        document.getElementById("line").value = line;
+
+        document.getElementById("position").value = position;
+
+        document.getElementById("coachNo").value = coach.coachNo;
+
+        document.getElementById("status").value = coach.status;
+
+    });
+
+};
+
+/* ==========================================
+   SEARCH HISTORY
+========================================== */
+
+const searchBox = document.getElementById("searchCoach");
+
+if (searchBox) {
+
+    searchBox.addEventListener("keyup", function () {
+
+        const value = this.value.toUpperCase();
+
+        document.querySelectorAll("#historyTable tr")
+
+        .forEach(row => {
+
+            row.style.display = row.innerText
+                .toUpperCase()
+                .includes(value)
+                ? ""
+                : "none";
+
+        });
+
+    });
+
+}
+
+/* ==========================================
+   FILTER SHOP
+========================================== */
+
+const shopFilter = document.getElementById("shopFilter");
+
+if (shopFilter) {
+
+    shopFilter.addEventListener("change", function () {
+
+        const value = this.value.toUpperCase();
+
+        document.querySelectorAll("#historyTable tr")
+
+        .forEach(row => {
+
+            if (value === "ALL") {
+
+                row.style.display = "";
+
+                return;
+
+            }
+
+            row.style.display = row.cells[0].innerText
+                .toUpperCase() === value
+                ? ""
+                : "none";
+
+        });
+
+    });
+
+}
+
+/* ==========================================
+   START
+========================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    loadCoachData();
+
+});
