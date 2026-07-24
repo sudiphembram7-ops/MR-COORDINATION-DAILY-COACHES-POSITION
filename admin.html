@@ -1,44 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MR Coach Admin Panel</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<style>
-body{
-    background:#f4f4f4;
-}
-.container{
-    max-width:900px;
-    margin-top:30px;
-}
-.card{
-    border:2px solid #003366;
-}
-.card-header{
-    background:#003366;
-    color:white;
-    font-weight:bold;
-    font-size:22px;
-}
-</style>
+<title>MR Admin Panel</title>
+
+<link rel="stylesheet"
+href="css/style.css">
+
+<link rel="stylesheet"
+href="css/admin.css">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+rel="stylesheet">
 
 </head>
 
-<body>
+<body class="bg-light">
 
-<div class="container">
+<div class="container-fluid">
 
-<div class="container">
+<div class="row">
 
-<div class="card">
+<div class="col-12">
 
-<div class="card-header bg-primary text-white">
+<div class="card shadow mt-3">
 
-<h3>MR CO-ORDINATION ADMIN PANEL</h3>
+<div class="card-header bg-dark text-white">
+
+<h2 class="text-center">
+
+MR CO-ORDINATION ADMIN PANEL
+
+</h2>
 
 </div>
 
@@ -46,41 +45,96 @@ body{
 
 <div class="row">
 
-<div class="col-md-4">
+<div class="col-md-3">
 
 <label>Shop</label>
 
-<select id="shop" class="form-select">
+<select
+id="shop"
+class="form-select">
 
 <option>N SHOP</option>
 
 <option>M SHOP</option>
 
-<option>MR SCR SHOP</option>
+<option>SCR SHOP</option>
 
 <option>CR SHOP</option>
 
-<option>LIFTING BAY</option>
-
 <option>J SHOP</option>
+
+<option>LIFTING BAY</option>
 
 </select>
 
 </div>
 
-<div class="col-md-4">
+<div class="col-md-3">
 
-<label>Column</label>
+<label>Line</label>
 
-<select id="column" class="form-select"></select>
+<select
+id="line"
+class="form-select">
+
+<option>SCR9</option>
+<option>SCR10</option>
+<option>SCR11</option>
+<option>SCR12</option>
+<option>SCR13</option>
+<option>SCR14</option>
+<option>SCR15</option>
+<option>SCR16</option>
+<option>SCR18</option>
+<option>SCR19</option>
+<option>SCR21</option>
+<option>SCR22</option>
+
+<option>F1</option>
+<option>F2</option>
+<option>F3</option>
+<option>F4</option>
+<option>F5</option>
+<option>F6</option>
+<option>F7</option>
+<option>F8</option>
+<option>F9</option>
+<option>F10</option>
+<option>F11</option>
+
+<option>J1</option>
+<option>J2</option>
+<option>J3</option>
+<option>J4</option>
+<option>J5</option>
+<option>J6</option>
+
+<option>N2</option>
+<option>N3</option>
+<option>N5</option>
+<option>N7</option>
+<option>N8</option>
+
+<option>M2</option>
+<option>M3</option>
+<option>M4</option>
+<option>M5</option>
+<option>M6</option>
+
+<option>L9</option>
+<option>L10</option>
+
+</select>
 
 </div>
 
-<div class="col-md-4">
+<div class="col-md-2">
 
 <label>Position</label>
 
-<select id="position" class="form-select">
+<select
+id="position"
+class="form-select">
 
 <option>H1</option>
 
@@ -94,12 +148,6 @@ body{
 
 </div>
 
-</div>
-
-<br>
-
-<div class="row">
-
 <div class="col-md-4">
 
 <label>Coach Number</label>
@@ -107,35 +155,21 @@ body{
 <input
 type="text"
 id="coachNo"
-class="form-control">
+class="form-control"
+placeholder="Enter Coach Number">
 
 </div>
 
-<div class="col-md-4">
-
-<label>Coach Type</label>
-
-<select id="coachType" class="form-select">
-
-<option>LHB AC</option>
-
-<option>LHB NAC</option>
-
-<option>GS</option>
-
-<option>SLR</option>
-
-<option>RCC</option>
-
-</select>
-
 </div>
+<div class="row mt-3">
 
-<div class="col-md-4">
+<div class="col-md-3">
 
 <label>Status</label>
 
-<select id="status" class="form-select">
+<select
+id="status"
+class="form-select">
 
 <option>PO</option>
 
@@ -145,43 +179,45 @@ class="form-control">
 
 <option>RL</option>
 
+<option>WIP</option>
+
+<option>HOLD</option>
+
 </select>
 
 </div>
 
-</div>
-
-<br>
-
-<label>Remarks</label>
-
-<textarea
-id="remarks"
-class="form-control"></textarea>
-
-<br>
+<div class="col-md-9 text-end">
 
 <button
-class="btn btn-success"
-onclick="saveCoach()">
+id="saveBtn"
+class="btn btn-success">
 
-💾 SAVE
+SAVE
 
 </button>
 
 <button
-class="btn btn-warning"
-onclick="updateCoach()">
+id="updateBtn"
+class="btn btn-primary">
 
-✏ UPDATE
+UPDATE
 
 </button>
 
 <button
-class="btn btn-danger"
-onclick="deleteCoach()">
+id="deleteBtn"
+class="btn btn-danger">
 
-🗑 DELETE
+DELETE
+
+</button>
+
+<button
+onclick="location.href='board.html'"
+class="btn btn-dark">
+
+LIVE BOARD
 
 </button>
 
@@ -189,90 +225,58 @@ onclick="deleteCoach()">
 
 </div>
 
+<hr>
+
+<h4>
+
+Recent Coach Entry
+
+</h4>
+
+<table
+class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Shop</th>
+
+<th>Line</th>
+
+<th>Position</th>
+
+<th>Coach</th>
+
+<th>Status</th>
+
+<th>Time</th>
+
+</tr>
+
+</thead>
+
+<tbody
+id="historyTable">
+
+</tbody>
+
+</table>
+
 </div>
 
-<script>
+</div>
 
-function saveCoach(){
+</div>
 
-let coach={
+</div>
 
-shop:shop.value,
+</div>
 
-column:column.value,
+<script type="module" src="js/admin.js"></script>
 
-position:position.value,
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-coachNo:coachNo.value,
-
-coachType:coachType.value,
-
-status:status.value
-
-};
-
-let data=
-JSON.parse(localStorage.getItem("CoachDB"))||[];
-
-data.push(coach);
-
-localStorage.setItem(
-"CoachDB",
-JSON.stringify(data)
-);
-
-alert("Coach Saved Successfully");
-
-}
-
-</script>
-
-<script>
-const shopColumns={
-
-"N SHOP":[
-"N2","N5","N7","N8"
-],
-
-"M SHOP":[
-"M2","M3","M4","M5","M6"
-],
-
-"MR SCR SHOP":[
-"SCR9","SCR10","SCR11","SCR12",
-"SCR13","SCR14","SCR15","SCR16",
-"SCR18","SCR19","SCR21","SCR22"
-],
-
-"CR SHOP":[
-"F1","F2","F3","F4","F5",
-"F6","F7","F8","F9","F10","F11"
-],
-
-"LIFTING BAY":[
-"L9","L10"
-],
-
-"J SHOP":[
-"J1","J2","J3","J4","J5","J6"
-]
-
-};
-
-shop.onchange=function(){
-
-column.innerHTML="";
-
-shopColumns[this.value].forEach(function(c){
-
-column.innerHTML+=
-`<option>${c}</option>`;
-
-});
-
-};
-
-shop.dispatchEvent(new Event("change"));
-</script>
 </body>
+
 </html>
