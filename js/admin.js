@@ -611,6 +611,4 @@ listenBoard((data) => {
     // Update History Table
     // Update Dashboard
 });
-import { database } from "./firebase-config.js";
 
-import { auth } from "./firebase-config.js";
