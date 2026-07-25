@@ -4,7 +4,13 @@
 ========================================== */
 
 import { database } from "./firebase-config.js";
-
+import {
+    saveCoach,
+    updateCoach,
+    deleteCoach,
+    getCoach,
+    listenBoard
+} from "./firebase-admin.js";
 document.addEventListener("DOMContentLoaded", () => {
 
     document
