@@ -4,12 +4,12 @@
 ========================================== */
 
 import {
-    ref,
-    set,
-    get,
-    child,
-    remove
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    saveCoach,
+    updateCoach,
+    deleteCoach,
+    getCoach,
+    listenBoard
+} from "./firebase-admin.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -69,14 +69,13 @@ async function saveCoach() {
 
     try {
 
-        await set(
-
-            ref(database,
-                "coachBoard/" +
-                coach.line +
-                "/" +
-                coach.position
-            ),
+        await saveCoach({
+    shop,
+    line,
+    position,
+    coachNo,
+    status
+});
 
             {
 
@@ -116,7 +115,13 @@ async function saveCoach() {
 
 async function updateCoach() {
 
-    await saveCoach();
+    await updateCoach({
+    shop,
+    line,
+    position,
+    coachNo,
+    status
+});
 
 }
 
@@ -130,20 +135,7 @@ async function deleteCoach() {
 
     try {
 
-        await remove(
-
-            ref(
-
-                database,
-
-                "coachBoard/" +
-                coach.line +
-                "/" +
-                coach.position
-
-            )
-
-        );
+        await deleteCoach(line, position);
 
         alert("Deleted");
 
@@ -199,10 +191,6 @@ function addHistoryRow(data) {
    LOAD BOARD DATA FROM FIREBASE
 ========================================== */
 
-import {
-    ref,
-    onValue
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 function loadCoachData() {
 
@@ -363,11 +351,6 @@ document.addEventListener("DOMContentLoaded", () => {
    ADMIN AUTH CHECK
 ========================================== */
 
-import {
-    getAuth,
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 const auth = getAuth();
 
@@ -411,10 +394,6 @@ if (logoutBtn) {
 /* ==========================================
    AUDIT LOG
 ========================================== */
-
-import {
-    push
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 async function writeAudit(action, coach) {
 
