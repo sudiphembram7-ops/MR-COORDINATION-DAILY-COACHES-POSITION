@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+(<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -90,21 +90,23 @@ placeholder="Search Coach Number">
 
 <div class="col-md-7 text-end">
 
-<button class="btn btn-success">
-Excel
-</button>
+<button id="excelBtn" class="btn btn-success">Excel</button>
 
-<button class="btn btn-danger">
-PDF
-</button>
+<button id="pdfBtn" class="btn btn-danger">PDF</button>
 
-<button class="btn btn-primary">
-Refresh
-</button>
+<button id="refreshBtn" class="btn btn-primary">Refresh</button>
 
-<button class="btn btn-dark">
-Full Screen
-</button>
+<button id="fullscreenBtn" class="btn btn-dark">Full Screen</button>
+
+<input id="searchBox" type="text" placeholder="Search Coach">
+
+<span id="databaseStatus"></span>
+
+<span id="totalCoach">0</span>
+
+<span id="occupiedCoach">0</span>
+
+<span id="freeCoach">0</span>
 
 </div>
 
