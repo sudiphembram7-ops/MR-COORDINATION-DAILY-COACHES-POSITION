@@ -4,12 +4,12 @@
 ========================================== */
 
 import {
-    saveCoach,
-    updateCoach,
-    deleteCoach,
-    getCoach,
-    listenBoard
-} from "./firebase-admin.js";
+    ref,
+    set,
+    get,
+    child,
+    remove
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -69,13 +69,14 @@ async function saveCoach() {
 
     try {
 
-        await saveCoach({
-    shop,
-    line,
-    position,
-    coachNo,
-    status
-});
+        await set(
+
+            ref(database,
+                "coachBoard/" +
+                coach.line +
+                "/" +
+                coach.position
+            ),
 
             {
 
@@ -115,13 +116,7 @@ async function saveCoach() {
 
 async function updateCoach() {
 
-    await updateCoach({
-    shop,
-    line,
-    position,
-    coachNo,
-    status
-});
+    await saveCoach();
 
 }
 
@@ -135,7 +130,20 @@ async function deleteCoach() {
 
     try {
 
-        await deleteCoach(line, position);
+        await remove(
+
+            ref(
+
+                database,
+
+                "coachBoard/" +
+                coach.line +
+                "/" +
+                coach.position
+
+            )
+
+        );
 
         alert("Deleted");
 
@@ -186,408 +194,3 @@ function addHistoryRow(data) {
         new Date().toLocaleString("en-IN");
 
 }
-
-/* ==========================================
-   LOAD BOARD DATA FROM FIREBASE
-========================================== */
-
-
-function loadCoachData() {
-
-    const boardRef = ref(database, "coachBoard");
-
-    onValue(boardRef, (snapshot) => {
-
-        if (!snapshot.exists()) return;
-
-        const data = snapshot.val();
-
-        renderHistory(data);
-
-    });
-
-}
-
-/* ==========================================
-   RENDER HISTORY TABLE
-========================================== */
-
-function renderHistory(data) {
-
-    const table = document.getElementById("historyTable");
-
-    table.innerHTML = "";
-
-    Object.keys(data).forEach(line => {
-
-        Object.keys(data[line]).forEach(position => {
-
-            const coach = data[line][position];
-
-            const row = table.insertRow();
-
-            row.innerHTML = `
-                <td>${coach.shop || "-"}</td>
-                <td>${line}</td>
-                <td>${position}</td>
-                <td>${coach.coachNo}</td>
-                <td>${coach.status}</td>
-                <td>${coach.updatedAt || "-"}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary"
-                        onclick="editCoach('${line}','${position}')">
-                        Edit
-                    </button>
-                </td>
-            `;
-        });
-
-    });
-
-}
-
-/* ==========================================
-   EDIT COACH
-========================================== */
-
-window.editCoach = function(line, position) {
-
-    get(ref(database, "coachBoard/" + line + "/" + position))
-
-    .then((snapshot) => {
-
-        if (!snapshot.exists()) return;
-
-        const coach = snapshot.val();
-
-        document.getElementById("shop").value = coach.shop;
-
-        document.getElementById("line").value = line;
-
-        document.getElementById("position").value = position;
-
-        document.getElementById("coachNo").value = coach.coachNo;
-
-        document.getElementById("status").value = coach.status;
-
-    });
-
-};
-
-/* ==========================================
-   SEARCH HISTORY
-========================================== */
-
-const searchBox = document.getElementById("searchCoach");
-
-if (searchBox) {
-
-    searchBox.addEventListener("keyup", function () {
-
-        const value = this.value.toUpperCase();
-
-        document.querySelectorAll("#historyTable tr")
-
-        .forEach(row => {
-
-            row.style.display = row.innerText
-                .toUpperCase()
-                .includes(value)
-                ? ""
-                : "none";
-
-        });
-
-    });
-
-}
-
-/* ==========================================
-   FILTER SHOP
-========================================== */
-
-const shopFilter = document.getElementById("shopFilter");
-
-if (shopFilter) {
-
-    shopFilter.addEventListener("change", function () {
-
-        const value = this.value.toUpperCase();
-
-        document.querySelectorAll("#historyTable tr")
-
-        .forEach(row => {
-
-            if (value === "ALL") {
-
-                row.style.display = "";
-
-                return;
-
-            }
-
-            row.style.display = row.cells[0].innerText
-                .toUpperCase() === value
-                ? ""
-                : "none";
-
-        });
-
-    });
-
-}
-
-/* ==========================================
-   START
-========================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    loadCoachData();
-
-});
-
-/* ==========================================
-   ADMIN AUTH CHECK
-========================================== */
-
-
-const auth = getAuth();
-
-onAuthStateChanged(auth, (user) => {
-
-    if (!user) {
-
-        window.location.href = "login.html";
-        return;
-
-    }
-
-    const adminName = document.getElementById("adminName");
-
-    if (adminName) {
-
-        adminName.textContent =
-            user.email;
-
-    }
-
-});
-
-/* ==========================================
-   LOGOUT
-========================================== */
-
-const logoutBtn =
-    document.getElementById("logoutBtn");
-
-if (logoutBtn) {
-
-    logoutBtn.onclick = async () => {
-
-        await signOut(auth);
-
-    };
-
-}
-
-/* ==========================================
-   AUDIT LOG
-========================================== */
-
-async function writeAudit(action, coach) {
-
-    await push(
-
-        ref(database, "auditLog"),
-
-        {
-
-            action,
-
-            shop: coach.shop,
-
-            line: coach.line,
-
-            position: coach.position,
-
-            coachNo: coach.coachNo,
-
-            status: coach.status,
-
-            user: auth.currentUser?.email || "Unknown",
-
-            time: new Date().toISOString()
-
-        }
-
-    );
-
-}
-
-/* ==========================================
-   MODIFY SAVE FUNCTION
-========================================== */
-
-const oldSaveCoach = saveCoach;
-
-saveCoach = async function () {
-
-    await oldSaveCoach();
-
-    await writeAudit(
-        "SAVE",
-        getFormData()
-    );
-
-};
-
-/* ==========================================
-   MODIFY DELETE FUNCTION
-========================================== */
-
-const oldDeleteCoach = deleteCoach;
-
-deleteCoach = async function () {
-
-    await writeAudit(
-        "DELETE",
-        getFormData()
-    );
-
-    await oldDeleteCoach();
-
-};
-
-/* ==========================================
-   DASHBOARD COUNTERS
-========================================== */
-
-function updateDashboardStats() {
-
-    const rows =
-        document.querySelectorAll(
-            "#historyTable tr"
-        );
-
-    document.getElementById("totalEntry").textContent =
-        rows.length;
-
-    let po = 0;
-
-    let lm = 0;
-
-    let med = 0;
-
-    rows.forEach(r => {
-
-        const s = r.cells[4].innerText;
-
-        if (s === "PO") po++;
-
-        if (s === "LM") lm++;
-
-        if (s === "MED") med++;
-
-    });
-
-    document.getElementById("poCount").textContent = po;
-
-    document.getElementById("lmCount").textContent = lm;
-
-    document.getElementById("medCount").textContent = med;
-
-}
-
-setInterval(updateDashboardStats, 2000);
-
-/* ==========================================
-   EXPORT CSV
-========================================== */
-
-const exportBtn =
-    document.getElementById("exportHistory");
-
-if (exportBtn) {
-
-    exportBtn.onclick = () => {
-
-        let csv =
-            "Shop,Line,Position,Coach,Status,Time\n";
-
-        document
-            .querySelectorAll("#historyTable tr")
-
-            .forEach(row => {
-
-                let cols = [];
-
-                row.querySelectorAll("td")
-
-                    .forEach(td => {
-
-                        cols.push(
-                            td.innerText
-                        );
-
-                    });
-
-                csv += cols.join(",") + "\n";
-
-            });
-
-        const blob =
-            new Blob([csv]);
-
-        const a =
-            document.createElement("a");
-
-        a.href =
-            URL.createObjectURL(blob);
-
-        a.download =
-            "CoachHistory.csv";
-
-        a.click();
-
-    };
-
-}
-
-
-import {
-    saveCoach,
-    updateCoach,
-    deleteCoach,
-    getCoach,
-    listenBoard
-} from "./firebase-admin.js";
-
-
-await saveCoach({
-    shop,
-    line,
-    position,
-    coachNo,
-    status
-});
-
-
-await updateCoach({
-    shop,
-    line,
-    position,
-    coachNo,
-    status
-});
-
-await deleteCoach(line, position);
-
-listenBoard((data) => {
-
-    console.log(data);
-
-    // Update History Table
-    // Update Dashboard
-});
-
