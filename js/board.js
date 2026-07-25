@@ -379,3 +379,281 @@ function updateCounters() {
     document.getElementById("freeCoach")?.textContent = total - occupied;
 
 }
+
+/* ==========================================
+   board.js
+   Production Version - Part 3
+========================================== */
+
+/* ==========================================
+   COACH HISTORY
+========================================== */
+
+const coachHistory = [];
+
+function addHistory(position, coachNo, status, coachType) {
+
+    coachHistory.unshift({
+
+        position,
+        coachNo,
+        status,
+        coachType,
+
+        time: new Date().toLocaleString("en-IN")
+
+    });
+
+    if (coachHistory.length > 300) {
+
+        coachHistory.pop();
+
+    }
+
+}
+
+/* ==========================================
+   CLICK DETAILS
+========================================== */
+
+document.addEventListener("click", (e) => {
+
+    const cell = e.target.closest(".coach-table td");
+
+    if (!cell) return;
+
+    if (!cell.dataset.position) return;
+
+    alert(
+
+`Position : ${cell.dataset.position}
+
+Coach No : ${cell.dataset.coach || "-"}
+
+Coach Type : ${cell.dataset.type || "-"}
+
+Status : ${cell.dataset.status || "-"}`
+
+    );
+
+});
+
+/* ==========================================
+   SAVE HISTORY
+========================================== */
+
+const oldUpdateCoachCell = updateCoachCell;
+
+updateCoachCell = function (
+
+    cellId,
+
+    coachNo,
+
+    status,
+
+    coachType
+
+) {
+
+    oldUpdateCoachCell(
+
+        cellId,
+
+        coachNo,
+
+        status,
+
+        coachType
+
+    );
+
+    addHistory(
+
+        cellId,
+
+        coachNo,
+
+        status,
+
+        coachType
+
+    );
+
+};
+
+/* ==========================================
+   PDF PRINT
+========================================== */
+
+function printBoard() {
+
+    window.print();
+
+}
+
+document
+
+.getElementById("pdfBtn")
+
+?.addEventListener(
+
+    "click",
+
+    printBoard
+
+);
+
+/* ==========================================
+   CSV EXPORT
+========================================== */
+
+function exportCSV() {
+
+    let csv = "";
+
+    document
+
+    .querySelectorAll(".coach-table tr")
+
+    .forEach(row => {
+
+        const cols = [];
+
+        row
+
+        .querySelectorAll("th,td")
+
+        .forEach(col => {
+
+            cols.push(
+
+                col.innerText
+
+                .replace(/\n/g," ")
+
+            );
+
+        });
+
+        csv += cols.join(",") + "\n";
+
+    });
+
+    const blob = new Blob(
+
+        [csv],
+
+        {
+
+            type:"text/csv"
+
+        }
+
+    );
+
+    const link =
+
+        document.createElement("a");
+
+    link.href =
+
+        URL.createObjectURL(blob);
+
+    link.download =
+
+        "MR_Coach_Position.csv";
+
+    link.click();
+
+}
+
+document
+
+.getElementById("excelBtn")
+
+?.addEventListener(
+
+    "click",
+
+    exportCSV
+
+);
+
+/* ==========================================
+   TV MODE
+========================================== */
+
+function enableTVMode() {
+
+    document.body.classList.add("tv-mode");
+
+}
+
+if (
+
+    window.innerWidth >= 1920
+
+) {
+
+    enableTVMode();
+
+}
+
+/* ==========================================
+   KEYBOARD SHORTCUT
+========================================== */
+
+document.addEventListener(
+
+    "keydown",
+
+    (e) => {
+
+        if (
+
+            e.ctrlKey &&
+
+            e.key.toLowerCase() === "f"
+
+        ) {
+
+            e.preventDefault();
+
+            document
+
+            .getElementById("searchBox")
+
+            ?.focus();
+
+        }
+
+        if (
+
+            e.key === "F11"
+
+        ) {
+
+            e.preventDefault();
+
+            if (
+
+                !document.fullscreenElement
+
+            ) {
+
+                document.documentElement
+
+                .requestFullscreen();
+
+            } else {
+
+                document.exitFullscreen();
+
+            }
+
+        }
+
+    }
+
+);
