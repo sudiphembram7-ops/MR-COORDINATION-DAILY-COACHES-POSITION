@@ -639,3 +639,5 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("MR Coach Coordination Board Started");
 
 });
+
+import { database } from "./firebase-config.js";
