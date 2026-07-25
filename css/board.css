@@ -1,0 +1,38 @@
+.status-po{
+    background:#28a745;
+    color:#fff;
+}
+
+.status-lm{
+    background:#ffc107;
+    color:#000;
+}
+
+.status-med{
+    background:#dc3545;
+    color:#fff;
+}
+
+.status-rl{
+    background:#0d6efd;
+    color:#fff;
+}
+
+.status-wip{
+    background:#17a2b8;
+    color:#fff;
+}
+
+.status-hold{
+    background:#6c757d;
+    color:#fff;
+}
+
+.coach-number{
+    font-weight:bold;
+    font-size:15px;
+}
+
+.coach-status{
+    font-size:11px;
+}
