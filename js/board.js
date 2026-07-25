@@ -245,3 +245,145 @@ document.addEventListener("DOMContentLoaded", () => {
     startBoardListener();
 
 });
+
+/* =====================================================
+   STATUS COLORS
+===================================================== */
+
+const STATUS_CLASS = {
+    "PO": "status-po",
+    "LM": "status-lm",
+    "MED": "status-med",
+    "RL": "status-rl",
+    "WIP": "status-wip",
+    "HOLD": "status-hold"
+};
+
+/* =====================================================
+   UPDATE COACH CELL
+===================================================== */
+
+function updateCoachCell(cellId, coachNo, status) {
+
+    const cell = document.getElementById(cellId);
+
+    if (!cell) return;
+
+    // Remove old status classes
+    Object.values(STATUS_CLASS).forEach(cls =>
+        cell.classList.remove(cls)
+    );
+
+    // Add new status class
+    if (STATUS_CLASS[status]) {
+        cell.classList.add(STATUS_CLASS[status]);
+    }
+
+    cell.innerHTML = `
+        <div class="coach-number">${coachNo || "-"}</div>
+        <div class="coach-status">${status || ""}</div>
+    `;
+
+    // Store data for popup
+    cell.dataset.coach = coachNo;
+    cell.dataset.status = status;
+    cell.dataset.position = cellId;
+
+    updateLastTime();
+}
+
+/* =====================================================
+   CLICK TO VIEW DETAILS
+===================================================== */
+
+document.addEventListener("click", function (e) {
+
+    const cell = e.target.closest(".coach-table td");
+
+    if (!cell) return;
+
+    alert(
+        "Position : " + cell.dataset.position +
+        "\nCoach : " + (cell.dataset.coach || "-") +
+        "\nStatus : " + (cell.dataset.status || "-")
+    );
+
+});
+
+/* =====================================================
+   HISTORY
+===================================================== */
+
+const coachHistory = [];
+
+function addHistory(position, coachNo, status) {
+
+    coachHistory.unshift({
+
+        position,
+        coachNo,
+        status,
+        time: new Date().toLocaleString("en-IN")
+
+    });
+
+    if (coachHistory.length > 200) {
+
+        coachHistory.pop();
+
+    }
+
+}
+
+/* =====================================================
+   SAVE HISTORY WHEN CELL UPDATED
+===================================================== */
+
+const oldUpdate = updateCoachCell;
+
+updateCoachCell = function (id, coachNo, status) {
+
+    oldUpdate(id, coachNo, status);
+
+    addHistory(id, coachNo, status);
+
+};
+
+/* =====================================================
+   ONLINE / OFFLINE
+===================================================== */
+
+function networkStatus() {
+
+    const db = document.getElementById("databaseStatus");
+
+    if (!db) return;
+
+    if (navigator.onLine) {
+
+        db.innerHTML =
+            '<span class="text-success">● Online</span>';
+
+    } else {
+
+        db.innerHTML =
+            '<span class="text-danger">● Offline</span>';
+
+    }
+
+}
+
+window.addEventListener("online", networkStatus);
+window.addEventListener("offline", networkStatus);
+
+networkStatus();
+
+/* =====================================================
+   AUTO REFRESH LAST UPDATE
+===================================================== */
+
+setInterval(() => {
+
+    updateLastTime();
+
+}, 30000);
