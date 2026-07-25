@@ -69,29 +69,13 @@ async function saveCoach() {
 
     try {
 
-        await set(
-
-            ref(database,
-                "coachBoard/" +
-                coach.line +
-                "/" +
-                coach.position
-            ),
-
-            {
-
-                coachNo: coach.coachNo,
-
-                status: coach.status,
-
-                shop: coach.shop,
-
-                updatedAt: coach.updatedAt
-
-            }
-
-        );
-
+        await saveCoach({
+    shop,
+    line,
+    position,
+    coachNo,
+    status
+});
         alert("Coach Saved Successfully");
 
         addHistoryRow(coach);
@@ -116,8 +100,13 @@ async function saveCoach() {
 
 async function updateCoach() {
 
-    await saveCoach();
-
+    await updateCoach({
+    shop,
+    line,
+    position,
+    coachNo,
+    status
+});
 }
 
 /* ==========================================
@@ -130,20 +119,7 @@ async function deleteCoach() {
 
     try {
 
-        await remove(
-
-            ref(
-
-                database,
-
-                "coachBoard/" +
-                coach.line +
-                "/" +
-                coach.position
-
-            )
-
-        );
+        await deleteCoach(line, position);
 
         alert("Deleted");
 
