@@ -6,7 +6,169 @@
 import { database } from "./firebase-config.js";
 
 import {
+    /* ==========================================
+   dashboard.js
+   MR CO-ORDINATION DASHBOARD
+========================================== */
+
+import { database } from "./firebase-config.js";
+
+import {
     ref,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+let shopChart = null;
+let statusChart = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    loadDashboard();
+
+});
+
+/* ==========================================
+   LOAD FIREBASE
+========================================== */
+
+function loadDashboard() {
+
+    const boardRef = ref(database, "coachBoard");
+
+    onValue(boardRef, (snapshot) => {
+
+        if (!snapshot.exists()) {
+
+            clearDashboard();
+            return;
+
+        }
+
+        updateDashboard(snapshot.val());
+
+    });
+
+}
+
+/* ==========================================
+   UPDATE DASHBOARD
+========================================== */
+
+function updateDashboard(data) {
+
+    // এখানে Shop Count
+    // এখানে Status Count
+    // এখানে Total Count
+    // এখানে Recent Updates
+
+    updateCards();
+
+    updateRecentTable();
+
+    updateCharts();
+
+}
+
+/* ==========================================
+   UPDATE SUMMARY CARDS
+========================================== */
+
+function updateCards() {
+
+    // Total
+    // Occupied
+    // Free
+
+}
+
+/* ==========================================
+   RECENT TABLE
+========================================== */
+
+function updateRecentTable() {
+
+    // সর্বশেষ ১০টি Update দেখাবে
+
+}
+
+/* ==========================================
+   SHOP BAR CHART
+========================================== */
+
+function updateCharts() {
+
+    if (shopChart) {
+
+        shopChart.destroy();
+
+    }
+
+    if (statusChart) {
+
+        statusChart.destroy();
+
+    }
+
+    shopChart = new Chart(
+        document.getElementById("shopChart"),
+        {
+            type: "bar",
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Coach Count",
+                    data: []
+                }]
+            }
+        }
+    );
+
+    statusChart = new Chart(
+        document.getElementById("statusChart"),
+        {
+            type: "pie",
+            data: {
+                labels: [],
+                datasets: [{
+                    data: []
+                }]
+            }
+        }
+    );
+
+}
+
+/* ==========================================
+   EXPORT CSV
+========================================== */
+
+document.getElementById("exportCSV")?.addEventListener("click", exportCSV);
+
+function exportCSV() {
+
+    // CSV Export
+
+}
+
+/* ==========================================
+   PRINT
+========================================== */
+
+document.getElementById("printDashboard")?.addEventListener("click", () => {
+
+    window.print();
+
+});
+
+/* ==========================================
+   CLEAR
+========================================== */
+
+function clearDashboard() {
+
+    document.getElementById("recentTable").innerHTML = "";
+
+}
     onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
