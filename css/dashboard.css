@@ -1,0 +1,230 @@
+/* ==========================================
+   dashboard.css
+   MR CO-ORDINATION DASHBOARD
+   Production Version 2.0
+========================================== */
+
+/* Dashboard Background */
+
+body{
+    background:#f5f7fa;
+    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+}
+
+/* Header */
+
+.dashboard-header{
+    background:#003366;
+    color:#fff;
+    padding:20px;
+    text-align:center;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+.dashboard-header h2{
+    margin:0;
+    font-weight:bold;
+}
+
+.dashboard-header p{
+    margin:5px 0 0;
+    font-size:15px;
+}
+
+/* Summary Cards */
+
+.summary-card{
+    border:none;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.12);
+    transition:.3s;
+    margin-bottom:20px;
+}
+
+.summary-card:hover{
+    transform:translateY(-5px);
+}
+
+.summary-card .card-body{
+    text-align:center;
+}
+
+.summary-card h5{
+    font-size:16px;
+    color:#666;
+}
+
+.summary-card h2{
+    font-size:34px;
+    font-weight:bold;
+    color:#003366;
+}
+
+/* Chart Cards */
+
+.chart-card{
+    border:none;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.12);
+    margin-bottom:20px;
+}
+
+.chart-card .card-header{
+    background:#003366;
+    color:#fff;
+    font-weight:bold;
+}
+
+/* Chart Size */
+
+canvas{
+    width:100% !important;
+    height:320px !important;
+}
+
+/* Table */
+
+.table{
+    background:#fff;
+}
+
+.table thead{
+    background:#003366;
+    color:#fff;
+}
+
+.table th,
+.table td{
+    text-align:center;
+    vertical-align:middle;
+}
+
+/* Status Badge */
+
+.status-po{
+    background:#28a745;
+    color:#fff;
+}
+
+.status-lm{
+    background:#ffc107;
+    color:#000;
+}
+
+.status-med{
+    background:#dc3545;
+    color:#fff;
+}
+
+.status-rl{
+    background:#0d6efd;
+    color:#fff;
+}
+
+.status-wip{
+    background:#17a2b8;
+    color:#fff;
+}
+
+.status-hold{
+    background:#6c757d;
+    color:#fff;
+}
+
+/* Buttons */
+
+.btn{
+    border-radius:8px;
+    font-weight:600;
+}
+
+/* Search */
+
+.search-box{
+    border-radius:30px;
+    padding:10px 15px;
+}
+
+/* Footer */
+
+.dashboard-footer{
+    margin-top:30px;
+    background:#003366;
+    color:#fff;
+    text-align:center;
+    padding:12px;
+    border-radius:10px;
+}
+
+/* TV Mode */
+
+@media screen and (min-width:1920px){
+
+    body{
+        zoom:1.2;
+    }
+
+    .summary-card h2{
+        font-size:42px;
+    }
+
+    canvas{
+        height:450px !important;
+    }
+
+}
+
+/* Tablet */
+
+@media(max-width:992px){
+
+    .summary-card{
+        margin-bottom:15px;
+    }
+
+}
+
+/* Mobile */
+
+@media(max-width:768px){
+
+    .dashboard-header h2{
+        font-size:22px;
+    }
+
+    .summary-card h2{
+        font-size:28px;
+    }
+
+    canvas{
+        height:250px !important;
+    }
+
+    .table{
+        font-size:12px;
+    }
+
+}
+
+/* Print */
+
+@media print{
+
+    .btn,
+    .search-box,
+    nav{
+        display:none;
+    }
+
+    body{
+        background:#fff;
+    }
+
+    .chart-card,
+    .summary-card{
+        box-shadow:none;
+    }
+
+}
