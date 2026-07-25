@@ -16,7 +16,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth
 
 const firebaseConfig = {
 
-    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",,
+    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
 
     authDomain: "mr-coordi-coach.firebaseapp.com",
 
