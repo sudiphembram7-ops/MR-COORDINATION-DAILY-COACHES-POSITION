@@ -3,25 +3,20 @@
    board.js
 ===================================================== */
 import { database } from "./firebase-config.js";
-document.addEventListener("DOMContentLoaded", () => {
 
+import {
+    ref,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+document.addEventListener("DOMContentLoaded", () => {
     startClock();
+    networkStatus();
+    startBoardListener();
     initButtons();
     initSearch();
-    startBoardListener();
-    
-    startClock();
-
-    networkStatus();
-
-    startBoardListener();
-
     updateCounters();
-
-    console.log("MR Coach Coordination Board Started");
-
 });
-
 /* =====================================================
    LIVE DATE & TIME
 ===================================================== */
