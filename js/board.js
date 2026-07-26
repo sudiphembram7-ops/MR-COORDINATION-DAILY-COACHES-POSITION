@@ -161,10 +161,7 @@ function updateCoachCell(id, coachNo, status) {
 ===================================================== */
 
 // Firebase v9+ modular SDK
-import {
-    ref,
-    onValue
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
 
 /* =====================================================
    START FIREBASE LISTENER
