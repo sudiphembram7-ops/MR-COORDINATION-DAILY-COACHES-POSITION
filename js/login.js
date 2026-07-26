@@ -11,7 +11,11 @@ async function login() {
     try {
         alert("2");
     } catch (e) {
-        alert("Error");
+        catch (error) {
+    console.log(error);
+    alert(error.code);
+    alert(error.message);
+}
     }
 }
 
