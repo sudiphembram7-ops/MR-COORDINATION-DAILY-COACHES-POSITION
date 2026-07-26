@@ -47,21 +47,13 @@ function getFormData() {
 ========================================== */
 
 async function saveCoach() {
+    console.log("SAVE CLICKED");
+
     const coach = getFormData();
 
-    if (!coach.coachNo) {
-        alert("Enter Coach Number");
-        return;
-    }
+    console.log(coach);
 
-    try {
-        await firebaseSaveCoach(coach);
-        alert("Coach Saved Successfully");
-        clearForm();
-    } catch (err) {
-        console.error(err);
-        alert("Save Failed");
-    }
+    ...
 }
 /* ==========================================
    UPDATE
