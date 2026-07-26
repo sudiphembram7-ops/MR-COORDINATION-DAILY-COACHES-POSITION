@@ -3,12 +3,12 @@
    admin.js
 ========================================== */
 
-import { database } from "./firebase-config.js";
+import { database } from "js/firebase-config.js";
 import {
     saveCoach as firebaseSaveCoach,
     updateCoach as firebaseUpdateCoach,
     deleteCoach as firebaseDeleteCoach
-} from "./firebase-admin.js";
+} from "js/firebase-admin.js";
 document.addEventListener("DOMContentLoaded", () => {
 
     document
