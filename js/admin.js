@@ -5,11 +5,9 @@
 
 import { database } from "./firebase-config.js";
 import {
-    saveCoach,
-    updateCoach,
-    deleteCoach,
-    getCoach,
-    listenBoard
+    saveCoach as firebaseSaveCoach,
+    updateCoach as firebaseUpdateCoach,
+    deleteCoach as firebaseDeleteCoach
 } from "./firebase-admin.js";
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -55,7 +53,7 @@ function getFormData() {
    SAVE
 ========================================== */
 
-async function saveCoach() {
+await firebaseSaveCoach(coach); {
 
     const coach = getFormData();
 
@@ -69,13 +67,9 @@ async function saveCoach() {
 
     try {
 
-        await saveCoach({
-    shop,
-    line,
-    position,
-    coachNo,
-    status
-});
+        const coach = getFormData();
+
+await firebaseSaveCoach(coach);
         alert("Coach Saved Successfully");
 
         addHistoryRow(coach);
@@ -100,13 +94,9 @@ async function saveCoach() {
 
 async function updateCoach() {
 
-    await updateCoach({
-    shop,
-    line,
-    position,
-    coachNo,
-    status
-});
+    const coach = getFormData();
+
+await firebaseUpdateCoach(coach);
 }
 
 /* ==========================================
