@@ -263,34 +263,6 @@ const STATUS_CLASS = {
    UPDATE COACH CELL
 ===================================================== */
 
-function updateCoachCell(cellId, coachNo, status) {
-
-    const cell = document.getElementById(cellId);
-
-    if (!cell) return;
-
-    // Remove old status classes
-    Object.values(STATUS_CLASS).forEach(cls =>
-        cell.classList.remove(cls)
-    );
-
-    // Add new status class
-    if (STATUS_CLASS[status]) {
-        cell.classList.add(STATUS_CLASS[status]);
-    }
-
-    cell.innerHTML = `
-        <div class="coach-number">${coachNo || "-"}</div>
-        <div class="coach-status">${status || ""}</div>
-    `;
-
-    // Store data for popup
-    cell.dataset.coach = coachNo;
-    cell.dataset.status = status;
-    cell.dataset.position = cellId;
-
-    updateLastTime();
-}
 
 /* =====================================================
    CLICK TO VIEW DETAILS
