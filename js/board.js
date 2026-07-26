@@ -2,11 +2,12 @@
    MR CO-ORDINATION DAILY COACHES POSITION
    board.js
 ===================================================== */
+import { database } from "./firebase-config.js";
+
 import {
     ref,
     onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
 document.addEventListener("DOMContentLoaded", () => {
     startClock();
     networkStatus();
