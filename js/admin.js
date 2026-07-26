@@ -311,22 +311,20 @@ if (shopFilter) {
    START
 ========================================== */
 
-function loadCoachData() {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const boardRef = ref(database, "coachBoard");
+    document.getElementById("saveBtn")
+        ?.addEventListener("click", saveCoach);
 
-    onValue(boardRef, (snapshot) => {
+    document.getElementById("updateBtn")
+        ?.addEventListener("click", updateCoach);
 
-        if (!snapshot.exists()) {
-            renderHistory({});
-            return;
-        }
+    document.getElementById("deleteBtn")
+        ?.addEventListener("click", deleteCoach);
 
-        renderHistory(snapshot.val());
+    loadCoachData();
 
-    });
-
-}
+});
 
 /* ==========================================
    ADMIN AUTH CHECK
@@ -417,18 +415,7 @@ async function writeAudit(action, coach) {
    MODIFY SAVE FUNCTION
 ========================================== */
 
-const
 
-saveCoach = async function () {
-
-    
-
-    await writeAudit(
-        "SAVE",
-        getFormData()
-    );
-
-};
 
 /* ==========================================
    MODIFY DELETE FUNCTION
@@ -458,7 +445,9 @@ function updateDashboardStats() {
 
     rows.forEach(r => {
 
-        const s = r.cells[4].innerText;
+        if (r.cells.length < 5) return;
+
+const s = r.cells[4].innerText;
 
         if (s === "PO") po++;
 
