@@ -8,6 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
     startClock();
     initButtons();
     initSearch();
+    startBoardListener();
+    
+    startClock();
+
+    networkStatus();
+
+    startBoardListener();
+
+    updateCounters();
+
+    console.log("MR Coach Coordination Board Started");
 
 });
 
@@ -240,11 +251,6 @@ function updateDatabaseStatus(ok) {
    START AFTER PAGE LOAD
 ===================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    startBoardListener();
-
-});
 
 /* =====================================================
    STATUS COLORS
@@ -520,17 +526,3 @@ document.addEventListener("keydown", (e) => {
 /* =====================================================
    SYSTEM START
 ===================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    startClock();
-
-    networkStatus();
-
-    startBoardListener();
-
-    updateCounters();
-
-    console.log("MR Coach Coordination Board Started");
-
-});
