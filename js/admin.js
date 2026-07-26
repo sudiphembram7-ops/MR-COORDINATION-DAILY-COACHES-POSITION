@@ -2,7 +2,7 @@
    MR CO-ORDINATION ADMIN PANEL
    admin.js
 ========================================== */
-
+console.log("admin.js loaded");
 import { database } from "./firebase-config.js";
 import {
     saveCoach as firebaseSaveCoach,
