@@ -85,7 +85,24 @@ async function updateCoach() {
 
     const coach = getFormData();
 
-await firebaseUpdateCoach(coach);
+    try {
+
+        await firebaseUpdateCoach(coach);
+
+        await writeAudit("UPDATE", coach);
+
+        alert("Coach Updated Successfully");
+
+        clearForm();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Update Failed");
+
+    }
+
 }
 
 /* ==========================================
@@ -417,18 +434,7 @@ saveCoach = async function () {
    MODIFY DELETE FUNCTION
 ========================================== */
 
-const oldDeleteCoach = deleteCoach;
 
-deleteCoach = async function () {
-
-    await writeAudit(
-        "DELETE",
-        getFormData()
-    );
-
-    await oldDeleteCoach();
-
-};
 
 /* ==========================================
    DASHBOARD COUNTERS
