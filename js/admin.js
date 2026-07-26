@@ -175,19 +175,22 @@ import {
    RENDER HISTORY TABLE
 ========================================== */
 
-function renderHistory(data) {
+Object.keys(data[line]).forEach(position => {
 
-    const table = document.getElementById("historyTable");
-    table.innerHTML = "";
+    const coach = data[line][position];
 
-    if (!data) return;
+    const row = table.insertRow();
 
-    Object.keys(data).forEach(line => {
-        Object.keys(data[line]).forEach(position => {
-            // existing code
-        });
-    });
-}
+    row.innerHTML = `
+        <td>${coach.shop}</td>
+        <td>${line}</td>
+        <td>${position}</td>
+        <td>${coach.coachNo}</td>
+        <td>${coach.status}</td>
+        <td>${coach.updatedAt}</td>
+    `;
+
+});
 
 /* ==========================================
    EDIT COACH
