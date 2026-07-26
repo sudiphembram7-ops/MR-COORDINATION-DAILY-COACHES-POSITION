@@ -7,8 +7,16 @@ import { database } from "./firebase-config.js";
 import {
     saveCoach as firebaseSaveCoach,
     updateCoach as firebaseUpdateCoach,
-    deleteCoach as firebaseDeleteCoach
+    deleteCoach as firebaseDeleteCoach,
+    listenBoard
 } from "./firebase-admin.js";
+
+function loadCoachData() {
+    listenBoard((data) => {
+        renderHistory(data);
+        updateDashboardStats();
+    });
+}
 
 /* ==========================================
    GET FORM DATA
