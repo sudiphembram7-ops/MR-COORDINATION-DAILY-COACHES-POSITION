@@ -91,16 +91,28 @@ await firebaseUpdateCoach(coach);
 /* ==========================================
    DELETE
 ========================================== */
+async function deleteCoach() {
 
-const coach = getFormData();
+    const coach = getFormData();
 
-await firebaseDeleteCoach(coach.line, coach.position);
+    try {
 
-await writeAudit("DELETE", coach);
+        await firebaseDeleteCoach(coach.line, coach.position);
 
-alert("Deleted");
+        await writeAudit("DELETE", coach);
 
-clearForm();
+        alert("Deleted Successfully");
+
+        clearForm();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Delete Failed");
+
+    }
+}
 /* ==========================================
    CLEAR FORM
 ========================================== */
@@ -144,24 +156,10 @@ function addHistoryRow(data) {
 
 import {
     ref,
-    onValue
+    onValue,
+    get,
+    push
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-function loadCoachData() {
-
-    const boardRef = ref(database, "coachBoard");
-
-    onValue(boardRef, (snapshot) => {
-
-        if (!snapshot.exists()) return;
-
-        const data = snapshot.val();
-
-        renderHistory(data);
-
-    });
-
-}
 
 /* ==========================================
    RENDER HISTORY TABLE
