@@ -11,9 +11,21 @@ async function login() {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
-    console.log(email, password);
+    console.log("Email:", email);
 
-    // ...
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Login Successful");
+        window.location.href = "admin.html";
+    } catch (error) {
+        console.error(error);
+        alert(error.code + "\n" + error.message);
+
+        const msg = document.getElementById("message");
+        if (msg) {
+            msg.textContent = error.message;
+        }
+    }
 }
 
 async function logout() {
