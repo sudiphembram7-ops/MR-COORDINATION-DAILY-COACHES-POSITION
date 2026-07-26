@@ -16,7 +16,7 @@ async function login() {
     alert(error.code);
     alert(error.message);
 }
-    }
+
 }
 
 async function logout() {
