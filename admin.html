@@ -276,6 +276,39 @@ id="historyTable">
 </div>
 
 <script type="module" src="js/admin.js"></script>
+<script>
+const shopLines = {
+    "N SHOP": ["N2", "N3", "N5", "N7", "N8"],
+    "M SHOP": ["M2", "M3", "M4", "M5", "M6"],
+    "SCR SHOP": ["SCR9", "SCR10", "SCR11", "SCR12", "SCR13", "SCR14", "SCR15", "SCR16", "SCR18", "SCR19", "SCR21", "SCR22"],
+    "CR SHOP": ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11"],
+    "J SHOP": ["J1", "J2", "J3", "J4", "J5", "J6"],
+    "LIFTING BAY": ["L9", "L10"]
+};
+
+const shopSelect = document.getElementById("shop");
+const lineSelect = document.getElementById("line");
+
+function loadLines() {
+    const shop = shopSelect.value;
+    lineSelect.innerHTML = "";
+
+    shopLines[shop].forEach(line => {
+        const option = document.createElement("option");
+        option.value = line;
+        option.textContent = line;
+        lineSelect.appendChild(option);
+    });
+
+    // Automatically select the first line
+    lineSelect.selectedIndex = 0;
+}
+
+shopSelect.addEventListener("change", loadLines);
+
+// Load default shop lines on page load
+loadLines();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
