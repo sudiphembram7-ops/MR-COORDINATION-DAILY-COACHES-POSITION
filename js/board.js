@@ -435,9 +435,7 @@ if (excelBtn) {
 
 setInterval(() => {
 
-    startBoardListener();
 
-}, 30000);
 
 /* =====================================================
    TV MODE
