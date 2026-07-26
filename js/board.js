@@ -2,8 +2,6 @@
    MR CO-ORDINATION DAILY COACHES POSITION
    board.js
 ===================================================== */
-import { database } from "./firebase-config.js";
-
 import {
     ref,
     onValue
@@ -135,18 +133,27 @@ function initSearch() {
 ===================================================== */
 
 function updateCoachCell(id, coachNo, status) {
-
     const cell = document.getElementById(id);
-
     if (!cell) return;
 
     cell.innerHTML = `
-        <div class="coach-no">${coachNo}</div>
-        <div class="coach-status">${status}</div>
+        <div class="coach-number">${coachNo || "-"}</div>
+        <div class="coach-status">${status || ""}</div>
     `;
 
-    updateLastTime();
+    cell.dataset.position = id;
+    cell.dataset.coach = coachNo || "";
+    cell.dataset.status = status || "";
 
+    Object.values(STATUS_CLASS).forEach(c =>
+        cell.classList.remove(c)
+    );
+
+    if (STATUS_CLASS[status]) {
+        cell.classList.add(STATUS_CLASS[status]);
+    }
+
+    updateLastTime();
 }
 /* =====================================================
    FIREBASE REALTIME BOARD LOADER
