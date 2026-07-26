@@ -168,23 +168,34 @@ import {
    RENDER HISTORY TABLE
 ========================================== */
 
-Object.keys(data[line]).forEach(position => {
+function renderHistory(data) {
 
-    const coach = data[line][position];
+    const table = document.getElementById("historyTable");
+    if (!table) return;
 
-    const row = table.insertRow();
+    table.innerHTML = "";
 
-    row.innerHTML = `
-        <td>${coach.shop}</td>
-        <td>${line}</td>
-        <td>${position}</td>
-        <td>${coach.coachNo}</td>
-        <td>${coach.status}</td>
-        <td>${coach.updatedAt}</td>
-    `;
+    Object.keys(data).forEach(line => {
 
-});
+        Object.keys(data[line]).forEach(position => {
 
+            const coach = data[line][position];
+
+            const row = table.insertRow();
+
+            row.innerHTML = `
+                <td>${coach.shop || ""}</td>
+                <td>${line}</td>
+                <td>${position}</td>
+                <td>${coach.coachNo || ""}</td>
+                <td>${coach.status || ""}</td>
+                <td>${coach.updatedAt || ""}</td>
+            `;
+        });
+
+    });
+
+}
 /* ==========================================
    EDIT COACH
 ========================================== */
