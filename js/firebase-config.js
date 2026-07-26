@@ -20,7 +20,7 @@ const firebaseConfig = {
 
     authDomain: "mr-coordi-coach.firebaseapp.com",
 
-    databaseURL: "https://mr-coordi-coach-default-rtdb.firebaseio.com/",
+    databaseURL: "https://mr-coordi-coach-default-rtdb.firebaseio.com",
 
     projectId: "mr-coordi-coach",
 
