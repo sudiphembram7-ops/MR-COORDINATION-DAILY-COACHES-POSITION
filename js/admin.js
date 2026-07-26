@@ -3,27 +3,12 @@
    admin.js
 ========================================== */
 
-import { database } from "js/firebase-config.js";
+import { database } from "./firebase-config.js";
 import {
     saveCoach as firebaseSaveCoach,
     updateCoach as firebaseUpdateCoach,
     deleteCoach as firebaseDeleteCoach
-} from "js/firebase-admin.js";
-document.addEventListener("DOMContentLoaded", () => {
-
-    document
-        .getElementById("saveBtn")
-        .addEventListener("click", saveCoach);
-
-    document
-        .getElementById("updateBtn")
-        .addEventListener("click", updateCoach);
-
-    document
-        .getElementById("deleteBtn")
-        .addEventListener("click", deleteCoach);
-
-});
+} from "./firebase-admin.js";
 
 /* ==========================================
    GET FORM DATA
