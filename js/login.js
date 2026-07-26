@@ -6,15 +6,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 async function login() {
+    alert("Login button clicked");
+
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "admin.html";
-    } catch (error) {
-        document.getElementById("message").textContent = error.message;
-    }
+    console.log(email, password);
+
+    // ...
 }
 
 async function logout() {
