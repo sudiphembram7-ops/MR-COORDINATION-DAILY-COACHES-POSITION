@@ -1,4 +1,4 @@
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 const auth = getAuth();
 
@@ -19,9 +19,21 @@ async function login() {
 
     }
 
-}}
+}
+
 // Logout
-function logout() {
-  sessionStorage.clear();
-  window.location.href = "login.html";
+async function logout() {
+
+    try {
+
+        await signOut(auth);
+
+        window.location.href = "login.html";
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
 }
