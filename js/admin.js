@@ -56,15 +56,8 @@ async function saveCoach() {
 
     try {
         await firebaseSaveCoach(coach);
-
-        await writeAudit("SAVE", coach);
-
         alert("Coach Saved Successfully");
-
-        addHistoryRow(coach);
-
         clearForm();
-
     } catch (err) {
         console.error(err);
         alert("Save Failed");
