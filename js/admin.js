@@ -294,11 +294,22 @@ if (shopFilter) {
    START
 ========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
+function loadCoachData() {
 
-    loadCoachData();
+    const boardRef = ref(database, "coachBoard");
 
-});
+    onValue(boardRef, (snapshot) => {
+
+        if (!snapshot.exists()) {
+            renderHistory({});
+            return;
+        }
+
+        renderHistory(snapshot.val());
+
+    });
+
+}
 
 /* ==========================================
    ADMIN AUTH CHECK
@@ -353,9 +364,7 @@ if (logoutBtn) {
    AUDIT LOG
 ========================================== */
 
-import {
-    push
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
 
 async function writeAudit(action, coach) {
 
@@ -391,11 +400,11 @@ async function writeAudit(action, coach) {
    MODIFY SAVE FUNCTION
 ========================================== */
 
-const oldSaveCoach = saveCoach;
+const
 
 saveCoach = async function () {
 
-    await oldSaveCoach();
+    
 
     await writeAudit(
         "SAVE",
