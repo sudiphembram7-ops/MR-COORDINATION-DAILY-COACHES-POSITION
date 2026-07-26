@@ -47,11 +47,19 @@ function getFormData() {
 ========================================== */
 
 async function saveCoach() {
-    console.log("SAVE CLICKED");
+
+    console.log(document.getElementById("coachNo"));
+
+    console.log(document.getElementById("coachNo").value);
 
     const coach = getFormData();
 
     console.log(coach);
+
+    if (!coach.coachNo) {
+        alert("Enter Coach Number");
+        return;
+    }
 
     ...
 }
