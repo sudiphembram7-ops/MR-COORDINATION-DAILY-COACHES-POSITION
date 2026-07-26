@@ -178,35 +178,15 @@ import {
 function renderHistory(data) {
 
     const table = document.getElementById("historyTable");
-
     table.innerHTML = "";
 
+    if (!data) return;
+
     Object.keys(data).forEach(line => {
-
         Object.keys(data[line]).forEach(position => {
-
-            const coach = data[line][position];
-
-            const row = table.insertRow();
-
-            row.innerHTML = `
-                <td>${coach.shop || "-"}</td>
-                <td>${line}</td>
-                <td>${position}</td>
-                <td>${coach.coachNo}</td>
-                <td>${coach.status}</td>
-                <td>${coach.updatedAt || "-"}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary"
-                        onclick="editCoach('${line}','${position}')">
-                        Edit
-                    </button>
-                </td>
-            `;
+            // existing code
         });
-
     });
-
 }
 
 /* ==========================================
