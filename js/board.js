@@ -2,7 +2,7 @@
    MR CO-ORDINATION DAILY COACHES POSITION
    board.js
 ===================================================== */
-import { database } from "js/firebase-config.js";
+import { database } from "./firebase-config.js";
 document.addEventListener("DOMContentLoaded", () => {
 
     startClock();
