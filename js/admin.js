@@ -311,20 +311,7 @@ if (shopFilter) {
    START
 ========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
 
-    document.getElementById("saveBtn")
-        ?.addEventListener("click", saveCoach);
-
-    document.getElementById("updateBtn")
-        ?.addEventListener("click", updateCoach);
-
-    document.getElementById("deleteBtn")
-        ?.addEventListener("click", deleteCoach);
-
-    loadCoachData();
-
-});
 
 /* ==========================================
    ADMIN AUTH CHECK
