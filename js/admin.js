@@ -53,41 +53,30 @@ function getFormData() {
    SAVE
 ========================================== */
 
-await firebaseSaveCoach(coach); {
-
+async function saveCoach() {
     const coach = getFormData();
 
     if (!coach.coachNo) {
-
         alert("Enter Coach Number");
-
         return;
-
     }
 
     try {
+        await firebaseSaveCoach(coach);
 
-        const coach = getFormData();
+        await writeAudit("SAVE", coach);
 
-await firebaseSaveCoach(coach);
         alert("Coach Saved Successfully");
 
         addHistoryRow(coach);
 
         clearForm();
 
-    }
-
-    catch (err) {
-
+    } catch (err) {
         console.error(err);
-
         alert("Save Failed");
-
     }
-
 }
-
 /* ==========================================
    UPDATE
 ========================================== */
