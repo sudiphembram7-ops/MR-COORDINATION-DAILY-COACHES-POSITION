@@ -489,7 +489,7 @@ function updateCounters() {
 
 }
 
-setInterval(updateCounters, 5000);
+
 
 /* =====================================================
    KEYBOARD SHORTCUTS
