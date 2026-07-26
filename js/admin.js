@@ -92,26 +92,15 @@ await firebaseUpdateCoach(coach);
    DELETE
 ========================================== */
 
-async function deleteCoach() {
+const coach = getFormData();
 
-    const coach = getFormData();
+await firebaseDeleteCoach(coach.line, coach.position);
 
-    try {
+await writeAudit("DELETE", coach);
 
-        await deleteCoach(line, position);
+alert("Deleted");
 
-        alert("Deleted");
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-    }
-
-}
-
+clearForm();
 /* ==========================================
    CLEAR FORM
 ========================================== */
