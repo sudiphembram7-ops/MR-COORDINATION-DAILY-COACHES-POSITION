@@ -24,15 +24,17 @@ function loadCoachData() {
 
 function getFormData() {
 
+    function getFormData() {
     return {
-    shop: document.getElementById("shop").value,
-    line: document.getElementById("line").value,
-    position: document.getElementById("position").value,
-    coachNo: document.getElementById("coachNo").value.trim(),
-    coachType: document.getElementById("coachType").value,
-    status: document.getElementById("status").value,
-    updatedAt: new Date().toISOString()
-};
+        shop: document.getElementById("shop").value,
+        line: document.getElementById("line").value,
+        position: document.getElementById("position").value,
+        coachNo: document.getElementById("coachNo").value.trim(),
+        coachType: document.getElementById("coachType").value,
+        status: document.getElementById("status").value,
+        updatedAt: new Date().toISOString()
+    };
+}
 /* ==========================================
    SAVE
 ========================================== */
