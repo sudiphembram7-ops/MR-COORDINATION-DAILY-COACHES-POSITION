@@ -23,8 +23,6 @@ function loadCoachData() {
 ========================================== */
 
 function getFormData() {
-
-    function getFormData() {
     return {
         shop: document.getElementById("shop").value,
         line: document.getElementById("line").value,
@@ -210,7 +208,7 @@ window.editCoach = function(line, position) {
         document.getElementById("position").value = position;
 
         document.getElementById("coachNo").value = coach.coachNo;
-
+document.getElementById("coachType").value = coach.coachType || "";
         document.getElementById("status").value = coach.status;
 
     });
