@@ -449,7 +449,8 @@ if (exportBtn) {
     exportBtn.onclick = () => {
 
         let csv =
-            "Shop,Line,Position,Coach,Status,Time\n";
+           let csv =
+"Shop,Line,Position,Coach,Coach Type,Status,Time\n";
 
         document
             .querySelectorAll("#historyTable tr")
