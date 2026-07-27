@@ -215,10 +215,11 @@ function loadBoardData(board) {
             const coach = positions[position];
 
             updateCoachCell(
-                line + "_" + position,
-                coach.coachNo,
-                coach.status
-            );
+    line + "_" + position,
+    coach.coachNo,
+    coach.coachType,
+    coach.status
+);
 
         });
 
@@ -271,12 +272,6 @@ const STATUS_CLASS = {
 /* =====================================================
    UPDATE COACH CELL
 ===================================================== */
-updateCoachCell(
-    line + "_" + position,
-    coach.coachNo,
-    coach.coachType,
-    coach.status
-);
 
 /* =====================================================
    CLICK TO VIEW DETAILS
