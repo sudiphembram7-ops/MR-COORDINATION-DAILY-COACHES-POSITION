@@ -417,7 +417,7 @@ function updateDashboardStats() {
 
         if (r.cells.length < 5) return;
 
-const s = r.cells[4].innerText;
+const s = r.cells[5].innerText;
 
         if (s === "PO") po++;
 
