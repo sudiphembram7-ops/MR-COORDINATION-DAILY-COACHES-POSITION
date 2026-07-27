@@ -40,21 +40,26 @@ function getFormData() {
 ========================================== */
 
 async function saveCoach() {
-
-    console.log(document.getElementById("coachNo"));
-
-    console.log(document.getElementById("coachNo").value);
-
     const coach = getFormData();
-
-    console.log(coach);
 
     if (!coach.coachNo) {
         alert("Enter Coach Number");
         return;
     }
 
-    ...
+    try {
+        await firebaseSaveCoach(coach);
+
+        await writeAudit("SAVE", coach);
+
+        alert("Coach Saved Successfully");
+
+        clearForm();
+
+    } catch (err) {
+        console.error(err);
+        alert("Save Failed");
+    }
 }
 /* ==========================================
    UPDATE
