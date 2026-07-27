@@ -133,13 +133,15 @@ function initSearch() {
    UPDATE CELL
 ===================================================== */
 
-function updateCoachCell(id, coachNo, status) {
+function updateCoachCell(id, coachNo, coachType, status) {
+
     const cell = document.getElementById(id);
+
     if (!cell) return;
 
     cell.innerHTML = `
-<div class="coach-no">${coach.coachNo}</div>
-<div class="coach-type">${coach.coachType || ""}
+        <div class="coach-no">${coachNo || ""}</div>
+        <div class="coach-type">${coachType || ""}</div>
         <div class="coach-status">${status || ""}</div>
     `;
 
@@ -269,7 +271,12 @@ const STATUS_CLASS = {
 /* =====================================================
    UPDATE COACH CELL
 ===================================================== */
-
+updateCoachCell(
+    line + "_" + position,
+    coach.coachNo,
+    coach.coachType,
+    coach.status
+);
 
 /* =====================================================
    CLICK TO VIEW DETAILS
@@ -320,13 +327,13 @@ function addHistory(position, coachNo, status) {
 
 const oldUpdate = updateCoachCell;
 
-updateCoachCell = function (id, coachNo, status) {
+updateCoachCell = function(id, coachNo, coachType, status){
 
-    oldUpdate(id, coachNo, status);
+    oldUpdate(id, coachNo, coachType, status);
 
     addHistory(id, coachNo, status);
 
-};
+}
 
 /* =====================================================
    ONLINE / OFFLINE
