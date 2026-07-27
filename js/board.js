@@ -146,12 +146,19 @@ function updateCoachCell(id, coachNo, coachType, status) {
     `;
 
     cell.dataset.position = id;
+    cell.dataset.type = coachType || "";
     cell.dataset.coach = coachNo || "";
     cell.dataset.status = status || "";
 
     Object.values(STATUS_CLASS).forEach(c =>
         cell.classList.remove(c)
     );
+    alert(
+    "Position : " + cell.dataset.position +
+    "\nCoach : " + (cell.dataset.coach || "-") +
+    "\nCoach Type : " + (cell.dataset.type || "-") +
+    "\nStatus : " + (cell.dataset.status || "-")
+);
 
     if (STATUS_CLASS[status]) {
         cell.classList.add(STATUS_CLASS[status]);
@@ -219,6 +226,8 @@ function loadBoardData(board) {
     coach.coachNo,
     coach.coachType,
     coach.status
+    
+    updateCounters();
 );
 
         });
