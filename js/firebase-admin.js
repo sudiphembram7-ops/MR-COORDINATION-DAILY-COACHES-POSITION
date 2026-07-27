@@ -24,12 +24,15 @@ export async function saveCoach(data) {
         `coachBoard/${data.line}/${data.position}`
     );
 
-    await set(coachRef, {
-        shop: data.shop,
-        coachNo: data.coachNo,
-        status: data.status,
-        updatedAt: new Date().toISOString()
-    });
+    await set(ref(database, ...), {
+    shop: coach.shop,
+    line: coach.line,
+    position: coach.position,
+    coachNo: coach.coachNo,
+    coachType: coach.coachType,
+    status: coach.status,
+    updatedAt: coach.updatedAt
+});
 
 }
 
