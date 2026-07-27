@@ -23,6 +23,7 @@ function loadCoachData() {
 ========================================== */
 
 function getFormData() {
+
     return {
         shop: document.getElementById("shop").value,
         line: document.getElementById("line").value,
@@ -32,6 +33,7 @@ function getFormData() {
         status: document.getElementById("status").value,
         updatedAt: new Date().toISOString()
     };
+
 }
 /* ==========================================
    SAVE
