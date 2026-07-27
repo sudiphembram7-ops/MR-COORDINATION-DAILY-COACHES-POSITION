@@ -153,12 +153,6 @@ function updateCoachCell(id, coachNo, coachType, status) {
     Object.values(STATUS_CLASS).forEach(c =>
         cell.classList.remove(c)
     );
-    alert(
-    "Position : " + cell.dataset.position +
-    "\nCoach : " + (cell.dataset.coach || "-") +
-    "\nCoach Type : " + (cell.dataset.type || "-") +
-    "\nStatus : " + (cell.dataset.status || "-")
-);
 
     if (STATUS_CLASS[status]) {
         cell.classList.add(STATUS_CLASS[status]);
@@ -222,17 +216,17 @@ function loadBoardData(board) {
             const coach = positions[position];
 
             updateCoachCell(
-    line + "_" + position,
-    coach.coachNo,
-    coach.coachType,
-    coach.status
-    
-    updateCounters();
-);
+                line + "_" + position,
+                coach.coachNo,
+                coach.coachType,
+                coach.status
+            );
 
         });
 
     });
+
+    updateCounters();
 
 }
 
@@ -281,7 +275,7 @@ const STATUS_CLASS = {
 /* =====================================================
    UPDATE COACH CELL
 ===================================================== */
-const s = r.cells[5].innerText;
+
 /* =====================================================
    CLICK TO VIEW DETAILS
 ===================================================== */
@@ -289,17 +283,16 @@ const s = r.cells[5].innerText;
 document.addEventListener("click", function (e) {
 
     const cell = e.target.closest(".coach-table td");
-
     if (!cell) return;
 
     alert(
         "Position : " + cell.dataset.position +
         "\nCoach : " + (cell.dataset.coach || "-") +
+        "\nCoach Type : " + (cell.dataset.type || "-") +
         "\nStatus : " + (cell.dataset.status || "-")
     );
 
 });
-
 /* =====================================================
    HISTORY
 ===================================================== */
