@@ -138,7 +138,9 @@ function updateCoachCell(id, coachNo, status) {
     if (!cell) return;
 
     cell.innerHTML = `
-        <div class="coach-number">${coachNo || "-"}</div>
+        cell.innerHTML = `
+<div class="coach-no">${coach.coachNo}</div>
+<div class="coach-type">${coach.coachType || ""}
         <div class="coach-status">${status || ""}</div>
     `;
 
