@@ -24,15 +24,15 @@ export async function saveCoach(data) {
         `coachBoard/${data.line}/${data.position}`
     );
 
-    await set(ref(database, ...), {
-    shop: coach.shop,
-    line: coach.line,
-    position: coach.position,
-    coachNo: coach.coachNo,
-    coachType: coach.coachType,
-    status: coach.status,
-    updatedAt: coach.updatedAt
-});
+    await set(coachRef, {
+        shop: data.shop,
+        line: data.line,
+        position: data.position,
+        coachNo: data.coachNo,
+        coachType: data.coachType,
+        status: data.status,
+        updatedAt: data.updatedAt
+    });
 
 }
 
