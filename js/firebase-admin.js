@@ -19,16 +19,20 @@ import {
 
 export async function saveCoach(data) {
 
-    await set(coachRef, {
-    shop: data.shop,
-    line: data.line,
-    position: data.position,
-    coachNo: data.coachNo,
-    coachType: data.coachType,
-    status: data.status,
-    updatedAt: data.updatedAt
-});
+    const coachRef = ref(
+        database,
+        `coachBoard/${data.line}/${data.position}`
+    );
 
+    await set(coachRef, {
+        shop: data.shop,
+        line: data.line,
+        position: data.position,
+        coachNo: data.coachNo,
+        coachType: data.coachType,
+        status: data.status,
+        updatedAt: data.updatedAt
+    });
 }
 
 /* =====================================================
