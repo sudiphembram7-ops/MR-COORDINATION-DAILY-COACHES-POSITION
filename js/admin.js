@@ -453,7 +453,6 @@ if (exportBtn) {
 
     exportBtn.onclick = () => {
 
-        let csv =
            let csv =
 "Shop,Line,Position,Coach,Coach Type,Status,Time\n";
 
