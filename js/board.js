@@ -162,28 +162,31 @@ openModal(td);
    OPEN MODAL
 ===================================================== */
 
-function openModal(cell){
+function openModal(cell) {
 
-document.getElementById("modalShop").value =
-cell.dataset.shop || "";
+    const [line, position] = cell.id.split("_");
 
-document.getElementById("modalLine").value =
-cell.dataset.line || "";
+    document.getElementById("modalShop").value = getShop(line);
+    document.getElementById("modalLine").value = line;
+    document.getElementById("modalPosition").value = position;
 
-document.getElementById("modalPosition").value =
-cell.dataset.position || "";
+    document.getElementById("modalCoachNo").value = cell.dataset.coach || "";
+    document.getElementById("modalCoachType").value = cell.dataset.type || "";
+    document.getElementById("modalStatus").value = cell.dataset.status || "PO";
 
-document.getElementById("modalCoachNo").value =
-cell.dataset.coach || "";
+    coachModal.show();
+}
 
-document.getElementById("modalCoachType").value =
-cell.dataset.type || "";
+function getShop(line){
 
-document.getElementById("modalStatus").value =
-cell.dataset.status || "PO";
+    if(line.startsWith("N")) return "N SHOP";
+    if(line.startsWith("M")) return "M SHOP";
+    if(line.startsWith("SCR")) return "MR SCR SHOP";
+    if(line.startsWith("F")) return "CR SHOP";
+    if(line.startsWith("J")) return "J SHOP";
+    if(line.startsWith("L")) return "LIFTING BAY";
 
-coachModal.show();
-
+    return "";
 }
 
 /* =====================================================
