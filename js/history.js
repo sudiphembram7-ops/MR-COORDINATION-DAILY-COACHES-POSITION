@@ -4,17 +4,19 @@ function addHistory(action, coach) {
 
     history.unshift({
 
-        date: new Date().toLocaleDateString(),
+        date: new Date().toLocaleDateString("en-IN"),
 
-        time: new Date().toLocaleTimeString(),
+        time: new Date().toLocaleTimeString("en-IN"),
 
         shop: coach.shop,
 
-        column: coach.column,
+        line: coach.line,          // coach.column নয়
 
         position: coach.position,
 
         coachNo: coach.coachNo,
+
+        coachType: coach.coachType,
 
         status: coach.status,
 
