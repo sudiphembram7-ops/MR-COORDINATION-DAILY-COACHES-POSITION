@@ -71,12 +71,8 @@ async function dropCoach(e) {
 
     if (!dragCell) return;
 
-    const fromLine = dragCell.dataset.line;
-    const fromPos = dragCell.dataset.position;
-
-    const toLine = this.dataset.line;
-    const toPos = this.dataset.position;
-
+    const [fromLine, fromPos] = dragCell.id.split("_");
+const [toLine, toPos] = this.id.split("_");
     if (fromLine === toLine && fromPos === toPos)
         return;
 
@@ -109,7 +105,7 @@ async function dropCoach(e) {
 
     } else {
 
-        await set(fromRef, {});
+        await set(fromRef, null);
 
     }
 
