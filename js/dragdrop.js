@@ -3,7 +3,6 @@
    MR CO-ORDINATION
 ========================================== */
 
-import { database } from "./firebase-config.js";
 
 import {
     ref,
