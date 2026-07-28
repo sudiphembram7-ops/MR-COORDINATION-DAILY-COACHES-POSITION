@@ -690,10 +690,154 @@ id="menu">
         <span class="badge bg-warning text-dark">LM</span>
         <span class="badge bg-danger">MED</span>
         <span class="badge bg-primary">RL</span>
-        <span class="badge bg-secondary">HOLD</span>
         <span class="badge bg-info text-dark">WIP</span>
+        <span class="badge bg-secondary">HOLD</span>
 
     </div>
+
+</div>
+
+<!-- ===================================
+     COACH EDIT MODAL
+=================================== -->
+
+<div class="modal fade" id="coachModal" tabindex="-1">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header bg-primary text-white">
+
+<h5 class="modal-title">
+Coach Entry
+</h5>
+
+<button
+type="button"
+class="btn-close btn-close-white"
+data-bs-dismiss="modal">
+</button>
+
+</div>
+
+<div class="modal-body">
+
+<label>Shop</label>
+
+<input
+id="modalShop"
+class="form-control mb-2"
+readonly>
+
+<label>Line</label>
+
+<input
+id="modalLine"
+class="form-control mb-2"
+readonly>
+
+<label>Position</label>
+
+<input
+id="modalPosition"
+class="form-control mb-2"
+readonly>
+
+<label>Coach Number</label>
+
+<input
+id="modalCoachNo"
+class="form-control mb-2"
+placeholder="Enter Coach Number">
+
+<label>Coach Type</label>
+
+<select
+id="modalCoachType"
+class="form-select mb-2">
+
+<option value="">Select</option>
+
+<option>LHB AC</option>
+
+<option>LHB NAC</option>
+
+<option>GS</option>
+
+<option>CZ</option>
+
+<option>CN</option>
+
+<option>AC</option>
+
+<option>NMG</option>
+
+<option>VB</option>
+
+</select>
+
+<label>Status</label>
+
+<select
+id="modalStatus"
+class="form-select">
+
+<option>PO</option>
+
+<option>LM</option>
+
+<option>MED</option>
+
+<option>RL</option>
+
+<option>WIP</option>
+
+<option>HOLD</option>
+
+</select>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+id="saveCoachBtn"
+class="btn btn-success">
+
+Save
+
+</button>
+
+<button
+id="updateCoachBtn"
+class="btn btn-primary">
+
+Update
+
+</button>
+
+<button
+id="deleteCoachBtn"
+class="btn btn-danger">
+
+Delete
+
+</button>
+
+<button
+class="btn btn-secondary"
+data-bs-dismiss="modal">
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
@@ -701,35 +845,52 @@ id="menu">
      FOOTER
 =================================== -->
 
-<footer class="mt-4 bg-dark text-white p-3">
+<footer class="bg-dark text-white mt-4 p-3">
 
-    <div class="row">
+<div class="row">
 
-        <div class="col-md-4">
-            <strong>MR CO-ORDINATION</strong><br>
-            Liluah Workshop
-        </div>
+<div class="col-md-4">
 
-        <div class="col-md-4 text-center">
-            Last Update :
-            <span id="lastUpdateTime">--</span>
-        </div>
+<b>MR CO-ORDINATION</b><br>
 
-        <div class="col-md-4 text-end">
-            Database :
-            <span class="text-success">
-                ● Connected
-            </span>
-        </div>
+Liluah Workshop
 
-    </div>
+</div>
+
+<div class="col-md-4 text-center">
+
+Last Update :
+
+<span id="lastUpdateTime">
+
+--
+
+</span>
+
+</div>
+
+<div class="col-md-4 text-end">
+
+Database :
+
+<span
+id="footerDatabase"
+class="text-success">
+
+● Connected
+
+</span>
+
+</div>
+
+</div>
 
 </footer>
 
 </div>
 
-<!-- Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
+
 </html>
