@@ -423,6 +423,8 @@ function updateDashboardStats() {
     let lm = 0;
 
     let med = 0;
+    let rl = 0;
+    let r1 = 0;
 
     rows.forEach(r => {
 
@@ -435,6 +437,10 @@ const s = r.cells[5].innerText;
         if (s === "LM") lm++;
 
         if (s === "MED") med++;
+        
+        if (s=== "RL") med++;
+        
+        if (s=== "R1") r1++;
 
     });
 
