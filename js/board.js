@@ -1,23 +1,41 @@
 /* =====================================================
-   MR CO-ORDINATION DAILY COACHES POSITION
+   MR CO-ORDINATION BOARD
    board.js
+   PART-1
 ===================================================== */
+
 import { database } from "./firebase-config.js";
 
 import {
     ref,
-    onValue
+    onValue,
+    get
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-document.addEventListener("DOMContentLoaded", () => {
-    startClock();
-    networkStatus();
-    startBoardListener();
-    initButtons();
-    initSearch();
-    updateCounters();
-});
+
+let currentCell = null;
+let boardData = {};
+
+const coachModal =
+    new bootstrap.Modal(
+        document.getElementById("coachModal")
+    );
+
 /* =====================================================
-   LIVE DATE & TIME
+   START
+===================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    startClock();
+
+    loadBoard();
+
+    enableCellClick();
+
+});
+
+/* =====================================================
+   LIVE CLOCK
 ===================================================== */
 
 function startClock() {
@@ -26,15 +44,145 @@ function startClock() {
 
         const now = new Date();
 
-        const date = now.toLocaleDateString("en-IN");
+        document.getElementById("liveDate").innerText =
+            now.toLocaleDateString("en-IN");
 
-        const time = now.toLocaleTimeString("en-IN");
+        document.getElementById("liveTime").innerText =
+            now.toLocaleTimeString("en-IN");
 
-        document.getElementById("liveDate").textContent = date;
+    },1000);
 
-        document.getElementById("liveTime").textContent = time;
+}
 
-    }, 1000);
+/* =====================================================
+   FIREBASE LISTENER
+===================================================== */
+
+function loadBoard(){
+
+    const boardRef =
+        ref(database,"coachBoard");
+
+    onValue(boardRef,(snapshot)=>{
+
+        if(!snapshot.exists()) return;
+
+        boardData =
+            snapshot.val();
+
+        drawBoard();
+
+    });
+
+}
+
+/* =====================================================
+   DRAW BOARD
+===================================================== */
+
+function drawBoard(){
+
+    Object.keys(boardData).forEach(line=>{
+
+        Object.keys(boardData[line]).forEach(position=>{
+
+            const coach =
+                boardData[line][position];
+
+            const id =
+                line+"_"+position;
+
+            const cell =
+                document.getElementById(id);
+
+            if(!cell) return;
+
+            cell.innerHTML=`
+
+<div class="coach-no">
+${coach.coachNo || ""}
+</div>
+
+<div class="coach-type">
+${coach.coachType || ""}
+</div>
+
+<div class="coach-status">
+${coach.status || ""}
+</div>
+
+`;
+
+            cell.dataset.shop =
+                coach.shop || "";
+
+            cell.dataset.line =
+                line;
+
+            cell.dataset.position =
+                position;
+
+            cell.dataset.coach =
+                coach.coachNo || "";
+
+            cell.dataset.type =
+                coach.coachType || "";
+
+            cell.dataset.status =
+                coach.status || "";
+
+        });
+
+    });
+
+}
+
+/* =====================================================
+   CELL CLICK
+===================================================== */
+
+function enableCellClick(){
+
+document.addEventListener("click",(e)=>{
+
+const td =
+e.target.closest(".coach-table td");
+
+if(!td) return;
+
+currentCell=td;
+
+openModal(td);
+
+});
+
+}
+
+/* =====================================================
+   OPEN MODAL
+===================================================== */
+
+function openModal(cell){
+
+document.getElementById("modalShop").value =
+cell.dataset.shop || "";
+
+document.getElementById("modalLine").value =
+cell.dataset.line || "";
+
+document.getElementById("modalPosition").value =
+cell.dataset.position || "";
+
+document.getElementById("modalCoachNo").value =
+cell.dataset.coach || "";
+
+document.getElementById("modalCoachType").value =
+cell.dataset.type || "";
+
+document.getElementById("modalStatus").value =
+cell.dataset.status || "PO";
+
+coachModal.show();
 
 }
 
@@ -42,487 +190,822 @@ function startClock() {
    LAST UPDATE
 ===================================================== */
 
-function updateLastTime() {
+function updateLastUpdate(){
 
-    const now = new Date();
+const now =
+new Date();
 
-    document.getElementById("lastUpdate").textContent =
-        "Updated : " + now.toLocaleTimeString("en-IN");
+document.getElementById(
+"lastUpdate"
+).innerText =
+"Updated : "+
+now.toLocaleTimeString("en-IN");
 
 }
 
 /* =====================================================
-   BUTTONS
+   PART-2
+   SAVE / UPDATE / DELETE
 ===================================================== */
 
-function initButtons() {
+import {
+    set,
+    remove,
+    push
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    const refreshBtn = document.getElementById("refreshBtn");
+/* =====================================================
+   BUTTON EVENTS
+===================================================== */
 
-    if (refreshBtn) {
+document
+.getElementById("saveCoachBtn")
+?.addEventListener("click", saveCoach);
 
-        refreshBtn.onclick = () => {
+document
+.getElementById("updateCoachBtn")
+?.addEventListener("click", updateCoach);
 
-            location.reload();
+document
+.getElementById("deleteCoachBtn")
+?.addEventListener("click", deleteCoach);
 
-        };
+/* =====================================================
+   GET MODAL DATA
+===================================================== */
 
-    }
+function getModalData(){
 
-    const fullBtn = document.getElementById("fullscreenBtn");
+    return{
 
-    if (fullBtn) {
+        shop:
+        document.getElementById("modalShop").value,
 
-        fullBtn.onclick = () => {
+        line:
+        document.getElementById("modalLine").value,
 
-            if (!document.fullscreenElement) {
+        position:
+        document.getElementById("modalPosition").value,
 
-                document.documentElement.requestFullscreen();
+        coachNo:
+        document.getElementById("modalCoachNo").value.trim(),
 
-            } else {
+        coachType:
+        document.getElementById("modalCoachType").value,
 
-                document.exitFullscreen();
+        status:
+        document.getElementById("modalStatus").value,
+
+        updatedAt:
+        new Date().toISOString()
+
+    };
+
+}
+
+/* =====================================================
+   DUPLICATE CHECK
+===================================================== */
+
+function duplicateCoach(no){
+
+    if(no==="") return false;
+
+    for(const line in boardData){
+
+        for(const pos in boardData[line]){
+
+            const coach =
+            boardData[line][pos];
+
+            if(
+                coach.coachNo===no &&
+                !(line===currentCell.dataset.line &&
+                  pos===currentCell.dataset.position)
+            ){
+
+                return true;
 
             }
-
-        };
-
-    }
-
-}
-
-/* =====================================================
-   SEARCH COACH
-===================================================== */
-
-function initSearch() {
-
-    const box = document.getElementById("searchBox");
-
-    if (!box) return;
-
-    box.addEventListener("keyup", function () {
-
-        const value = this.value.trim().toUpperCase();
-
-        const cells = document.querySelectorAll(".coach-table td");
-
-        cells.forEach(cell => {
-
-            cell.style.background = "";
-
-            if (value !== "" &&
-                cell.innerText.toUpperCase().includes(value)) {
-
-                cell.style.background = "#fff176";
-
-                cell.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-
-            }
-
-        });
-
-    });
-
-}
-
-/* =====================================================
-   UPDATE CELL
-===================================================== */
-
-function updateCoachCell(id, coachNo, coachType, status) {
-
-    const cell = document.getElementById(id);
-
-    if (!cell) return;
-
-    cell.innerHTML = `
-        <div class="coach-no">${coachNo || ""}</div>
-        <div class="coach-type">${coachType || ""}</div>
-        <div class="coach-status">${status || ""}</div>
-    `;
-
-    cell.dataset.position = id;
-    cell.dataset.type = coachType || "";
-    cell.dataset.coach = coachNo || "";
-    cell.dataset.status = status || "";
-
-    Object.values(STATUS_CLASS).forEach(c =>
-        cell.classList.remove(c)
-    );
-
-    if (STATUS_CLASS[status]) {
-        cell.classList.add(STATUS_CLASS[status]);
-    }
-
-    updateLastTime();
-}
-/* =====================================================
-   FIREBASE REALTIME BOARD LOADER
-===================================================== */
-
-// Firebase v9+ modular SDK
-
-
-/* =====================================================
-   START FIREBASE LISTENER
-===================================================== */
-
-function startBoardListener() {
-
-    const boardRef = ref(database, "coachBoard");
-
-    onValue(boardRef, (snapshot) => {
-
-        if (!snapshot.exists()) {
-
-            console.log("No Coach Data Found");
-
-            return;
 
         }
 
-        const data = snapshot.val();
+    }
 
-        loadBoardData(data);
-
-        updateDatabaseStatus(true);
-
-    }, (error) => {
-
-        console.error(error);
-
-        updateDatabaseStatus(false);
-
-    });
+    return false;
 
 }
 
 /* =====================================================
-   LOAD COMPLETE BOARD
+   SAVE
 ===================================================== */
 
-function loadBoardData(board) {
+async function saveCoach(){
 
-    Object.keys(board).forEach(line => {
+    const coach =
+    getModalData();
 
-        const positions = board[line];
+    if(duplicateCoach(coach.coachNo)){
 
-        Object.keys(positions).forEach(position => {
+        alert("Coach Number already exists.");
 
-            const coach = positions[position];
-
-            updateCoachCell(
-                line + "_" + position,
-                coach.coachNo,
-                coach.coachType,
-                coach.status
-            );
-
-        });
-
-    });
-
-    updateCounters();
-
-}
-
-/* =====================================================
-   DATABASE STATUS
-===================================================== */
-
-function updateDatabaseStatus(ok) {
-
-    const status = document.getElementById("databaseStatus");
-
-    if (!status) return;
-
-    if (ok) {
-
-        status.innerHTML =
-            '<span class="text-success">● Connected</span>';
-
-    } else {
-
-        status.innerHTML =
-            '<span class="text-danger">● Offline</span>';
+        return;
 
     }
 
+    await set(
+
+        ref(
+            database,
+            "coachBoard/"+coach.line+"/"+coach.position
+        ),
+
+        coach
+
+    );
+
+    await writeHistory("SAVE",coach);
+
+    coachModal.hide();
+
+    updateLastUpdate();
+
 }
 
 /* =====================================================
-   START AFTER PAGE LOAD
+   UPDATE
 ===================================================== */
 
+async function updateCoach(){
 
-/* =====================================================
-   STATUS COLORS
-===================================================== */
+    const coach =
+    getModalData();
 
-const STATUS_CLASS = {
-    "PO": "status-po",
-    "LM": "status-lm",
-    "MED": "status-med",
-    "RL": "status-rl",
-    "R1": "status-R1",
-    "HOLD": "status-hold"
-};
+    if(duplicateCoach(coach.coachNo)){
 
-/* =====================================================
-   UPDATE COACH CELL
-===================================================== */
+        alert("Duplicate Coach Number.");
 
-/* =====================================================
-   CLICK TO VIEW DETAILS
-===================================================== */
+        return;
 
-document.addEventListener("click", function (e) {
+    }
 
-    const cell = e.target.closest(".coach-table td");
-    if (!cell) return;
+    await set(
 
-    alert(
-        "Position : " + cell.dataset.position +
-        "\nCoach : " + (cell.dataset.coach || "-") +
-        "\nCoach Type : " + (cell.dataset.type || "-") +
-        "\nStatus : " + (cell.dataset.status || "-")
+        ref(
+            database,
+            "coachBoard/"+coach.line+"/"+coach.position
+        ),
+
+        coach
+
     );
 
-});
+    await writeHistory("UPDATE",coach);
+
+    coachModal.hide();
+
+    updateLastUpdate();
+
+}
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+async function deleteCoach(){
+
+    if(
+!confirm("Delete this coach?")
+) return;
+
+const coach =
+getModalData();
+
+await remove(
+
+ref(
+database,
+"coachBoard/"+coach.line+"/"+coach.position
+)
+
+);
+
+await writeHistory(
+"DELETE",
+coach
+);
+
+coachModal.hide();
+
+updateLastUpdate();
+
+}
+
 /* =====================================================
    HISTORY
 ===================================================== */
 
-const coachHistory = [];
+async function writeHistory(action,coach){
 
-function addHistory(position, coachNo, status) {
+await push(
 
-    coachHistory.unshift({
+ref(database,"history"),
 
-        position,
-        coachNo,
-        status,
-        time: new Date().toLocaleString("en-IN")
+{
+
+action,
+
+shop:
+coach.shop,
+
+line:
+coach.line,
+
+position:
+coach.position,
+
+coachNo:
+coach.coachNo,
+
+coachType:
+coach.coachType,
+
+status:
+coach.status,
+
+time:
+new Date().toISOString()
+
+}
+
+);
+
+}
+
+/* =====================================================
+   PART-3
+   DRAG & DROP SYSTEM
+===================================================== */
+
+let lastMove = null;
+
+/* =====================================================
+   ENABLE DRAG
+===================================================== */
+
+function enableDragDrop() {
+
+    document.querySelectorAll(".coach-table td").forEach(cell => {
+
+        cell.draggable = true;
+
+        cell.addEventListener("dragstart", dragStart);
+
+        cell.addEventListener("dragover", dragOver);
+
+        cell.addEventListener("drop", dropCoach);
 
     });
 
-    if (coachHistory.length > 200) {
+}
 
-        coachHistory.pop();
+document.addEventListener("DOMContentLoaded", () => {
 
-    }
+    setTimeout(enableDragDrop,1000);
+
+});
+
+/* =====================================================
+   DRAG START
+===================================================== */
+
+let dragCell = null;
+
+function dragStart(e){
+
+    dragCell = this;
+
+    e.dataTransfer.effectAllowed="move";
 
 }
 
 /* =====================================================
-   SAVE HISTORY WHEN CELL UPDATED
+   DRAG OVER
 ===================================================== */
 
-const oldUpdate = updateCoachCell;
+function dragOver(e){
 
-updateCoachCell = function(id, coachNo, coachType, status){
-
-    oldUpdate(id, coachNo, coachType, status);
-
-    addHistory(id, coachNo, status);
+    e.preventDefault();
 
 }
 
 /* =====================================================
-   ONLINE / OFFLINE
+   DROP
 ===================================================== */
 
-function networkStatus() {
+async function dropCoach(e){
 
-    const db = document.getElementById("databaseStatus");
+    e.preventDefault();
 
-    if (!db) return;
+    if(!dragCell) return;
 
-    if (navigator.onLine) {
+    if(dragCell===this) return;
 
-        db.innerHTML =
-            '<span class="text-success">● Online</span>';
+    const fromLine =
+        dragCell.dataset.line;
 
-    } else {
+    const fromPos =
+        dragCell.dataset.position;
 
-        db.innerHTML =
-            '<span class="text-danger">● Offline</span>';
+    const toLine =
+        this.dataset.line;
 
-    }
+    const toPos =
+        this.dataset.position;
+
+    const fromCoach =
+        boardData[fromLine][fromPos] || {};
+
+    const toCoach =
+        boardData[toLine]?.[toPos] || {};
+
+    lastMove = {
+
+        fromLine,
+
+        fromPos,
+
+        toLine,
+
+        toPos,
+
+        fromCoach,
+
+        toCoach
+
+    };
+
+    /* Swap */
+
+    await set(
+
+        ref(database,
+        "coachBoard/"+toLine+"/"+toPos),
+
+        fromCoach
+
+    );
+
+    await set(
+
+        ref(database,
+        "coachBoard/"+fromLine+"/"+fromPos),
+
+        toCoach
+
+    );
+
+    dragCell = null;
 
 }
 
-window.addEventListener("online", networkStatus);
-window.addEventListener("offline", networkStatus);
-
-networkStatus();
-
 /* =====================================================
-   AUTO REFRESH LAST UPDATE
+   CTRL+Z UNDO
 ===================================================== */
 
-setInterval(() => {
+document.addEventListener("keydown",async(e)=>{
 
-    updateLastTime();
+if(!(e.ctrlKey && e.key==="z")) return;
 
-}, 30000);
+if(!lastMove) return;
+
+await set(
+
+ref(database,
+"coachBoard/"
++lastMove.fromLine+"/"
++lastMove.fromPos),
+
+lastMove.fromCoach
+
+);
+
+await set(
+
+ref(database,
+"coachBoard/"
++lastMove.toLine+"/"
++lastMove.toPos),
+
+lastMove.toCoach
+
+);
+
+alert("Last Move Restored");
+
+});
+
 /* =====================================================
-   PDF EXPORT
+   CELL ANIMATION
 ===================================================== */
 
-function downloadPDF() {
+document.addEventListener("dragenter",(e)=>{
 
-    window.print();
+const td=e.target.closest(".coach-table td");
+
+if(td){
+
+td.style.background="#d1ecf1";
 
 }
 
-const pdfBtn = document.getElementById("pdfBtn");
+});
 
-if (pdfBtn) {
+document.addEventListener("dragleave",(e)=>{
 
-    pdfBtn.addEventListener("click", downloadPDF);
+const td=e.target.closest(".coach-table td");
+
+if(td){
+
+td.style.background="";
 
 }
 
+});
+
+document.addEventListener("drop",(e)=>{
+
+const td=e.target.closest(".coach-table td");
+
+if(td){
+
+td.style.background="";
+
+}
+
+});
+
 /* =====================================================
-   EXCEL EXPORT
+   RELOAD DRAG AFTER FIREBASE UPDATE
 ===================================================== */
 
-function exportExcel() {
+const oldDrawBoard = drawBoard;
 
-    let csv = "";
+drawBoard = function(){
 
-    document.querySelectorAll(".coach-table tr").forEach(row => {
+    oldDrawBoard();
 
-        let cols = [];
+    enableDragDrop();
 
-        row.querySelectorAll("th,td").forEach(col => {
+};
 
-            cols.push(col.innerText.replace(/\n/g, " "));
+/* =====================================================
+   PART-4
+   DASHBOARD / SEARCH / EXPORT / TV MODE
+===================================================== */
 
-        });
+/* =====================================================
+   DASHBOARD COUNTERS
+===================================================== */
 
-        csv += cols.join(",") + "\n";
+function updateCounters() {
+
+    const cells =
+        document.querySelectorAll(".coach-table td");
+
+    let total = cells.length;
+    let occupied = 0;
+    let free = 0;
+
+    let po = 0;
+    let lm = 0;
+    let med = 0;
+    let rl = 0;
+    let hold = 0;
+    let wip = 0;
+
+    cells.forEach(cell => {
+
+        if ((cell.dataset.coach || "").trim() !== "") {
+
+            occupied++;
+
+            switch (cell.dataset.status) {
+
+                case "PO":
+                    po++;
+                    break;
+
+                case "LM":
+                    lm++;
+                    break;
+
+                case "MED":
+                    med++;
+                    break;
+
+                case "RL":
+                    rl++;
+                    break;
+
+                case "HOLD":
+                    hold++;
+                    break;
+
+                case "WIP":
+                    wip++;
+                    break;
+            }
+
+        }
 
     });
 
-    const blob = new Blob([csv], {
+    free = total - occupied;
 
-        type: "text/csv"
-
-    });
-
-    const a = document.createElement("a");
-
-    a.href = URL.createObjectURL(blob);
-
-    a.download = "MR_Coach_Position.csv";
-
-    a.click();
-
-}
-
-const excelBtn = document.getElementById("excelBtn");
-
-if (excelBtn) {
-
-    excelBtn.addEventListener("click", exportExcel);
+    document.getElementById("totalCoach").innerText = total;
+    document.getElementById("occupiedCoach").innerText = occupied;
+    document.getElementById("freeCoach").innerText = free;
 
 }
 
 /* =====================================================
-   AUTO REFRESH
+   SEARCH
 ===================================================== */
 
+const search =
+document.getElementById("searchBox");
+
+if(search){
+
+search.addEventListener("keyup",function(){
+
+const value =
+this.value.toUpperCase();
+
+document.querySelectorAll(".coach-table td")
+
+.forEach(td=>{
+
+td.style.outline="";
+
+if(td.innerText
+.toUpperCase()
+.includes(value)
+&& value!=""){
+
+td.style.outline=
+"3px solid red";
+
+td.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+});
+
+}
+
+});
+
+});
+
+}
+
+/* =====================================================
+   STATUS COLOR
+===================================================== */
+
+function applyStatusColours(){
+
+document.querySelectorAll(".coach-table td")
+
+.forEach(td=>{
+
+td.classList.remove(
+
+"status-po",
+"status-lm",
+"status-med",
+"status-rl",
+"status-hold",
+"status-wip"
+
+);
+
+switch(td.dataset.status){
+
+case "PO":
+
+td.classList.add("status-po");
+
+break;
+
+case "LM":
+
+td.classList.add("status-lm");
+
+break;
+
+case "MED":
+
+td.classList.add("status-med");
+
+break;
+
+case "RL":
+
+td.classList.add("status-rl");
+
+break;
+
+case "HOLD":
+
+td.classList.add("status-hold");
+
+break;
+
+case "WIP":
+
+td.classList.add("status-wip");
+
+break;
+
+}
+
+});
+
+}
+
+/* =====================================================
+   PDF
+===================================================== */
+
+document
+.getElementById("pdfBtn")
+?.addEventListener("click",()=>{
+
+window.print();
+
+});
+
+/* =====================================================
+   EXCEL
+===================================================== */
+
+document
+.getElementById("excelBtn")
+?.addEventListener("click",()=>{
+
+let csv="";
+
+document.querySelectorAll(".coach-table tr")
+
+.forEach(row=>{
+
+let cols=[];
+
+row.querySelectorAll("th,td")
+
+.forEach(c=>{
+
+cols.push(
+
+c.innerText.replace(/\n/g," ")
+
+);
+
+});
+
+csv+=cols.join(",")+"\n";
+
+});
+
+const blob=
+new Blob([csv],{
+
+type:"text/csv"
+
+});
+
+const a=
+document.createElement("a");
+
+a.href=
+URL.createObjectURL(blob);
+
+a.download=
+"MR_BOARD.csv";
+
+a.click();
+
+});
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+document
+.getElementById("refreshBtn")
+?.addEventListener("click",()=>{
+
+location.reload();
+
+});
+
+/* =====================================================
+   FULL SCREEN
+===================================================== */
+
+document
+.getElementById("fullscreenBtn")
+?.addEventListener("click",()=>{
+
+if(!document.fullscreenElement){
+
+document.documentElement.requestFullscreen();
+
+}else{
+
+document.exitFullscreen();
+
+}
+
+});
 
 /* =====================================================
    TV MODE
 ===================================================== */
 
-function enableTVMode() {
+if(window.innerWidth>=1920){
 
-    document.body.classList.add("tv-mode");
-
-}
-
-if (window.innerWidth >= 1920) {
-
-    enableTVMode();
+document.body.classList.add("tv-mode");
 
 }
 
 /* =====================================================
-   LIVE COUNTERS
+   KEYBOARD
 ===================================================== */
 
-function updateCounters() {
+document.addEventListener("keydown",(e)=>{
 
-    const total = document.querySelectorAll(".coach-table td").length;
+if(e.key==="F11"){
 
-    let occupied = 0;
+e.preventDefault();
 
-    document.querySelectorAll(".coach-table td").forEach(td => {
+if(!document.fullscreenElement){
 
-        if (td.innerText.trim() !== "") {
+document.documentElement.requestFullscreen();
 
-            occupied++;
+}else{
 
-        }
-
-    });
-
-    const totalEl = document.getElementById("totalCoach");
-
-    const occEl = document.getElementById("occupiedCoach");
-
-    const freeEl = document.getElementById("freeCoach");
-
-    if (totalEl) totalEl.innerText = total;
-
-    if (occEl) occEl.innerText = occupied;
-
-    if (freeEl) freeEl.innerText = total - occupied;
+document.exitFullscreen();
 
 }
 
+}
 
+if(e.ctrlKey && e.key==="f"){
 
-/* =====================================================
-   KEYBOARD SHORTCUTS
-===================================================== */
+e.preventDefault();
 
-document.addEventListener("keydown", (e) => {
+document.getElementById("searchBox")?.focus();
 
-    if (e.key === "F11") {
-
-        e.preventDefault();
-
-        if (!document.fullscreenElement) {
-
-            document.documentElement.requestFullscreen();
-
-        } else {
-
-            document.exitFullscreen();
-
-        }
-
-    }
-
-    if (e.ctrlKey && e.key === "f") {
-
-        e.preventDefault();
-
-        document.getElementById("searchBox")?.focus();
-
-    }
+}
 
 });
 
 /* =====================================================
-   SYSTEM START
+   LAST UPDATE
 ===================================================== */
+
+setInterval(()=>{
+
+const t=
+document.getElementById("lastUpdateTime");
+
+if(t){
+
+t.innerText=
+new Date().toLocaleTimeString("en-IN");
+
+}
+
+},1000);
+
+/* =====================================================
+   AUTO UPDATE AFTER DRAW
+===================================================== */
+
+const oldDraw = drawBoard;
+
+drawBoard = function(){
+
+oldDraw();
+
+applyStatusColours();
+
+updateCounters();
+
+};
