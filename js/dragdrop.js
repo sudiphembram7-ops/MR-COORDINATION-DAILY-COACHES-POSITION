@@ -4,10 +4,12 @@
 ========================================== */
 
 
+import { database } from "./firebase-config.js";
+
 import {
     ref,
     get,
-    set
+    update
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 let dragCell = null;
@@ -46,6 +48,8 @@ function dragStart(e) {
 
     dragCell = this;
 
+    console.log("DRAG START:", this.id);
+
     e.dataTransfer.effectAllowed = "move";
 
 }
@@ -65,6 +69,15 @@ function dragOver(e) {
 ========================================== */
 
 async function dropCoach(e) {
+
+    e.preventDefault();
+
+    console.log(
+        "DROP:",
+        dragCell?.id,
+        this.id
+    );
+
 
     e.preventDefault();
 
