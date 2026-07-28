@@ -72,42 +72,91 @@ async function dropCoach(e) {
     if (!dragCell) return;
 
     const [fromLine, fromPos] = dragCell.id.split("_");
-const [toLine, toPos] = this.id.split("_");
+    const [toLine, toPos] = this.id.split("_");
+
+    if (!fromLine || !fromPos || !toLine || !toPos)
+        return;
+
     if (fromLine === toLine && fromPos === toPos)
         return;
 
-    const fromRef = ref(database, `coachBoard/${fromLine}/${fromPos}`);
-    const toRef   = ref(database, `coachBoard/${toLine}/${toPos}`);
 
-    const fromSnap = await get(fromRef);
-    const toSnap   = await get(toRef);
+    const fromRef = ref(database, 
+        `coachBoard/${fromLine}/${fromPos}`
+    );
 
-    const fromCoach = fromSnap.exists() ? fromSnap.val() : null;
-    const toCoach   = toSnap.exists() ? toSnap.val() : null;
+    const toRef = ref(database,
+        `coachBoard/${toLine}/${toPos}`
+    );
 
-    /* ---------- Swap ---------- */
 
-    if (fromCoach) {
+    try {
 
-        fromCoach.line = toLine;
-        fromCoach.position = toPos;
+        const fromSnap = await get(fromRef);
+        const toSnap = await get(toRef);
 
-        await set(toRef, fromCoach);
+
+        const fromCoach = fromSnap.exists()
+            ? fromSnap.val()
+            : null;
+
+        const toCoach = toSnap.exists()
+            ? toSnap.val()
+            : null;
+
+
+
+        const updates = {};
+
+
+        // Move dragged coach
+        if(fromCoach){
+
+            fromCoach.line = toLine;
+            fromCoach.position = toPos;
+
+            updates[
+              `coachBoard/${toLine}/${toPos}`
+            ] = fromCoach;
+
+        }
+
+
+        // Swap existing coach
+        if(toCoach){
+
+            toCoach.line = fromLine;
+            toCoach.position = fromPos;
+
+            updates[
+              `coachBoard/${fromLine}/${fromPos}`
+            ] = toCoach;
+
+        }
+        else{
+
+            updates[
+              `coachBoard/${fromLine}/${fromPos}`
+            ] = null;
+
+        }
+
+
+        await update(ref(database), updates);
+
+
+    }
+    catch(error){
+
+        console.error(
+            "Drag Drop Error:",
+            error
+        );
+
+        alert("Coach movement failed");
 
     }
 
-    if (toCoach) {
-
-        toCoach.line = fromLine;
-        toCoach.position = fromPos;
-
-        await set(fromRef, toCoach);
-
-    } else {
-
-        await set(fromRef, null);
-
-    }
 
     dragCell = null;
 
