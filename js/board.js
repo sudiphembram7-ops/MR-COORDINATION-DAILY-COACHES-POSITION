@@ -268,7 +268,7 @@ const STATUS_CLASS = {
     "LM": "status-lm",
     "MED": "status-med",
     "RL": "status-rl",
-    "WIP": "status-wip",
+    "R1": "status-R1",
     "HOLD": "status-hold"
 };
 
