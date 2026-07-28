@@ -18,15 +18,15 @@ let dragCell = null;
    ENABLE DRAG
 ========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    enableDrag();
-
-});
-
 export function enableDrag() {
 
-    document.querySelectorAll(".coach-table td").forEach(cell => {
+    const cells = document.querySelectorAll(".coach-table td");
+
+    console.log("TOTAL DRAG CELLS:", cells.length);
+
+    cells.forEach(cell => {
+
+        console.log("ATTACH DRAG:", cell.id);
 
         cell.setAttribute("draggable", true);
 
