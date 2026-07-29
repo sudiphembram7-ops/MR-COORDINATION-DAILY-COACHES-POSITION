@@ -31,10 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
    LOAD FIREBASE BOARD
 ========================================== */
 
+let boardListenerStarted = false;
+
 function loadBoard() {
 
-    if (loadBoard.loaded) return;
-    loadBoard.loaded = true;
+    if (boardListenerStarted) return;
+
+    boardListenerStarted = true;
 
     listenBoard((data) => {
         boardData = data || {};
@@ -44,9 +47,7 @@ function loadBoard() {
         updateLastUpdate();
         updateDatabaseStatus(true);
     });
-
 }
-
 /* ==========================================
    RENDER BOARD
 ========================================== */
