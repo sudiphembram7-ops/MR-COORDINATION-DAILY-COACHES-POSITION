@@ -438,6 +438,7 @@ document.addEventListener("click", (e) => {
 
 window.addEventListener("online", () => {
     updateDatabaseStatus(true);
+    loadBoard();
 });
 
 window.addEventListener("offline", () => {
