@@ -341,30 +341,6 @@ function setupSearch() {
 
 }
 
-/* ==========================================
-   FULL SCREEN
-========================================== */
-
-const fullscreenBtn =
-    document.getElementById("fullscreenBtn");
-
-if (fullscreenBtn) {
-
-    fullscreenBtn.addEventListener("click", () => {
-
-        if (!document.fullscreenElement) {
-
-            document.documentElement.requestFullscreen();
-
-        } else {
-
-            document.exitFullscreen();
-
-        }
-
-    });
-
-}
 
 /* ==========================================
    EXPORT CSV (Excel)
@@ -394,22 +370,7 @@ function exportCSV() {
     link.click();
 }
 
-/* ==========================================
-   PRINT PDF
-========================================== */
 
-const pdfBtn =
-    document.getElementById("pdfBtn");
-
-if (pdfBtn) {
-
-    pdfBtn.addEventListener("click", () => {
-
-        window.print();
-
-    });
-
-}
 
 /* ==========================================
    AUTO REFRESH
