@@ -272,17 +272,30 @@ function updateDatabaseStatus(status) {
 
 function setupButtons() {
 
-    const refreshBtn =
-        document.getElementById("refreshBtn");
-
+    const refreshBtn = document.getElementById("refreshBtn");
     if (refreshBtn) {
+        refreshBtn.addEventListener("click", loadBoard);
+    }
 
-        refreshBtn.addEventListener("click", () => {
-
-            loadBoard();
-
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener("click", () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
         });
+    }
 
+    const pdfBtn = document.getElementById("pdfBtn");
+    if (pdfBtn) {
+        pdfBtn.addEventListener("click", () => window.print());
+    }
+
+    const excelBtn = document.getElementById("excelBtn");
+    if (excelBtn) {
+        excelBtn.addEventListener("click", exportCSV);
     }
 
 }
