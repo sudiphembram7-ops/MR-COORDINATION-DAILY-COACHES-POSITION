@@ -73,10 +73,21 @@ function updateClock() {
 function loadBoard() {
 
     onValue(ref(database, "coachBoard"), (snapshot) => {
-    boardData = snapshot.exists() ? snapshot.val() : {};
-    drawBoard();
-    updateLastUpdate();
-});
+
+        boardData = snapshot.exists() ? snapshot.val() : {};
+
+        drawBoard();
+
+        updateCounters();
+
+        updateLastUpdate();
+
+    }, (error) => {
+
+        console.error("Firebase Sync Error:", error);
+
+    });
+
 }
 /* =====================================================
    DRAW BOARD
@@ -730,33 +741,44 @@ function applyStatusColours() {
    SEARCH
 ===================================================== */
 
-document.getElementById("searchBox")
-?.addEventListener("keyup", function () {
+const searchBox = document.getElementById("searchBox");
 
-    const value = this.value.toUpperCase();
+if (searchBox) {
 
-    document.querySelectorAll(".coach-table td").forEach(td => {
+    searchBox.addEventListener("input", function () {
 
-        td.style.outline = "";
+        const keyword = this.value.trim().toUpperCase();
 
-        if (
-            value !== "" &&
-            td.innerText.toUpperCase().includes(value)
-        ) {
+        document.querySelectorAll(".coach-table td").forEach(td => {
 
-            td.style.outline = "3px solid red";
+            td.style.outline = "";
 
-            td.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
+            if (!keyword) return;
 
-        }
+            const text = (
+                td.dataset.coach +
+                " " +
+                td.dataset.type +
+                " " +
+                td.dataset.status
+            ).toUpperCase();
+
+            if (text.includes(keyword)) {
+
+                td.style.outline = "3px solid red";
+
+                td.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+            }
+
+        });
 
     });
 
-});
-
+}
 /* =====================================================
    PDF
 ===================================================== */
