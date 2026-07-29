@@ -199,9 +199,13 @@ function updateCounters() {
 
     const free = total - occupied;
 
-    document.getElementById("totalCoach").textContent = total;
-    document.getElementById("occupiedCoach").textContent = occupied;
-    document.getElementById("freeCoach").textContent = free;
+    const totalEl = document.getElementById("totalCoach");
+const occupiedEl = document.getElementById("occupiedCoach");
+const freeEl = document.getElementById("freeCoach");
+
+if (totalEl) totalEl.textContent = total;
+if (occupiedEl) occupiedEl.textContent = occupied;
+if (freeEl) freeEl.textContent = free;
 
 }
 
