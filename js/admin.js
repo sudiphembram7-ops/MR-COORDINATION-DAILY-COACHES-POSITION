@@ -5,6 +5,10 @@
 
 console.log("admin.js loaded");
 
+document.addEventListener("DOMContentLoaded", () => {
+    alert("admin.js loaded successfully");
+});
+
 /* ==========================================
    IMPORTS
 ========================================== */
