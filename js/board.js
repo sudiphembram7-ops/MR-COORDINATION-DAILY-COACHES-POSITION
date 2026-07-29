@@ -8,6 +8,7 @@ console.log("board.js loaded");
 import {
     listenBoard
 } from "./firebase-board.js";
+import { enableDragDrop } from "./dragdrop.js";
 
 let boardData = {};
 import { enableDragDrop } from "./dragdrop.js";
