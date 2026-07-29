@@ -199,17 +199,15 @@ placeholder="Enter Coach Number">
 id="status"
 class="form-select">
 
-<option>PO</option>
-
+<<option>PO</option>
+<option>S</option>
 <option>LM</option>
-
 <option>MED</option>
-
 <option>RL</option>
-
-<option>R 1</option>
-
+<option>R1</option>
+<option>RS</option>
 <option>L</option>
+<option>HVY</option>
 
 </select>
 
@@ -254,6 +252,45 @@ LIVE BOARD
 </div>
 
 <hr>
+    <div class="row text-center mb-3">
+
+    <div class="col">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 id="totalEntry">0</h5>
+                <small>Total</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 id="poCount">0</h5>
+                <small>PO</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card bg-warning">
+            <div class="card-body">
+                <h5 id="lmCount">0</h5>
+                <small>LM</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5 id="medCount">0</h5>
+                <small>MED</small>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 <h4>
 
@@ -287,6 +324,7 @@ class="table table-bordered">
 
 <tbody
 id="historyTable">
+<th>Action</th>
 
 </tbody>
 
