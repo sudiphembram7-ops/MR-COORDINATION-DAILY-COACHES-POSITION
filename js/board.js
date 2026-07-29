@@ -659,7 +659,7 @@ function updateCounters() {
 
     cells.forEach(cell => {
 
-        if ((cell.dataset.coach || "").trim() !== "") {
+        if ((cell.dataset.coach || "").trim()) {
             occupied++;
         }
 
@@ -667,12 +667,15 @@ function updateCounters() {
 
     const free = total - occupied;
 
-    document.getElementById("totalCoach").innerText = total;
-    document.getElementById("occupiedCoach").innerText = occupied;
-    document.getElementById("freeCoach").innerText = free;
+    document.getElementById("totalCoach") &&
+        (document.getElementById("totalCoach").textContent = total);
 
+    document.getElementById("occupiedCoach") &&
+        (document.getElementById("occupiedCoach").textContent = occupied);
+
+    document.getElementById("freeCoach") &&
+        (document.getElementById("freeCoach").textContent = free);
 }
-
 /* =====================================================
    STATUS COLOURS
 ===================================================== */
