@@ -462,8 +462,6 @@ async function writeHistory(action, coach) {
    100% WORKING DRAG & DROP
 ===================================================== */
 
-let dragCell = null;
-let lastMove = null;
 
 /* =====================================================
    ENABLE DRAG
@@ -735,8 +733,8 @@ function applyStatusColours() {
             "status-lm",
             "status-med",
             "status-rl",
-            "status-hold",
-            "status-wip"
+            "status-r1",
+            "status-l"
         );
 
         switch (td.dataset.status) {
@@ -757,12 +755,12 @@ function applyStatusColours() {
                 td.classList.add("status-rl");
                 break;
 
-            case "HOLD":
-                td.classList.add("status-hold");
+            case "R1":
+                td.classList.add("status-r1");
                 break;
 
-            case "WIP":
-                td.classList.add("status-wip");
+            case "L":
+                td.classList.add("status-l");
                 break;
         }
 
