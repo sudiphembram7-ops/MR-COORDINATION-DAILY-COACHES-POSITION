@@ -160,26 +160,21 @@ async function saveCoach() {
     }
 
     try {
+    console.log("Save button clicked");
+    console.log(coach);
 
-        console.log(coach);
+    await firebaseSaveCoach(coach);
 
-await firebaseSaveCoach(coach);
+    console.log("Firebase save success");
 
-console.log("Saved");
+    await writeAudit("SAVE", coach);
 
-        await writeAudit("SAVE", coach);
+    alert("Coach Saved Successfully");
 
-        alert("Coach Saved Successfully");
-
-        clearForm();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Save Failed");
-
-    }
+} catch (error) {
+    console.error(error);
+    alert(error.message);
+}
 
 }
 
