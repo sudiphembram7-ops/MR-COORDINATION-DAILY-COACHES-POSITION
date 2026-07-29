@@ -711,11 +711,14 @@ function updateCounters() {
                     rl++;
                     break;
 
-                case "HOLD":
+                case "R 1":
                     hold++;
                     break;
 
-                case "WIP":
+                case "L":
+                    wip++;
+                    break;
+                 Ccase "HVY":
                     wip++;
                     break;
             }
