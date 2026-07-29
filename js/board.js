@@ -84,16 +84,16 @@ function loadBoard() {
 
 function drawBoard() {
 
-    document.querySelectorAll(".coach-table td").forEach(td => {
+    document.querySelectorAll(".coach-table td").forEach(cell => {
 
-        td.innerHTML = "";
+        cell.innerHTML = "";
 
-        td.dataset.shop = "";
-        td.dataset.line = "";
-        td.dataset.position = "";
-        td.dataset.coach = "";
-        td.dataset.type = "";
-        td.dataset.status = "";
+        cell.dataset.shop = "";
+        cell.dataset.line = "";
+        cell.dataset.position = "";
+        cell.dataset.coach = "";
+        cell.dataset.type = "";
+        cell.dataset.status = "";
 
     });
 
@@ -103,37 +103,25 @@ function drawBoard() {
 
             const coach = boardData[line][position];
 
-            const cell = document.getElementById(
-                `${line}_${position}`
-            );
+            if (!coach) return;
+
+            const cell = document.getElementById(`${line}_${position}`);
 
             if (!cell) return;
 
+            const html = `
+                <div class="coach-no">${coach.coachNo || ""}</div>
+                <div class="coach-type">${coach.coachType || ""}</div>
+                <div class="coach-status">${coach.status || ""}</div>
+            `;
+
             const card = cell.querySelector(".coach-card");
 
-const html = `
-    <div class="coach-no">${coach.coachNo || ""}</div>
-    <div class="coach-type">${coach.coachType || ""}</div>
-    <div class="coach-status">${coach.status || ""}</div>
-`;
-
-if (card) {
-    card.innerHTML = html;
-} else {
-    cell.innerHTML = html;
-}
-                <div class="coach-no">
-                    ${coach.coachNo || ""}
-                </div>
-
-                <div class="coach-type">
-                    ${coach.coachType || ""}
-                </div>
-
-                <div class="coach-status">
-                    ${coach.status || ""}
-                </div>
-            `;
+            if (card) {
+                card.innerHTML = html;
+            } else {
+                cell.innerHTML = html;
+            }
 
             cell.dataset.shop = coach.shop || "";
             cell.dataset.line = line;
@@ -147,11 +135,8 @@ if (card) {
     });
 
     applyStatusColours();
-
     updateCounters();
-
     enableDragDrop();
-
 }
 
 /* =====================================================
@@ -278,33 +263,31 @@ function getModalData() {
 
 function duplicateCoach(coachNo) {
 
-    if (!coachNo || !currentCell) return false;
+    if (!coachNo) return false;
 
     for (const line in boardData) {
+
+        if (!boardData[line]) continue;
 
         for (const pos in boardData[line]) {
 
             const coach = boardData[line][pos];
 
+            if (!coach) continue;
+
             if (
-                coach &&
                 coach.coachNo === coachNo &&
+                currentCell &&
                 !(line === currentCell.dataset.line &&
                   pos === currentCell.dataset.position)
             ) {
-
                 return true;
-
             }
-
         }
-
     }
 
     return false;
-
 }
-
 /* =====================================================
    BUTTON EVENTS
 ===================================================== */
@@ -329,33 +312,35 @@ async function saveCoach() {
 
     const coach = getModalData();
 
-    if (duplicateCoach(coach.coachNo)) {
-
-        alert("Coach Number already exists.");
-
+    if (!coach.coachNo) {
+        alert("Please enter Coach Number.");
         return;
+    }
+
+    if (duplicateCoach(coach.coachNo)) {
+        alert("Coach Number already exists.");
+        return;
+    }
+
+    try {
+
+        await set(
+            ref(database, `coachBoard/${coach.line}/${coach.position}`),
+            coach
+        );
+
+        await writeHistory("SAVE", coach);
+
+        coachModal.hide();
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Save Failed");
 
     }
 
-    await set(
-
-        ref(
-            database,
-            `coachBoard/${coach.line}/${coach.position}`
-        ),
-
-        coach
-
-    );
-
-    await writeHistory("SAVE", coach);
-
-    coachModal.hide();
-
-    updateLastUpdate();
-
 }
-
 /* =====================================================
    UPDATE
 ===================================================== */
@@ -364,33 +349,35 @@ async function updateCoach() {
 
     const coach = getModalData();
 
-    if (duplicateCoach(coach.coachNo)) {
-
-        alert("Duplicate Coach Number.");
-
+    if (!coach.coachNo) {
+        alert("Please enter Coach Number.");
         return;
+    }
+
+    if (duplicateCoach(coach.coachNo)) {
+        alert("Duplicate Coach Number.");
+        return;
+    }
+
+    try {
+
+        await set(
+            ref(database, `coachBoard/${coach.line}/${coach.position}`),
+            coach
+        );
+
+        await writeHistory("UPDATE", coach);
+
+        coachModal.hide();
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Update Failed");
 
     }
 
-    await set(
-
-        ref(
-            database,
-            `coachBoard/${coach.line}/${coach.position}`
-        ),
-
-        coach
-
-    );
-
-    await writeHistory("UPDATE", coach);
-
-    coachModal.hide();
-
-    updateLastUpdate();
-
 }
-
 /* =====================================================
    DELETE
 ===================================================== */
@@ -488,14 +475,17 @@ function enableDragDrop() {
 
 function dragStart(e) {
 
-    if (!this.dataset.line) return;
+    if (!this.dataset.line || !this.dataset.position) {
+        e.preventDefault();
+        return;
+    }
 
     dragCell = this;
 
     e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", this.id);
 
 }
-
 /* =====================================================
    DRAG OVER
 ===================================================== */
@@ -512,18 +502,13 @@ function dragOver(e) {
    DROP
 ===================================================== */
 
-async function dropCoach(e) {
+aasync function dropCoach(e) {
 
     e.preventDefault();
 
-    if (!dragCell) return;
-
-    if (dragCell === this) {
-
+    if (!dragCell || dragCell === this) {
         dragCell = null;
-
         return;
-
     }
 
     const fromLine = dragCell.dataset.line;
@@ -532,94 +517,65 @@ async function dropCoach(e) {
     const toLine = this.dataset.line;
     const toPos = this.dataset.position;
 
-    if (!fromLine || !toLine) {
-
+    if (!fromLine || !fromPos || !toLine || !toPos) {
         dragCell = null;
-
         return;
-
     }
 
-    const fromCoach =
-        boardData[fromLine]?.[fromPos] || null;
-
-    const toCoach =
-        boardData[toLine]?.[toPos] || null;
+    const fromCoach = boardData[fromLine]?.[fromPos];
 
     if (!fromCoach) {
-
         dragCell = null;
-
         return;
-
     }
 
-    lastMove = {
+    const toCoach = boardData[toLine]?.[toPos] || null;
 
+    lastMove = {
         fromLine,
         fromPos,
         toLine,
         toPos,
-
         fromCoach: structuredClone(fromCoach),
-
-        toCoach: toCoach
-            ? structuredClone(toCoach)
-            : null
-
+        toCoach: toCoach ? structuredClone(toCoach) : null
     };
 
     const updates = {};
 
-    /* Move dragged coach */
-
-    fromCoach.line = toLine;
-    fromCoach.position = toPos;
-
-    updates[
-        `coachBoard/${toLine}/${toPos}`
-    ] = fromCoach;
-
-    /* Swap */
+    updates[`coachBoard/${toLine}/${toPos}`] = {
+        ...fromCoach,
+        line: toLine,
+        position: toPos
+    };
 
     if (toCoach) {
-
-        toCoach.line = fromLine;
-        toCoach.position = fromPos;
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = toCoach;
-
-    }
-    else {
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = null;
-
+        updates[`coachBoard/${fromLine}/${fromPos}`] = {
+            ...toCoach,
+            line: fromLine,
+            position: fromPos
+        };
+    } else {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = null;
     }
 
     try {
 
-        await update(
-            ref(database),
-            updates
-        );
+        await update(ref(database), updates);
 
-        await writeHistory("MOVE", fromCoach);
+        await writeHistory("MOVE", {
+            ...fromCoach,
+            line: toLine,
+            position: toPos
+        });
 
-    }
-    catch (err) {
+    } catch (err) {
 
-        console.error(err);
-
+        console.error("Drag & Drop Error:", err);
         alert("Drag & Drop Failed");
 
     }
 
     dragCell = null;
-
 }
 
 /* =====================================================
