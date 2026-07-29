@@ -153,8 +153,13 @@ function drawBoard() {
 
             if (!cell) return;
 
-            const card =
-                cell.querySelector(".coach-card");
+            const card = cell.querySelector(".coach-card");
+
+if (card) {
+    card.innerHTML = html;
+} else {
+    cell.innerHTML = `<div class="coach-card">${html}</div>`;
+}
 
             card.innerHTML = `
 
