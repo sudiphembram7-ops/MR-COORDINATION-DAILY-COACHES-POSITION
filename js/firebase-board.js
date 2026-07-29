@@ -1,169 +1,172 @@
-/* =====================================================
+/* ==========================================
+   MR CO-ORDINATION
    firebase-board.js
-   Live Board Sync
-===================================================== */
+========================================== */
 
 import { database } from "./firebase-config.js";
 
 import {
     ref,
-    onValue
+    onValue,
+    get,
+    set,
+    update,
+    remove
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* =====================================================
-   START LIVE BOARD
-===================================================== */
+/* ==========================================
+   BOARD REFERENCE
+========================================== */
 
-function startLiveBoard() {
+const boardRef = ref(database, "coachBoard");
 
-    const boardRef = ref(database, "coachBoard");
+/* ==========================================
+   LIVE LISTENER
+========================================== */
+
+export function listenBoard(callback) {
 
     onValue(boardRef, (snapshot) => {
 
-        if (!snapshot.exists()) {
+        if (snapshot.exists()) {
 
-            console.log("No coach data available.");
+            callback(snapshot.val());
 
-            clearBoard();
+        } else {
 
-            return;
+            callback({});
+
         }
-
-        loadBoard(snapshot.val());
 
     }, (error) => {
 
-        console.error("Firebase Error:", error);
-
-        updateConnection(false);
+        console.error("Firebase Listener Error:", error);
 
     });
 
 }
 
-/* =====================================================
-   LOAD BOARD
-===================================================== */
+/* ==========================================
+   GET ALL BOARD DATA
+========================================== */
 
-function loadBoard(board) {
+export async function getBoard() {
 
-    clearBoard();
+    const snapshot = await get(boardRef);
 
-    Object.keys(board).forEach(line => {
+    if (snapshot.exists()) {
 
-        Object.keys(board[line]).forEach(position => {
+        return snapshot.val();
 
-            const coach = board[line][position];
+    }
 
-            const cellId = `${line}_${position}`;
+    return {};
 
-            const cell = document.getElementById(cellId);
+}
 
-            if (!cell) return;
+/* ==========================================
+   GET SINGLE COACH
+========================================== */
 
-            cell.innerHTML = `
-                <div class="coach-number">
-                    ${coach.coachNo ?? "-"}
-                </div>
+export async function getCoach(line, position) {
 
-                <div class="coach-status">
-                    ${coach.status ?? ""}
-                </div>
-            `;
+    const snapshot = await get(
+        ref(database, `coachBoard/${line}/${position}`)
+    );
 
-            cell.className = "";
+    if (snapshot.exists()) {
 
-            cell.classList.add(getStatusClass(coach.status));
+        return snapshot.val();
 
-        });
+    }
+
+    return null;
+
+}
+
+/* ==========================================
+   SAVE NEW COACH
+========================================== */
+
+export async function saveCoach(coach) {
+
+    await set(
+
+        ref(database,
+            `coachBoard/${coach.line}/${coach.position}`),
+
+        {
+
+            shop: coach.shop,
+            line: coach.line,
+            position: coach.position,
+            coachNo: coach.coachNo,
+            coachType: coach.coachType,
+            status: coach.status,
+            updatedAt: new Date().toISOString()
+
+        }
+
+    );
+
+}
+
+/* ==========================================
+   UPDATE COACH
+========================================== */
+
+export async function updateCoach(coach) {
+
+    await update(
+
+        ref(database,
+            `coachBoard/${coach.line}/${coach.position}`),
+
+        {
+
+            shop: coach.shop,
+            coachNo: coach.coachNo,
+            coachType: coach.coachType,
+            status: coach.status,
+            updatedAt: new Date().toISOString()
+
+        }
+
+    );
+
+}
+
+/* ==========================================
+   DELETE COACH
+========================================== */
+
+export async function deleteCoach(line, position) {
+
+    await remove(
+
+        ref(database,
+            `coachBoard/${line}/${position}`)
+
+    );
+
+}
+
+/* ==========================================
+   DATABASE CONNECTION CHECK
+========================================== */
+
+export function checkConnection(callback) {
+
+    onValue(ref(database, ".info/connected"), (snapshot) => {
+
+        callback(snapshot.val() === true);
 
     });
 
-    updateConnection(true);
-
 }
 
-/* =====================================================
-   STATUS COLOR
-===================================================== */
+/* ==========================================
+   END
+========================================== */
 
-function getStatusClass(status) {
-
-    switch (status) {
-
-        case "PO":
-            return "status-po";
-
-        case "LM":
-            return "status-lm";
-
-        case "MED":
-            return "status-med";
-
-        case "RL":
-            return "status-rl";
-
-        case "WIP":
-            return "status-wip";
-
-        case "HOLD":
-            return "status-hold";
-
-        default:
-            return "";
-    }
-
-}
-
-/* =====================================================
-   CLEAR BOARD
-===================================================== */
-
-function clearBoard() {
-
-    document.querySelectorAll(".coach-table td")
-
-        .forEach(td => {
-
-            td.innerHTML = "";
-
-            td.className = "";
-
-        });
-
-}
-
-/* =====================================================
-   CONNECTION STATUS
-===================================================== */
-
-function updateConnection(ok) {
-
-    const status =
-        document.getElementById("databaseStatus");
-
-    if (!status) return;
-
-    if (ok) {
-
-        status.innerHTML =
-            '<span class="text-success">● Connected</span>';
-
-    } else {
-
-        status.innerHTML =
-            '<span class="text-danger">● Offline</span>';
-
-    }
-
-}
-
-/* =====================================================
-   START
-===================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    startLiveBoard();
-
-});
+console.log("firebase-board.js loaded successfully");
