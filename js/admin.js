@@ -157,7 +157,11 @@ async function saveCoach() {
 
     try {
 
-        await firebaseSaveCoach(coach);
+        console.log(coach);
+
+await firebaseSaveCoach(coach);
+
+console.log("Saved");
 
         await writeAudit("SAVE", coach);
 
