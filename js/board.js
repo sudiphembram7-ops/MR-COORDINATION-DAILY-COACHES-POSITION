@@ -1,7 +1,6 @@
 /* =====================================================
    MR CO-ORDINATION BOARD
-   board.js
-   PART-1
+   PART - 1
 ===================================================== */
 
 import { database } from "./firebase-config.js";
@@ -9,16 +8,25 @@ import { database } from "./firebase-config.js";
 import {
     ref,
     onValue,
-    get
+    get,
+    set,
+    update,
+    remove,
+    push
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-let currentCell = null;
-let boardData = {};
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
 
-const coachModal =
-    new bootstrap.Modal(
-        document.getElementById("coachModal")
-    );
+let boardData = {};
+let currentCell = null;
+let dragCell = null;
+let lastMove = null;
+
+const coachModal = new bootstrap.Modal(
+    document.getElementById("coachModal")
+);
 
 /* =====================================================
    START
@@ -40,35 +48,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function startClock() {
 
-    setInterval(() => {
+    updateClock();
 
-        const now = new Date();
+    setInterval(updateClock, 1000);
 
-        document.getElementById("liveDate").innerText =
-            now.toLocaleDateString("en-IN");
+}
 
-        document.getElementById("liveTime").innerText =
-            now.toLocaleTimeString("en-IN");
+function updateClock() {
 
-    },1000);
+    const now = new Date();
+
+    const date = document.getElementById("liveDate");
+    const time = document.getElementById("liveTime");
+
+    if (date)
+        date.innerText = now.toLocaleDateString("en-IN");
+
+    if (time)
+        time.innerText = now.toLocaleTimeString("en-IN");
 
 }
 
 /* =====================================================
-   FIREBASE LISTENER
+   LOAD BOARD
 ===================================================== */
 
-function loadBoard(){
+function loadBoard() {
 
-    const boardRef =
-        ref(database,"coachBoard");
+    onValue(ref(database, "coachBoard"), (snapshot) => {
 
-    onValue(boardRef,(snapshot)=>{
+        if (snapshot.exists()) {
 
-        if(!snapshot.exists()) return;
+            boardData = snapshot.val();
 
-        boardData =
-            snapshot.val();
+        } else {
+
+            boardData = {};
+
+        }
 
         drawBoard();
 
@@ -80,81 +97,108 @@ function loadBoard(){
    DRAW BOARD
 ===================================================== */
 
-function drawBoard(){
+function drawBoard() {
 
-    Object.keys(boardData).forEach(line=>{
+    document.querySelectorAll(".coach-table td").forEach(td => {
 
-        Object.keys(boardData[line]).forEach(position=>{
+        td.innerHTML = "";
 
-            const coach =
-                boardData[line][position];
+        td.dataset.shop = "";
+        td.dataset.line = "";
+        td.dataset.position = "";
+        td.dataset.coach = "";
+        td.dataset.type = "";
+        td.dataset.status = "";
 
-            const id =
-                line+"_"+position;
+    });
 
-            const cell =
-                document.getElementById(id);
+    Object.keys(boardData).forEach(line => {
 
-            if(!cell) return;
+        Object.keys(boardData[line]).forEach(position => {
 
-            cell.innerHTML=`
+            const coach = boardData[line][position];
 
-<div class="coach-no">
-${coach.coachNo || ""}
-</div>
+            const cell = document.getElementById(
+                `${line}_${position}`
+            );
 
-<div class="coach-type">
-${coach.coachType || ""}
-</div>
+            if (!cell) return;
 
-<div class="coach-status">
-${coach.status || ""}
-</div>
+            cell.innerHTML = `
+                <div class="coach-no">
+                    ${coach.coachNo || ""}
+                </div>
 
-`;
+                <div class="coach-type">
+                    ${coach.coachType || ""}
+                </div>
 
-            cell.dataset.shop =
-                coach.shop || "";
+                <div class="coach-status">
+                    ${coach.status || ""}
+                </div>
+            `;
 
-            cell.dataset.line =
-                line;
-
-            cell.dataset.position =
-                position;
-
-            cell.dataset.coach =
-                coach.coachNo || "";
-
-            cell.dataset.type =
-                coach.coachType || "";
-
-            cell.dataset.status =
-                coach.status || "";
+            cell.dataset.shop = coach.shop || "";
+            cell.dataset.line = line;
+            cell.dataset.position = position;
+            cell.dataset.coach = coach.coachNo || "";
+            cell.dataset.type = coach.coachType || "";
+            cell.dataset.status = coach.status || "";
 
         });
 
     });
 
+    applyStatusColours();
+
+    updateCounters();
+
+    enableDragDrop();
+
 }
 
 /* =====================================================
-   CELL CLICK
+   LAST UPDATE
 ===================================================== */
 
-function enableCellClick(){
+function updateLastUpdate() {
 
-document.addEventListener("click",(e)=>{
+    const now = new Date();
 
-const td =
-e.target.closest(".coach-table td");
+    const last = document.getElementById("lastUpdate");
 
-if(!td) return;
+    if (last) {
 
-currentCell=td;
+        last.innerText =
+            "Updated : " +
+            now.toLocaleTimeString("en-IN");
 
-openModal(td);
+    }
 
-});
+}
+
+/* =====================================================
+   PART - 2
+   CELL CLICK + SAVE + UPDATE + DELETE
+===================================================== */
+
+/* =====================================================
+   ENABLE CELL CLICK
+===================================================== */
+
+function enableCellClick() {
+
+    document.addEventListener("click", (e) => {
+
+        const td = e.target.closest(".coach-table td");
+
+        if (!td) return;
+
+        currentCell = td;
+
+        openModal(td);
+
+    });
 
 }
 
@@ -170,52 +214,99 @@ function openModal(cell) {
     document.getElementById("modalLine").value = line;
     document.getElementById("modalPosition").value = position;
 
-    document.getElementById("modalCoachNo").value = cell.dataset.coach || "";
-    document.getElementById("modalCoachType").value = cell.dataset.type || "";
-    document.getElementById("modalStatus").value = cell.dataset.status || "PO";
+    document.getElementById("modalCoachNo").value =
+        cell.dataset.coach || "";
+
+    document.getElementById("modalCoachType").value =
+        cell.dataset.type || "";
+
+    document.getElementById("modalStatus").value =
+        cell.dataset.status || "PO";
 
     coachModal.show();
+
 }
 
-function getShop(line){
+/* =====================================================
+   SHOP NAME
+===================================================== */
 
-    if(line.startsWith("N")) return "N SHOP";
-    if(line.startsWith("M")) return "M SHOP";
-    if(line.startsWith("SCR")) return "MR SCR SHOP";
-    if(line.startsWith("F")) return "CR SHOP";
-    if(line.startsWith("J")) return "J SHOP";
-    if(line.startsWith("L")) return "LIFTING BAY";
+function getShop(line) {
+
+    if (line.startsWith("N")) return "N SHOP";
+    if (line.startsWith("M")) return "M SHOP";
+    if (line.startsWith("SCR")) return "MR SCR SHOP";
+    if (line.startsWith("F")) return "CR SHOP";
+    if (line.startsWith("J")) return "J SHOP";
+    if (line.startsWith("L")) return "LIFTING BAY";
 
     return "";
-}
-
-/* =====================================================
-   LAST UPDATE
-===================================================== */
-
-function updateLastUpdate(){
-
-const now =
-new Date();
-
-document.getElementById(
-"lastUpdate"
-).innerText =
-"Updated : "+
-now.toLocaleTimeString("en-IN");
 
 }
 
 /* =====================================================
-   PART-2
-   SAVE / UPDATE / DELETE
+   MODAL DATA
 ===================================================== */
 
-import {
-    set,
-    remove,
-    push
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+function getModalData() {
+
+    return {
+
+        shop: document.getElementById("modalShop").value,
+        line: document.getElementById("modalLine").value,
+        position: document.getElementById("modalPosition").value,
+
+        coachNo:
+            document.getElementById("modalCoachNo")
+            .value.trim(),
+
+        coachType:
+            document.getElementById("modalCoachType")
+            .value,
+
+        status:
+            document.getElementById("modalStatus")
+            .value,
+
+        updatedAt:
+            new Date().toISOString()
+
+    };
+
+}
+
+/* =====================================================
+   DUPLICATE CHECK
+===================================================== */
+
+function duplicateCoach(coachNo) {
+
+    if (!coachNo) return false;
+
+    for (const line in boardData) {
+
+        for (const pos in boardData[line]) {
+
+            const coach = boardData[line][pos];
+
+            if (
+                coach &&
+                coach.coachNo === coachNo &&
+                !(line === currentCell.dataset.line &&
+                  pos === currentCell.dataset.position)
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+    return false;
+
+}
 
 /* =====================================================
    BUTTON EVENTS
@@ -234,81 +325,14 @@ document
 ?.addEventListener("click", deleteCoach);
 
 /* =====================================================
-   GET MODAL DATA
-===================================================== */
-
-function getModalData(){
-
-    return{
-
-        shop:
-        document.getElementById("modalShop").value,
-
-        line:
-        document.getElementById("modalLine").value,
-
-        position:
-        document.getElementById("modalPosition").value,
-
-        coachNo:
-        document.getElementById("modalCoachNo").value.trim(),
-
-        coachType:
-        document.getElementById("modalCoachType").value,
-
-        status:
-        document.getElementById("modalStatus").value,
-
-        updatedAt:
-        new Date().toISOString()
-
-    };
-
-}
-
-/* =====================================================
-   DUPLICATE CHECK
-===================================================== */
-
-function duplicateCoach(no){
-
-    if(no==="") return false;
-
-    for(const line in boardData){
-
-        for(const pos in boardData[line]){
-
-            const coach =
-            boardData[line][pos];
-
-            if(
-                coach.coachNo===no &&
-                !(line===currentCell.dataset.line &&
-                  pos===currentCell.dataset.position)
-            ){
-
-                return true;
-
-            }
-
-        }
-
-    }
-
-    return false;
-
-}
-
-/* =====================================================
    SAVE
 ===================================================== */
 
-async function saveCoach(){
+async function saveCoach() {
 
-    const coach =
-    getModalData();
+    const coach = getModalData();
 
-    if(duplicateCoach(coach.coachNo)){
+    if (duplicateCoach(coach.coachNo)) {
 
         alert("Coach Number already exists.");
 
@@ -320,14 +344,14 @@ async function saveCoach(){
 
         ref(
             database,
-            "coachBoard/"+coach.line+"/"+coach.position
+            `coachBoard/${coach.line}/${coach.position}`
         ),
 
         coach
 
     );
 
-    await writeHistory("SAVE",coach);
+    await writeHistory("SAVE", coach);
 
     coachModal.hide();
 
@@ -339,12 +363,11 @@ async function saveCoach(){
    UPDATE
 ===================================================== */
 
-async function updateCoach(){
+async function updateCoach() {
 
-    const coach =
-    getModalData();
+    const coach = getModalData();
 
-    if(duplicateCoach(coach.coachNo)){
+    if (duplicateCoach(coach.coachNo)) {
 
         alert("Duplicate Coach Number.");
 
@@ -356,14 +379,14 @@ async function updateCoach(){
 
         ref(
             database,
-            "coachBoard/"+coach.line+"/"+coach.position
+            `coachBoard/${coach.line}/${coach.position}`
         ),
 
         coach
 
     );
 
-    await writeHistory("UPDATE",coach);
+    await writeHistory("UPDATE", coach);
 
     coachModal.hide();
 
@@ -375,32 +398,27 @@ async function updateCoach(){
    DELETE
 ===================================================== */
 
-async function deleteCoach(){
+async function deleteCoach() {
 
-    if(
-!confirm("Delete this coach?")
-) return;
+    if (!confirm("Delete this coach?"))
+        return;
 
-const coach =
-getModalData();
+    const coach = getModalData();
 
-await remove(
+    await remove(
 
-ref(
-database,
-"coachBoard/"+coach.line+"/"+coach.position
-)
+        ref(
+            database,
+            `coachBoard/${coach.line}/${coach.position}`
+        )
 
-);
+    );
 
-await writeHistory(
-"DELETE",
-coach
-);
+    await writeHistory("DELETE", coach);
 
-coachModal.hide();
+    coachModal.hide();
 
-updateLastUpdate();
+    updateLastUpdate();
 
 }
 
@@ -408,48 +426,43 @@ updateLastUpdate();
    HISTORY
 ===================================================== */
 
-async function writeHistory(action,coach){
+async function writeHistory(action, coach) {
 
-await push(
+    await push(
 
-ref(database,"history"),
+        ref(database, "history"),
 
-{
+        {
 
-action,
+            action,
 
-shop:
-coach.shop,
+            shop: coach.shop,
 
-line:
-coach.line,
+            line: coach.line,
 
-position:
-coach.position,
+            position: coach.position,
 
-coachNo:
-coach.coachNo,
+            coachNo: coach.coachNo,
 
-coachType:
-coach.coachType,
+            coachType: coach.coachType,
 
-status:
-coach.status,
+            status: coach.status,
 
-time:
-new Date().toISOString()
+            time: new Date().toISOString()
+
+        }
+
+    );
 
 }
 
-);
-
-}
 
 /* =====================================================
-   PART-3
-   DRAG & DROP SYSTEM
+   PART - 3
+   100% WORKING DRAG & DROP
 ===================================================== */
 
+let dragCell = null;
 let lastMove = null;
 
 /* =====================================================
@@ -462,33 +475,29 @@ function enableDragDrop() {
 
         cell.draggable = true;
 
+        cell.removeEventListener("dragstart", dragStart);
+        cell.removeEventListener("dragover", dragOver);
+        cell.removeEventListener("drop", dropCoach);
+
         cell.addEventListener("dragstart", dragStart);
-
         cell.addEventListener("dragover", dragOver);
-
         cell.addEventListener("drop", dropCoach);
 
     });
 
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    setTimeout(enableDragDrop,1000);
-
-});
-
 /* =====================================================
    DRAG START
 ===================================================== */
 
-let dragCell = null;
+function dragStart(e) {
 
-function dragStart(e){
+    if (!this.dataset.line) return;
 
     dragCell = this;
 
-    e.dataTransfer.effectAllowed="move";
+    e.dataTransfer.effectAllowed = "move";
 
 }
 
@@ -496,9 +505,11 @@ function dragStart(e){
    DRAG OVER
 ===================================================== */
 
-function dragOver(e){
+function dragOver(e) {
 
     e.preventDefault();
+
+    e.dataTransfer.dropEffect = "move";
 
 }
 
@@ -506,165 +517,182 @@ function dragOver(e){
    DROP
 ===================================================== */
 
-async function dropCoach(e){
+async function dropCoach(e) {
 
     e.preventDefault();
 
-    if(!dragCell) return;
+    if (!dragCell) return;
 
-    if(dragCell===this) return;
+    if (dragCell === this) {
 
-    const fromLine =
-        dragCell.dataset.line;
+        dragCell = null;
 
-    const fromPos =
-        dragCell.dataset.position;
+        return;
 
-    const toLine =
-        this.dataset.line;
+    }
 
-    const toPos =
-        this.dataset.position;
+    const fromLine = dragCell.dataset.line;
+    const fromPos = dragCell.dataset.position;
+
+    const toLine = this.dataset.line;
+    const toPos = this.dataset.position;
+
+    if (!fromLine || !toLine) {
+
+        dragCell = null;
+
+        return;
+
+    }
 
     const fromCoach =
-        boardData[fromLine][fromPos] || {};
+        boardData[fromLine]?.[fromPos] || null;
 
     const toCoach =
-        boardData[toLine]?.[toPos] || {};
+        boardData[toLine]?.[toPos] || null;
+
+    if (!fromCoach) {
+
+        dragCell = null;
+
+        return;
+
+    }
 
     lastMove = {
 
         fromLine,
-
         fromPos,
-
         toLine,
-
         toPos,
 
-        fromCoach,
+        fromCoach: structuredClone(fromCoach),
 
-        toCoach
+        toCoach: toCoach
+            ? structuredClone(toCoach)
+            : null
 
     };
 
+    const updates = {};
+
+    /* Move dragged coach */
+
+    fromCoach.line = toLine;
+    fromCoach.position = toPos;
+
+    updates[
+        `coachBoard/${toLine}/${toPos}`
+    ] = fromCoach;
+
     /* Swap */
 
-    await set(
+    if (toCoach) {
 
-        ref(database,
-        "coachBoard/"+toLine+"/"+toPos),
+        toCoach.line = fromLine;
+        toCoach.position = fromPos;
 
-        fromCoach
+        updates[
+            `coachBoard/${fromLine}/${fromPos}`
+        ] = toCoach;
 
-    );
+    }
+    else {
 
-    await set(
+        updates[
+            `coachBoard/${fromLine}/${fromPos}`
+        ] = null;
 
-        ref(database,
-        "coachBoard/"+fromLine+"/"+fromPos),
+    }
 
-        toCoach
+    try {
 
-    );
+        await update(
+            ref(database),
+            updates
+        );
+
+        await writeHistory("MOVE", fromCoach);
+
+    }
+    catch (err) {
+
+        console.error(err);
+
+        alert("Drag & Drop Failed");
+
+    }
 
     dragCell = null;
 
 }
 
 /* =====================================================
-   CTRL+Z UNDO
+   CTRL + Z
 ===================================================== */
 
-document.addEventListener("keydown",async(e)=>{
+document.addEventListener("keydown", async (e) => {
 
-if(!(e.ctrlKey && e.key==="z")) return;
+    if (!(e.ctrlKey && e.key === "z"))
+        return;
 
-if(!lastMove) return;
+    if (!lastMove)
+        return;
 
-await set(
+    const undo = {};
 
-ref(database,
-"coachBoard/"
-+lastMove.fromLine+"/"
-+lastMove.fromPos),
+    undo[
+        `coachBoard/${lastMove.fromLine}/${lastMove.fromPos}`
+    ] = lastMove.fromCoach;
 
-lastMove.fromCoach
+    undo[
+        `coachBoard/${lastMove.toLine}/${lastMove.toPos}`
+    ] = lastMove.toCoach;
 
-);
+    await update(
+        ref(database),
+        undo
+    );
 
-await set(
-
-ref(database,
-"coachBoard/"
-+lastMove.toLine+"/"
-+lastMove.toPos),
-
-lastMove.toCoach
-
-);
-
-alert("Last Move Restored");
+    alert("Last Move Restored");
 
 });
 
 /* =====================================================
-   CELL ANIMATION
+   HIGHLIGHT
 ===================================================== */
 
-document.addEventListener("dragenter",(e)=>{
+document.addEventListener("dragenter", e => {
 
-const td=e.target.closest(".coach-table td");
+    const td = e.target.closest(".coach-table td");
 
-if(td){
-
-td.style.background="#d1ecf1";
-
-}
+    if (td)
+        td.classList.add("table-info");
 
 });
 
-document.addEventListener("dragleave",(e)=>{
+document.addEventListener("dragleave", e => {
 
-const td=e.target.closest(".coach-table td");
+    const td = e.target.closest(".coach-table td");
 
-if(td){
-
-td.style.background="";
-
-}
+    if (td)
+        td.classList.remove("table-info");
 
 });
 
-document.addEventListener("drop",(e)=>{
+document.addEventListener("drop", e => {
 
-const td=e.target.closest(".coach-table td");
+    const td = e.target.closest(".coach-table td");
 
-if(td){
-
-td.style.background="";
-
-}
+    if (td)
+        td.classList.remove("table-info");
 
 });
+
 
 /* =====================================================
-   RELOAD DRAG AFTER FIREBASE UPDATE
-===================================================== */
-
-const oldDrawBoard = drawBoard;
-
-drawBoard = function(){
-
-    oldDrawBoard();
-
-    enableDragDrop();
-
-};
-
-/* =====================================================
-   PART-4
-   DASHBOARD / SEARCH / EXPORT / TV MODE
+   PART - 4
+   DASHBOARD / SEARCH / EXPORT / STATUS
 ===================================================== */
 
 /* =====================================================
@@ -673,61 +701,20 @@ drawBoard = function(){
 
 function updateCounters() {
 
-    const cells =
-        document.querySelectorAll(".coach-table td");
+    const cells = document.querySelectorAll(".coach-table td");
 
     let total = cells.length;
     let occupied = 0;
-    let free = 0;
-
-    let po = 0;
-    let lm = 0;
-    let med = 0;
-    let rl = 0;
-    let hold = 0;
-    let wip = 0;
 
     cells.forEach(cell => {
 
         if ((cell.dataset.coach || "").trim() !== "") {
-
             occupied++;
-
-            switch (cell.dataset.status) {
-
-                case "PO":
-                    po++;
-                    break;
-
-                case "LM":
-                    lm++;
-                    break;
-
-                case "MED":
-                    med++;
-                    break;
-
-                case "RL":
-                    rl++;
-                    break;
-
-                case "R 1":
-                    hold++;
-                    break;
-
-                case "L":
-                    wip++;
-                    break;
-                 Ccase "HVY":
-                    wip++;
-                    break;
-            }
-
         }
 
     });
 
-    free = total - occupied;
+    const free = total - occupied;
 
     document.getElementById("totalCoach").innerText = total;
     document.getElementById("occupiedCoach").innerText = occupied;
@@ -736,175 +723,131 @@ function updateCounters() {
 }
 
 /* =====================================================
-   SEARCH
+   STATUS COLOURS
 ===================================================== */
 
-const search =
-document.getElementById("searchBox");
+function applyStatusColours() {
 
-if(search){
+    document.querySelectorAll(".coach-table td").forEach(td => {
 
-search.addEventListener("keyup",function(){
+        td.classList.remove(
+            "status-po",
+            "status-lm",
+            "status-med",
+            "status-rl",
+            "status-hold",
+            "status-wip"
+        );
 
-const value =
-this.value.toUpperCase();
+        switch (td.dataset.status) {
 
-document.querySelectorAll(".coach-table td")
+            case "PO":
+                td.classList.add("status-po");
+                break;
 
-.forEach(td=>{
+            case "LM":
+                td.classList.add("status-lm");
+                break;
 
-td.style.outline="";
+            case "MED":
+                td.classList.add("status-med");
+                break;
 
-if(td.innerText
-.toUpperCase()
-.includes(value)
-&& value!=""){
+            case "RL":
+                td.classList.add("status-rl");
+                break;
 
-td.style.outline=
-"3px solid red";
+            case "HOLD":
+                td.classList.add("status-hold");
+                break;
 
-td.scrollIntoView({
+            case "WIP":
+                td.classList.add("status-wip");
+                break;
+        }
 
-behavior:"smooth",
-
-block:"center"
-
-});
-
-}
-
-});
-
-});
+    });
 
 }
 
 /* =====================================================
-   STATUS COLOR
+   SEARCH
 ===================================================== */
 
-function applyStatusColours(){
+document.getElementById("searchBox")
+?.addEventListener("keyup", function () {
 
-document.querySelectorAll(".coach-table td")
+    const value = this.value.toUpperCase();
 
-.forEach(td=>{
+    document.querySelectorAll(".coach-table td").forEach(td => {
 
-td.classList.remove(
+        td.style.outline = "";
 
-"status-po",
-"status-lm",
-"status-med",
-"status-rl",
-"status-hold",
-"status-wip"
+        if (
+            value !== "" &&
+            td.innerText.toUpperCase().includes(value)
+        ) {
 
-);
+            td.style.outline = "3px solid red";
 
-switch(td.dataset.status){
+            td.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
 
-case "PO":
+        }
 
-td.classList.add("status-po");
-
-break;
-
-case "LM":
-
-td.classList.add("status-lm");
-
-break;
-
-case "MED":
-
-td.classList.add("status-med");
-
-break;
-
-case "RL":
-
-td.classList.add("status-rl");
-
-break;
-
-case "HOLD":
-
-td.classList.add("status-hold");
-
-break;
-
-case "WIP":
-
-td.classList.add("status-wip");
-
-break;
-
-}
+    });
 
 });
-
-}
 
 /* =====================================================
    PDF
 ===================================================== */
 
-document
-.getElementById("pdfBtn")
-?.addEventListener("click",()=>{
+document.getElementById("pdfBtn")
+?.addEventListener("click", () => {
 
-window.print();
+    window.print();
 
 });
 
 /* =====================================================
-   EXCEL
+   EXPORT CSV
 ===================================================== */
 
-document
-.getElementById("excelBtn")
-?.addEventListener("click",()=>{
+document.getElementById("excelBtn")
+?.addEventListener("click", () => {
 
-let csv="";
+    let csv = "";
 
-document.querySelectorAll(".coach-table tr")
+    document.querySelectorAll(".coach-table tr").forEach(row => {
 
-.forEach(row=>{
+        let cols = [];
 
-let cols=[];
+        row.querySelectorAll("th,td").forEach(col => {
 
-row.querySelectorAll("th,td")
+            cols.push(
+                `"${col.innerText.replace(/\n/g, " ")}"`
+            );
 
-.forEach(c=>{
+        });
 
-cols.push(
+        csv += cols.join(",") + "\n";
 
-c.innerText.replace(/\n/g," ")
+    });
 
-);
+    const blob = new Blob([csv], {
+        type: "text/csv"
+    });
 
-});
+    const a = document.createElement("a");
 
-csv+=cols.join(",")+"\n";
+    a.href = URL.createObjectURL(blob);
 
-});
+    a.download = "MR_COACH_BOARD.csv";
 
-const blob=
-new Blob([csv],{
-
-type:"text/csv"
-
-});
-
-const a=
-document.createElement("a");
-
-a.href=
-URL.createObjectURL(blob);
-
-a.download=
-"MR_BOARD.csv";
-
-a.click();
+    a.click();
 
 });
 
@@ -912,31 +855,29 @@ a.click();
    REFRESH
 ===================================================== */
 
-document
-.getElementById("refreshBtn")
-?.addEventListener("click",()=>{
+document.getElementById("refreshBtn")
+?.addEventListener("click", () => {
 
-location.reload();
+    location.reload();
 
 });
 
 /* =====================================================
-   FULL SCREEN
+   FULLSCREEN
 ===================================================== */
 
-document
-.getElementById("fullscreenBtn")
-?.addEventListener("click",()=>{
+document.getElementById("fullscreenBtn")
+?.addEventListener("click", () => {
 
-if(!document.fullscreenElement){
+    if (!document.fullscreenElement) {
 
-document.documentElement.requestFullscreen();
+        document.documentElement.requestFullscreen();
 
-}else{
+    } else {
 
-document.exitFullscreen();
+        document.exitFullscreen();
 
-}
+    }
 
 });
 
@@ -944,74 +885,56 @@ document.exitFullscreen();
    TV MODE
 ===================================================== */
 
-if(window.innerWidth>=1920){
+if (window.innerWidth >= 1920) {
 
-document.body.classList.add("tv-mode");
+    document.body.classList.add("tv-mode");
 
 }
 
 /* =====================================================
-   KEYBOARD
+   SHORTCUT KEYS
 ===================================================== */
 
-document.addEventListener("keydown",(e)=>{
+document.addEventListener("keydown", e => {
 
-if(e.key==="F11"){
+    if (e.ctrlKey && e.key === "f") {
 
-e.preventDefault();
+        e.preventDefault();
 
-if(!document.fullscreenElement){
+        document.getElementById("searchBox")?.focus();
 
-document.documentElement.requestFullscreen();
+    }
 
-}else{
+    if (e.key === "F11") {
 
-document.exitFullscreen();
+        e.preventDefault();
 
-}
+        if (!document.fullscreenElement) {
 
-}
+            document.documentElement.requestFullscreen();
 
-if(e.ctrlKey && e.key==="f"){
+        } else {
 
-e.preventDefault();
+            document.exitFullscreen();
 
-document.getElementById("searchBox")?.focus();
+        }
 
-}
+    }
 
 });
 
 /* =====================================================
-   LAST UPDATE
+   FOOTER CLOCK
 ===================================================== */
 
-setInterval(()=>{
+setInterval(() => {
 
-const t=
-document.getElementById("lastUpdateTime");
+    const t = document.getElementById("lastUpdateTime");
 
-if(t){
+    if (t) {
 
-t.innerText=
-new Date().toLocaleTimeString("en-IN");
+        t.innerText = new Date().toLocaleTimeString("en-IN");
 
-}
+    }
 
-},1000);
-
-/* =====================================================
-   AUTO UPDATE AFTER DRAW
-===================================================== */
-
-const oldDraw = drawBoard;
-
-drawBoard = function(){
-
-oldDraw();
-
-applyStatusColours();
-
-updateCounters();
-
-};
+}, 1000);
