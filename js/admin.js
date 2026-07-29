@@ -506,105 +506,19 @@ function updateDashboardStats() {
    RENDER HISTORY TABLE
 ========================================== */
 
-function renderHistory(data) {
 
-    const table = document.getElementById("historyTable");
-
-    if (!table) return;
-
-    table.innerHTML = "";
-
-    Object.keys(data).forEach(line => {
-
-        Object.keys(data[line]).forEach(position => {
-
-            const coach = data[line][position];
-
-            const row = table.insertRow();
-
-            row.innerHTML = `
-                <td>${coach.shop || ""}</td>
-                <td>${line}</td>
-                <td>${position}</td>
-                <td>${coach.coachNo || ""}</td>
-                <td>${coach.coachType || ""}</td>
-                <td>${coach.status || ""}</td>
-                <td>${coach.updatedAt ?
-                    new Date(coach.updatedAt).toLocaleString("en-IN")
-                    : ""}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary"
-                        onclick="editCoach('${line}','${position}')">
-                        Edit
-                    </button>
-                </td>
-            `;
-
-        });
-
-    });
-
-}
 
 /* ==========================================
    SEARCH
 ========================================== */
 
-const searchBox = document.getElementById("searchCoach");
 
-if (searchBox) {
-
-    searchBox.addEventListener("keyup", function () {
-
-        const value = this.value.toUpperCase();
-
-        document.querySelectorAll("#historyTable tr")
-            .forEach(row => {
-
-                row.style.display =
-                    row.innerText.toUpperCase().includes(value)
-                        ? ""
-                        : "none";
-
-            });
-
-    });
-
-}
 
 /* ==========================================
    SHOP FILTER
 ========================================== */
 
-const shopFilter =
-    document.getElementById("shopFilter");
 
-if (shopFilter) {
-
-    shopFilter.addEventListener("change", function () {
-
-        const value = this.value.toUpperCase();
-
-        document.querySelectorAll("#historyTable tr")
-            .forEach(row => {
-
-                if (value === "ALL") {
-
-                    row.style.display = "";
-                    return;
-
-                }
-
-                row.style.display =
-                    row.cells[0].innerText.toUpperCase() === value
-                        ? ""
-                        : "none";
-
-            });
-
-    });
-
-}
 
 /* ==========================================
    DASHBOARD COUNTERS
