@@ -1,7 +1,7 @@
-/* =====================================================
+/* ==========================================
    firebase-config.js
-   Firebase v11 Configuration
-===================================================== */
+   Firebase Configuration
+========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 
@@ -9,41 +9,46 @@ import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-
 
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-/* =====================================================
+/* ==========================================
    YOUR FIREBASE CONFIG
-   Replace these values with your own project settings.
-===================================================== */
+========================================== */
 
 const firebaseConfig = {
 
-    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
+    apiKey: "YOUR_API_KEY",
 
-    authDomain: "mr-coordi-coach.firebaseapp.com",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
 
-    databaseURL: "https://mr-coordi-coach-default-rtdb.firebaseio.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-    projectId: "mr-coordi-coach",
+    projectId: "YOUR_PROJECT_ID",
 
-    storageBucket: "mr-coordi-coach.firebasestorage.app",
+    storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
 
-    messagingSenderId: "955185707268",
+    messagingSenderId: "YOUR_SENDER_ID",
 
-    appId: "1:955185707268:web:31d017094ffc97da65f851"
+    appId: "YOUR_APP_ID"
 
 };
 
-/* =====================================================
+/* ==========================================
    INITIALIZE FIREBASE
-===================================================== */
+========================================== */
 
 const app = initializeApp(firebaseConfig);
 
-const database = getDatabase(app);
+/* ==========================================
+   EXPORT SERVICES
+========================================== */
 
-const auth = getAuth(app);
+export const database = getDatabase(app);
 
-/* =====================================================
-   EXPORT
-===================================================== */
+export const auth = getAuth(app);
 
-export { app, database, auth };
+export default app;
+
+/* ==========================================
+   CHECK
+========================================== */
+
+console.log("Firebase Connected Successfully");
