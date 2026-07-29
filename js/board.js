@@ -33,18 +33,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function loadBoard() {
 
-    listenBoard((data) => {
+    if (loadBoard.loaded) return;
+    loadBoard.loaded = true;
 
+    listenBoard((data) => {
         boardData = data || {};
 
         renderBoard();
-
         updateCounters();
-
         updateLastUpdate();
-
         updateDatabaseStatus(true);
-
     });
 
 }
