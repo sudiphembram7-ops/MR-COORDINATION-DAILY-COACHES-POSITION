@@ -1,5 +1,5 @@
 /* ==========================================
-   MR CO-ORDINATION ADMIN PANEL
+ ADMIN PANEL
    admin.js
 ========================================== */
 console.log("admin.js loaded");
