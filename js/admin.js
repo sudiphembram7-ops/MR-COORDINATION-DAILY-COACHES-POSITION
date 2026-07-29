@@ -419,12 +419,14 @@ function updateDashboardStats() {
         rows.length;
 
     let po = 0;
-
+let s = 0;
     let lm = 0;
 
     let med = 0;
     let rl = 0;
     let r1 = 0;
+    let rs = 0;
+    let hvy = 0;
 
     rows.forEach(r => {
 
@@ -433,14 +435,17 @@ function updateDashboardStats() {
 const s = r.cells[5].innerText;
 
         if (s === "PO") po++;
+        if (s === "S") s++;
 
         if (s === "LM") lm++;
 
         if (s === "MED") med++;
         
-        if (s=== "RL") med++;
+        if (s=== "RL") rl++;
         
         if (s=== "R1") r1++;
+        if (s === "RS") rs++;
+        if (s === "HVY") hvy++;
 
     });
 
