@@ -128,11 +128,11 @@ function drawBoard() {
 
             const card = cell.querySelector(".coach-card");
 
-            if (card) {
-                card.innerHTML = html;
-            } else {
-                cell.innerHTML = html;
-            }
+if(card){
+    card.innerHTML="";
+}else{
+    cell.innerHTML='<div class="coach-card"></div>';
+}
 
             cell.dataset.shop = coach.shop || "";
             cell.dataset.line = line;
@@ -513,7 +513,7 @@ function dragOver(e) {
    DROP
 ===================================================== */
 
-aasync function dropCoach(e) {
+async function dropCoach(e) {
 
     e.preventDefault();
 
@@ -702,12 +702,13 @@ function applyStatusColours() {
 
         td.classList.remove(
             "status-po",
+            "status-s",
             "status-lm",
             "status-med",
             "status-rl",
-            "status-r 1",
-            "status-r s"
-            "status-l"
+            "status-r1",
+            "status-rs"
+            "status-l",
             "status-hvy"
         );
 
@@ -717,6 +718,9 @@ function applyStatusColours() {
 
             case "PO":
                 td.classList.add("status-po");
+                break;
+            case "S":
+                td.classList.add("status-s");
                 break;
 
             case "LM":
@@ -732,17 +736,17 @@ function applyStatusColours() {
                 break;
                 
 
-            case "R 1":
-                td.classList.add("status-r 1");
+            case "R1":
+                td.classList.add("status-r1");
                 break;
-                case "R S":
-                td.classList.add("status-r s");
+            case "RS":
+                td.classList.add("status-rs");
                 break;
 
             case "L":
                 td.classList.add("status-l");
                 break;
-                case "HVY":
+            case "HVY":
                 td.classList.add("status-hvy");
                 break;
         }
