@@ -33,15 +33,12 @@ const coachModal = new bootstrap.Modal(
 ===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-
     startClock();
-
     loadBoard();
-
     enableCellClick();
-
+    enableDragDrop();
+    updateCounters();
 });
-
 /* =====================================================
    LIVE CLOCK
 ===================================================== */
@@ -76,23 +73,10 @@ function updateClock() {
 function loadBoard() {
 
     onValue(ref(database, "coachBoard"), (snapshot) => {
-
-        if (snapshot.exists()) {
-
-            boardData = snapshot.val();
-
-        } else {
-
-            boardData = {};
-
-        }
-
-        drawBoard();
-
-    });
-
-}
-
+    boardData = snapshot.exists() ? snapshot.val() : {};
+    drawBoard();
+    updateLastUpdate();
+});
 /* =====================================================
    DRAW BOARD
 ===================================================== */
