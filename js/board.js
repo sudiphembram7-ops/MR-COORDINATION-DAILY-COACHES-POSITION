@@ -370,46 +370,28 @@ if (fullscreenBtn) {
    EXPORT CSV (Excel)
 ========================================== */
 
-const excelBtn =
-    document.getElementById("excelBtn");
+function exportCSV() {
 
-if (excelBtn) {
+    let csv = "Line,Position,Coach No,Coach Type,Status\n";
 
-    excelBtn.addEventListener("click", () => {
+    Object.keys(boardData).forEach(line => {
 
-        let csv =
-            "Line,Position,Coach No,Coach Type,Status\n";
+        Object.keys(boardData[line]).forEach(position => {
 
-        Object.keys(boardData).forEach(line => {
+            const coach = boardData[line][position];
 
-            Object.keys(boardData[line]).forEach(position => {
-
-                const coach = boardData[line][position];
-
-                csv +=
-                    `${line},${position},${coach.coachNo || ""},${coach.coachType || ""},${coach.status || ""}\n`;
-
-            });
+            csv += `${line},${position},${coach.coachNo || ""},${coach.coachType || ""},${coach.status || ""}\n`;
 
         });
-
-        const blob = new Blob([csv], {
-            type: "text/csv"
-        });
-
-        const link =
-            document.createElement("a");
-
-        link.href =
-            URL.createObjectURL(blob);
-
-        link.download =
-            "MR_Coach_Position.csv";
-
-        link.click();
 
     });
 
+    const blob = new Blob([csv], { type: "text/csv" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "MR_Coach_Position.csv";
+    link.click();
 }
 
 /* ==========================================
