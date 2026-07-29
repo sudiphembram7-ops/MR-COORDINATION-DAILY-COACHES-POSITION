@@ -31,6 +31,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let sourceCell = null;
 
+export function enableDragDrop() {
+
+    document.querySelectorAll(".coach-card").forEach(card => {
+        card.draggable = true;
+        card.removeEventListener("dragstart", dragStart);
+        card.addEventListener("dragstart", dragStart);
+    });
+
+    document.querySelectorAll("td[id]").forEach(cell => {
+        cell.removeEventListener("dragover", dragOver);
+        cell.removeEventListener("drop", dropCoach);
+
+        cell.addEventListener("dragover", dragOver);
+        cell.addEventListener("drop", dropCoach);
+    });
+
+}
 function dragStart(e) {
 
     sourceCell = e.target.closest("td");
