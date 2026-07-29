@@ -49,9 +49,7 @@ export function enableDragDrop() {
 
 }
 function dragStart(e) {
-
-    sourceCell = e.target.closest("td");
-
+    sourceCell = e.currentTarget.closest("td");
 }
 
 function dragOver(e) {
@@ -81,8 +79,10 @@ async function dropCoach(e) {
     coach.position = toPos;
 
     await saveCoach(coach);
+await deleteCoach(fromLine, fromPos);
 
-    await deleteCoach(fromLine, fromPos);
+sourceCell = null;
 
-    sourceCell = null;
+// Refresh drag
+enableDragDrop();
 }
