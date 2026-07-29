@@ -595,31 +595,36 @@ aasync function dropCoach(e) {
 
 document.addEventListener("keydown", async (e) => {
 
-    if (!(e.ctrlKey && e.key === "z"))
-        return;
+    if (!(e.ctrlKey && e.key.toLowerCase() === "z")) return;
+    if (!lastMove) return;
 
-    if (!lastMove)
-        return;
+    try {
 
-    const undo = {};
+        const updates = {};
 
-    undo[
-        `coachBoard/${lastMove.fromLine}/${lastMove.fromPos}`
-    ] = lastMove.fromCoach;
+        updates[`coachBoard/${lastMove.fromLine}/${lastMove.fromPos}`] =
+            lastMove.fromCoach;
 
-    undo[
-        `coachBoard/${lastMove.toLine}/${lastMove.toPos}`
-    ] = lastMove.toCoach;
+        updates[`coachBoard/${lastMove.toLine}/${lastMove.toPos}`] =
+            lastMove.toCoach;
 
-    await update(
-        ref(database),
-        undo
-    );
+        await update(ref(database), updates);
 
-    alert("Last Move Restored");
+        await writeHistory("UNDO", lastMove.fromCoach);
+
+        lastMove = null;
+
+        alert("Undo Successful");
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Undo Failed");
+
+    }
 
 });
-
 /* =====================================================
    HIGHLIGHT
 ===================================================== */
@@ -783,8 +788,7 @@ if (searchBox) {
    PDF
 ===================================================== */
 
-document.getElementById("pdfBtn")
-?.addEventListener("click", () => {
+document.getElementById("pdfBtn")?.addEventListener("click", () => {
 
     window.print();
 
@@ -833,10 +837,9 @@ document.getElementById("excelBtn")
    REFRESH
 ===================================================== */
 
-document.getElementById("refreshBtn")
-?.addEventListener("click", () => {
+document.getElementById("refreshBtn")?.addEventListener("click", () => {
 
-    location.reload();
+    loadBoard();
 
 });
 
@@ -845,15 +848,23 @@ document.getElementById("refreshBtn")
 ===================================================== */
 
 document.getElementById("fullscreenBtn")
-?.addEventListener("click", () => {
+?.addEventListener("click", async () => {
 
-    if (!document.fullscreenElement) {
+    try {
 
-        document.documentElement.requestFullscreen();
+        if (!document.fullscreenElement) {
 
-    } else {
+            await document.documentElement.requestFullscreen();
 
-        document.exitFullscreen();
+        } else {
+
+            await document.exitFullscreen();
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
 
     }
 
@@ -911,7 +922,7 @@ setInterval(() => {
 
     if (t) {
 
-        t.innerText = new Date().toLocaleTimeString("en-IN");
+        t.textContent = new Date().toLocaleTimeString("en-IN");
 
     }
 
