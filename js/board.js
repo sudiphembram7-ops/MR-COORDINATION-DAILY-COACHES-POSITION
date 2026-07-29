@@ -705,8 +705,10 @@ function applyStatusColours() {
             "status-lm",
             "status-med",
             "status-rl",
-            "status-r1",
+            "status-r 1",
+            "status-r s"
             "status-l"
+            "status-hvy"
         );
 
         const status = (td.dataset.status || "").toUpperCase();
@@ -728,13 +730,20 @@ function applyStatusColours() {
             case "RL":
                 td.classList.add("status-rl");
                 break;
+                
 
-            case "R1":
-                td.classList.add("status-r1");
+            case "R 1":
+                td.classList.add("status-r 1");
+                break;
+                case "R S":
+                td.classList.add("status-r s");
                 break;
 
             case "L":
                 td.classList.add("status-l");
+                break;
+                case "HVY":
+                td.classList.add("status-hvy");
                 break;
         }
 
