@@ -693,7 +693,9 @@ function applyStatusColours() {
             "status-l"
         );
 
-        switch (td.dataset.status) {
+        const status = (td.dataset.status || "").toUpperCase();
+
+        switch (status) {
 
             case "PO":
                 td.classList.add("status-po");
