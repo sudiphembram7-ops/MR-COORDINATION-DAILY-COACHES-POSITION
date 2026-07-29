@@ -1,6 +1,7 @@
 /* ==========================================
    dragdrop.js
    MR CO-ORDINATION
+   Desktop + Mobile
 ========================================== */
 
 import {
@@ -9,80 +10,134 @@ import {
     deleteCoach
 } from "./firebase-board.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    document.querySelectorAll(".coach-card").forEach(card => {
-
-        card.setAttribute("draggable", "true");
-
-        card.addEventListener("dragstart", dragStart);
-
-    });
-
-    document.querySelectorAll("td").forEach(cell => {
-
-        cell.addEventListener("dragover", dragOver);
-
-        cell.addEventListener("drop", dropCoach);
-
-    });
-
-});
-
 let sourceCell = null;
 
 export function enableDragDrop() {
 
     document.querySelectorAll(".coach-card").forEach(card => {
-        card.draggable = true;
-        card.removeEventListener("dragstart", dragStart);
-        card.addEventListener("dragstart", dragStart);
-    });
 
-    document.querySelectorAll("td[id]").forEach(cell => {
-        cell.removeEventListener("dragover", dragOver);
-        cell.removeEventListener("drop", dropCoach);
+        card.style.touchAction = "none";
 
-        cell.addEventListener("dragover", dragOver);
-        cell.addEventListener("drop", dropCoach);
+        card.onpointerdown = pointerDown;
+
     });
 
 }
-function dragStart(e) {
-    sourceCell = e.currentTarget.closest("td");
+
+function pointerDown(e) {
+
+    const card = e.currentTarget;
+
+    sourceCell = card.closest("td");
+
+    if (!sourceCell) return;
+
+    card.setPointerCapture(e.pointerId);
+
+    card.style.opacity = "0.5";
+
+    card.onpointermove = pointerMove;
+
+    card.onpointerup = pointerUp;
+
 }
 
-function dragOver(e) {
+function pointerMove(e) {
 
-    e.preventDefault();
+    const card = e.currentTarget;
+
+    card.style.position = "fixed";
+    card.style.left = e.clientX - 40 + "px";
+    card.style.top = e.clientY - 20 + "px";
+    card.style.zIndex = "9999";
+    card.style.pointerEvents = "none";
 
 }
 
-async function dropCoach(e) {
+async function pointerUp(e) {
 
-    e.preventDefault();
+    const card = e.currentTarget;
 
-    const targetCell = e.target.closest("td");
+    card.releasePointerCapture(e.pointerId);
 
-    if (!sourceCell || !targetCell) return;
+    card.style.opacity = "";
 
-    if (sourceCell.id === targetCell.id) return;
+    card.style.position = "";
+    card.style.left = "";
+    card.style.top = "";
+    card.style.zIndex = "";
+    card.style.pointerEvents = "";
+
+    const target = document.elementFromPoint(
+        e.clientX,
+        e.clientY
+    );
+
+    if (!target) {
+
+        sourceCell = null;
+        return;
+
+    }
+
+    const targetCell = target.closest("td");
+
+    if (!targetCell) {
+
+        sourceCell = null;
+        return;
+
+    }
+
+    if (!sourceCell) return;
+
+    if (sourceCell.id === targetCell.id) {
+
+        sourceCell = null;
+        return;
+
+    }
 
     const [fromLine, fromPos] = sourceCell.id.split("_");
     const [toLine, toPos] = targetCell.id.split("_");
 
-    const coach = await getCoach(fromLine, fromPos);
+    try {
 
-    if (!coach) return;
+        const coach = await getCoach(fromLine, fromPos);
 
-    coach.line = toLine;
-    coach.position = toPos;
+        if (!coach) {
 
-    await saveCoach(coach);
-await deleteCoach(fromLine, fromPos);
+            sourceCell = null;
+            return;
 
-sourceCell = null;
+        }
 
-// Refresh drag
-enableDragDrop();
+        const targetCoach = await getCoach(toLine, toPos);
+
+        coach.line = toLine;
+        coach.position = toPos;
+
+        await saveCoach(coach);
+
+        if (targetCoach) {
+
+            targetCoach.line = fromLine;
+            targetCoach.position = fromPos;
+
+            await saveCoach(targetCoach);
+
+        } else {
+
+            await deleteCoach(fromLine, fromPos);
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+    sourceCell = null;
+
 }
