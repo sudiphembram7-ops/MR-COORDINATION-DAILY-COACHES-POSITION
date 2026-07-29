@@ -420,11 +420,7 @@ if (pdfBtn) {
    AUTO REFRESH
 ========================================== */
 
-setInterval(() => {
 
-    loadBoard();
-
-}, 30000);
 
 /* ==========================================
    board.js (Part 4)
@@ -483,10 +479,7 @@ document.addEventListener("click", (e) => {
 ========================================== */
 
 window.addEventListener("online", () => {
-
     updateDatabaseStatus(true);
-    loadBoard();
-
 });
 
 window.addEventListener("offline", () => {
@@ -499,15 +492,7 @@ window.addEventListener("offline", () => {
    AUTO RECONNECT
 ========================================== */
 
-setInterval(() => {
 
-    if (navigator.onLine) {
-
-        loadBoard();
-
-    }
-
-}, 60000);
 
 /* ==========================================
    LAST UPDATE TIMER
@@ -523,13 +508,7 @@ setInterval(() => {
    INITIALIZE
 ========================================== */
 
-window.addEventListener("load", () => {
 
-    console.log("MR Board Ready");
-
-    loadBoard();
-
-});
 
 /* ==========================================
    GLOBAL ERROR HANDLER
