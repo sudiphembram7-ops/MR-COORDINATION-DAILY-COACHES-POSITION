@@ -15,19 +15,19 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth
 
 const firebaseConfig = {
 
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
 
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    authDomain: "mr-coordi-coach.firebaseapp.com",
 
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app",
+    databaseURL: "https://mr-coordi-coach-default-rtdb.firebaseio.com",
 
-    projectId: "YOUR_PROJECT_ID",
+    projectId: "mr-coordi-coach",
 
-    storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+    storageBucket: "mr-coordi-coach.firebasestorage.app",
 
-    messagingSenderId: "YOUR_SENDER_ID",
+    messagingSenderId: "955185707268",
 
-    appId: "YOUR_APP_ID"
+    appId: "1:955185707268:web:706c031162f6152565f851"
 
 };
 
