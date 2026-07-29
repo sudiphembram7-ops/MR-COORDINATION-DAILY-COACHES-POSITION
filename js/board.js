@@ -11,7 +11,7 @@ import {
 import { enableDragDrop } from "./dragdrop.js";
 
 let boardData = {};
-import { enableDragDrop } from "./dragdrop.js";
+
 
 /* ==========================================
    DOM READY
