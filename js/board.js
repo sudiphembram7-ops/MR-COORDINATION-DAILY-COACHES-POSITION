@@ -77,6 +77,7 @@ function loadBoard() {
     drawBoard();
     updateLastUpdate();
 });
+}
 /* =====================================================
    DRAW BOARD
 ===================================================== */
@@ -108,7 +109,13 @@ function drawBoard() {
 
             if (!cell) return;
 
-            cell.innerHTML = `
+            const card = td.querySelector(".coach-card");
+
+if (card) {
+    card.innerHTML = "";
+} else {
+    td.innerHTML = "";
+}
                 <div class="coach-no">
                     ${coach.coachNo || ""}
                 </div>
@@ -265,7 +272,7 @@ function getModalData() {
 
 function duplicateCoach(coachNo) {
 
-    if (!coachNo) return false;
+    if (!currentCell) return false;
 
     for (const line in boardData) {
 
