@@ -3,18 +3,13 @@
    PART - 1
 ===================================================== */
 
-import { database } from "./firebase-config.js";
 
 import {
     ref,
-    onValue,
     get,
-    set,
-    update,
-    remove,
-    push
+    push,
+    onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
 /* =====================================================
    GLOBAL VARIABLES
 ===================================================== */
@@ -319,103 +314,16 @@ document
    SAVE
 ===================================================== */
 
-async function saveCoach() {
 
-    const coach = getModalData();
-
-    if (!coach.coachNo) {
-        alert("Please enter Coach Number.");
-        return;
-    }
-
-    if (duplicateCoach(coach.coachNo)) {
-        alert("Coach Number already exists.");
-        return;
-    }
-
-    try {
-
-        await set(
-            ref(database, `coachBoard/${coach.line}/${coach.position}`),
-            coach
-        );
-
-        await writeHistory("SAVE", coach);
-
-        coachModal.hide();
-
-    } catch (err) {
-
-        console.error(err);
-        alert("Save Failed");
-
-    }
-
-}
 /* =====================================================
    UPDATE
 ===================================================== */
 
-async function updateCoach() {
 
-    const coach = getModalData();
-
-    if (!coach.coachNo) {
-        alert("Please enter Coach Number.");
-        return;
-    }
-
-    if (duplicateCoach(coach.coachNo)) {
-        alert("Duplicate Coach Number.");
-        return;
-    }
-
-    try {
-
-        await set(
-            ref(database, `coachBoard/${coach.line}/${coach.position}`),
-            coach
-        );
-
-        await writeHistory("UPDATE", coach);
-
-        coachModal.hide();
-
-    } catch (err) {
-
-        console.error(err);
-        alert("Update Failed");
-
-    }
-
-}
 /* =====================================================
    DELETE
 ===================================================== */
 
-async function deleteCoach() {
-
-    if (!confirm("Delete this coach?"))
-        return;
-
-    const coach = getModalData();
-
-    await remove(
-
-        ref(
-            database,
-            `coachBoard/${coach.line}/${coach.position}`
-        )
-
-    );
-
-    await writeHistory("DELETE", coach);
-
-    coachModal.hide();
-
-    updateLastUpdate();
-
-}
 
 /* =====================================================
    HISTORY
@@ -759,44 +667,7 @@ function applyStatusColours() {
    SEARCH
 ===================================================== */
 
-const searchBox = document.getElementById("searchBox");
 
-if (searchBox) {
-
-    searchBox.addEventListener("input", function () {
-
-        const keyword = this.value.trim().toUpperCase();
-
-        document.querySelectorAll(".coach-table td").forEach(td => {
-
-            td.style.outline = "";
-
-            if (!keyword) return;
-
-            const text = (
-                td.dataset.coach +
-                " " +
-                td.dataset.type +
-                " " +
-                td.dataset.status
-            ).toUpperCase();
-
-            if (text.includes(keyword)) {
-
-                td.style.outline = "3px solid red";
-
-                td.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-
-            }
-
-        });
-
-    });
-
-}
 /* =====================================================
    PDF
 ===================================================== */
