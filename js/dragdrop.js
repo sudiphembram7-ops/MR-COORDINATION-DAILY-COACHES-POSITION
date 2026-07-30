@@ -1,74 +1,143 @@
+/* ==========================================
+   dragdrop.js
+   MR CO-ORDINATION
+   Desktop + Mobile
+========================================== */
+
 import {
-    ref,
-    update
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    getCoach,
+    saveCoach,
+    deleteCoach
+} from "./firebase-board.js";
 
-import { database } from "./firebase-config.js";
+let sourceCell = null;
 
-const isAdmin = localStorage.getItem("isAdmin") === "true";
+export function enableDragDrop() {
 
-let draggedCoach = null;
+    document.querySelectorAll(".coach-card").forEach(card => {
 
-document.querySelectorAll(".coach").forEach(coach => {
+        card.style.touchAction = "none";
 
-    coach.draggable = isAdmin;
-
-    if (!isAdmin) return;
-
-    coach.addEventListener("dragstart", e => {
-
-        draggedCoach = e.target;
-
-        e.dataTransfer.effectAllowed = "move";
+        card.onpointerdown = pointerDown;
 
     });
 
-});
+}
 
-document.querySelectorAll(".dropzone").forEach(zone => {
+function pointerDown(e) {
 
-    if (!isAdmin) return;
+    const card = e.currentTarget;
 
-    zone.addEventListener("dragover", e => {
+    sourceCell = card.closest("td");
 
-        e.preventDefault();
+    if (!sourceCell) return;
 
-    });
+    card.setPointerCapture(e.pointerId);
 
-    zone.addEventListener("drop", async e => {
+    card.style.opacity = "0.5";
 
-        e.preventDefault();
+    card.onpointermove = pointerMove;
 
-        if (!draggedCoach) return;
+    card.onpointerup = pointerUp;
 
-        zone.appendChild(draggedCoach);
+}
 
-        const coachNo = draggedCoach.dataset.coach;
+function pointerMove(e) {
 
-        const section = zone.dataset.section;
+    const card = e.currentTarget;
 
-        const line = zone.dataset.line;
+    card.style.position = "fixed";
+    card.style.left = e.clientX - 40 + "px";
+    card.style.top = e.clientY - 20 + "px";
+    card.style.zIndex = "9999";
+    card.style.pointerEvents = "none";
 
-        try {
+}
 
-            await update(ref(database, "coaches/" + coachNo), {
+async function pointerUp(e) {
 
-                section,
+    const card = e.currentTarget;
 
-                line,
+    card.releasePointerCapture(e.pointerId);
 
-                updatedAt: Date.now()
+    card.style.opacity = "";
 
-            });
+    card.style.position = "";
+    card.style.left = "";
+    card.style.top = "";
+    card.style.zIndex = "";
+    card.style.pointerEvents = "";
 
-            console.log("Updated");
+    const target = document.elementFromPoint(
+        e.clientX,
+        e.clientY
+    );
 
-        } catch (err) {
+    if (!target) {
 
-            alert(err.message);
+        sourceCell = null;
+        return;
+
+    }
+
+    const targetCell = target.closest("td");
+
+    if (!targetCell) {
+
+        sourceCell = null;
+        return;
+
+    }
+
+    if (!sourceCell) return;
+
+    if (sourceCell.id === targetCell.id) {
+
+        sourceCell = null;
+        return;
+
+    }
+
+    const [fromLine, fromPos] = sourceCell.id.split("_");
+    const [toLine, toPos] = targetCell.id.split("_");
+
+    try {
+
+        const coach = await getCoach(fromLine, fromPos);
+
+        if (!coach) {
+
+            sourceCell = null;
+            return;
 
         }
 
-    });
+        const targetCoach = await getCoach(toLine, toPos);
 
-});
+        coach.line = toLine;
+        coach.position = toPos;
+
+        await saveCoach(coach);
+
+        if (targetCoach) {
+
+            targetCoach.line = fromLine;
+            targetCoach.position = fromPos;
+
+            await saveCoach(targetCoach);
+
+        } else {
+
+            await deleteCoach(fromLine, fromPos);
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+    sourceCell = null;
+
+}
