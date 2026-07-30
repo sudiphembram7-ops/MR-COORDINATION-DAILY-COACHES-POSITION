@@ -1,31 +1,24 @@
 /* ==========================================
    MR CO-ORDINATION ADMIN PANEL
-   admin.js (Part 1)
+   admin.js - Part 1
 ========================================== */
-
-console.log("admin.js loaded");
-
-document.addEventListener("DOMContentLoaded", () => {
-    alert("admin.js loaded successfully");
-});
 
 /* ==========================================
    IMPORTS
 ========================================== */
 
-
 import { auth, database } from "./firebase-config.js";
-
-import {
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
+import { enableDragDrop } from "./dragdrop.js";
 import {
     ref,
     get,
     push
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 import {
     saveCoach as firebaseSaveCoach,
@@ -34,39 +27,45 @@ import {
     listenBoard
 } from "./firebase-board.js";
 
-import {
-    ref,
-    get,
-    push
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-import {
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
 /* ==========================================
    GLOBAL VARIABLES
 ========================================== */
 
 let boardData = {};
+let currentUser = null;
 
 /* ==========================================
-   AUTH CHECK
+   ADMIN AUTH CHECK
 ========================================== */
 
 onAuthStateChanged(auth, (user) => {
 
     if (!user) {
+
+        alert("Please Login First");
+
         window.location.href = "login.html";
+
         return;
+
     }
 
-    const adminName = document.getElementById("adminName");
+    currentUser = user;
+
+    console.log("Admin Login :", user.email);
+
+    console.log("UID :", user.uid);
+
+    const adminName =
+        document.getElementById("adminName");
 
     if (adminName) {
+
         adminName.textContent = user.email;
+
     }
+
+    loadCoachData();
 
 });
 
@@ -76,21 +75,22 @@ onAuthStateChanged(auth, (user) => {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    loadCoachData();
-
-    document.getElementById("saveBtn")
+    document
+        .getElementById("saveBtn")
         ?.addEventListener("click", saveCoach);
 
-    document.getElementById("updateBtn")
+    document
+        .getElementById("updateBtn")
         ?.addEventListener("click", updateCoach);
 
-    document.getElementById("deleteBtn")
+    document
+        .getElementById("deleteBtn")
         ?.addEventListener("click", deleteCoach);
 
 });
 
 /* ==========================================
-   LOAD BOARD DATA
+   LOAD BOARD
 ========================================== */
 
 function loadCoachData() {
@@ -108,6 +108,11 @@ function loadCoachData() {
 }
 
 /* ==========================================
+   admin.js - Part 2
+   FORM • SAVE • UPDATE • DELETE • AUDIT
+========================================== */
+
+/* ==========================================
    GET FORM DATA
 ========================================== */
 
@@ -121,7 +126,7 @@ function getFormData() {
 
         position: document.getElementById("position").value,
 
-        coachNo: document.getElementById("coachNo").value.trim(),
+        coachNo: document.getElementById("coachNo").value.trim().toUpperCase(),
 
         coachType: document.getElementById("coachType").value,
 
@@ -141,17 +146,11 @@ function clearForm() {
 
     document.getElementById("coachNo").value = "";
 
-    document.getElementById("coachType").value = "";
+    document.getElementById("coachType").selectedIndex = 0;
 
-    document.getElementById("status").value = "";
+    document.getElementById("status").selectedIndex = 0;
 
 }
-
-
-/* ==========================================
-   admin.js (Part 2)
-   SAVE • UPDATE • DELETE • AUDIT
-========================================== */
 
 /* ==========================================
    SAVE COACH
@@ -161,32 +160,31 @@ async function saveCoach() {
 
     const coach = getFormData();
 
-    if (!coach.shop || !coach.line || !coach.position) {
-        alert("Select Shop, Line and Position");
-        return;
-    }
-
     if (!coach.coachNo) {
+
         alert("Enter Coach Number");
+
         return;
+
     }
 
     try {
-    console.log("Save button clicked");
-    console.log(coach);
 
-    await firebaseSaveCoach(coach);
+        await firebaseSaveCoach(coach);
 
-    console.log("Firebase save success");
+        await writeAudit("SAVE", coach);
 
-    await writeAudit("SAVE", coach);
+        alert("Coach Saved Successfully");
 
-    alert("Coach Saved Successfully");
+        clearForm();
 
-} catch (error) {
-    console.error(error);
-    alert(error.message);
-}
+    } catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
 
 }
 
@@ -199,8 +197,11 @@ async function updateCoach() {
     const coach = getFormData();
 
     if (!coach.coachNo) {
+
         alert("Enter Coach Number");
+
         return;
+
     }
 
     try {
@@ -217,7 +218,7 @@ async function updateCoach() {
 
         console.error(error);
 
-        alert("Update Failed");
+        alert(error.message);
 
     }
 
@@ -231,7 +232,7 @@ async function deleteCoach() {
 
     const coach = getFormData();
 
-    if (!confirm("Delete this coach?")) return;
+    if (!confirm("Delete this Coach?")) return;
 
     try {
 
@@ -242,7 +243,7 @@ async function deleteCoach() {
 
         await writeAudit("DELETE", coach);
 
-        alert("Coach Deleted");
+        alert("Coach Deleted Successfully");
 
         clearForm();
 
@@ -250,11 +251,62 @@ async function deleteCoach() {
 
         console.error(error);
 
-        alert("Delete Failed");
+        alert(error.message);
 
     }
 
 }
+
+/* ==========================================
+   AUDIT LOG
+========================================== */
+
+async function writeAudit(action, coach) {
+
+    try {
+
+        await push(
+
+            ref(database, "auditLog"),
+
+            {
+
+                action,
+
+                shop: coach.shop,
+
+                line: coach.line,
+
+                position: coach.position,
+
+                coachNo: coach.coachNo,
+
+                coachType: coach.coachType,
+
+                status: coach.status,
+
+                user: currentUser.email,
+
+                uid: currentUser.uid,
+
+                time: new Date().toISOString()
+
+            }
+
+        );
+
+    } catch (error) {
+
+        console.error("Audit Error :", error);
+
+    }
+
+}
+
+/* ==========================================
+   admin.js - Part 3
+   EDIT • HISTORY • SEARCH • FILTER • DASHBOARD
+========================================== */
 
 /* ==========================================
    EDIT COACH
@@ -294,51 +346,14 @@ window.editCoach = async function (line, position) {
 
         console.error(error);
 
+        alert("Unable to load coach.");
+
     }
 
 };
 
 /* ==========================================
-   AUDIT LOG
-========================================== */
-
-async function writeAudit(action, coach) {
-
-    try {
-
-        await push(
-
-            ref(database, "auditLog"),
-
-            {
-                action: action,
-                shop: coach.shop,
-                line: coach.line,
-                position: coach.position,
-                coachNo: coach.coachNo,
-                coachType: coach.coachType,
-                status: coach.status,
-                user: auth.currentUser?.email || "Unknown",
-                time: new Date().toISOString()
-            }
-
-        );
-
-    } catch (error) {
-
-        console.error("Audit Error:", error);
-
-    }
-
-}
-
-/* ==========================================
-   admin.js (Part 3)
-   HISTORY • SEARCH • FILTER • DASHBOARD
-========================================== */
-
-/* ==========================================
-   RENDER HISTORY TABLE
+   HISTORY TABLE
 ========================================== */
 
 function renderHistory(data) {
@@ -364,9 +379,11 @@ function renderHistory(data) {
                 <td>${coach.coachNo || ""}</td>
                 <td>${coach.coachType || ""}</td>
                 <td>${coach.status || ""}</td>
-                <td>${coach.updatedAt ?
-                    new Date(coach.updatedAt).toLocaleString("en-IN")
-                    : ""}</td>
+                <td>${
+                    coach.updatedAt
+                        ? new Date(coach.updatedAt).toLocaleString("en-IN")
+                        : ""
+                }</td>
                 <td>
                     <button class="btn btn-sm btn-primary"
                         onclick="editCoach('${line}','${position}')">
@@ -385,13 +402,15 @@ function renderHistory(data) {
    SEARCH
 ========================================== */
 
-const searchBox = document.getElementById("searchCoach");
+const searchBox =
+    document.getElementById("searchCoach");
 
 if (searchBox) {
 
     searchBox.addEventListener("keyup", function () {
 
-        const value = this.value.toUpperCase();
+        const value =
+            this.value.toUpperCase();
 
         document.querySelectorAll("#historyTable tr")
             .forEach(row => {
@@ -418,7 +437,8 @@ if (shopFilter) {
 
     shopFilter.addEventListener("change", function () {
 
-        const value = this.value.toUpperCase();
+        const value =
+            this.value.toUpperCase();
 
         document.querySelectorAll("#historyTable tr")
             .forEach(row => {
@@ -426,6 +446,7 @@ if (shopFilter) {
                 if (value === "ALL") {
 
                     row.style.display = "";
+
                     return;
 
                 }
@@ -492,6 +513,7 @@ function updateDashboardStats() {
 
     });
 
+    document.getElementById("totalEntry").textContent = rows.length;
     document.getElementById("poCount").textContent = po;
     document.getElementById("lmCount").textContent = lm;
     document.getElementById("medCount").textContent = med;
@@ -505,29 +527,103 @@ function updateDashboardStats() {
 }
 
 /* ==========================================
-   admin.js (Part 3)
-   HISTORY • SEARCH • FILTER • DASHBOARD
+   admin.js - Part 4
+   LOGOUT • REFRESH • AUTO REFRESH
 ========================================== */
 
 /* ==========================================
-   RENDER HISTORY TABLE
+   LOGOUT
 ========================================== */
 
+window.logout = async function () {
 
+    try {
+
+        await signOut(auth);
+
+        alert("Logout Successful");
+
+        window.location.href = "login.html";
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
+
+};
 
 /* ==========================================
-   SEARCH
+   REFRESH BUTTON
 ========================================== */
 
+const refreshBtn =
+    document.getElementById("refreshBtn");
 
+if (refreshBtn) {
+
+    refreshBtn.addEventListener("click", () => {
+
+        loadCoachData();
+
+        alert("Board Refreshed");
+
+    });
+
+}
 
 /* ==========================================
-   SHOP FILTER
+   AUTO REFRESH
 ========================================== */
 
+setInterval(() => {
 
+    loadCoachData();
+
+}, 10000);
 
 /* ==========================================
-   DASHBOARD COUNTERS
+   LIVE CONNECTION STATUS
 ========================================== */
 
+window.addEventListener("online", () => {
+
+    console.log("Internet Connected");
+
+    loadCoachData();
+
+});
+
+window.addEventListener("offline", () => {
+
+    alert("Internet Connection Lost");
+
+});
+
+/* ==========================================
+   ADMIN DRAG & DROP
+========================================== */
+
+
+
+onAuthStateChanged(auth, (user) => {
+
+    if (user) {
+
+        enableDragDrop();
+
+    }
+
+});
+
+/* ==========================================
+   INITIALIZE
+========================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("MR CO-ORDINATION ADMIN READY");
+
+});
