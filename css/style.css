@@ -97,8 +97,25 @@ body{
     font-weight:bold;
 }
 /* SEARCH */
-#searchBox{
-    border-radius:25px;
+.search-highlight{
+
+    animation: blink 1s infinite;
+
+    border:3px solid red !important;
+
+    background:#fff176 !important;
+
+}
+
+@keyframes blink{
+
+    0%{opacity:1;}
+
+    50%{opacity:.3;}
+
+    100%{opacity:1;}
+
+}
 }
 /* FOOTER */
 footer{
