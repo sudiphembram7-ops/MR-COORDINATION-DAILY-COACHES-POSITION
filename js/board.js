@@ -9,7 +9,14 @@ import {
     listenBoard
 } from "./firebase-board.js";
 import { enableDragDrop } from "./dragdrop.js";
+import { auth } from "./firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        enableDragDrop();
+    }
+});
 let boardData = {};
 
 
@@ -89,8 +96,7 @@ function renderBoard() {
 
         });
 
-    });console.log("Drag enabled");
-enableDragDrop();
+    });
 }
 
 /* ==========================================
@@ -277,10 +283,15 @@ function updateDatabaseStatus(status) {
 
 function setupButtons() {
 
-    const refreshBtn = document.getElementById("refreshBtn");
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", loadBoard);
-    }
+    refreshBtn.addEventListener("click", () => {
+
+    renderBoard();
+
+    updateCounters();
+
+    updateLastUpdate();
+
+});}
 
     const fullscreenBtn = document.getElementById("fullscreenBtn");
     if (fullscreenBtn) {
@@ -315,11 +326,25 @@ function setupButtons() {
 
 function setupSearch() {
 
-    const searchBox = document.getElementById("searchBox");
+    const searchBox = ;
 
     if (!searchBox) return;
 
-    searchBox.addEventListener("input", searchCoach);
+    searchBox.;
+    if (!coachNo) {
+
+    document.getElementById("searchResult").innerHTML = `
+<div class="alert alert-success mt-2">
+<b>Coach:</b> ${coach.coachNo}<br>
+<b>Shop:</b> ${coach.shop}<br>
+<b>Line:</b> ${line}<br>
+<b>Position:</b> ${position}
+</div>
+`;
+
+    return;
+
+}
 
 }
 
