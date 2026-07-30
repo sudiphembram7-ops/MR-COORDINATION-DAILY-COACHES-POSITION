@@ -1,81 +1,194 @@
 /* ==========================================
-   dragdrop.js
    MR CO-ORDINATION
-   Desktop + Mobile
+   dragdrop.js (Part 1)
+   DESKTOP + MOBILE
 ========================================== */
 
 import {
-    getCoach,
-    saveCoach,
-    deleteCoach
+    updateCoachPosition
 } from "./firebase-board.js";
 
-let sourceCell = null;
+let dragSource = null;
+let touchSource = null;
+let isDragging = false;
+
+/* ==========================================
+   ENABLE DRAG & DROP
+========================================== */
 
 export function enableDragDrop() {
 
     document.querySelectorAll(".coach-card").forEach(card => {
 
-        card.style.touchAction = "none";
+        card.setAttribute("draggable", true);
 
-        card.onpointerdown = pointerDown;
+        /* Desktop */
+        card.removeEventListener("dragstart", dragStart);
+        card.addEventListener("dragstart", dragStart);
+
+        card.removeEventListener("dragend", dragEnd);
+        card.addEventListener("dragend", dragEnd);
+
+        /* Mobile */
+        card.removeEventListener("touchstart", touchStart);
+        card.addEventListener("touchstart", touchStart, {
+            passive: false
+        });
 
     });
 
-}
+    document.querySelectorAll("td").forEach(cell => {
 
-function pointerDown(e) {
+        /* Desktop */
 
-    const card = e.currentTarget;
+        cell.removeEventListener("dragover", dragOver);
+        cell.removeEventListener("drop", dropCoach);
 
-    sourceCell = card.closest("td");
+        cell.addEventListener("dragover", dragOver);
+        cell.addEventListener("drop", dropCoach);
 
-    if (!sourceCell) return;
+        /* Mobile */
 
-    card.setPointerCapture(e.pointerId);
+        cell.removeEventListener("touchmove", touchMove);
+        cell.removeEventListener("touchend", touchEnd);
 
-    card.style.opacity = "0.5";
+        cell.addEventListener("touchmove", touchMove, {
+            passive: false
+        });
 
-    card.onpointermove = pointerMove;
+        cell.addEventListener("touchend", touchEnd);
 
-    card.onpointerup = pointerUp;
+    });
 
-}
-
-function pointerMove(e) {
-
-    const card = e.currentTarget;
-
-    card.style.position = "fixed";
-    card.style.left = e.clientX - 40 + "px";
-    card.style.top = e.clientY - 20 + "px";
-    card.style.zIndex = "9999";
-    card.style.pointerEvents = "none";
+    console.log("DragDrop Ready");
 
 }
 
-async function pointerUp(e) {
+/* ==========================================
+   DESKTOP DRAG START
+========================================== */
 
-    const card = e.currentTarget;
+function dragStart(e) {
 
-    card.releasePointerCapture(e.pointerId);
+    const td = e.target.closest("td");
 
-    card.style.opacity = "";
+    if (!td) return;
 
-    card.style.position = "";
-    card.style.left = "";
-    card.style.top = "";
-    card.style.zIndex = "";
-    card.style.pointerEvents = "";
+    dragSource = td.id;
+
+    isDragging = true;
+
+    e.dataTransfer.effectAllowed = "move";
+
+}
+
+/* ==========================================
+   DESKTOP DRAG END
+========================================== */
+
+function dragEnd() {
+
+    dragSource = null;
+
+    isDragging = false;
+
+}
+
+/* ==========================================
+   DESKTOP DRAG OVER
+========================================== */
+
+function dragOver(e) {
+
+    e.preventDefault();
+
+    e.dataTransfer.dropEffect = "move";
+
+}
+
+/* ==========================================
+   MR CO-ORDINATION
+   dragdrop.js (Part 2)
+   MOBILE TOUCH SUPPORT
+========================================== */
+
+/* ==========================================
+   TOUCH START
+========================================== */
+
+function touchStart(e) {
+
+    const td = e.target.closest("td");
+
+    if (!td) return;
+
+    touchSource = td.id;
+
+    isDragging = true;
+
+    td.classList.add("drag-source");
+
+}
+
+/* ==========================================
+   TOUCH MOVE
+========================================== */
+
+function touchMove(e) {
+
+    if (!isDragging) return;
+
+    e.preventDefault();
+
+    const touch = e.touches[0];
 
     const target = document.elementFromPoint(
-        e.clientX,
-        e.clientY
+        touch.clientX,
+        touch.clientY
+    );
+
+    if (!target) return;
+
+    document.querySelectorAll(".drag-over")
+        .forEach(cell => cell.classList.remove("drag-over"));
+
+    const td = target.closest("td");
+
+    if (td) {
+
+        td.classList.add("drag-over");
+
+    }
+
+}
+
+/* ==========================================
+   TOUCH END
+========================================== */
+
+async function touchEnd(e) {
+
+    if (!isDragging) return;
+
+    isDragging = false;
+
+    document.querySelectorAll(".drag-source")
+        .forEach(cell => cell.classList.remove("drag-source"));
+
+    document.querySelectorAll(".drag-over")
+        .forEach(cell => cell.classList.remove("drag-over"));
+
+    const touch = e.changedTouches[0];
+
+    const target = document.elementFromPoint(
+        touch.clientX,
+        touch.clientY
     );
 
     if (!target) {
 
-        sourceCell = null;
+        touchSource = null;
+
         return;
 
     }
@@ -84,60 +197,263 @@ async function pointerUp(e) {
 
     if (!targetCell) {
 
-        sourceCell = null;
+        touchSource = null;
+
         return;
 
     }
 
-    if (!sourceCell) return;
+    if (touchSource === targetCell.id) {
 
-    if (sourceCell.id === targetCell.id) {
+        touchSource = null;
 
-        sourceCell = null;
         return;
 
     }
 
-    const [fromLine, fromPos] = sourceCell.id.split("_");
-    const [toLine, toPos] = targetCell.id.split("_");
+    await moveCoach(touchSource, targetCell.id);
+
+    touchSource = null;
+
+}
+
+
+/* ==========================================
+   MR CO-ORDINATION
+   dragdrop.js (Part 3)
+   DROP + FIREBASE UPDATE
+========================================== */
+
+/* ==========================================
+   DESKTOP DROP
+========================================== */
+
+async function dropCoach(e) {
+
+    e.preventDefault();
+
+    if (!dragSource) return;
+
+    const targetCell = e.currentTarget;
+
+    if (!targetCell) return;
+
+    if (dragSource === targetCell.id) {
+
+        dragSource = null;
+        return;
+
+    }
+
+    await moveCoach(dragSource, targetCell.id);
+
+    dragSource = null;
+
+}
+
+/* ==========================================
+   MOVE COACH
+========================================== */
+
+async function moveCoach(sourceId, targetId) {
+
+    if (!sourceId || !targetId) return;
+
+    const [fromLine, fromPosition] = sourceId.split("_");
+    const [toLine, toPosition] = targetId.split("_");
 
     try {
 
-        const coach = await getCoach(fromLine, fromPos);
+        console.log(
+            `Move : ${fromLine}/${fromPosition} → ${toLine}/${toPosition}`
+        );
 
-        if (!coach) {
+        await updateCoachPosition(
+            fromLine,
+            fromPosition,
+            toLine,
+            toPosition
+        );
 
-            sourceCell = null;
-            return;
+        flashCell(targetId);
 
-        }
+    } catch (error) {
 
-        const targetCoach = await getCoach(toLine, toPos);
+        console.error("Move Failed :", error);
 
-        coach.line = toLine;
-        coach.position = toPos;
-
-        await saveCoach(coach);
-
-        if (targetCoach) {
-
-            targetCoach.line = fromLine;
-            targetCoach.position = fromPos;
-
-            await saveCoach(targetCoach);
-
-        } else {
-
-            await deleteCoach(fromLine, fromPos);
-
-        }
-
-    } catch (err) {
-
-        console.error(err);
+        alert("Coach Move Failed");
 
     }
 
-    sourceCell = null;
+}
+
+/* ==========================================
+   FLASH TARGET CELL
+========================================== */
+
+function flashCell(cellId) {
+
+    const cell = document.getElementById(cellId);
+
+    if (!cell) return;
+
+    cell.classList.add("drag-success");
+
+    setTimeout(() => {
+
+        cell.classList.remove("drag-success");
+
+    }, 1200);
 
 }
+
+/* ==========================================
+   CANCEL DRAG
+========================================== */
+
+function cancelDrag() {
+
+    dragSource = null;
+    touchSource = null;
+    isDragging = false;
+
+    document
+        .querySelectorAll(".drag-source,.drag-over")
+        .forEach(el => {
+
+            el.classList.remove(
+                "drag-source",
+                "drag-over"
+            );
+
+        });
+
+}
+
+/* ==========================================
+   MR CO-ORDINATION
+   dragdrop.js (Part 4)
+   FINAL INITIALIZATION
+========================================== */
+
+/* ==========================================
+   AUTO RE-ENABLE AFTER BOARD UPDATE
+========================================== */
+
+export function refreshDragDrop() {
+
+    setTimeout(() => {
+
+        enableDragDrop();
+
+    }, 100);
+
+}
+
+/* ==========================================
+   WINDOW FOCUS
+========================================== */
+
+window.addEventListener("focus", () => {
+
+    refreshDragDrop();
+
+});
+
+/* ==========================================
+   PAGE VISIBILITY
+========================================== */
+
+document.addEventListener("visibilitychange", () => {
+
+    if (!document.hidden) {
+
+        refreshDragDrop();
+
+    }
+
+});
+
+/* ==========================================
+   ONLINE / OFFLINE
+========================================== */
+
+window.addEventListener("online", () => {
+
+    console.log("Internet Connected");
+
+    refreshDragDrop();
+
+});
+
+window.addEventListener("offline", () => {
+
+    console.log("Internet Disconnected");
+
+});
+
+/* ==========================================
+   ESC KEY CANCEL
+========================================== */
+
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === "Escape") {
+
+        cancelDrag();
+
+    }
+
+});
+
+/* ==========================================
+   WINDOW BLUR
+========================================== */
+
+window.addEventListener("blur", () => {
+
+    cancelDrag();
+
+});
+
+/* ==========================================
+   GLOBAL ERROR HANDLER
+========================================== */
+
+window.addEventListener("error", (event) => {
+
+    console.error("DragDrop Error:", event.error);
+
+    cancelDrag();
+
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+
+    console.error("Promise Error:", event.reason);
+
+    cancelDrag();
+
+});
+
+/* ==========================================
+   INITIALIZE
+========================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    refreshDragDrop();
+
+});
+
+/* ==========================================
+   END OF FILE
+========================================== */
+
+console.log("==================================");
+console.log("MR CO-ORDINATION DragDrop Ready");
+console.log("Desktop Drag Supported");
+console.log("Android Touch Supported");
+console.log("iPhone Touch Supported");
+console.log("Firebase Sync Enabled");
+console.log("==================================");
