@@ -89,7 +89,7 @@ function renderBoard() {
 
         });
 
-    });
+    });console.log("Drag enabled");
 enableDragDrop();
 }
 
