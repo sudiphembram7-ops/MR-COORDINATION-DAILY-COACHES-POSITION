@@ -347,6 +347,84 @@ function setupSearch() {
 }
 
 
+function searchCoach() {
+
+    const coachNo = document
+        .getElementById("searchBox")
+        .value
+        .trim()
+        .toUpperCase();
+
+    if (!coachNo) {
+
+        document.getElementById("searchResult").textContent = "";
+        return;
+
+    }
+
+    let found = false;
+
+    Object.keys(boardData).forEach(line => {
+
+        Object.keys(boardData[line]).forEach(position => {
+
+            const coach = boardData[line][position];
+
+            if (
+                coach.coachNo &&
+                coach.coachNo.toUpperCase() === coachNo
+            ) {
+
+                found = true;
+
+                document.getElementById("searchResult").innerHTML = `
+                    <b>Coach :</b> ${coach.coachNo}
+                    &nbsp;&nbsp;
+                    <b>Shop :</b> ${coach.shop}
+                    &nbsp;&nbsp;
+                    <b>Line :</b> ${line}
+                    &nbsp;&nbsp;
+                    <b>Position :</b> ${position}
+                `;
+
+                // Highlight the cell
+                document.querySelectorAll("td").forEach(td =>
+                    td.classList.remove("search-highlight")
+                );
+
+                const cell = document.getElementById(`${line}_${position}`);
+
+                if (cell) {
+
+                    cell.classList.add("search-highlight");
+
+                    cell.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+
+                }
+
+            }
+
+        });
+
+    });
+
+    if (!found) {
+
+        document.getElementById("searchResult").innerHTML =
+            "<span style='color:red'>Coach Not Found</span>";
+
+    }
+
+}
+
+document
+    .getElementById("searchBox")
+    .addEventListener("input", searchCoach);
+
+
 /* ==========================================
    EXPORT CSV (Excel)
 ========================================== */
