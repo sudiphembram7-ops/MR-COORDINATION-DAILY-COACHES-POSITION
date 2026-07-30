@@ -14,16 +14,19 @@ document.addEventListener("DOMContentLoaded", () => {
 ========================================== */
 
 
-import { auth } from "./firebase-config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { auth, database } from "./firebase-config.js";
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        alert("Logged in\nUID: " + user.uid);
-    } else {
-        alert("Not Logged In");
-    }
-});
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+import {
+    ref,
+    get,
+    push
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
 import {
     saveCoach as firebaseSaveCoach,
     updateCoach as firebaseUpdateCoach,
