@@ -12,7 +12,11 @@ console.log("board.js Part 1 Loaded");
 import { listenBoard } from "./firebase-board.js";
 import { enableDragDrop } from "./dragdrop.js";
 import { auth } from "./firebase-config.js";
+import {
+    checkConnection
+} from "./firebase-board.js";
 
+checkConnection(updateDatabaseStatus);
 import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
@@ -132,7 +136,9 @@ function renderBoard() {
         });
 
     });
-
+if (auth.currentUser && auth.currentUser.uid === ADMIN_UID) {
+    enableDragDrop();
+}
 }
 
 /* ==========================================
@@ -320,13 +326,11 @@ function setupButtons() {
 
         refreshBtn.addEventListener("click", () => {
 
-            renderBoard();
+    boardListenerStarted = false;
 
-            updateCounters();
+    loadBoard();
 
-            updateLastUpdate();
-
-        });
+});
 
     }
 
@@ -411,9 +415,6 @@ function searchCoach() {
 
     const coachNo = searchBox.value.trim().toUpperCase();
 
-    document.querySelectorAll("td").forEach(td => {
-        td.classList.remove("search-highlight");
-    });
 
     if (coachNo === "") {
 
