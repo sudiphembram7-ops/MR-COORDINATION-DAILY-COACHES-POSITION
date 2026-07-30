@@ -1,65 +1,46 @@
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
 import { auth } from "./firebase-config.js";
 
-const loginBtn = document.getElementById("loginBtn");
+import {
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-if (loginBtn) {
+async function login() {
 
-    loginBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
 
-        const email = document.getElementById("username").value.trim();
+    try {
 
-        const password = document.getElementById("password").value;
+        await signInWithEmailAndPassword(auth, email, password);
 
-        try {
+        alert("Login Successful");
 
-            const userCredential = await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
+        window.location.href = "admin.html";
 
-            localStorage.setItem("isAdmin", "true");
-            localStorage.setItem("adminUID", userCredential.user.uid);
+    } catch (error) {
 
-            window.location.href = "admin.html";
-
-        } catch (e) {
-
-            alert("Invalid Email or Password");
-
-        }
-
-    });
-
-}
-
-onAuthStateChanged(auth, (user) => {
-
-    if (user) {
-
-        localStorage.setItem("isAdmin", "true");
-
-    } else {
-
-        localStorage.removeItem("isAdmin");
-        localStorage.removeItem("adminUID");
+        console.log(error);
+        alert(error.code);
+        alert(error.message);
 
     }
+}
 
-});
+async function logout() {
 
-window.logout = async function () {
+    try {
 
-    await signOut(auth);
+        await signOut(auth);
 
-    localStorage.clear();
+        window.location.href = "login.html";
 
-    window.location.href = "login.html";
+    } catch (error) {
 
-};
+        console.log(error);
+
+    }
+}
+
+window.login = login;
+window.logout = logout;
