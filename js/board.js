@@ -319,30 +319,7 @@ function setupSearch() {
 
     if (!searchBox) return;
 
-    searchBox.addEventListener("keyup", function () {
-
-        const value = this.value.trim().toUpperCase();
-
-        document.querySelectorAll(".coach-card").forEach(card => {
-
-            const cell = card.parentElement;
-
-            if (!cell) return;
-
-            if (value === "") {
-                cell.style.display = "";
-                return;
-            }
-
-            if (card.innerText.toUpperCase().includes(value)) {
-                cell.style.display = "";
-            } else {
-                cell.style.display = "none";
-            }
-
-        });
-
-    });
+    searchBox.addEventListener("input", searchCoach);
 
 }
 
