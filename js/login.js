@@ -1,46 +1,65 @@
-import { auth } from "./firebase-config.js";
-
 import {
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-async function login() {
+import { auth } from "./firebase-config.js";
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+const loginBtn = document.getElementById("loginBtn");
 
-    try {
+if (loginBtn) {
 
-        await signInWithEmailAndPassword(auth, email, password);
+    loginBtn.addEventListener("click", async () => {
 
-        alert("Login Successful");
+        const email = document.getElementById("username").value.trim();
 
-        window.location.href = "admin.html";
+        const password = document.getElementById("password").value;
 
-    } catch (error) {
+        try {
 
-        console.log(error);
-        alert(error.code);
-        alert(error.message);
+            const userCredential = await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-    }
+            localStorage.setItem("isAdmin", "true");
+            localStorage.setItem("adminUID", userCredential.user.uid);
+
+            window.location.href = "admin.html";
+
+        } catch (e) {
+
+            alert("Invalid Email or Password");
+
+        }
+
+    });
+
 }
 
-async function logout() {
+onAuthStateChanged(auth, (user) => {
 
-    try {
+    if (user) {
 
-        await signOut(auth);
+        localStorage.setItem("isAdmin", "true");
 
-        window.location.href = "login.html";
+    } else {
 
-    } catch (error) {
-
-        console.log(error);
+        localStorage.removeItem("isAdmin");
+        localStorage.removeItem("adminUID");
 
     }
-}
 
-window.login = login;
-window.logout = logout;
+});
+
+window.logout = async function () {
+
+    await signOut(auth);
+
+    localStorage.clear();
+
+    window.location.href = "login.html";
+
+};
