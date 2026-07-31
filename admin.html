@@ -138,13 +138,16 @@ id="position"
 class="form-select">
 <option>H</option>
 <option>H1</option>
+
 <option>H2</option>
 <option>H3</option>
-<option>C</option>
-<option>D3</option>
+    <option>C</option>
+    <option>D3</option>
 <option>D2</option>
+
 <option>D1</option>
-<option>D</option>
+    <option>D</option>
+
 </select>
 
 </div>
@@ -169,17 +172,18 @@ placeholder="Enter Coach Number">
 
 <label>Coach Type</label>
 <select id="coachType" class="form-select">
-   <option value="LHB AC">LHB AC</option>
-<option value="LHB NAC">LHB NAC</option>
-<option value="GS">GS</option>
-<option value="CZ">CZ</option>
-<option value="VB">VB</option>
-<option value="CN">CN</option>
-<option value="AC">AC</option>
-<option value="ART">ART</option>
-<option value="NMG">NMG</option>
-<option value="NMGH">NMGH</option>
-<option value="NMGHS">NMGHS</option>
+    <option value="">Select Coach Type</option>
+    <option value="LHB">LHB AC</option>
+    <option value="LHB">LHB NAC</option>
+    <option value="ICF">GS</option>
+    <option value="ICF">CZ</option>
+    <option value="VB">VB</option>
+    <option value="ICF">CN</option>
+    <option value="ICF">AC</option>
+    <option value="ICF">ART</option>
+     <option value="ICF">NMG</option>
+     <option value="ICF">NMGH</option>
+     <option value="ICF">NMGHS</option>
 </select>
 </div>
 
@@ -196,14 +200,16 @@ id="status"
 class="form-select">
 
 <option>PO</option>
-<option>S</option>
+
 <option>LM</option>
+
 <option>MED</option>
+
 <option>RL</option>
-<option>R1</option>
-<option>RS</option>
+
+<option>R 1</option>
+
 <option>L</option>
-<option>HVY</option>
 
 </select>
 
@@ -248,45 +254,6 @@ LIVE BOARD
 </div>
 
 <hr>
-    <div class="row text-center mb-3">
-
-    <div class="col">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h5 id="totalEntry">0</h5>
-                <small>Total</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <h5 id="poCount">0</h5>
-                <small>PO</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card bg-warning">
-            <div class="card-body">
-                <h5 id="lmCount">0</h5>
-                <small>LM</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card bg-danger text-white">
-            <div class="card-body">
-                <h5 id="medCount">0</h5>
-                <small>MED</small>
-            </div>
-        </div>
-    </div>
-
-</div>
 
 <h4>
 
@@ -294,23 +261,34 @@ Recent Coach Entry
 
 </h4>
 
-<table class="table table-bordered">
+<table
+class="table table-bordered">
 
-    <thead>
-        <tr>
-            <th>Shop</th>
-            <th>Line</th>
-            <th>Position</th>
-            <th>Coach No</th>
-            <th>Coach Type</th>
-            <th>Status</th>
-            <th>Time</th>
-            <th>Action</th>
-        </tr>
-    </thead>
+<thead>
 
-    <tbody id="historyTable">
-    </tbody>
+<tr>
+
+<th>Shop</th>
+
+<th>Line</th>
+
+<th>Position</th>
+
+<th>Coach No</th>
+<th>Coach Type</th>
+
+<th>Status</th>
+
+<th>Time</th>
+
+</tr>
+
+</thead>
+
+<tbody
+id="historyTable">
+
+</tbody>
 
 </table>
 
@@ -324,6 +302,7 @@ Recent Coach Entry
 
 </div>
 
+<script type="module" src="js/admin.js"></script>
 <script>
 const shopLines = {
     "N SHOP": ["N2", "N3", "N5", "N7", "N8"],
@@ -355,11 +334,11 @@ function loadLines() {
 shopSelect.addEventListener("change", loadLines);
 
 // Load default shop lines on page load
-loadLines();</script>
-
+loadLines();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="js/admin.js"></script>
+
 </body>
 
 </html>
