@@ -945,3 +945,201 @@ if (window.innerWidth >= 1920) {
 }
 
 console.log("BOARD PART-5 LOADED SUCCESSFULLY");
+/* =====================================================
+   PART - 6
+   FINAL INITIALIZATION • UTILITIES • HISTORY
+===================================================== */
+
+/* =====================================================
+   CLEAR MODAL
+===================================================== */
+
+function clearModal() {
+
+    document.getElementById("modalCoachNo").value = "";
+    document.getElementById("modalCoachType").selectedIndex = 0;
+    document.getElementById("modalStatus").selectedIndex = 0;
+
+}
+
+/* =====================================================
+   MODAL EVENTS
+===================================================== */
+
+coachModal._element.addEventListener("hidden.bs.modal", () => {
+
+    currentCell = null;
+
+    clearModal();
+
+});
+
+/* =====================================================
+   DATABASE STATUS
+===================================================== */
+
+function updateDatabaseStatus(status = true) {
+
+    const badge = document.getElementById("dbStatus");
+
+    if (!badge) return;
+
+    if (status) {
+
+        badge.className = "badge bg-success";
+
+        badge.innerText = "ONLINE";
+
+    } else {
+
+        badge.className = "badge bg-danger";
+
+        badge.innerText = "OFFLINE";
+
+    }
+
+}
+
+window.addEventListener("online", () => {
+
+    updateDatabaseStatus(true);
+
+});
+
+window.addEventListener("offline", () => {
+
+    updateDatabaseStatus(false);
+
+});
+
+/* =====================================================
+   HISTORY PANEL
+===================================================== */
+
+function refreshHistory() {
+
+    get(ref(database, "history"))
+
+        .then(snapshot => {
+
+            if (!snapshot.exists()) return;
+
+            const body = document.getElementById("historyBody");
+
+            if (!body) return;
+
+            body.innerHTML = "";
+
+            const data = snapshot.val();
+
+            Object.keys(data).reverse().forEach(key => {
+
+                const h = data[key];
+
+                body.innerHTML += `
+<tr>
+<td>${h.action}</td>
+<td>${h.shop}</td>
+<td>${h.line}</td>
+<td>${h.position}</td>
+<td>${h.coachNo}</td>
+<td>${h.status}</td>
+<td>${new Date(h.time).toLocaleString("en-IN")}</td>
+</tr>
+`;
+
+            });
+
+        })
+
+        .catch(console.error);
+
+}
+
+/* =====================================================
+   AUTO HISTORY
+===================================================== */
+
+setInterval(refreshHistory, 30000);
+
+/* =====================================================
+   KEYBOARD SHORTCUT
+===================================================== */
+
+document.addEventListener("keydown", e => {
+
+    if (e.key === "Escape") {
+
+        coachModal.hide();
+
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "r") {
+
+        e.preventDefault();
+
+        drawBoard();
+
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "h") {
+
+        e.preventDefault();
+
+        refreshHistory();
+
+    }
+
+});
+
+/* =====================================================
+   PERFORMANCE
+===================================================== */
+
+window.addEventListener("visibilitychange", () => {
+
+    if (document.hidden) {
+
+        console.log("Board Hidden");
+
+    } else {
+
+        drawBoard();
+
+        updateCounters();
+
+    }
+
+});
+
+/* =====================================================
+   STARTUP
+===================================================== */
+
+window.addEventListener("load", () => {
+
+    updateDatabaseStatus(navigator.onLine);
+
+    refreshHistory();
+
+    updateCounters();
+
+    console.log("MR CO-ORDINATION BOARD READY");
+
+});
+
+/* =====================================================
+   FINAL EXPORT
+===================================================== */
+
+window.boardAPI = {
+
+    loadBoard,
+    drawBoard,
+    updateCounters,
+    refreshHistory,
+    duplicateCoach
+
+};
+
+console.log("BOARD.JS LOADED SUCCESSFULLY");
