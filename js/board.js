@@ -2,7 +2,7 @@
    MR CO-ORDINATION BOARD
    PART - 1
 ===================================================== */
-
+import { database } from "./firebase-config.js";
 
 import {
     ref,
@@ -123,11 +123,14 @@ function drawBoard() {
 
             const card = cell.querySelector(".coach-card");
 
-if(card){
-    card.innerHTML="";
-}else{
-    cell.innerHTML='<div class="coach-card"></div>';
+let card = cell.querySelector(".coach-card");
+
+if (!card) {
+    cell.innerHTML = '<div class="coach-card"></div>';
+    card = cell.querySelector(".coach-card");
 }
+
+card.innerHTML = html;
 
             cell.dataset.shop = coach.shop || "";
             cell.dataset.line = line;
@@ -479,7 +482,13 @@ async function dropCoach(e) {
 
     try {
 
-        await update(ref(database), updates);
+        import {
+    ref,
+    get,
+    push,
+    onValue,
+    update
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
         await writeHistory("MOVE", {
             ...fromCoach,
@@ -615,8 +624,8 @@ function applyStatusColours() {
             "status-med",
             "status-rl",
             "status-r1",
-            "status-rs"
-            "status-l",
+            "status-rs",
+"status-l",
             "status-hvy"
         );
 
