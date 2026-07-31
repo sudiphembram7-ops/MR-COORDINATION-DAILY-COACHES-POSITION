@@ -516,10 +516,13 @@ function enableDragDrop() {
 
 function dragStart(e) {
 
-    if (!this.dataset.line || !this.dataset.position) {
-        e.preventDefault();
-        return;
-    }
+    if(!isAdmin()){
+
+e.preventDefault();
+
+return;
+
+}
 
     dragCell = this;
 
