@@ -1,77 +1,97 @@
 (<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MR CO-ORDINATION DAILY COACHES POSITION</title>
+<body class="bg-light">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/mobile.css">
+<!-- =========================
+HEADER
+========================= -->
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<header class="bg-primary text-white shadow-sm py-3">
 
-  
-</head>
-
-<body>
-
-<header class="header bg-primary text-white p-3">
-    <div class="container-fluid">
-
-        <div class="d-flex justify-content-between align-items-center">
-
-            <div>
-                <h2>INDIAN RAILWAYS</h2>
-                <h4>MR CO-ORDINATION DAILY COACHES POSITION</h4>
-                <h5>LILUAH WORKSHOP</h5>
-            </div>
-
-            <div class="text-end">
-                <span id="liveDate"></span><br>
-                <span id="liveTime"></span>
-            </div>
-
-        </div>
-
-    </div>
-</header>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 <div class="container-fluid">
 
-<a class="navbar-brand" href="#">MR BOARD</a>
+<div class="row align-items-center">
 
-<button class="navbar-toggler"
+<div class="col-md-8">
+
+<h2 class="fw-bold mb-0">
+INDIAN RAILWAYS
+</h2>
+
+<h4 class="mb-0">
+MR CO-ORDINATION DAILY COACHES POSITION
+</h4>
+
+<h6 class="mb-0">
+LILUAH WORKSHOP
+</h6>
+
+</div>
+
+<div class="col-md-4 text-md-end mt-3 mt-md-0">
+
+<div id="liveDate" class="fw-bold"></div>
+
+<div id="liveTime" class="fs-5"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+<!-- =========================
+NAVBAR
+========================= -->
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+<div class="container-fluid">
+
+<a class="navbar-brand fw-bold" href="#">
+MR BOARD
+</a>
+
+<button
+class="navbar-toggler"
 type="button"
 data-bs-toggle="collapse"
-data-bs-target="#menu">
+data-bs-target="#navbarMenu">
 
 <span class="navbar-toggler-icon"></span>
 
 </button>
 
-<div class="collapse navbar-collapse"
-id="menu">
+<div
+class="collapse navbar-collapse"
+id="navbarMenu">
 
 <ul class="navbar-nav ms-auto">
 
 <li class="nav-item">
-<a class="nav-link" href="dashboard.html">Dashboard</a>
+<a class="nav-link" href="dashboard.html">
+Dashboard
+</a>
 </li>
 
 <li class="nav-item">
-<a class="nav-link" href="admin.html">Admin</a>
+<a class="nav-link" href="admin.html">
+Admin
+</a>
 </li>
 
 <li class="nav-item">
-<a class="nav-link" href="history.html">History</a>
+<a class="nav-link" href="history.html">
+History
+</a>
 </li>
 
 <li class="nav-item">
-<a class="nav-link" href="reports.html">Reports</a>
+<a class="nav-link" href="reports.html">
+Reports
+</a>
 </li>
 
 </ul>
@@ -79,78 +99,183 @@ id="menu">
 </div>
 
 </div>
+
 </nav>
+
+<!-- =========================
+CONTROL PANEL
+========================= -->
 
 <div class="container-fluid mt-3">
 
-<div class="row">
+<div class="row g-2 align-items-center">
 
-<div class="col-md-5">
+<div class="col-lg-4">
 
 <input
-id="searchBox"
 type="search"
+id="searchBox"
 class="form-control"
-placeholder="Search Coach Number">
+placeholder="Search Coach Number...">
 
 </div>
 
-<div class="col-md-7 text-end">
+<div class="col-lg-8 text-lg-end">
 
-<button id="excelBtn" class="btn btn-success">Excel</button>
+<button
+id="refreshBtn"
+class="btn btn-primary">
 
-<button id="pdfBtn" class="btn btn-danger">PDF</button>
+Refresh
 
-<button id="refreshBtn" class="btn btn-primary">Refresh</button>
+</button>
 
-<button id="fullscreenBtn" class="btn btn-dark">Full Screen</button>
+<button
+id="excelBtn"
+class="btn btn-success">
 
+Excel
 
+</button>
 
-<span id="databaseStatus"></span>
+<button
+id="pdfBtn"
+class="btn btn-danger">
 
-<span id="totalCoach">0</span>
+PDF
 
-<span id="occupiedCoach">0</span>
+</button>
 
-<span id="freeCoach">0</span>
+<button
+id="fullscreenBtn"
+class="btn btn-dark">
 
+Full Screen
+
+</button>
+
+</div>
+
+</div>
+
+<!-- =========================
+DASHBOARD
+========================= -->
+
+<div class="row text-center mt-3 g-2">
+
+<div class="col-md-3">
+
+<div class="card border-primary shadow-sm">
+
+<div class="card-body">
+
+<h2 id="totalCoach">0</h2>
+
+<b>Total Coach</b>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-success shadow-sm">
+
+<div class="card-body">
+
+<h2 id="occupiedCoach">0</h2>
+
+<b>Occupied</b>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-secondary shadow-sm">
+
+<div class="card-body">
+
+<h2 id="freeCoach">0</h2>
+
+<b>Free</b>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-info shadow-sm">
+
+<div class="card-body">
+
+<h5>
+
+Database
+
+</h5>
+
+<span
+id="databaseStatus"
+class="badge bg-success">
+
+Connected
+
+</span>
+
+</div>
+
+</div>
 
 </div>
 
 </div>
 
 <hr>
-    </div>
+
+</div>
+
 <!-- =========================
      N SHOP
-========================== -->
+========================= -->
 
-<div class="shop-card mt-4">
+<div class="container-fluid mt-4">
 
-    <h3 class="shop-title text-center bg-warning p-2">
-        N SHOP
-    </h3>
+<div class="card shadow">
 
-    <div class="table-responsive">
+<div class="card-header bg-warning text-dark text-center">
 
-        <table class="table table-bordered text-center coach-table">
+<h3 class="mb-0">
+N SHOP
+</h3>
 
-            <thead class="table-dark">
+</div>
 
+<div class="card-body p-0">
+
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped text-center align-middle mb-0 coach-table">
+
+<thead class="table-dark">
 
 <tr>
 
-<th>Position</th>
+<th style="min-width:80px;">POSITION</th>
 
 <th>N2</th>
-
 <th>N3</th>
-
 <th>N5</th>
-
 <th>N7</th>
-
 <th>N8</th>
 
 </tr>
@@ -163,21 +288,11 @@ placeholder="Search Coach Number">
 
 <th>H1</th>
 
-<td id="N2_H1">
-    <div class="coach-card"></div>
-</td>
-<td id="N3_H1">
-    <div class="coach-card"></div>
-</td>
-<td id="N5_H1">
-    <div class="coach-card"></div>
-</td>
-<td id="N7_H1">
-    <div class="coach-card"></div>
-</td>
-<td id="N8_H1">
-    <div class="coach-card"></div>
-</td>
+<td id="N2_H1"><div class="coach-card"></div></td>
+<td id="N3_H1"><div class="coach-card"></div></td>
+<td id="N5_H1"><div class="coach-card"></div></td>
+<td id="N7_H1"><div class="coach-card"></div></td>
+<td id="N8_H1"><div class="coach-card"></div></td>
 
 </tr>
 
@@ -185,145 +300,105 @@ placeholder="Search Coach Number">
 
 <th>H2</th>
 
-<td id="N2_H2">
-    <div class="coach-card"></div>
-</td>
-<td id="N3_H2">
-    <div class="coach-card"></div>
-</td>
-<td id="N5_H2">
-    <div class="coach-card"></div>
-</td>
-<td id="N7_H2">
-    <div class="coach-card"></div>
-</td>
-<td id="N8_H2">
-    <div class="coach-card"></div></td>
+<td id="N2_H2"><div class="coach-card"></div></td>
+<td id="N3_H2"><div class="coach-card"></div></td>
+<td id="N5_H2"><div class="coach-card"></div></td>
+<td id="N7_H2"><div class="coach-card"></div></td>
+<td id="N8_H2"><div class="coach-card"></div></td>
 
 </tr>
+
 <tr>
-    <th>H3</th>
 
-<td id="N2_H3">
-    <div class="coach-card"></div>
-</td>
-<td id="N3_H3">
-    <div class="coach-card"></div>
-</td>
-<td id="N5_H3">
-    <div class="coach-card"></div>
-</td>
-<td id="N7_H3">
-    <div class="coach-card"></div>
-</td>
-<td id="N8_H3">
-    <div class="coach-card"></div> </td>
+<th>H3</th>
+
+<td id="N2_H3"><div class="coach-card"></div></td>
+<td id="N3_H3"><div class="coach-card"></div></td>
+<td id="N5_H3"><div class="coach-card"></div></td>
+<td id="N7_H3"><div class="coach-card"></div></td>
+<td id="N8_H3"><div class="coach-card"></div></td>
+
 </tr>
-
-
 
 <tr>
 
 <th>D3</th>
 
-<td id="N2_D3">
-    <div class="coach-card"></div>
-</td>
-<td id="N3_D3">
-    <div class="coach-card"></div>
-</td>
-<td id="N5_D3">
-    <div class="coach-card"></div>
-</td>
-<td id="N7_D3">
-    <div class="coach-card"></div>
-</td>
-<td id="N8_D3">
-    <div class="coach-card"></div>
-</td>
-
+<td id="N2_D3"><div class="coach-card"></div></td>
+<td id="N3_D3"><div class="coach-card"></div></td>
+<td id="N5_D3"><div class="coach-card"></div></td>
+<td id="N7_D3"><div class="coach-card"></div></td>
+<td id="N8_D3"><div class="coach-card"></div></td>
 
 </tr>
+
 <tr>
 
 <th>D2</th>
 
-<td id="N2_D2">
-    <div class="coach-card"></div>
-</td>
-<td id="N3_D2">
-    <div class="coach-card"></div>
-</td>
-<td id="N5_D2">
-    <div class="coach-card"></div>
-</td>
-<td id="N7_D2">
-    <div class="coach-card"></div></td>
-
-<td id="N8_D2">
-    <div class="coach-card"></div>
-</td>
-
+<td id="N2_D2"><div class="coach-card"></div></td>
+<td id="N3_D2"><div class="coach-card"></div></td>
+<td id="N5_D2"><div class="coach-card"></div></td>
+<td id="N7_D2"><div class="coach-card"></div></td>
+<td id="N8_D2"><div class="coach-card"></div></td>
 
 </tr>
+
 <tr>
 
 <th>D1</th>
 
-<td id="N2_D1">
-    <div class="coach-card"></div>
-</td>
-<td id="N3_D1">
-    <div class="coach-card"></div>
-</td>
-<td id="N5_D1">
-    <div class="coach-card"></div>
-</td>
-<td id="N7_D1">
-    <div class="coach-card"></div>
-</td>
-<td id="N8_D1">
-    <div class="coach-card"></div></td>
+<td id="N2_D1"><div class="coach-card"></div></td>
+<td id="N3_D1"><div class="coach-card"></div></td>
+<td id="N5_D1"><div class="coach-card"></div></td>
+<td id="N7_D1"><div class="coach-card"></div></td>
+<td id="N8_D1"><div class="coach-card"></div></td>
 
 </tr>
 
 </tbody>
 
 </table>
-    
 
 </div>
 
 </div>
+
+</div>
+
+</div>
+
+
 <!-- =========================
      M SHOP
-========================== -->
+========================= -->
 
-<div class="shop-card mt-4">
+<div class="container-fluid mt-4">
 
-    <h3 class="shop-title text-center bg-warning p-2">
-        M SHOP
-    </h3>
+<div class="card shadow">
 
-    <div class="table-responsive">
+<div class="card-header bg-warning text-dark text-center">
 
-        <table class="table table-bordered text-center coach-table">
+<h3 class="mb-0">M SHOP</h3>
 
-            <thead class="table-dark">
+</div>
 
+<div class="card-body p-0">
+
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped text-center align-middle mb-0 coach-table">
+
+<thead class="table-dark">
 
 <tr>
 
-<th>Position</th>
+<th style="min-width:80px;">POSITION</th>
 
 <th>M2</th>
-
 <th>M3</th>
-
 <th>M4</th>
-
 <th>M5</th>
-
 <th>M6</th>
 
 </tr>
@@ -331,17 +406,16 @@ placeholder="Search Coach Number">
 </thead>
 
 <tbody>
-  
 
 <tr>
 
 <th>H</th>
 
-<td id="M2_H"> <div class="coach-card"></div></td>
-<td id="M3_H"> <div class="coach-card"></div></td>
-<td id="M4_H"> <div class="coach-card"></div></td>
-<td id="M5_H"> <div class="coach-card"></div></td>
-<td id="M6_H"> <div class="coach-card"></div></td>
+<td id="M2_H"><div class="coach-card"></div></td>
+<td id="M3_H"><div class="coach-card"></div></td>
+<td id="M4_H"><div class="coach-card"></div></td>
+<td id="M5_H"><div class="coach-card"></div></td>
+<td id="M6_H"><div class="coach-card"></div></td>
 
 </tr>
 
@@ -349,11 +423,11 @@ placeholder="Search Coach Number">
 
 <th>C</th>
 
-<td id="M2_C"> <div class="coach-card"></div></td>
-<td id="M3_C"> <div class="coach-card"></div></td>
-<td id="M4_C"> <div class="coach-card"></div></td>
-<td id="M5_C"> <div class="coach-card"></div></td>
-<td id="M6_C"> <div class="coach-card"></div></td>
+<td id="M2_C"><div class="coach-card"></div></td>
+<td id="M3_C"><div class="coach-card"></div></td>
+<td id="M4_C"><div class="coach-card"></div></td>
+<td id="M5_C"><div class="coach-card"></div></td>
+<td id="M6_C"><div class="coach-card"></div></td>
 
 </tr>
 
@@ -361,47 +435,53 @@ placeholder="Search Coach Number">
 
 <th>D</th>
 
-<td id="M2_D"> <div class="coach-card"></div></td>
-<td id="M3_D"> <div class="coach-card"></div></td>
-<td id="M4_D"> <div class="coach-card"></div></td>
-<td id="M5_D"> <div class="coach-card"></div></td>
-<td id="M6_D"> <div class="coach-card"></div></td>
+<td id="M2_D"><div class="coach-card"></div></td>
+<td id="M3_D"><div class="coach-card"></div></td>
+<td id="M4_D"><div class="coach-card"></div></td>
+<td id="M5_D"><div class="coach-card"></div></td>
+<td id="M6_D"><div class="coach-card"></div></td>
 
 </tr>
-
-
-
 
 </tbody>
 
 </table>
 
 </div>
+
+</div>
+
+</div>
+
 </div>
 
 <!-- =========================
      LIFTING BAY
-========================== -->
+========================= -->
 
-<div class="shop-card mt-4">
+<div class="container-fluid mt-4">
 
-    <h3 class="shop-title text-center bg-warning p-2">
-        LIFTING BAY
-    </h3>
+<div class="card shadow">
 
-    <div class="table-responsive">
+<div class="card-header bg-info text-white text-center">
 
-        <table class="table table-bordered text-center coach-table">
+<h3 class="mb-0">LIFTING BAY</h3>
 
-            <thead class="table-dark">
+</div>
 
+<div class="card-body p-0">
+
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped text-center align-middle mb-0 coach-table">
+
+<thead class="table-dark">
 
 <tr>
 
-<th>Position</th>
+<th style="min-width:80px;">POSITION</th>
 
 <th>L9</th>
-
 <th>L10</th>
 
 </tr>
@@ -411,161 +491,177 @@ placeholder="Search Coach Number">
 <tbody>
 
 <tr>
+
 <th>H</th>
-<td id="L9_H"> <div class="coach-card"></div></td>
-<td id="L10_H"> <div class="coach-card"></div></td>
+
+<td id="L9_H"><div class="coach-card"></div></td>
+<td id="L10_H"><div class="coach-card"></div></td>
+
 </tr>
 
 <tr>
+
 <th>C</th>
-<td id="L9_C"> <div class="coach-card"></div></td>
-<td id="L10_C"> <div class="coach-card"></div></td>
+
+<td id="L9_C"><div class="coach-card"></div></td>
+<td id="L10_C"><div class="coach-card"></div></td>
+
 </tr>
 
 <tr>
+
 <th>D</th>
-<td id="L9_D"> <div class="coach-card"></div></td>
-<td id="L10_D"> <div class="coach-card"></div></td>
+
+<td id="L9_D"><div class="coach-card"></div></td>
+<td id="L10_D"><div class="coach-card"></div></td>
+
 </tr>
-
-
 
 </tbody>
 
 </table>
 
 </div>
+
 </div>
+
+</div>
+
+</div>
+
 
 <!-- =========================
      MR SCR SHOP
-========================== -->
+========================= -->
 
-<div class="shop-card mt-4">
+<div class="container-fluid mt-4">
 
-    <h3 class="shop-title text-center bg-warning p-2">
-        MR SCR SHOP
-    </h3>
+<div class="card shadow">
 
-    <div class="table-responsive">
+<div class="card-header bg-warning text-dark text-center">
 
-        <table class="table table-bordered text-center coach-table">
+<h3 class="mb-0">
+MR SCR SHOP
+</h3>
 
-            <thead class="table-dark">
+</div>
 
-            <tr>
+<div class="card-body p-0">
 
-                <th>POSITION</th>
+<div class="table-responsive">
 
-                <th>SCR9</th>
-                <th>SCR10</th>
-                <th>SCR11</th>
-                <th>SCR12</th>
-                <th>SCR13</th>
-                <th>SCR14</th>
-                <th>SCR15</th>
-                <th>SCR16</th>
-                <th>SCR18</th>
-                <th>SCR19</th>
-                <th>SCR21</th>
-                <th>SCR22</th>
+<table class="table table-bordered table-striped text-center align-middle mb-0 coach-table">
 
-            </tr>
+<thead class="table-dark">
 
-            </thead>
+<tr>
 
-            <tbody>
+<th style="min-width:90px;">POSITION</th>
 
-        
+<th>SCR9</th>
+<th>SCR10</th>
+<th>SCR11</th>
+<th>SCR12</th>
+<th>SCR13</th>
+<th>SCR14</th>
+<th>SCR15</th>
+<th>SCR16</th>
+<th>SCR18</th>
+<th>SCR19</th>
+<th>SCR21</th>
+<th>SCR22</th>
 
-            <tr>
+</tr>
 
-                <th>H1</th>
+</thead>
 
-                <td id="SCR9_H1"> <div class="coach-card"></div></td>
-                <td id="SCR10_H1"> <div class="coach-card"></div></td>
-                <td id="SCR11_H1"> <div class="coach-card"></div></td>
-                <td id="SCR12_H1"> <div class="coach-card"></div></td>
-                <td id="SCR13_H1"> <div class="coach-card"></div></td>
-                <td id="SCR14_H1"> <div class="coach-card"></div></td>
-                <td id="SCR15_H1"> <div class="coach-card"></div></td>
-                <td id="SCR16_H1"> <div class="coach-card"></div></td>
-                <td id="SCR18_H1"> <div class="coach-card"></div></td>
-                <td id="SCR19_H1"> <div class="coach-card"></div></td>
-                <td id="SCR21_H1"> <div class="coach-card"></div></td>
-                <td id="SCR22_H1"> <div class="coach-card"></div></td>
+<tbody>
 
-            </tr>
+<tr>
 
-        
+<th>H1</th>
 
-            <tr>
+<td id="SCR9_H1"><div class="coach-card"></div></td>
+<td id="SCR10_H1"><div class="coach-card"></div></td>
+<td id="SCR11_H1"><div class="coach-card"></div></td>
+<td id="SCR12_H1"><div class="coach-card"></div></td>
+<td id="SCR13_H1"><div class="coach-card"></div></td>
+<td id="SCR14_H1"><div class="coach-card"></div></td>
+<td id="SCR15_H1"><div class="coach-card"></div></td>
+<td id="SCR16_H1"><div class="coach-card"></div></td>
+<td id="SCR18_H1"><div class="coach-card"></div></td>
+<td id="SCR19_H1"><div class="coach-card"></div></td>
+<td id="SCR21_H1"><div class="coach-card"></div></td>
+<td id="SCR22_H1"><div class="coach-card"></div></td>
 
-                <th>H2</th>
+</tr>
 
-                <td id="SCR9_H2"> <div class="coach-card"></div></td>
-                <td id="SCR10_H2"> <div class="coach-card"></div></td>
-                <td id="SCR11_H2"> <div class="coach-card"></div></td>
-                <td id="SCR12_H2"> <div class="coach-card"></div></td>
-                <td id="SCR13_H2"> <div class="coach-card"></div></td>
-                <td id="SCR14_H2"> <div class="coach-card"></div></td>
-                <td id="SCR15_H2"> <div class="coach-card"></div></td>
-                <td id="SCR16_H2"> <div class="coach-card"></div></td>
-                <td id="SCR18_H2"> <div class="coach-card"></div></td>
-                <td id="SCR19_H2"> <div class="coach-card"></div></td>
-                <td id="SCR21_H2"> <div class="coach-card"></div></td>
-                <td id="SCR22_H2"> <div class="coach-card"></div></td>
+<tr>
 
-            </tr>
+<th>H2</th>
 
-        
+<td id="SCR9_H2"><div class="coach-card"></div></td>
+<td id="SCR10_H2"><div class="coach-card"></div></td>
+<td id="SCR11_H2"><div class="coach-card"></div></td>
+<td id="SCR12_H2"><div class="coach-card"></div></td>
+<td id="SCR13_H2"><div class="coach-card"></div></td>
+<td id="SCR14_H2"><div class="coach-card"></div></td>
+<td id="SCR15_H2"><div class="coach-card"></div></td>
+<td id="SCR16_H2"><div class="coach-card"></div></td>
+<td id="SCR18_H2"><div class="coach-card"></div></td>
+<td id="SCR19_H2"><div class="coach-card"></div></td>
+<td id="SCR21_H2"><div class="coach-card"></div></td>
+<td id="SCR22_H2"><div class="coach-card"></div></td>
 
-            <tr>
+</tr>
 
-                <th>D2</th>
+<tr>
 
-                <td id="SCR9_D2"> <div class="coach-card"></div></td>
-                <td id="SCR10_D2"> <div class="coach-card"></div></td>
-                <td id="SCR11_D2"> <div class="coach-card"></div></td>
-                <td id="SCR12_D2"> <div class="coach-card"></div></td>
-                <td id="SCR13_D2"> <div class="coach-card"></div></td>
-                <td id="SCR14_D2"> <div class="coach-card"></div></td>
-                <td id="SCR15_D2"> <div class="coach-card"></div></td>
-                <td id="SCR16_D2"> <div class="coach-card"></div></td>
-                <td id="SCR18_D2"> <div class="coach-card"></div></td>
-                <td id="SCR19_D2"> <div class="coach-card"></div></td>
-                <td id="SCR21_D2"> <div class="coach-card"></div></td>
-                <td id="SCR22_D2"> <div class="coach-card"></div></td>
+<th>D2</th>
 
-            </tr>
-            
-                        <tr>
+<td id="SCR9_D2"><div class="coach-card"></div></td>
+<td id="SCR10_D2"><div class="coach-card"></div></td>
+<td id="SCR11_D2"><div class="coach-card"></div></td>
+<td id="SCR12_D2"><div class="coach-card"></div></td>
+<td id="SCR13_D2"><div class="coach-card"></div></td>
+<td id="SCR14_D2"><div class="coach-card"></div></td>
+<td id="SCR15_D2"><div class="coach-card"></div></td>
+<td id="SCR16_D2"><div class="coach-card"></div></td>
+<td id="SCR18_D2"><div class="coach-card"></div></td>
+<td id="SCR19_D2"><div class="coach-card"></div></td>
+<td id="SCR21_D2"><div class="coach-card"></div></td>
+<td id="SCR22_D2"><div class="coach-card"></div></td>
 
-                <th>D1</th>
+</tr>
 
-                <td id="SCR9_D1"> <div class="coach-card"></div></td>
-                <td id="SCR10_D1"> <div class="coach-card"></div></td>
-                <td id="SCR11_D1"> <div class="coach-card"></div></td>
-                <td id="SCR12_D1"> <div class="coach-card"></div></td>
-                <td id="SCR13_D1"> <div class="coach-card"></div></td>
-                <td id="SCR14_D1"> <div class="coach-card"></div></td>
-                <td id="SCR15_D1"> <div class="coach-card"></div></td>
-                <td id="SCR16_D1"> <div class="coach-card"></div></td>
-                <td id="SCR18_D1"> <div class="coach-card"></div></td>
-                <td id="SCR19_D1"> <div class="coach-card"></div></td>
-                <td id="SCR21_D1"> <div class="coach-card"></div></td>
-                <td id="SCR22_D1"> <div class="coach-card"></div></td>
+<tr>
 
-            </tr>
+<th>D1</th>
 
-        
+<td id="SCR9_D1"><div class="coach-card"></div></td>
+<td id="SCR10_D1"><div class="coach-card"></div></td>
+<td id="SCR11_D1"><div class="coach-card"></div></td>
+<td id="SCR12_D1"><div class="coach-card"></div></td>
+<td id="SCR13_D1"><div class="coach-card"></div></td>
+<td id="SCR14_D1"><div class="coach-card"></div></td>
+<td id="SCR15_D1"><div class="coach-card"></div></td>
+<td id="SCR16_D1"><div class="coach-card"></div></td>
+<td id="SCR18_D1"><div class="coach-card"></div></td>
+<td id="SCR19_D1"><div class="coach-card"></div></td>
+<td id="SCR21_D1"><div class="coach-card"></div></td>
+<td id="SCR22_D1"><div class="coach-card"></div></td>
 
-           
-            </tbody>
+</tr>
 
-        </table>
+</tbody>
 
-    </div>
+</table>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
