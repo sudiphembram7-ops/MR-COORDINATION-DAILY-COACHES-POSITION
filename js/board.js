@@ -350,14 +350,10 @@ document
    SAVE
 ===================================================== */
 
-async function saveCoach() {
-
-    const coach = getModalData();
-
-    if (!coach.coachNo) {
-        alert("Enter Coach Number");
-        return;
-    }
+if (!isAdmin()) {
+    alert("Admin Login Required");
+    return;
+}
 
     if (duplicateCoach(coach.coachNo)) {
         alert("Duplicate Coach Number");
@@ -395,14 +391,10 @@ async function saveCoach() {
    UPDATE
 ===================================================== */
 
-async function updateCoach() {
-
-    const coach = getModalData();
-
-    if (!coach.coachNo) {
-        alert("Enter Coach Number");
-        return;
-    }
+if (!isAdmin()) {
+    alert("Admin Login Required");
+    return;
+}
 
     if (duplicateCoach(coach.coachNo)) {
         alert("Duplicate Coach Number");
@@ -443,11 +435,10 @@ async function updateCoach() {
    DELETE
 ===================================================== */
 
-async function deleteCoach() {
-
-    if (!confirm("Delete this Coach?")) return;
-
-    const coach = getModalData();
+if (!isAdmin()) {
+    alert("Admin Login Required");
+    return;
+}
 
     try {
 
