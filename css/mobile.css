@@ -1,55 +1,56 @@
-/* =========================
-   Mobile Responsive
-========================= */
+@media(max-width:768px){
 
-@media (max-width:768px){
+.header h2{
 
-body{
-    margin:5px;
-    font-size:14px;
+font-size:20px;
+
 }
 
-.top-bar{
-    flex-direction:column;
-    gap:10px;
-    text-align:center;
+.header h4{
+
+font-size:16px;
+
 }
 
-.shop-container{
-    display:block;
+.header h5{
+
+font-size:14px;
+
+}
+
+.coach-card{
+
+min-height:55px;
+
+font-size:12px;
+
+padding:3px;
+
+}
+
+table{
+
+font-size:12px;
+
+}
+
+.btn{
+
+margin-top:5px;
+
+width:100%;
+
 }
 
 .shop-card{
-    width:100%;
-    margin-bottom:15px;
-}
 
-.coach-table{
-    display:block;
-    overflow-x:auto;
-    white-space:nowrap;
-}
-
-.coach-table th,
-.coach-table td{
-
-    min-width:80px;
-    height:50px;
-    font-size:13px;
+margin:10px 0;
 
 }
 
-button{
+.login-box{
 
-    width:100%;
-    margin-top:8px;
-
-}
-
-input,
-select{
-
-    width:100%;
+width:95%;
 
 }
 
