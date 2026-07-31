@@ -148,7 +148,6 @@ if (!card) {
 }
 
 card.innerHTML = html;
-
 if (!card) {
     cell.innerHTML = '<div class="coach-card"></div>';
     card = cell.querySelector(".coach-card");
