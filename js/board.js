@@ -400,7 +400,7 @@ async function saveCoach() {
    UPDATE
 ===================================================== */
 
-async function saveCoach() {
+async function updateCoach() {
 
     if (!isAdmin()) {
         alert("Admin Login Required");
@@ -409,15 +409,7 @@ async function saveCoach() {
 
     const coach = getModalData();
 
-    if (!coach.coachNo) {
-        alert("Enter Coach Number");
-        return;
-    }
 
-    if (duplicateCoach(coach.coachNo)) {
-        alert("Duplicate Coach Number");
-        return;
-    }
 
   
 
@@ -455,24 +447,16 @@ async function saveCoach() {
    DELETE
 ===================================================== */
 
-async function saveCoach() {
+async function deleteCoach() {
 
     if (!isAdmin()) {
         alert("Admin Login Required");
         return;
     }
 
+    if (!confirm("Delete this Coach?")) return;
+
     const coach = getModalData();
-
-    if (!coach.coachNo) {
-        alert("Enter Coach Number");
-        return;
-    }
-
-    if (duplicateCoach(coach.coachNo)) {
-        alert("Duplicate Coach Number");
-        return;
-    }
 
   
 
