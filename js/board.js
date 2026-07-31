@@ -521,7 +521,27 @@ async function writeHistory(action, coach) {
    100% WORKING DRAG & DROP
 ===================================================== */
 
+function applyStatusColours() {
+    document.querySelectorAll(".coach-table td").forEach(cell => {
+        cell.classList.remove(
+            "status-po",
+            "status-lm",
+            "status-med",
+            "status-rl",
+            "status-r1",
+            "status-rs",
+            "status-s",
+            "status-l",
+            "status-hvy"
+        );
 
+        const status = (cell.dataset.status || "").toLowerCase();
+
+        if (status) {
+            cell.classList.add("status-" + status);
+        }
+    });
+}
 /* =====================================================
    ENABLE DRAG
 ===================================================== */
