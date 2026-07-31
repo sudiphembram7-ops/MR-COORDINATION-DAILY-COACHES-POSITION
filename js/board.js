@@ -228,7 +228,6 @@ function openModal(cell) {
         return;
     }
 
-    const [line, position] = cell.id.split("_");
 
 
     const [line, position] = cell.id.split("_");
@@ -350,15 +349,25 @@ document
    SAVE
 ===================================================== */
 
-if (!isAdmin()) {
-    alert("Admin Login Required");
-    return;
-}
+async function saveCoach() {
+
+    if (!isAdmin()) {
+        alert("Admin Login Required");
+        return;
+    }
+
+    const coach = getModalData();
+
+    if (!coach.coachNo) {
+        alert("Enter Coach Number");
+        return;
+    }
 
     if (duplicateCoach(coach.coachNo)) {
         alert("Duplicate Coach Number");
         return;
     }
+
 
     try {
 
@@ -391,15 +400,26 @@ if (!isAdmin()) {
    UPDATE
 ===================================================== */
 
-if (!isAdmin()) {
-    alert("Admin Login Required");
-    return;
-}
+async function saveCoach() {
+
+    if (!isAdmin()) {
+        alert("Admin Login Required");
+        return;
+    }
+
+    const coach = getModalData();
+
+    if (!coach.coachNo) {
+        alert("Enter Coach Number");
+        return;
+    }
 
     if (duplicateCoach(coach.coachNo)) {
         alert("Duplicate Coach Number");
         return;
     }
+
+  
 
     try {
 
@@ -435,10 +455,26 @@ if (!isAdmin()) {
    DELETE
 ===================================================== */
 
-if (!isAdmin()) {
-    alert("Admin Login Required");
-    return;
-}
+async function saveCoach() {
+
+    if (!isAdmin()) {
+        alert("Admin Login Required");
+        return;
+    }
+
+    const coach = getModalData();
+
+    if (!coach.coachNo) {
+        alert("Enter Coach Number");
+        return;
+    }
+
+    if (duplicateCoach(coach.coachNo)) {
+        alert("Duplicate Coach Number");
+        return;
+    }
+
+  
 
     try {
 
