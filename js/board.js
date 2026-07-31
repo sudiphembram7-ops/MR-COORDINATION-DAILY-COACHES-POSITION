@@ -124,9 +124,14 @@ function drawBoard() {
                 <div class="coach-status">${coach.status || ""}</div>
             `;
 
-            const card = cell.querySelector(".coach-card");
+            let card = cell.querySelector(".coach-card");
 
-let card = cell.querySelector(".coach-card");
+if (!card) {
+    cell.innerHTML = '<div class="coach-card"></div>';
+    card = cell.querySelector(".coach-card");
+}
+
+card.innerHTML = html;
 
 if (!card) {
     cell.innerHTML = '<div class="coach-card"></div>';
@@ -316,9 +321,7 @@ document
 .getElementById("deleteCoachBtn")
 ?.addEventListener("click", deleteCoach);
 
-/* =====================================================
-   SAVE
-===================================================== */
+
 /* =====================================================
    SAVE
 ===================================================== */
@@ -363,9 +366,7 @@ async function saveCoach() {
 
 }
 
-/* =====================================================
-   UPDATE
-===================================================== */
+
 /* =====================================================
    UPDATE
 ===================================================== */
@@ -413,9 +414,7 @@ async function updateCoach() {
 
 }
 
-/* =====================================================
-   DELETE
-===================================================== */
+
 /* =====================================================
    DELETE
 ===================================================== */
@@ -602,13 +601,13 @@ async function dropCoach(e) {
 
     try {
 
-        import {
-    ref,
-    get,
-    push,
-    onValue,
-    update
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        await update(ref(database), updates);
+
+await writeHistory("MOVE", {
+    ...fromCoach,
+    line: toLine,
+    position: toPos
+});
 
         await writeHistory("MOVE", {
             ...fromCoach,
