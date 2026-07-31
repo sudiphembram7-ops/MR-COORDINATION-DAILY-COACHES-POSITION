@@ -601,8 +601,18 @@ async function dropCoach(e) {
 
     try {
 
-        await update(ref(database), updates);
+    await update(ref(database), updates);
 
+    await writeHistory("MOVE", {
+        ...fromCoach,
+        line: toLine,
+        position: toPos
+    });
+
+} catch (err) {
+    console.error("Drag & Drop Error:", err);
+    alert("Drag & Drop Failed");
+}
 await writeHistory("MOVE", {
     ...fromCoach,
     line: toLine,
