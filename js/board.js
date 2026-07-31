@@ -3,6 +3,22 @@
    PART - 1
 ===================================================== */
 import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+const auth = getAuth();
+
+let adminLoggedIn = false;
+
+onAuthStateChanged(auth, (user) => {
+    adminLoggedIn = !!user;
+});
+
+function isAdmin() {
+    return adminLoggedIn;
+}
+import {
     ref,
     get,
     push,
@@ -206,6 +222,14 @@ function enableCellClick() {
 ===================================================== */
 
 function openModal(cell) {
+
+    if (!isAdmin()) {
+        alert("Admin Login Required");
+        return;
+    }
+
+    const [line, position] = cell.id.split("_");
+
 
     const [line, position] = cell.id.split("_");
 
