@@ -152,7 +152,7 @@ onValue
 const historyBody =
 document.getElementById("historyBody");
 
-onValue(ref(database,"auditLog"),(snapshot)=>{
+onValue(ref(database, "history"), (snapshot) => {
 
 historyBody.innerHTML="";
 
