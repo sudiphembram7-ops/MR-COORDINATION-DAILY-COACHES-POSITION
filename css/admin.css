@@ -1,0 +1,491 @@
+/* ==========================================
+   MR CO-ORDINATION ADMIN PANEL
+   admin.css
+   PART - 1
+========================================== */
+
+/* ===== BODY ===== */
+
+body{
+    margin:0;
+    padding:0;
+    background:#f4f7fb;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#222;
+}
+
+/* ===== CONTAINER ===== */
+
+.container-fluid{
+    max-width:1400px;
+    margin:auto;
+}
+
+/* ===== HEADER CARD ===== */
+
+.card{
+    border:none;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.card-header{
+    font-weight:700;
+    font-size:18px;
+}
+
+/* ===== TITLE ===== */
+
+h2{
+    font-weight:700;
+    color:#0d6efd;
+    margin-bottom:5px;
+}
+
+h5{
+    margin:0;
+    font-weight:600;
+}
+
+/* ===== DATE & TIME ===== */
+
+#currentDate{
+    font-size:15px;
+    color:#555;
+}
+
+#currentTime{
+    font-size:24px;
+    font-weight:bold;
+    color:#0d6efd;
+}
+
+/* ===== TOP BUTTONS ===== */
+
+.btn{
+    border-radius:10px;
+    font-weight:600;
+    transition:.25s ease;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-success{
+    background:#198754;
+}
+
+.btn-primary{
+    background:#0d6efd;
+}
+
+.btn-warning{
+    color:#fff;
+}
+
+.btn-danger{
+    background:#dc3545;
+}
+
+/* ===== ICON ===== */
+
+.bi{
+    margin-right:6px;
+}
+
+/* ==========================================
+   MR CO-ORDINATION ADMIN PANEL
+   admin.css
+   PART - 2
+========================================== */
+
+/* ===== TABLE ===== */
+
+.table-responsive{
+    max-height:550px;
+    overflow:auto;
+}
+
+.table{
+    margin-bottom:0;
+    vertical-align:middle;
+}
+
+.table thead th{
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:#212529;
+    color:#fff;
+    text-align:center;
+    white-space:nowrap;
+}
+
+.table tbody td{
+    text-align:center;
+    vertical-align:middle;
+    white-space:nowrap;
+}
+
+.table-hover tbody tr:hover{
+    background:#eef6ff;
+    transition:.2s;
+}
+
+/* ===== STATUS BADGES ===== */
+
+.badge{
+    min-width:70px;
+    padding:8px 12px;
+    font-size:13px;
+    border-radius:30px;
+    font-weight:700;
+}
+
+.badge-po{
+    background:#198754;
+    color:#fff;
+}
+
+.badge-lm{
+    background:#ffc107;
+    color:#000;
+}
+
+.badge-med{
+    background:#dc3545;
+    color:#fff;
+}
+
+.badge-rl{
+    background:#0d6efd;
+    color:#fff;
+}
+
+.badge-wip{
+    background:#0dcaf0;
+    color:#000;
+}
+
+.badge-hold{
+    background:#6c757d;
+    color:#fff;
+}
+
+/* ===== ACTION BUTTONS ===== */
+
+.editBtn{
+    border:none;
+    border-radius:8px;
+    padding:6px 14px;
+    font-weight:600;
+    background:#ffc107;
+    color:#000;
+    transition:.25s;
+}
+
+.editBtn:hover{
+    background:#e0a800;
+}
+
+.deleteBtn{
+    border:none;
+    border-radius:8px;
+    padding:6px 14px;
+    font-weight:600;
+    background:#dc3545;
+    color:#fff;
+    transition:.25s;
+}
+
+.deleteBtn:hover{
+    background:#bb2d3b;
+}
+
+/* ===== CARD BODY ===== */
+
+.card-body{
+    background:#fff;
+}
+
+/* ==========================================
+   MR CO-ORDINATION ADMIN PANEL
+   admin.css
+   PART - 3
+========================================== */
+
+/* ===== MODAL ===== */
+
+.modal-content{
+    border:none;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 15px 40px rgba(0,0,0,.25);
+}
+
+.modal-header{
+    background:#198754;
+    color:#fff;
+    border-bottom:none;
+    padding:18px 24px;
+}
+
+.modal-title{
+    font-size:22px;
+    font-weight:700;
+}
+
+.btn-close{
+    filter:invert(1);
+}
+
+/* ===== FORM ===== */
+
+.form-label{
+    font-weight:600;
+    margin-bottom:6px;
+    color:#333;
+}
+
+.form-control,
+.form-select{
+    height:48px;
+    border-radius:10px;
+    border:1px solid #ced4da;
+    transition:.25s;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:#0d6efd;
+    box-shadow:0 0 0 .2rem rgba(13,110,253,.25);
+}
+
+textarea.form-control{
+    height:auto;
+}
+
+/* ===== SAVE / UPDATE / DELETE ===== */
+
+#saveBtn,
+#updateBtn,
+#deleteBtn{
+    width:100%;
+    height:52px;
+    border:none;
+    border-radius:10px;
+    font-size:17px;
+    font-weight:700;
+    transition:.25s;
+}
+
+#saveBtn{
+    background:#198754;
+    color:#fff;
+}
+
+#saveBtn:hover{
+    background:#157347;
+}
+
+#updateBtn{
+    background:#ffc107;
+    color:#000;
+}
+
+#updateBtn:hover{
+    background:#e0a800;
+}
+
+#deleteBtn{
+    background:#dc3545;
+    color:#fff;
+}
+
+#deleteBtn:hover{
+    background:#bb2d3b;
+}
+
+/* ===== MODAL BODY ===== */
+
+.modal-body{
+    padding:25px;
+    background:#fafafa;
+}
+
+.modal-footer{
+    border-top:none;
+    background:#fafafa;
+}
+
+/* ==========================================
+   MR CO-ORDINATION ADMIN PANEL
+   admin.css
+   PART - 4
+========================================== */
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width:992px){
+
+    .container-fluid{
+        padding:15px;
+    }
+
+    h2{
+        font-size:26px;
+    }
+
+    h5{
+        font-size:17px;
+    }
+
+    .btn{
+        margin-bottom:10px;
+    }
+
+}
+
+@media (max-width:768px){
+
+    .table{
+        font-size:13px;
+    }
+
+    .table th,
+    .table td{
+        padding:8px 6px;
+    }
+
+    .modal-dialog{
+        margin:10px;
+    }
+
+    .modal-body{
+        padding:18px;
+    }
+
+    .form-control,
+    .form-select{
+        height:44px;
+        font-size:14px;
+    }
+
+    #saveBtn,
+    #updateBtn,
+    #deleteBtn{
+        height:48px;
+        font-size:15px;
+    }
+
+}
+
+@media (max-width:576px){
+
+    h2{
+        font-size:22px;
+    }
+
+    h5{
+        font-size:15px;
+    }
+
+    #currentTime{
+        font-size:18px;
+    }
+
+    .card{
+        border-radius:12px;
+    }
+
+    .card-header{
+        font-size:15px;
+    }
+
+    .badge{
+        min-width:60px;
+        font-size:11px;
+        padding:6px 10px;
+    }
+
+    .table{
+        font-size:12px;
+    }
+
+    .editBtn,
+    .deleteBtn{
+        width:100%;
+        margin:2px 0;
+        font-size:12px;
+    }
+
+}
+
+/* ===== PRINT ===== */
+
+@media print{
+
+    .btn,
+    .modal,
+    .modal-backdrop{
+        display:none !important;
+    }
+
+    body{
+        background:#fff;
+    }
+
+    .card{
+        box-shadow:none;
+        border:1px solid #ddd;
+    }
+
+    .table{
+        font-size:11px;
+    }
+
+}
+
+/* ===== SCROLLBAR ===== */
+
+::-webkit-scrollbar{
+    width:8px;
+    height:8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#b5b5b5;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#888;
+}
+
+::-webkit-scrollbar-track{
+    background:#f1f1f1;
+}
+
+/* ===== ANIMATION ===== */
+
+.fade-up{
+    animation:fadeUp .35s ease;
+}
+
+@keyframes fadeUp{
+
+    from{
+        opacity:0;
+        transform:translateY(15px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+/* ===== END OF FILE ===== */
