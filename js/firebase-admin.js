@@ -18,6 +18,7 @@ import {
 ===================================================== */
 
 export async function saveCoach(data) {
+    console.log("Saving:", data);
 
     const coachRef = ref(
         database,
@@ -33,6 +34,8 @@ export async function saveCoach(data) {
         status: data.status,
         updatedAt: data.updatedAt
     });
+
+    console.log("Saved Successfully");
 }
 
 /* =====================================================
