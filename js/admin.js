@@ -1,24 +1,12 @@
 /* ==========================================
    MR CO-ORDINATION ADMIN PANEL
-   admin.js - Part 1
+   admin.js
+   PART - 1
 ========================================== */
 
-/* ==========================================
-   IMPORTS
-========================================== */
+console.log("admin.js loaded");
 
-import { auth, database } from "./firebase-config.js";
-import { enableDragDrop } from "./dragdrop.js";
-import {
-    ref,
-    get,
-    push
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-import {
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { database, auth } from "./firebase-config.js";
 
 import {
     saveCoach as firebaseSaveCoach,
@@ -27,163 +15,167 @@ import {
     listenBoard
 } from "./firebase-admin.js";
 
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
 /* ==========================================
-   GLOBAL VARIABLES
+   DOM ELEMENTS
+========================================== */
+
+const shop = document.getElementById("shop");
+const line = document.getElementById("line");
+const position = document.getElementById("position");
+const coachNo = document.getElementById("coachNo");
+const coachType = document.getElementById("coachType");
+const status = document.getElementById("status");
+
+const saveBtn = document.getElementById("saveBtn");
+const updateBtn = document.getElementById("updateBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+const refreshBtn = document.getElementById("refreshBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const historyBody = document.getElementById("historyBody");
+
+/* ==========================================
+   VARIABLES
 ========================================== */
 
 let boardData = {};
-let currentUser = null;
+let selectedCoachKey = null;
 
 /* ==========================================
-   ADMIN AUTH CHECK
+   AUTH CHECK
 ========================================== */
 
 onAuthStateChanged(auth, (user) => {
 
     if (!user) {
-
-        alert("Please Login First");
-
         window.location.href = "login.html";
-
         return;
-
     }
 
-    currentUser = user;
+    console.log("Login Success :", user.email);
 
-    console.log("Admin Login :", user.email);
+});
 
-    console.log("UID :", user.uid);
+/* ==========================================
+   INITIAL LOAD
+========================================== */
 
-    const adminName =
-        document.getElementById("adminName");
+loadCoachData();
 
-    if (adminName) {
+/* ==========================================
+   EVENT LISTENERS
+========================================== */
 
-        adminName.textContent = user.email;
+saveBtn?.addEventListener("click", saveCoach);
 
-    }
+updateBtn?.addEventListener("click", updateCoach);
+
+deleteBtn?.addEventListener("click", deleteCoach);
+
+refreshBtn?.addEventListener("click", () => {
 
     loadCoachData();
 
 });
 
-/* ==========================================
-   DOM READY
-========================================== */
+logoutBtn?.addEventListener("click", async () => {
 
-document.addEventListener("DOMContentLoaded", () => {
+    if (!confirm("Are you sure you want to logout?")) return;
 
-    document
-        .getElementById("saveBtn")
-        ?.addEventListener("click", saveCoach);
+    await signOut(auth);
 
-    document
-        .getElementById("updateBtn")
-        ?.addEventListener("click", updateCoach);
-
-    document
-        .getElementById("deleteBtn")
-        ?.addEventListener("click", deleteCoach);
+    window.location.href = "login.html";
 
 });
-
-/* ==========================================
-   LOAD BOARD
-========================================== */
-
-function loadCoachData() {
-
-    listenBoard((data) => {
-
-        boardData = data || {};
-
-        renderHistory(boardData);
-
-        updateDashboardStats();
-
-    });
-
-}
-
-/* ==========================================
-   admin.js - Part 2
-   FORM • SAVE • UPDATE • DELETE • AUDIT
-========================================== */
-
-/* ==========================================
-   GET FORM DATA
-========================================== */
-
-function getFormData() {
-
-    return {
-
-        shop: document.getElementById("shop").value,
-
-        line: document.getElementById("line").value,
-
-        position: document.getElementById("position").value,
-
-        coachNo: document.getElementById("coachNo").value.trim().toUpperCase(),
-
-        coachType: document.getElementById("coachType").value,
-
-        status: document.getElementById("status").value,
-
-        updatedAt: new Date().toISOString()
-
-    };
-
-}
-
-/* ==========================================
-   CLEAR FORM
-========================================== */
-
-function clearForm() {
-
-    document.getElementById("coachNo").value = "";
-
-    document.getElementById("coachType").selectedIndex = 0;
-
-    document.getElementById("status").selectedIndex = 0;
-
-}
 
 /* ==========================================
    SAVE COACH
 ========================================== */
 
 async function saveCoach() {
-    console.log("SAVE button clicked");
 
-    const coach = getFormData();
+    const coach = {
+        shop: shop.value.trim(),
+        line: line.value.trim(),
+        position: position.value.trim(),
+        coachNo: coachNo.value.trim().toUpperCase(),
+        coachType: coachType.value.trim(),
+        status: status.value.trim(),
+        lastUpdated: new Date().toISOString()
+    };
 
-    if (!coach.coachNo) {
+    /* ---------- Validation ---------- */
 
-        alert("Enter Coach Number");
+    if (
+        !coach.shop ||
+        !coach.line ||
+        !coach.position ||
+        !coach.coachNo ||
+        !coach.coachType ||
+        !coach.status
+    ) {
 
+        alert("Please fill all fields.");
         return;
 
     }
+
+    /* ---------- Duplicate Check ---------- */
+
+    let duplicate = false;
+
+    Object.keys(boardData).forEach((key) => {
+
+        const item = boardData[key];
+
+        if (
+            item.coachNo === coach.coachNo &&
+            key !== selectedCoachKey
+        ) {
+
+            duplicate = true;
+
+        }
+
+    });
+
+    if (duplicate) {
+
+        alert("Coach Number already exists.");
+        return;
+
+    }
+
+    /* ---------- Save ---------- */
 
     try {
 
         await firebaseSaveCoach(coach);
 
-        await writeAudit("SAVE", coach);
-
-        alert("Coach Saved Successfully");
+        alert("Coach saved successfully.");
 
         clearForm();
 
-    } catch (error) {
+        loadCoachData();
+
+        const modal = bootstrap.Modal.getInstance(
+            document.getElementById("coachModal")
+        );
+
+        if (modal) modal.hide();
+
+    }
+
+    catch (error) {
 
         console.error(error);
 
-        alert(error.message);
+        alert("Save failed.");
 
     }
 
@@ -195,35 +187,96 @@ async function saveCoach() {
 
 async function updateCoach() {
 
-    const coach = getFormData();
+    if (!selectedCoachKey) {
 
-    if (!coach.coachNo) {
-
-        alert("Enter Coach Number");
-
+        alert("Please select a coach first.");
         return;
 
     }
 
+    const coach = {
+
+        shop: shop.value.trim(),
+        line: line.value.trim(),
+        position: position.value.trim(),
+        coachNo: coachNo.value.trim().toUpperCase(),
+        coachType: coachType.value.trim(),
+        status: status.value.trim(),
+        lastUpdated: new Date().toISOString()
+
+    };
+
+    /* ---------- Validation ---------- */
+
+    if (
+        !coach.shop ||
+        !coach.line ||
+        !coach.position ||
+        !coach.coachNo ||
+        !coach.coachType ||
+        !coach.status
+    ) {
+
+        alert("Please fill all fields.");
+        return;
+
+    }
+
+    /* ---------- Duplicate Check ---------- */
+
+    let duplicate = false;
+
+    Object.keys(boardData).forEach((key) => {
+
+        if (key === selectedCoachKey) return;
+
+        const item = boardData[key];
+
+        if (item.coachNo === coach.coachNo) {
+
+            duplicate = true;
+
+        }
+
+    });
+
+    if (duplicate) {
+
+        alert("Coach Number already exists.");
+        return;
+
+    }
+
+    /* ---------- Update ---------- */
+
     try {
 
-        await firebaseUpdateCoach(coach);
+        await firebaseUpdateCoach(selectedCoachKey, coach);
 
-        await writeAudit("UPDATE", coach);
-
-        alert("Coach Updated Successfully");
+        alert("Coach updated successfully.");
 
         clearForm();
 
+        selectedCoachKey = null;
+
+        loadCoachData();
+
+        const modalElement = document.getElementById("coachModal");
+
+        const modal = bootstrap.Modal.getInstance(modalElement);
+
+        if (modal) modal.hide();
+
     } catch (error) {
 
-        console.error(error);
+        console.error("Update Error:", error);
 
-        alert(error.message);
+        alert("Update failed.");
 
     }
 
 }
+
 
 /* ==========================================
    DELETE COACH
@@ -231,167 +284,187 @@ async function updateCoach() {
 
 async function deleteCoach() {
 
-    const coach = getFormData();
+    if (!selectedCoachKey) {
 
-    if (!confirm("Delete this Coach?")) return;
+        alert("Please select a coach first.");
+        return;
+
+    }
+
+    const ok = confirm(
+        "Are you sure you want to delete this coach?"
+    );
+
+    if (!ok) return;
 
     try {
 
-        await firebaseDeleteCoach(
-            coach.line,
-            coach.position
-        );
+        await firebaseDeleteCoach(selectedCoachKey);
 
-        await writeAudit("DELETE", coach);
-
-        alert("Coach Deleted Successfully");
+        alert("Coach deleted successfully.");
 
         clearForm();
 
-    } catch (error) {
+        selectedCoachKey = null;
 
-        console.error(error);
+        loadCoachData();
 
-        alert(error.message);
+        const modalElement =
+            document.getElementById("coachModal");
+
+        const modal =
+            bootstrap.Modal.getInstance(modalElement);
+
+        if (modal) {
+
+            modal.hide();
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error("Delete Error:", error);
+
+        alert("Delete failed.");
 
     }
 
 }
 
 /* ==========================================
-   AUDIT LOG
+   CLEAR FORM
 ========================================== */
 
-async function writeAudit(action, coach) {
+function clearForm() {
 
-    try {
+    shop.value = "";
+    line.innerHTML =
+        '<option value="">Select Line</option>';
 
-        await push(
+    position.innerHTML =
+        '<option value="">Select Position</option>';
 
-            ref(database, "auditLog"),
+    coachNo.value = "";
+    coachType.value = "";
+    status.value = "";
 
-            {
-
-                action,
-
-                shop: coach.shop,
-
-                line: coach.line,
-
-                position: coach.position,
-
-                coachNo: coach.coachNo,
-
-                coachType: coach.coachType,
-
-                status: coach.status,
-
-                user: currentUser.email,
-
-                uid: currentUser.uid,
-
-                time: new Date().toISOString()
-
-            }
-
-        );
-
-    } catch (error) {
-
-        console.error("Audit Error :", error);
-
-    }
+    selectedCoachKey = null;
 
 }
 
 /* ==========================================
-   admin.js - Part 3
-   EDIT • HISTORY • SEARCH • FILTER • DASHBOARD
+   LOAD COACH DATA
 ========================================== */
 
-/* ==========================================
-   EDIT COACH
-========================================== */
+function loadCoachData() {
 
-window.editCoach = async function (line, position) {
+    listenBoard((data) => {
 
-    try {
+        boardData = data || {};
 
-        const snapshot = await get(
-            ref(database, `coachBoard/${line}/${position}`)
-        );
+        renderHistory(boardData);
 
-        if (!snapshot.exists()) return;
+    });
 
-        const coach = snapshot.val();
-
-        document.getElementById("shop").value =
-            coach.shop || "";
-
-        document.getElementById("line").value =
-            line;
-
-        document.getElementById("position").value =
-            position;
-
-        document.getElementById("coachNo").value =
-            coach.coachNo || "";
-
-        document.getElementById("coachType").value =
-            coach.coachType || "";
-
-        document.getElementById("status").value =
-            coach.status || "";
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Unable to load coach.");
-
-    }
-
-};
+}
 
 /* ==========================================
-   HISTORY TABLE
+   RENDER HISTORY TABLE
 ========================================== */
 
 function renderHistory(data) {
 
-    const table = document.getElementById("historyTable");
+    historyBody.innerHTML = "";
 
-    if (!table) return;
+    Object.keys(data).forEach((key) => {
 
-    table.innerHTML = "";
+        const coach = data[key];
 
-    Object.keys(data).forEach(line => {
+        const tr = document.createElement("tr");
 
-        Object.keys(data[line]).forEach(position => {
+        tr.innerHTML = `
 
-            const coach = data[line][position];
+            <td>${coach.shop || ""}</td>
 
-            const row = table.insertRow();
+            <td>${coach.line || ""}</td>
 
-            row.innerHTML = `
-                <td>${coach.shop || ""}</td>
-                <td>${line}</td>
-                <td>${position}</td>
-                <td>${coach.coachNo || ""}</td>
-                <td>${coach.coachType || ""}</td>
-                <td>${coach.status || ""}</td>
-                <td>${
-                    coach.updatedAt
-                        ? new Date(coach.updatedAt).toLocaleString("en-IN")
-                        : ""
-                }</td>
-                <td>
-                    <button class="btn btn-sm btn-primary"
-                        onclick="editCoach('${line}','${position}')">
-                        Edit
-                    </button>
-                </td>
-            `;
+            <td>${coach.position || ""}</td>
+
+            <td>
+                <strong>${coach.coachNo || ""}</strong>
+            </td>
+
+            <td>${coach.coachType || ""}</td>
+
+            <td>
+
+                <span class="badge bg-primary">
+
+                    ${coach.status || ""}
+
+                </span>
+
+            </td>
+
+            <td>
+
+                <button
+                    class="btn btn-warning btn-sm editBtn"
+                    data-key="${key}">
+
+                    Edit
+
+                </button>
+
+            </td>
+
+        `;
+
+        historyBody.appendChild(tr);
+
+    });
+
+    bindEditButtons();
+
+}
+
+/* ==========================================
+   EDIT BUTTON
+========================================== */
+
+function bindEditButtons() {
+
+    document.querySelectorAll(".editBtn").forEach((btn) => {
+
+        btn.addEventListener("click", () => {
+
+            const key = btn.dataset.key;
+
+            const coach = boardData[key];
+
+            if (!coach) return;
+
+            selectedCoachKey = key;
+
+            shop.value = coach.shop || "";
+
+            line.value = coach.line || "";
+
+            position.value = coach.position || "";
+
+            coachNo.value = coach.coachNo || "";
+
+            coachType.value = coach.coachType || "";
+
+            status.value = coach.status || "";
+
+            const modal = new bootstrap.Modal(
+                document.getElementById("coachModal")
+            );
+
+            modal.show();
 
         });
 
@@ -400,231 +473,128 @@ function renderHistory(data) {
 }
 
 /* ==========================================
-   SEARCH
+   SHOP → LINE → POSITION
 ========================================== */
 
-const searchBox =
-    document.getElementById("searchCoach");
+const shopConfig = {
 
-if (searchBox) {
+    "N SHOP": {
+        lines: ["A", "B", "C", "D"],
+        positions: 12
+    },
 
-    searchBox.addEventListener("keyup", function () {
+    "M SHOP": {
+        lines: ["A", "B", "C", "D"],
+        positions: 12
+    },
 
-        const value =
-            this.value.toUpperCase();
+    "MR SCR SHOP": {
+        lines: ["1", "2", "3"],
+        positions: 10
+    },
 
-        document.querySelectorAll("#historyTable tr")
-            .forEach(row => {
+    "CR SHOP": {
+        lines: ["1", "2"],
+        positions: 10
+    },
 
-                row.style.display =
-                    row.innerText.toUpperCase().includes(value)
-                        ? ""
-                        : "none";
+    "J SHOP": {
+        lines: ["A", "B"],
+        positions: 10
+    },
 
-            });
-
-    });
-
-}
-
-/* ==========================================
-   SHOP FILTER
-========================================== */
-
-const shopFilter =
-    document.getElementById("shopFilter");
-
-if (shopFilter) {
-
-    shopFilter.addEventListener("change", function () {
-
-        const value =
-            this.value.toUpperCase();
-
-        document.querySelectorAll("#historyTable tr")
-            .forEach(row => {
-
-                if (value === "ALL") {
-
-                    row.style.display = "";
-
-                    return;
-
-                }
-
-                row.style.display =
-                    row.cells[0].innerText.toUpperCase() === value
-                        ? ""
-                        : "none";
-
-            });
-
-    });
-
-}
-
-/* ==========================================
-   DASHBOARD COUNTERS
-========================================== */
-
-function updateDashboardStats() {
-
-    const rows =
-        document.querySelectorAll("#historyTable tr");
-
-    document.getElementById("totalEntry").textContent =
-        rows.length;
-
-    let po = 0;
-    let lm = 0;
-    let med = 0;
-    let rl = 0;
-    let r1 = 0;
-
-    rows.forEach(row => {
-
-        if (row.cells.length < 6) return;
-
-        const status =
-            row.cells[5].innerText.trim().toUpperCase();
-
-        switch (status) {
-
-            case "PO":
-                po++;
-                break;
-
-            case "LM":
-                lm++;
-                break;
-
-            case "MED":
-                med++;
-                break;
-
-            case "RL":
-                rl++;
-                break;
-
-            case "R1":
-                r1++;
-                break;
-
-        }
-
-    });
-
-    document.getElementById("totalEntry").textContent = rows.length;
-    document.getElementById("poCount").textContent = po;
-    document.getElementById("lmCount").textContent = lm;
-    document.getElementById("medCount").textContent = med;
-
-    const rlCount = document.getElementById("rlCount");
-    if (rlCount) rlCount.textContent = rl;
-
-    const r1Count = document.getElementById("r1Count");
-    if (r1Count) r1Count.textContent = r1;
-
-}
-
-/* ==========================================
-   admin.js - Part 4
-   LOGOUT • REFRESH • AUTO REFRESH
-========================================== */
-
-/* ==========================================
-   LOGOUT
-========================================== */
-
-window.logout = async function () {
-
-    try {
-
-        await signOut(auth);
-
-        alert("Logout Successful");
-
-        window.location.href = "login.html";
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(error.message);
-
+    "LIFTING BAY": {
+        lines: ["BAY"],
+        positions: 20
     }
 
 };
 
 /* ==========================================
-   REFRESH BUTTON
+   LOAD LINES
 ========================================== */
 
-const refreshBtn =
-    document.getElementById("refreshBtn");
+shop.addEventListener("change", () => {
 
-if (refreshBtn) {
+    line.innerHTML =
+        '<option value="">Select Line</option>';
 
-    refreshBtn.addEventListener("click", () => {
+    position.innerHTML =
+        '<option value="">Select Position</option>';
 
-        loadCoachData();
+    const config = shopConfig[shop.value];
 
-        alert("Board Refreshed");
+    if (!config) return;
+
+    config.lines.forEach((item) => {
+
+        const option = document.createElement("option");
+
+        option.value = item;
+        option.textContent = item;
+
+        line.appendChild(option);
 
     });
 
-}
-
-/* ==========================================
-   AUTO REFRESH
-========================================== */
-
-setInterval(() => {
-
-    loadCoachData();
-
-}, 10000);
-
-/* ==========================================
-   LIVE CONNECTION STATUS
-========================================== */
-
-window.addEventListener("online", () => {
-
-    console.log("Internet Connected");
-
-    loadCoachData();
-
-});
-
-window.addEventListener("offline", () => {
-
-    alert("Internet Connection Lost");
-
 });
 
 /* ==========================================
-   ADMIN DRAG & DROP
+   LOAD POSITIONS
 ========================================== */
 
+line.addEventListener("change", () => {
 
+    position.innerHTML =
+        '<option value="">Select Position</option>';
 
-onAuthStateChanged(auth, (user) => {
+    const config = shopConfig[shop.value];
 
-    if (user) {
+    if (!config) return;
 
-        enableDragDrop();
+    for (let i = 1; i <= config.positions; i++) {
+
+        const option = document.createElement("option");
+
+        option.value = i;
+        option.textContent = i;
+
+        position.appendChild(option);
 
     }
 
 });
 
 /* ==========================================
-   INITIALIZE
+   REFRESH
 ========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
+refreshBtn?.addEventListener("click", () => {
 
-    console.log("MR CO-ORDINATION ADMIN READY");
+    loadCoachData();
 
 });
+
+/* ==========================================
+   MODAL RESET
+========================================== */
+
+document
+.getElementById("coachModal")
+.addEventListener("hidden.bs.modal", () => {
+
+    clearForm();
+
+});
+
+/* ==========================================
+   AUTO LOAD
+========================================== */
+
+loadCoachData();
+
+/* ==========================================
+   END
+========================================== */
+
+console.log("admin.js loaded successfully.");
