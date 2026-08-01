@@ -25,7 +25,7 @@ import {
     updateCoach as firebaseUpdateCoach,
     deleteCoach as firebaseDeleteCoach,
     listenBoard
-} from "./firebase-board.js";
+} from "./firebase-admin.js";
 
 /* ==========================================
    GLOBAL VARIABLES
