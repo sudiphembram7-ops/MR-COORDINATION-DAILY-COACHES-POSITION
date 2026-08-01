@@ -6,7 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 document.getElementById("loginBtn").addEventListener("click", login);
-
+console.log("Login button clicked");
 async function login() {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
