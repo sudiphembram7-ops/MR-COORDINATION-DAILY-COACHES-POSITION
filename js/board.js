@@ -488,34 +488,21 @@ async function deleteCoach() {
 async function writeHistory(action, coach) {
 
     await push(
-
-        ref(database, "history"),
-
+        ref(database, "auditLog"),
         {
-
-            action,
-
+            action: action,
             shop: coach.shop,
-
             line: coach.line,
-
             position: coach.position,
-
             coachNo: coach.coachNo,
-
             coachType: coach.coachType,
-
             status: coach.status,
-
-            time: new Date().toISOString()
-
+            user: auth.currentUser?.email || "Admin",
+            time: Date.now()
         }
-
     );
 
 }
-
-
 /* =====================================================
    PART - 3
    100% WORKING DRAG & DROP
