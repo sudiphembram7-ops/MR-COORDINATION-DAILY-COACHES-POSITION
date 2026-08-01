@@ -157,6 +157,7 @@ function clearForm() {
 ========================================== */
 
 async function saveCoach() {
+    console.log("SAVE button clicked");
 
     const coach = getFormData();
 
