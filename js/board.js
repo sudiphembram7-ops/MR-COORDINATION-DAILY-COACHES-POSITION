@@ -486,22 +486,21 @@ async function deleteCoach() {
 ===================================================== */
 
 async function writeHistory(action, coach) {
+    console.log("History Write:", action, coach);
 
-    await push(
-        ref(database, "auditLog"),
-        {
-            action: action,
-            shop: coach.shop,
-            line: coach.line,
-            position: coach.position,
-            coachNo: coach.coachNo,
-            coachType: coach.coachType,
-            status: coach.status,
-            user: auth.currentUser?.email || "Admin",
-            time: Date.now()
-        }
-    );
+    await push(ref(database, "history"), {
+        action,
+        shop: coach.shop,
+        line: coach.line,
+        position: coach.position,
+        coachNo: coach.coachNo,
+        coachType: coach.coachType,
+        status: coach.status,
+        user: auth.currentUser?.email || "Admin",
+        time: Date.now()
+    });
 
+    console.log("History Saved");
 }
 /* =====================================================
    PART - 3
