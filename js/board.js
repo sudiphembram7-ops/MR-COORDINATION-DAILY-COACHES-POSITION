@@ -533,72 +533,11 @@ function applyStatusColours() {
 
 
 
-/* =====================================================
-   CTRL + Z
-===================================================== */
 
-document.addEventListener("keydown", async (e) => {
-
-    if (!(e.ctrlKey && e.key.toLowerCase() === "z")) return;
-    if (!lastMove) return;
-
-    try {
-
-        const updates = {};
-
-        updates[`coachBoard/${lastMove.fromLine}/${lastMove.fromPos}`] =
-            lastMove.fromCoach;
-
-        updates[`coachBoard/${lastMove.toLine}/${lastMove.toPos}`] =
-            lastMove.toCoach;
-
-        await update(ref(database), updates);
-
-        await writeHistory("UNDO", lastMove.fromCoach);
-
-        lastMove = null;
-
-        alert("Undo Successful");
-
-    } catch (err) {
-
-        console.error(err);
-
-        alert("Undo Failed");
-
-    }
-
-});
 /* =====================================================
    HIGHLIGHT
 ===================================================== */
 
-document.addEventListener("dragenter", e => {
-
-    const td = e.target.closest(".coach-table td");
-
-    if (td)
-        td.classList.add("table-info");
-
-});
-
-document.addEventListener("dragleave", e => {
-
-    const td = e.target.closest(".coach-table td");
-
-    if (td)
-        td.classList.remove("table-info");
-
-});
-
-document.addEventListener("drop", e => {
-
-    const td = e.target.closest(".coach-table td");
-
-    if (td)
-        td.classList.remove("table-info");
-
-});
 
 
 /* =====================================================
