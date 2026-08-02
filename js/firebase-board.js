@@ -184,9 +184,7 @@ export async function deleteCoach(line, position) {
    DRAG & DROP MOVE
 ========================================== */
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-const auth = getAuth();
 
 /* ==========================
    UPDATE COACH POSITION
