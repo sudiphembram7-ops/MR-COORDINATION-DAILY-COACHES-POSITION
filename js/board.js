@@ -116,6 +116,8 @@ function drawBoard() {
     document.querySelectorAll(".coach-table td").forEach(cell => {
 
         cell.innerHTML = "";
+        card.classList.add("coach-card");
+card.setAttribute("draggable", "true");
 
         cell.dataset.shop = "";
         cell.dataset.line = "";
@@ -128,48 +130,19 @@ function drawBoard() {
 
     Object.keys(boardData).forEach(line => {
 
-        Object.keys(boardData[line]).forEach(position => {
+        Object.keys(boardData).forEach(line => {
 
-            const coach = boardData[line][position];
+    Object.keys(boardData[line]).forEach(position => {
 
-            if (!coach) return;
-
-            const cell = document.getElementById(`${line}_${position}`);
-
-            if (!cell) return;
-
-            const html = `
-                <div class="coach-no">${coach.coachNo || ""}</div>
-                <div class="coach-type">${coach.coachType || ""}</div>
-                <div class="coach-status">${coach.status || ""}</div>
-            `;
-
-            let card = cell.querySelector(".coach-card");
-
-
-if (!card) {
-    cell.innerHTML = '<div class="coach-card"></div>';
-    card = cell.querySelector(".coach-card");
-}
-
-card.innerHTML = html;
-
-            cell.dataset.shop = coach.shop || "";
-            cell.dataset.line = line;
-            cell.dataset.position = position;
-            cell.dataset.coach = coach.coachNo || "";
-            cell.dataset.type = coach.coachType || "";
-            cell.dataset.status = coach.status || "";
-
-      
+        // render coach
 
     });
-    refreshDragDrop();
 
-    applyStatusColours();
-    updateCounters();
-    
-}
+});
+
+refreshDragDrop();
+applyStatusColours();
+updateCounters();
 
 /* =====================================================
    LAST UPDATE
