@@ -146,12 +146,7 @@ function drawBoard() {
 
             let card = cell.querySelector(".coach-card");
 
-if (!card) {
-    cell.innerHTML = '<div class="coach-card"></div>';
-    card = cell.querySelector(".coach-card");
-}
 
-card.innerHTML = html;
 if (!card) {
     cell.innerHTML = '<div class="coach-card"></div>';
     card = cell.querySelector(".coach-card");
@@ -169,6 +164,7 @@ card.innerHTML = html;
         });
 
     });
+    refreshDragDrop();
 
     applyStatusColours();
     updateCounters();
