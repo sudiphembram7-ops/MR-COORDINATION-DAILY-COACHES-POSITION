@@ -157,7 +157,7 @@ function drawBoard() {
 
 refreshDragDrop();
 applyStatusColours();
-updateCounters();
+updateCounters();}
 /* =====================================================
    LAST UPDATE
 ===================================================== */
@@ -813,7 +813,7 @@ coachModal._element.addEventListener("hidden.bs.modal", () => {
 
 function updateDatabaseStatus(status = true) {
 
-    const badge = document.getElementById("dbStatus");
+    const badge = document.getElementById("databaseStatus");
 
     if (!badge) return;
 
