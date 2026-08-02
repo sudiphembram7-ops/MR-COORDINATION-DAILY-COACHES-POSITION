@@ -88,19 +88,7 @@ export function enableDragDrop() {
    DESKTOP DRAG START
 ========================================== */
 
-function dragStart(e) {
 
-    const td = e.target.closest("td");
-
-    if (!td) return;
-
-    dragSource = td.id;
-
-    isDragging = true;
-
-    e.dataTransfer.effectAllowed = "move";
-
-}
 
 /* ==========================================
    DESKTOP DRAG END
@@ -277,37 +265,41 @@ async function dropCoach(e) {
 
 async function moveCoach(sourceId, targetId) {
 
-    
-if (sourceId === targetId) {
-    return;
-}
-    const [fromLine, fromPosition] = sourceId.split("_");
-    const [toLine, toPosition] = targetId.split("_");
+    if (!sourceId || !targetId) return;
+
+    if (sourceId === targetId) return;
+
+    const source = sourceId.split("_");
+    const target = targetId.split("_");
+
+    if (source.length !== 2 || target.length !== 2) {
+        console.error("Invalid Cell ID");
+        return;
+    }
+
+    const [fromLine, fromPosition] = source;
+    const [toLine, toPosition] = target;
 
     try {
 
-        console.log(
-            `Move : ${fromLine}/${fromPosition} → ${toLine}/${toPosition}`
+        await updateCoachPosition(
+            fromLine,
+            fromPosition,
+            toLine,
+            toPosition
         );
 
-        await updateCoachPosition(
-    fromLine,
-    fromPosition,
-    toLine,
-    toPosition
-);
-
-refreshDragDrop();
         flashCell(targetId);
 
-    } catch (error) {
+        refreshDragDrop();
 
-        console.error("Move Failed :", error);
+    } catch (err) {
+
+        console.error(err);
 
         alert("Coach Move Failed");
 
     }
-
 }
 
 /* ==========================================
