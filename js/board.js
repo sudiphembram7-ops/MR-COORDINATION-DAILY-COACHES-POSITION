@@ -168,7 +168,7 @@ card.innerHTML = html;
 
     applyStatusColours();
     updateCounters();
-    enableDragDrop();
+    
 }
 
 /* =====================================================
@@ -528,139 +528,10 @@ function applyStatusColours() {
         }
     });
 }
-/* =====================================================
-   ENABLE DRAG
-===================================================== */
 
-function enableDragDrop() {
 
-    document.querySelectorAll(".coach-table td").forEach(cell => {
 
-        cell.draggable = true;
 
-        cell.removeEventListener("dragstart", dragStart);
-        cell.removeEventListener("dragover", dragOver);
-        cell.removeEventListener("drop", dropCoach);
-
-        cell.addEventListener("dragstart", dragStart);
-        cell.addEventListener("dragover", dragOver);
-        cell.addEventListener("drop", dropCoach);
-
-    });
-
-}
-
-/* =====================================================
-   DRAG START
-===================================================== */
-
-function dragStart(e) {
-
-    if(!isAdmin()){
-
-e.preventDefault();
-
-return;
-
-}
-
-    dragCell = this;
-
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", this.id);
-
-}
-/* =====================================================
-   DRAG OVER
-===================================================== */
-
-function dragOver(e) {
-
-    e.preventDefault();
-
-    e.dataTransfer.dropEffect = "move";
-
-}
-
-/* =====================================================
-   DROP
-===================================================== */
-
-async function dropCoach(e) {
-
-    e.preventDefault();
-
-    if (!dragCell || dragCell === this) {
-        dragCell = null;
-        return;
-    }
-
-    const fromLine = dragCell.dataset.line;
-    const fromPos = dragCell.dataset.position;
-
-    const toLine = this.dataset.line;
-    const toPos = this.dataset.position;
-
-    if (!fromLine || !fromPos || !toLine || !toPos) {
-        dragCell = null;
-        return;
-    }
-
-    const fromCoach = boardData[fromLine]?.[fromPos];
-
-    if (!fromCoach) {
-        dragCell = null;
-        return;
-    }
-
-    const toCoach = boardData[toLine]?.[toPos] || null;
-
-    lastMove = {
-        fromLine,
-        fromPos,
-        toLine,
-        toPos,
-        fromCoach: structuredClone(fromCoach),
-        toCoach: toCoach ? structuredClone(toCoach) : null
-    };
-
-    const updates = {};
-
-    updates[`coachBoard/${toLine}/${toPos}`] = {
-        ...fromCoach,
-        line: toLine,
-        position: toPos
-    };
-
-    if (toCoach) {
-        updates[`coachBoard/${fromLine}/${fromPos}`] = {
-            ...toCoach,
-            line: fromLine,
-            position: fromPos
-        };
-    } else {
-        updates[`coachBoard/${fromLine}/${fromPos}`] = null;
-    }
-
-    try {
-
-    await update(ref(database), updates);
-
-    await writeHistory("MOVE", {
-        ...fromCoach,
-        line: toLine,
-        position: toPos
-    });
-
-} catch (err) {
-
-    console.error("Drag & Drop Error:", err);
-    alert("Drag & Drop Failed");
-
-}
-
-dragCell = null;
-}
 
 /* =====================================================
    CTRL + Z
