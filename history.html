@@ -154,43 +154,27 @@ document.getElementById("historyBody");
 
 onValue(ref(database, "history"), (snapshot) => {
 
-historyBody.innerHTML="";
+    historyBody.innerHTML = "";
 
-if(!snapshot.exists()) return;
+    if (!snapshot.exists()) return;
 
-const data=snapshot.val();
+    const history = Object.values(snapshot.val()).reverse();
 
-const list=Object.values(data).reverse();
+    history.forEach(item => {
 
-list.forEach(item=>{
-
-historyBody.innerHTML += `
-
-<tr>
-
-<td>${new Date(item.time).toLocaleString("en-IN")}</td>
-
-<td>${item.shop||""}</td>
-
-<td>${item.line||""}</td>
-
-<td>${item.position||""}</td>
-
-<td>${item.coachNo||""}</td>
-
-<td>${item.coachType||""}</td>
-
-<td>${item.status||""}</td>
-
-<td>${item.user||""}</td>
-
-<td>${item.action||""}</td>
-
-</tr>
-
-`;
-
-});
+        historyBody.innerHTML += `
+        <tr>
+            <td>${new Date(item.time).toLocaleString("en-IN")}</td>
+            <td>${item.shop || ""}</td>
+            <td>${item.line || ""}</td>
+            <td>${item.position || ""}</td>
+            <td>${item.coachNo || ""}</td>
+            <td>${item.coachType || ""}</td>
+            <td>${item.status || ""}</td>
+            <td>${item.user || "Admin"}</td>
+            <td>${item.action}</td>
+        </tr>`;
+    });
 
 });
 
