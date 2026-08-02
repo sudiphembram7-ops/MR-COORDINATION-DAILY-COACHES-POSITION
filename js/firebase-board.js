@@ -1,7 +1,6 @@
 /* ==========================================
    firebase-board.js
-   PART - 1
-   Firebase Board Functions
+   MR CO-ORDINATION BOARD
 ========================================== */
 
 import { database } from "./firebase-config.js";
@@ -12,179 +11,106 @@ import {
     set,
     update,
     remove,
-    onValue,
     push,
+    onValue,
     runTransaction
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* ==========================================
-   BOARD REFERENCE
-========================================== */
+import {
+    getAuth
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+const auth = getAuth();
 
 const boardRef = ref(database, "coachBoard");
 const historyRef = ref(database, "history");
 
-/* ==========================================
-   LIVE BOARD LISTENER
-========================================== */
-
-export function listenBoard(callback) {
-
-    onValue(boardRef, (snapshot) => {
-
-        if (snapshot.exists()) {
-
-            callback(snapshot.val());
-
-        } else {
-
-            callback({});
-
-        }
-
-    });
-
-}
-
-/* ==========================================
-   GET ALL BOARD DATA
-========================================== */
-
-export async function getBoard() {
-
-    const snapshot = await get(boardRef);
-
-    return snapshot.exists() ? snapshot.val() : {};
-
-}
-
-/* ==========================================
-   GET SINGLE COACH
-========================================== */
-
-export async function getCoach(line, position) {
-
-    const snapshot = await get(
-        ref(database, `coachBoard/${line}/${position}`)
-    );
-
-    return snapshot.exists() ? snapshot.val() : null;
-
-}
-
-/* ==========================================
-   WRITE HISTORY
-========================================== */
-
-export async function writeHistory(action, coach, user = "Admin") {
+export async function writeHistory(action, coach) {
 
     await push(historyRef, {
 
         action,
+
         shop: coach.shop || "",
+
         line: coach.line || "",
+
         position: coach.position || "",
+
         coachNo: coach.coachNo || "",
+
         coachType: coach.coachType || "",
+
         status: coach.status || "",
-        user,
-        time: new Date().toISOString()
+
+        user: auth.currentUser?.email || "Admin",
+
+        time: Date.now()
 
     });
 
 }
 
-/* ==========================================
-   firebase-board.js
-   PART - 2
-   SAVE • UPDATE • DELETE
-========================================== */
-
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
-const auth = getAuth();
-
 /* ==========================
    SAVE COACH
 ========================== */
-
 export async function saveCoach(coach) {
 
-    await set(
-        ref(database, `coachBoard/${coach.line}/${coach.position}`),
-        {
-            shop: coach.shop,
-            line: coach.line,
-            position: coach.position,
-            coachNo: coach.coachNo,
-            coachType: coach.coachType,
-            status: coach.status,
-            updatedAt: Date.now()
-        }
+    const coachRef = ref(
+        database,
+        `coachBoard/${coach.line}/${coach.position}`
     );
 
-    await writeHistory(
-        "SAVE",
-        coach,
-        auth.currentUser?.email || "Admin"
-    );
+    await set(coachRef, {
+        ...coach,
+        updatedAt: Date.now()
+    });
 
+    await writeHistory("SAVE", coach);
+
+    return true;
 }
 
 /* ==========================
    UPDATE COACH
 ========================== */
-
 export async function updateCoach(coach) {
 
-    await update(
-        ref(database, `coachBoard/${coach.line}/${coach.position}`),
-        {
-            shop: coach.shop,
-            coachNo: coach.coachNo,
-            coachType: coach.coachType,
-            status: coach.status,
-            updatedAt: Date.now()
-        }
+    const coachRef = ref(
+        database,
+        `coachBoard/${coach.line}/${coach.position}`
     );
 
-    await writeHistory(
-        "UPDATE",
-        coach,
-        auth.currentUser?.email || "Admin"
-    );
+    await update(coachRef, {
+        shop: coach.shop,
+        coachNo: coach.coachNo,
+        coachType: coach.coachType,
+        status: coach.status,
+        updatedAt: Date.now()
+    });
 
+    await writeHistory("UPDATE", coach);
+
+    return true;
 }
 
 /* ==========================
    DELETE COACH
 ========================== */
-
 export async function deleteCoach(line, position) {
 
     const coach = await getCoach(line, position);
 
-    if (!coach) return;
+    if (!coach) return false;
 
     await remove(
         ref(database, `coachBoard/${line}/${position}`)
     );
 
-    await writeHistory(
-        "DELETE",
-        coach,
-        auth.currentUser?.email || "Admin"
-    );
+    await writeHistory("DELETE", coach);
 
+    return true;
 }
-
-/* ==========================================
-   firebase-board.js
-   PART - 3
-   DRAG & DROP MOVE
-========================================== */
-
-
 
 /* ==========================
    UPDATE COACH POSITION
@@ -197,31 +123,43 @@ export async function updateCoachPosition(
     toPosition
 ) {
 
-    const fromRef = ref(database, `coachBoard/${fromLine}/${fromPosition}`);
-    const toRef = ref(database, `coachBoard/${toLine}/${toPosition}`);
+    if (
+        fromLine === toLine &&
+        fromPosition === toPosition
+    ) {
+        return;
+    }
+
+    const fromRef = ref(
+        database,
+        `coachBoard/${fromLine}/${fromPosition}`
+    );
+
+    const toRef = ref(
+        database,
+        `coachBoard/${toLine}/${toPosition}`
+    );
 
     const fromSnap = await get(fromRef);
 
-    if (!fromSnap.exists()) return;
+    if (!fromSnap.exists()) {
+        throw new Error("Source coach not found");
+    }
 
     const fromCoach = fromSnap.val();
 
     const toSnap = await get(toRef);
-
     const toCoach = toSnap.exists() ? toSnap.val() : null;
 
     const updates = {};
 
-    /* Move Source → Target */
+    /* Move source -> target */
 
     updates[`coachBoard/${toLine}/${toPosition}`] = {
-
         ...fromCoach,
-
         line: toLine,
         position: toPosition,
         updatedAt: Date.now()
-
     };
 
     /* Swap অথবা Empty */
@@ -229,13 +167,10 @@ export async function updateCoachPosition(
     if (toCoach) {
 
         updates[`coachBoard/${fromLine}/${fromPosition}`] = {
-
             ...toCoach,
-
             line: fromLine,
             position: fromPosition,
             updatedAt: Date.now()
-
         };
 
     } else {
@@ -246,19 +181,11 @@ export async function updateCoachPosition(
 
     await update(ref(database), updates);
 
-    /* ==========================
-       HISTORY
-    ========================== */
+    await writeHistory("MOVE", {
+        ...fromCoach,
+        line: toLine,
+        position: toPosition
+    });
 
-    await writeHistory(
-        "MOVE",
-        {
-            ...fromCoach,
-            line: toLine,
-            position: toPosition
-        },
-        auth.currentUser?.email || "Admin"
-    );
-
+    return true;
 }
-
