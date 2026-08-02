@@ -115,18 +115,16 @@ function drawBoard() {
 
     document.querySelectorAll(".coach-table td").forEach(cell => {
 
-        cell.innerHTML = "";
-        card.classList.add("coach-card");
-card.setAttribute("draggable", "true");
+    cell.innerHTML = '<div class="coach-card" draggable="true"></div>';
 
-        cell.dataset.shop = "";
-        cell.dataset.line = "";
-        cell.dataset.position = "";
-        cell.dataset.coach = "";
-        cell.dataset.type = "";
-        cell.dataset.status = "";
+    cell.dataset.shop = "";
+    cell.dataset.line = "";
+    cell.dataset.position = "";
+    cell.dataset.coach = "";
+    cell.dataset.type = "";
+    cell.dataset.status = "";
 
-    });
+});
 
     Object.keys(boardData).forEach(line => {
     Object.keys(boardData[line]).forEach(position => {
