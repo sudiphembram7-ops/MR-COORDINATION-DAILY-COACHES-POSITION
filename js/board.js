@@ -161,7 +161,7 @@ card.innerHTML = html;
             cell.dataset.type = coach.coachType || "";
             cell.dataset.status = coach.status || "";
 
-        });
+      
 
     });
     refreshDragDrop();
