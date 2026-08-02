@@ -3,7 +3,27 @@
    dragdrop.js (Part 1)
    DESKTOP + MOBILE
 ========================================== */
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
+const auth = getAuth();
+
+function dragStart(e) {
+
+    if (!auth.currentUser) {
+        e.preventDefault();
+        return;
+    }
+
+    const td = e.target.closest("td");
+
+    if (!td) return;
+
+    dragSource = td.id;
+
+    isDragging = true;
+
+    e.dataTransfer.effectAllowed = "move";
+}
 import {
     updateCoachPosition
 } from "./firebase-board.js";
@@ -119,7 +139,7 @@ function dragOver(e) {
 function touchStart(e) {
 
     const td = e.target.closest("td");
-
+if (!auth.currentUser) return;
     if (!td) return;
 
     touchSource = td.id;
@@ -257,8 +277,10 @@ async function dropCoach(e) {
 
 async function moveCoach(sourceId, targetId) {
 
-    if (!sourceId || !targetId) return;
-
+    
+if (sourceId === targetId) {
+    return;
+}
     const [fromLine, fromPosition] = sourceId.split("_");
     const [toLine, toPosition] = targetId.split("_");
 
@@ -269,12 +291,13 @@ async function moveCoach(sourceId, targetId) {
         );
 
         await updateCoachPosition(
-            fromLine,
-            fromPosition,
-            toLine,
-            toPosition
-        );
+    fromLine,
+    fromPosition,
+    toLine,
+    toPosition
+);
 
+refreshDragDrop();
         flashCell(targetId);
 
     } catch (error) {
