@@ -129,21 +129,40 @@ card.setAttribute("draggable", "true");
     });
 
     Object.keys(boardData).forEach(line => {
-
-        Object.keys(boardData).forEach(line => {
-
     Object.keys(boardData[line]).forEach(position => {
 
-        // render coach
+        const coach = boardData[line][position];
+        if (!coach) return;
 
+        const cell = document.getElementById(`${line}_${position}`);
+        if (!cell) return;
+
+        let card = cell.querySelector(".coach-card");
+
+        if (!card) {
+            cell.innerHTML = '<div class="coach-card"></div>';
+            card = cell.querySelector(".coach-card");
+        }
+
+        card.innerHTML = `
+            <div class="coach-no">${coach.coachNo || ""}</div>
+            <div class="coach-type">${coach.coachType || ""}</div>
+            <div class="coach-status">${coach.status || ""}</div>
+        `;
+
+        cell.dataset.shop = coach.shop || "";
+        cell.dataset.line = line;
+        cell.dataset.position = position;
+        cell.dataset.coach = coach.coachNo || "";
+        cell.dataset.type = coach.coachType || "";
+        cell.dataset.status = coach.status || "";
     });
-
 });
 
 refreshDragDrop();
 applyStatusColours();
 updateCounters();
-
+}
 /* =====================================================
    LAST UPDATE
 ===================================================== */
