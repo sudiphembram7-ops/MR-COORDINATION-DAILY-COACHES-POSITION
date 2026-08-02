@@ -10,7 +10,7 @@ function addHistory(action, coach) {
 
         shop: coach.shop,
 
-        line: coach.line,          // coach.column নয়
+        line: coach.line,          // coach.column 
 
         position: coach.position,
 
