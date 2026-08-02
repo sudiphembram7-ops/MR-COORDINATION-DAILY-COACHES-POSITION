@@ -29,6 +29,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 import { database } from "./firebase-config.js";
+import {
+    enableDragDrop,
+    refreshDragDrop
+} from "./dragdrop.js";
 /* =====================================================
    GLOBAL VARIABLES
 ===================================================== */
