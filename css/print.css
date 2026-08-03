@@ -1,0 +1,157 @@
+/* ==========================================
+   MR CO-ORDINATION
+   print.css
+   Desktop A4 Landscape
+========================================== */
+
+@page{
+    size:A4 landscape;
+    margin:6mm;
+}
+
+@media print{
+
+    *{
+        -webkit-print-color-adjust:exact !important;
+        print-color-adjust:exact !important;
+        box-sizing:border-box;
+    }
+
+    html,
+    body{
+        width:297mm;
+        min-height:210mm;
+        margin:0;
+        padding:0;
+        background:#fff;
+        font-family:Arial,Helvetica,sans-serif;
+        color:#000;
+        overflow:hidden;
+    }
+
+    body{
+        zoom:0.68;          /* প্রয়োজনে 0.60–0.75 করুন */
+    }
+
+    /* ===== Header ===== */
+
+    .header{
+        padding:6px !important;
+        margin-bottom:8px;
+    }
+
+    .header h3{
+        font-size:18px;
+        margin:0;
+        font-weight:700;
+    }
+
+    .header h5{
+        font-size:13px;
+        margin:2px 0;
+    }
+
+    /* ===== Layout ===== */
+
+    .print-board{
+        width:100%;
+    }
+
+    .row{
+        margin-bottom:8px;
+    }
+
+    .shop-card{
+        border:1px solid #000;
+        margin-bottom:6px;
+        page-break-inside:avoid;
+        break-inside:avoid;
+    }
+
+    .shop-title{
+        font-size:12px;
+        font-weight:bold;
+        padding:4px !important;
+        margin:0;
+        text-align:center;
+    }
+
+    /* ===== Tables ===== */
+
+    table{
+        width:100%;
+        border-collapse:collapse;
+        table-layout:fixed;
+    }
+
+    th,
+    td{
+        border:1px solid #000 !important;
+        text-align:center;
+        vertical-align:middle;
+        padding:2px;
+        font-size:8px;
+        height:24px;
+    }
+
+    thead th{
+        font-size:9px;
+        font-weight:bold;
+    }
+
+    .coach-card{
+        width:100%;
+        min-height:18px;
+        font-size:8px;
+        font-weight:bold;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        text-align:center;
+        overflow:hidden;
+        word-break:break-word;
+    }
+
+    /* ===== Legend ===== */
+
+    .badge{
+        border:1px solid #000;
+        margin:2px;
+        font-size:8px;
+        padding:4px 8px;
+    }
+
+    /* ===== Hide Screen Only Items ===== */
+
+    nav,
+    .navbar,
+    footer,
+    .modal,
+    .btn,
+    input,
+    select,
+    textarea,
+    #searchBox,
+    #excelBtn,
+    #pdfBtn,
+    #refreshBtn,
+    #fullscreenBtn,
+    #databaseStatus,
+    #totalCoach,
+    #occupiedCoach,
+    #freeCoach{
+        display:none !important;
+    }
+
+    /* ===== Avoid Page Break ===== */
+
+    tr,
+    td,
+    th{
+        page-break-inside:avoid;
+    }
+
+    .shop-card{
+        page-break-inside:avoid;
+    }
+}
