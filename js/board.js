@@ -531,56 +531,89 @@ function applyStatusColours() {
    PART - 5
    SEARCH • AUTO REFRESH • DASHBOARD • EXPORT
 ===================================================== */
+/* =====================================================
+   LIVE SEARCH (Coach + Shop + Line + Position + Status)
+===================================================== */
 
+const searchBox = document.getElementById("searchBox");
+const searchResult = document.getElementById("searchResult");
+
+if (searchBox) {
+
+    searchBox.addEventListener("input", function () {
+
+        const keyword = this.value.trim().toUpperCase();
+
+        // পুরনো highlight সরাও
+        document.querySelectorAll(".coach-table td").forEach(cell => {
+            cell.classList.remove("search-match");
+        });
+
+        if (searchResult) searchResult.innerHTML = "";
+
+        if (!keyword) return;
+
+        let found = false;
+
+        document.querySelectorAll(".coach-table td").forEach(cell => {
+
+            const coachNo = (cell.dataset.coach || "").toUpperCase();
+            const coachType = (cell.dataset.type || "").toUpperCase();
+            const shop = (cell.dataset.shop || "").toUpperCase();
+            const line = (cell.dataset.line || "").toUpperCase();
+            const position = (cell.dataset.position || "").toUpperCase();
+            const status = (cell.dataset.status || "").toUpperCase();
+
+            if (
+                coachNo.includes(keyword) ||
+                coachType.includes(keyword) ||
+                shop.includes(keyword) ||
+                line.includes(keyword) ||
+                position.includes(keyword) ||
+                status.includes(keyword)
+            ) {
+
+                found = true;
+
+                cell.classList.add("search-match");
+
+                cell.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                if (searchResult) {
+                    searchResult.innerHTML = `
+                        <div class="alert alert-success mt-2 mb-0">
+                            <b>Coach :</b> ${coachNo || "-"}<br>
+                            <b>Shop :</b> ${shop || "-"}<br>
+                            <b>Line :</b> ${line || "-"}<br>
+                            <b>Position :</b> ${position || "-"}<br>
+                            <b>Status :</b> ${status || "-"}
+                        </div>
+                    `;
+                }
+
+                return;
+            }
+
+        });
+
+        if (!found && searchResult) {
+            searchResult.innerHTML = `
+                <div class="alert alert-danger mt-2 mb-0">
+                    Coach Not Found
+                </div>
+            `;
+        }
+
+    });
+
+}
 /* =====================================================
    LIVE SEARCH
 ===================================================== */
 
-function searchCoach() {
-    const coachNo = document.getElementById("searchInput").value.trim().toUpperCase();
-    const result = document.getElementById("searchResult");
-
-    let found = false;
-
-    document.querySelectorAll(".coach-card").forEach(card => {
-        const no = card.dataset.coach;
-
-        if (no === coachNo) {
-            found = true;
-
-            const shop = card.dataset.shop;
-            const line = card.dataset.line;
-            const position = card.dataset.position;
-
-            result.innerHTML = `
-                <div class="alert alert-success">
-                    <b>Coach:</b> ${no}<br>
-                    <b>Shop:</b> ${shop}<br>
-                    <b>Line:</b> ${line}<br>
-                    <b>Position:</b> ${position}
-                </div>
-            `;
-
-            card.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
-
-            card.classList.add("search-highlight");
-            setTimeout(() => {
-                card.classList.remove("search-highlight");
-            }, 3000);
-        }
-    });
-
-    if (!found) {
-        result.innerHTML = `
-            <div class="alert alert-danger">
-                Coach Not Found
-            </div>
-        `;
-    }
-}
 
 /* =====================================================
    DASHBOARD COUNTERS
