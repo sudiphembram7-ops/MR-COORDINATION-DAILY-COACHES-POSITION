@@ -193,13 +193,18 @@ function enableCellClick() {
 
         card.onclick = (e) => {
 
-            if (isDragging) return;   // Drag চললে modal খুলবে না
-
             e.stopPropagation();
+
+            if (document.body.dataset.dragging === "true") {
+                return;
+            }
 
             currentCell = card.closest("td");
 
-            openModal(currentCell);
+            if (currentCell) {
+                openModal(currentCell);
+            }
+
         };
 
     });
