@@ -31,6 +31,8 @@ import {
 let dragSource = null;
 let touchSource = null;
 let isDragging = false;
+let touchTimer = null;
+const LONG_PRESS_DELAY = 300;
 
 /* ==========================================
    ENABLE DRAG & DROP
@@ -126,18 +128,27 @@ function dragOver(e) {
 
 function touchStart(e) {
 
+    if (!auth.currentUser) return;
+
     const td = e.target.closest("td");
-if (!auth.currentUser) return;
     if (!td) return;
 
-    touchSource = td.id;
+    e.preventDefault();
 
-    isDragging = true;
+    touchTimer = setTimeout(() => {
 
-    td.classList.add("drag-source");
+        touchSource = td.id;
+        isDragging = true;
+
+        td.classList.add("drag-source");
+
+        if (navigator.vibrate) {
+            navigator.vibrate(30);
+        }
+
+    }, LONG_PRESS_DELAY);
 
 }
-
 /* ==========================================
    TOUCH MOVE
 ========================================== */
