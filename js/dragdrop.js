@@ -155,7 +155,10 @@ function touchStart(e) {
 
 function touchMove(e) {
 
-    if (!isDragging) return;
+    if (!isDragging) {
+        clearTimeout(touchTimer);
+        return;
+    }
 
     e.preventDefault();
 
@@ -174,11 +177,8 @@ function touchMove(e) {
     const td = target.closest("td");
 
     if (td) {
-
         td.classList.add("drag-over");
-
     }
-
 }
 
 /* ==========================================
@@ -187,7 +187,9 @@ function touchMove(e) {
 
 async function touchEnd(e) {
 
-    if (!isDragging) return;
+    clearTimeout(touchTimer);
+
+if (!isDragging) return;
 
     isDragging = false;
 
