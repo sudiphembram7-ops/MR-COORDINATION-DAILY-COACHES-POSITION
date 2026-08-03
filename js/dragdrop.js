@@ -100,8 +100,10 @@ export function enableDragDrop() {
 function dragEnd() {
 
     dragSource = null;
-
     isDragging = false;
+
+    document.body.dataset.dragging = "false";
+}
 
 }
 
