@@ -577,10 +577,7 @@ if (searchBox) {
 
                 cell.classList.add("search-match");
 
-                cell.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
+                
 
                 if (searchResult) {
                     searchResult.innerHTML = `
