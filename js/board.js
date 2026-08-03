@@ -189,15 +189,18 @@ function updateLastUpdate() {
 
 function enableCellClick() {
 
-    document.addEventListener("click", (e) => {
+    document.querySelectorAll(".coach-card").forEach(card => {
 
-        const td = e.target.closest(".coach-table td");
+        card.onclick = (e) => {
 
-        if (!td) return;
+            if (isDragging) return;   // Drag চললে modal খুলবে না
 
-        currentCell = td;
+            e.stopPropagation();
 
-        openModal(td);
+            currentCell = card.closest("td");
+
+            openModal(currentCell);
+        };
 
     });
 
