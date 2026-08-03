@@ -536,38 +536,50 @@ function applyStatusColours() {
    LIVE SEARCH
 ===================================================== */
 
-const searchBox = document.getElementById("searchBox");
+function searchCoach() {
+    const coachNo = document.getElementById("searchInput").value.trim().toUpperCase();
+    const result = document.getElementById("searchResult");
 
-if (searchBox) {
+    let found = false;
 
-    searchBox.addEventListener("input", function () {
+    document.querySelectorAll(".coach-card").forEach(card => {
+        const no = card.dataset.coach;
 
-        const keyword = this.value.trim().toUpperCase();
+        if (no === coachNo) {
+            found = true;
 
-        document.querySelectorAll(".coach-table td").forEach(cell => {
+            const shop = card.dataset.shop;
+            const line = card.dataset.line;
+            const position = card.dataset.position;
 
-            const coachNo = (cell.dataset.coach || "").toUpperCase();
-            const coachType = (cell.dataset.type || "").toUpperCase();
-            const line = (cell.dataset.line || "").toUpperCase();
-            const status = (cell.dataset.status || "").toUpperCase();
+            result.innerHTML = `
+                <div class="alert alert-success">
+                    <b>Coach:</b> ${no}<br>
+                    <b>Shop:</b> ${shop}<br>
+                    <b>Line:</b> ${line}<br>
+                    <b>Position:</b> ${position}
+                </div>
+            `;
 
-            cell.classList.remove("search-match");
+            card.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
 
-            if (!keyword) return;
-
-            if (
-                coachNo.includes(keyword) ||
-                coachType.includes(keyword) ||
-                line.includes(keyword) ||
-                status.includes(keyword)
-            ) {
-                cell.classList.add("search-match");
-            }
-
-        });
-
+            card.classList.add("search-highlight");
+            setTimeout(() => {
+                card.classList.remove("search-highlight");
+            }, 3000);
+        }
     });
 
+    if (!found) {
+        result.innerHTML = `
+            <div class="alert alert-danger">
+                Coach Not Found
+            </div>
+        `;
+    }
 }
 
 /* =====================================================
