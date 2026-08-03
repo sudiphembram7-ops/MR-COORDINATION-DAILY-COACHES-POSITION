@@ -14,12 +14,13 @@ function dragStart(e) {
         return;
     }
 
+    document.body.dataset.dragging = "true";
+
     const td = e.target.closest("td");
 
     if (!td) return;
 
     dragSource = td.id;
-
     isDragging = true;
 
     e.dataTransfer.effectAllowed = "move";
