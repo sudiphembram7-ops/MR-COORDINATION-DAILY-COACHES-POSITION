@@ -437,13 +437,7 @@ document
    SAVE • UPDATE • DELETE
 ===================================================== */
 
-import {
-    ref,
-    set,
-    update,
-    remove,
-    push
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
 
 /* ==========================
    SAVE COACH
