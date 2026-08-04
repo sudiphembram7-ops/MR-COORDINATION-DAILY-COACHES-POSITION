@@ -7,17 +7,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-const auth = getAuth();
 
-let adminLoggedIn = false;
-
-onAuthStateChanged(auth, (user) => {
-    adminLoggedIn = !!user;
-});
-
-function isAdmin() {
-    return adminLoggedIn;
-}
 import {
     ref,
     get,
@@ -33,6 +23,17 @@ import {
     enableDragDrop,
     refreshDragDrop
 } from "./dragdrop.js";
+const auth = getAuth();
+
+let adminLoggedIn = false;
+
+onAuthStateChanged(auth, (user) => {
+    adminLoggedIn = !!user;
+});
+
+function isAdmin() {
+    return adminLoggedIn;
+}
 /* =====================================================
    GLOBAL VARIABLES
 ===================================================== */
