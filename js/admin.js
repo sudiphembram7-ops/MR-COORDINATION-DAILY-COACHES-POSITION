@@ -68,7 +68,6 @@ onAuthStateChanged(auth, (user) => {
     loadCoachData();
 enableDragDrop();
 });
-}
 /* ==========================================
    DOM READY
 ========================================== */
@@ -472,9 +471,7 @@ function updateDashboardStats() {
     const rows =
         document.querySelectorAll("#historyTable tr");
 
-    document.getElementById("totalEntry").textContent =
-        rows.length;
-
+    
     let po = 0;
     let lm = 0;
     let med = 0;
