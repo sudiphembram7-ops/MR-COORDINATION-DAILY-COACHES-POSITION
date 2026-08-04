@@ -1,95 +1,85 @@
 /* =====================================================
    MR CO-ORDINATION BOARD
    PART - 1
-   INITIALIZATION + AUTH + LOAD BOARD
 ===================================================== */
 
-import {
-    getAuth,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+/* ==========================
+   IMPORTS
+========================== */
+
+import { database, auth } from "./firebase-config.js";
 
 import {
     ref,
     onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-import { database } from "./firebase-config.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 import {
     enableDragDrop,
     refreshDragDrop
 } from "./dragdrop.js";
 
-/* =====================================================
-   AUTH
-===================================================== */
+/* ==========================
+   GLOBAL VARIABLES
+========================== */
 
-const auth = getAuth();
-
+let boardData = {};
+let currentCell = null;
 let adminLoggedIn = false;
+let isBoardLoaded = false;
+
+/* Prevent click immediately after drag */
+let dragInProgress = false;
+
+/* Bootstrap Modal */
+const coachModal = new bootstrap.Modal(
+    document.getElementById("coachModal")
+);
+
+/* ==========================
+   AUTH
+========================== */
 
 onAuthStateChanged(auth, (user) => {
 
     adminLoggedIn = !!user;
 
     console.log(
-        "Admin Status:",
-        adminLoggedIn ? "Logged In" : "Logged Out"
+        "Admin Login :",
+        adminLoggedIn
     );
 
 });
+
+/* ==========================
+   CHECK ADMIN
+========================== */
 
 export function isAdmin() {
     return adminLoggedIn;
 }
 
-/* =====================================================
-   GLOBAL VARIABLES
-===================================================== */
+/* ==========================
+   START APPLICATION
+========================== */
 
-let boardData = {};
-let currentCell = null;
-let lastMove = null;
+document.addEventListener("DOMContentLoaded", () => {
 
-const modalElement =
-    document.getElementById("coachModal");
-
-const coachModal =
-    modalElement
-        ? new bootstrap.Modal(modalElement)
-        : null;
-
-/* =====================================================
-   START
-===================================================== */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    initBoard
-);
-
-function initBoard() {
-
-    console.log(
-        "MR CO-ORDINATION BOARD STARTING..."
-    );
+    console.log("Board Starting...");
 
     startClock();
 
     loadBoard();
 
-    enableCellClick();
+});
 
-    enableDragDrop();
-
-    updateCounters();
-
-}
-
-/* =====================================================
+/* ==========================
    LIVE CLOCK
-===================================================== */
+========================== */
 
 function startClock() {
 
@@ -103,89 +93,73 @@ function updateClock() {
 
     const now = new Date();
 
-    const date =
-        document.getElementById("liveDate");
+    document.getElementById("liveDate").textContent =
+        now.toLocaleDateString("en-IN");
 
-    const time =
-        document.getElementById("liveTime");
-
-    if (date) {
-
-        date.textContent =
-            now.toLocaleDateString("en-IN");
-
-    }
-
-    if (time) {
-
-        time.textContent =
-            now.toLocaleTimeString("en-IN");
-
-    }
+    document.getElementById("liveTime").textContent =
+        now.toLocaleTimeString("en-IN");
 
 }
 
-/* =====================================================
+/* ==========================
    LOAD BOARD
-===================================================== */
+========================== */
 
 function loadBoard() {
 
-    const boardRef =
-        ref(database, "coachBoard");
+    const boardRef = ref(database, "coachBoard");
 
-    onValue(
-        boardRef,
+    onValue(boardRef, (snapshot) => {
 
-        (snapshot) => {
+        boardData = snapshot.exists()
+            ? snapshot.val()
+            : {};
 
-            console.log(
-                "Board Snapshot:",
-                snapshot.exists()
-            );
+        drawBoard();
 
-            boardData =
-                snapshot.exists()
-                    ? snapshot.val()
-                    : {};
+        updateCounters();
 
-            drawBoard();
+        if (!isBoardLoaded) {
 
-            updateCounters();
+            enableDragDrop();
 
-            updateLastUpdate();
+            enableCellClick();
 
-        },
+            isBoardLoaded = true;
 
-        (error) => {
+        } else {
 
-            console.error(
-                "Board Load Error:",
-                error
-            );
+            refreshDragDrop();
 
         }
-    );
+
+        updateLastUpdate();
+
+        console.log("Board Loaded");
+
+    }, (error) => {
+
+        console.error(error);
+
+        alert("Board Load Failed");
+
+    });
 
 }
-
 /* =====================================================
-   DRAW BOARD
+   PART - 2
+   DRAW BOARD + CELL CLICK + MODAL
 ===================================================== */
+
+/* ==========================
+   DRAW BOARD
+========================== */
 
 function drawBoard() {
 
-    const cells =
-        document.querySelectorAll(
-            ".coach-table td"
-        );
+    document.querySelectorAll(".coach-table td").forEach(cell => {
 
-    /* Clear All Cells */
-
-    cells.forEach(cell => {
-
-        cell.innerHTML =
-            `<div class="coach-card"></div>`;
+        cell.innerHTML = `<div class="coach-card"></div>`;
 
         cell.dataset.shop = "";
         cell.dataset.line = "";
@@ -196,89 +170,30 @@ function drawBoard() {
 
     });
 
-    /* No Data */
-
-    if (
-        !boardData ||
-        typeof boardData !== "object"
-    ) {
-
-        console.warn("Board Empty");
-
-        return;
-    }
-
-    /* Draw Coaches */
-
     Object.keys(boardData).forEach(line => {
 
-        const lineData =
-            boardData[line];
+        Object.keys(boardData[line]).forEach(position => {
 
-        if (
-            !lineData ||
-            typeof lineData !== "object"
-        ) {
-            return;
-        }
+            const coach = boardData[line][position];
+            if (!coach) return;
 
-        Object.keys(lineData).forEach(position => {
-
-            const coach =
-                lineData[position];
-
-            if (
-                !coach ||
-                typeof coach !== "object"
-            ) {
-                return;
-            }
-
-            const cell =
-                document.getElementById(
-                    `${line}_${position}`
-                );
-
+            const cell = document.getElementById(`${line}_${position}`);
             if (!cell) return;
 
-            const card =
-                cell.querySelector(
-                    ".coach-card"
-                );
-
-            if (!card) return;
+            const card = cell.querySelector(".coach-card");
 
             card.innerHTML = `
-                <div class="coach-no">
-                    ${coach.coachNo || ""}
-                </div>
-
-                <div class="coach-type">
-                    ${coach.coachType || ""}
-                </div>
-
-                <div class="coach-status">
-                    ${coach.status || ""}
-                </div>
+                <div class="coach-no">${coach.coachNo || ""}</div>
+                <div class="coach-type">${coach.coachType || ""}</div>
+                <div class="coach-status">${coach.status || ""}</div>
             `;
 
-            cell.dataset.shop =
-                coach.shop || "";
-
-            cell.dataset.line =
-                line;
-
-            cell.dataset.position =
-                position;
-
-            cell.dataset.coach =
-                coach.coachNo || "";
-
-            cell.dataset.type =
-                coach.coachType || "";
-
-            cell.dataset.status =
-                coach.status || "";
+            cell.dataset.shop = coach.shop || "";
+            cell.dataset.line = line;
+            cell.dataset.position = position;
+            cell.dataset.coach = coach.coachNo || "";
+            cell.dataset.type = coach.coachType || "";
+            cell.dataset.status = coach.status || "";
 
         });
 
@@ -292,57 +207,50 @@ function drawBoard() {
 
 }
 
-/* =====================================================
-   LAST UPDATE
-===================================================== */
+/* ==========================
+   STATUS COLOUR
+========================== */
 
-function updateLastUpdate() {
+function applyStatusColours() {
 
-    const last =
-        document.getElementById(
-            "lastUpdate"
-        );
+    document.querySelectorAll(".coach-table td").forEach(cell => {
 
-    if (!last) return;
+        cell.className = "";
 
-    last.textContent =
-        "Updated : " +
-        new Date().toLocaleTimeString(
-            "en-IN"
-        );
+        const status = (cell.dataset.status || "").toLowerCase();
+
+        if (status) {
+            cell.classList.add("status-" + status);
+        }
+
+    });
 
 }
 
-/* =====================================================
-   PART - 2A
-   CELL CLICK + MODAL
-===================================================== */
+/* ==========================
+   ENABLE CELL CLICK
+========================== */
 
 function enableCellClick() {
 
     document.querySelectorAll(".coach-card").forEach(card => {
+
+        card.onclick = null;
 
         card.onclick = (e) => {
 
             e.preventDefault();
             e.stopPropagation();
 
-            // Drag চলাকালীন Modal খুলবে না
-            if (document.body.dataset.dragging === "true") {
-                return;
-            }
+            /* Ignore click after drag */
+            if (dragInProgress) return;
 
-            // Admin ছাড়া Modal খুলবে না
-            if (!isAdmin()) {
-                alert("Admin Login Required");
-                return;
-            }
+            const td = card.closest("td");
+            if (!td) return;
 
-            currentCell = card.closest("td");
+            currentCell = td;
 
-            if (!currentCell) return;
-
-            openModal(currentCell);
+            openModal(td);
 
         };
 
@@ -350,24 +258,21 @@ function enableCellClick() {
 
 }
 
-/* =====================================================
+/* ==========================
    OPEN MODAL
-===================================================== */
+========================== */
 
 function openModal(cell) {
 
-    if (!coachModal) return;
+    if (!adminLoggedIn) {
 
-    if (!cell || !cell.id) return;
+        alert("Admin Login Required");
 
-    const ids = cell.id.split("_");
-
-    if (ids.length !== 2) {
-        console.error("Invalid Cell ID :", cell.id);
         return;
+
     }
 
-    const [line, position] = ids;
+    const [line, position] = cell.id.split("_");
 
     document.getElementById("modalShop").value =
         getShop(line);
@@ -391,74 +296,78 @@ function openModal(cell) {
 
 }
 
+/* ==========================
+   LAST UPDATE
+========================== */
+
+function updateLastUpdate() {
+
+    const last = document.getElementById("lastUpdate");
+
+    if (!last) return;
+
+    last.textContent =
+        "Updated : " +
+        new Date().toLocaleTimeString("en-IN");
+
+}
+
 /* =====================================================
-   SHOP NAME
+   PART - 2A
+   SHOP + MODAL DATA + DUPLICATE CHECK
 ===================================================== */
+
+/* ==========================
+   GET SHOP NAME
+========================== */
 
 function getShop(line) {
 
     if (!line) return "";
 
     if (line.startsWith("N")) return "N SHOP";
-
     if (line.startsWith("M")) return "M SHOP";
-
     if (line.startsWith("SCR")) return "MR SCR SHOP";
-
     if (line.startsWith("F")) return "CR SHOP";
-
     if (line.startsWith("J")) return "J SHOP";
-
     if (line.startsWith("L")) return "LIFTING BAY";
 
     return "";
 
 }
 
-/* =====================================================
+/* ==========================
    GET MODAL DATA
-===================================================== */
+========================== */
 
 function getModalData() {
 
     return {
 
-        shop:
-            document.getElementById("modalShop").value,
+        shop: document.getElementById("modalShop").value.trim(),
 
-        line:
-            document.getElementById("modalLine").value,
+        line: document.getElementById("modalLine").value.trim(),
 
-        position:
-            document.getElementById("modalPosition").value,
+        position: document.getElementById("modalPosition").value.trim(),
 
-        coachNo:
-            document
-                .getElementById("modalCoachNo")
-                .value
-                .trim()
-                .toUpperCase(),
+        coachNo: document.getElementById("modalCoachNo")
+            .value
+            .trim()
+            .toUpperCase(),
 
-        coachType:
-            document
-                .getElementById("modalCoachType")
-                .value,
+        coachType: document.getElementById("modalCoachType").value,
 
-        status:
-            document
-                .getElementById("modalStatus")
-                .value,
+        status: document.getElementById("modalStatus").value,
 
-        updatedAt:
-            Date.now()
+        updatedAt: Date.now()
 
     };
 
 }
 
-/* =====================================================
-   DUPLICATE CHECK
-===================================================== */
+/* ==========================
+   DUPLICATE COACH CHECK
+========================== */
 
 function duplicateCoach(coachNo) {
 
@@ -472,18 +381,17 @@ function duplicateCoach(coachNo) {
 
         for (const position in boardData[line]) {
 
-            const coach =
-                boardData[line][position];
+            const coach = boardData[line][position];
 
             if (!coach) continue;
 
-            const existing =
+            const oldCoach =
                 (coach.coachNo || "")
                 .trim()
                 .toUpperCase();
 
             if (
-                existing === coachNo &&
+                oldCoach === coachNo &&
                 currentCell &&
                 !(
                     line === currentCell.dataset.line &&
@@ -503,15 +411,9 @@ function duplicateCoach(coachNo) {
 
 }
 
-
-/* =====================================================
-   PART - 2B
-   SAVE • UPDATE • DELETE • HISTORY
-===================================================== */
-
-/* =====================================================
+/* ==========================
    BUTTON EVENTS
-===================================================== */
+========================== */
 
 document
     .getElementById("saveCoachBtn")
@@ -524,21 +426,34 @@ document
 document
     .getElementById("deleteCoachBtn")
     ?.addEventListener("click", deleteCoach);
-
-/* =====================================================
-   SAVE
+    
+    /* =====================================================
+   PART - 2B
+   SAVE • UPDATE • DELETE
 ===================================================== */
+
+import {
+    ref,
+    set,
+    update,
+    remove,
+    push
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+/* ==========================
+   SAVE COACH
+========================== */
 
 async function saveCoach() {
 
-    if (!isAdmin()) {
+    if (!adminLoggedIn) {
         alert("Admin Login Required");
         return;
     }
 
     const coach = getModalData();
 
-    if (!coach.coachNo) {
+    if (coach.coachNo === "") {
         alert("Enter Coach Number");
         return;
     }
@@ -551,8 +466,7 @@ async function saveCoach() {
     try {
 
         await set(
-            ref(database,
-            `coachBoard/${coach.line}/${coach.position}`),
+            ref(database, `coachBoard/${coach.line}/${coach.position}`),
             coach
         );
 
@@ -560,9 +474,7 @@ async function saveCoach() {
 
         coachModal.hide();
 
-        setTimeout(() => {
-            alert("Coach Saved Successfully");
-        }, 250);
+        alert("Coach Saved Successfully");
 
     } catch (err) {
 
@@ -574,20 +486,20 @@ async function saveCoach() {
 
 }
 
-/* =====================================================
-   UPDATE
-===================================================== */
+/* ==========================
+   UPDATE COACH
+========================== */
 
 async function updateCoach() {
 
-    if (!isAdmin()) {
+    if (!adminLoggedIn) {
         alert("Admin Login Required");
         return;
     }
 
     const coach = getModalData();
 
-    if (!coach.coachNo) {
+    if (coach.coachNo === "") {
         alert("Enter Coach Number");
         return;
     }
@@ -595,8 +507,7 @@ async function updateCoach() {
     try {
 
         await update(
-            ref(database,
-            `coachBoard/${coach.line}/${coach.position}`),
+            ref(database, `coachBoard/${coach.line}/${coach.position}`),
             {
                 shop: coach.shop,
                 coachNo: coach.coachNo,
@@ -610,9 +521,7 @@ async function updateCoach() {
 
         coachModal.hide();
 
-        setTimeout(() => {
-            alert("Coach Updated Successfully");
-        }, 250);
+        alert("Coach Updated Successfully");
 
     } catch (err) {
 
@@ -624,35 +533,32 @@ async function updateCoach() {
 
 }
 
-/* =====================================================
-   DELETE
-===================================================== */
+/* ==========================
+   DELETE COACH
+========================== */
 
 async function deleteCoach() {
 
-    if (!isAdmin()) {
+    if (!adminLoggedIn) {
         alert("Admin Login Required");
         return;
     }
 
-    if (!confirm("Delete this coach?")) return;
+    if (!confirm("Delete this Coach?")) return;
 
     const coach = getModalData();
 
     try {
 
         await remove(
-            ref(database,
-            `coachBoard/${coach.line}/${coach.position}`)
+            ref(database, `coachBoard/${coach.line}/${coach.position}`)
         );
 
         await writeHistory("DELETE", coach);
 
         coachModal.hide();
 
-        setTimeout(() => {
-            alert("Coach Deleted Successfully");
-        }, 250);
+        alert("Coach Deleted Successfully");
 
     } catch (err) {
 
@@ -664,34 +570,41 @@ async function deleteCoach() {
 
 }
 
-/* =====================================================
-   HISTORY
-===================================================== */
+/* ==========================
+   WRITE HISTORY
+========================== */
 
 async function writeHistory(action, coach) {
 
     try {
 
-        await push(
-            ref(database, "history"),
-            {
-                action,
-                shop: coach.shop,
-                line: coach.line,
-                position: coach.position,
-                coachNo: coach.coachNo,
-                coachType: coach.coachType,
-                status: coach.status,
-                user: auth.currentUser?.email || "Admin",
-                time: Date.now()
-            }
-        );
+        await push(ref(database, "history"), {
+
+            action,
+
+            shop: coach.shop,
+
+            line: coach.line,
+
+            position: coach.position,
+
+            coachNo: coach.coachNo,
+
+            coachType: coach.coachType,
+
+            status: coach.status,
+
+            user: auth.currentUser?.email || "Admin",
+
+            time: Date.now()
+
+        });
 
         console.log("History Saved");
 
     } catch (err) {
 
-        console.error("History Error:", err);
+        console.error("History Error :", err);
 
     }
 
@@ -699,12 +612,12 @@ async function writeHistory(action, coach) {
 
 /* =====================================================
    PART - 3
-   STATUS • SEARCH • COUNTERS • AUTO REFRESH
+   STATUS • COUNTERS • DRAG CONTROL
 ===================================================== */
 
-/* =====================================================
-   STATUS COLOUR
-===================================================== */
+/* ==========================
+   APPLY STATUS COLOUR
+========================== */
 
 function applyStatusColours() {
 
@@ -722,16 +635,11 @@ function applyStatusColours() {
             "status-hvy"
         );
 
-        const status =
-            (cell.dataset.status || "")
-            .trim()
-            .toLowerCase();
+        const status = (cell.dataset.status || "").toLowerCase();
 
         if (status !== "") {
 
-            cell.classList.add(
-                "status-" + status
-            );
+            cell.classList.add("status-" + status);
 
         }
 
@@ -739,134 +647,16 @@ function applyStatusColours() {
 
 }
 
-/* =====================================================
-   LIVE SEARCH
-===================================================== */
-
-const searchBox =
-    document.getElementById("searchBox");
-
-const searchResult =
-    document.getElementById("searchResult");
-
-if (searchBox) {
-
-    searchBox.addEventListener("input", () => {
-
-        const keyword =
-            searchBox.value
-            .trim()
-            .toUpperCase();
-
-        document
-            .querySelectorAll(".coach-table td")
-            .forEach(cell => {
-
-                cell.classList.remove(
-                    "search-match"
-                );
-
-            });
-
-        if (searchResult)
-            searchResult.innerHTML = "";
-
-        if (!keyword) return;
-
-        let found = false;
-
-        document
-            .querySelectorAll(".coach-table td")
-            .forEach(cell => {
-
-                const coach =
-                    (cell.dataset.coach || "")
-                    .toUpperCase();
-
-                const type =
-                    (cell.dataset.type || "")
-                    .toUpperCase();
-
-                const shop =
-                    (cell.dataset.shop || "")
-                    .toUpperCase();
-
-                const line =
-                    (cell.dataset.line || "")
-                    .toUpperCase();
-
-                const position =
-                    (cell.dataset.position || "")
-                    .toUpperCase();
-
-                const status =
-                    (cell.dataset.status || "")
-                    .toUpperCase();
-
-                if (
-                    coach.includes(keyword) ||
-                    type.includes(keyword) ||
-                    shop.includes(keyword) ||
-                    line.includes(keyword) ||
-                    position.includes(keyword) ||
-                    status.includes(keyword)
-                ) {
-
-                    found = true;
-
-                    cell.classList.add(
-                        "search-match"
-                    );
-
-                    cell.scrollIntoView({
-
-                        behavior: "smooth",
-
-                        block: "center"
-
-                    });
-
-                    if (searchResult) {
-
-                        searchResult.innerHTML = `
-<div class="alert alert-success mb-0">
-<b>Coach :</b> ${coach || "-"}<br>
-<b>Shop :</b> ${shop || "-"}<br>
-<b>Line :</b> ${line || "-"}<br>
-<b>Position :</b> ${position || "-"}<br>
-<b>Status :</b> ${status || "-"}
-</div>`;
-
-                    }
-
-                }
-
-            });
-
-        if (!found && searchResult) {
-
-            searchResult.innerHTML = `
-<div class="alert alert-danger mb-0">
-Coach Not Found
-</div>`;
-
-        }
-
-    });
-
-}
-
-/* =====================================================
-   COUNTERS
-===================================================== */
+/* ==========================
+   DASHBOARD COUNTERS
+========================== */
 
 function updateCounters() {
 
     let total = 0;
     let occupied = 0;
 
-    const counts = {
-
+    const statusCount = {
         PO:0,
         LM:0,
         MED:0,
@@ -876,179 +666,221 @@ function updateCounters() {
         S:0,
         L:0,
         HVY:0
-
     };
 
-    document
-        .querySelectorAll(".coach-table td")
-        .forEach(cell => {
+    document.querySelectorAll(".coach-table td").forEach(cell => {
 
-            total++;
+        total++;
 
-            const coach =
-                (cell.dataset.coach || "").trim();
+        if ((cell.dataset.coach || "").trim() !== "") {
 
-            if (coach) occupied++;
-
-            const status =
-                (cell.dataset.status || "")
-                .trim()
-                .toUpperCase();
-
-            if (counts.hasOwnProperty(status)) {
-
-                counts[status]++;
-
-            }
-
-        });
-
-    const free = total - occupied;
-
-    const setValue = (id,value)=>{
-
-        const el =
-            document.getElementById(id);
-
-        if(el){
-
-            el.textContent = value;
+            occupied++;
 
         }
 
-    };
+        const status =
+            (cell.dataset.status || "").toUpperCase();
 
-    setValue("totalCoach",total);
-    setValue("occupiedCoach",occupied);
-    setValue("freeCoach",free);
+        if (statusCount.hasOwnProperty(status)) {
 
-    setValue("poCount",counts.PO);
-    setValue("lmCount",counts.LM);
-    setValue("medCount",counts.MED);
-    setValue("rlCount",counts.RL);
-    setValue("r1Count",counts.R1);
-    setValue("rsCount",counts.RS);
-    setValue("sCount",counts.S);
-    setValue("lCount",counts.L);
-    setValue("hvyCount",counts.HVY);
+            statusCount[status]++;
 
-}
+        }
 
-/* =====================================================
-   AUTO REFRESH
-===================================================== */
+    });
 
-let autoRefresh = true;
+    const free = total - occupied;
 
-setInterval(()=>{
+    document.getElementById("totalCoach").textContent = total;
+    document.getElementById("occupiedCoach").textContent = occupied;
+    document.getElementById("freeCoach").textContent = free;
 
-    if(!autoRefresh) return;
+    Object.keys(statusCount).forEach(key => {
 
-    updateLastUpdate();
+        const el = document.getElementById(
+            key.toLowerCase() + "Count"
+        );
 
-},30000);
+        if (el) {
 
-/* =====================================================
-   PART - 4A
-   HISTORY • DATABASE STATUS • REFRESH • EXPORT
-===================================================== */
+            el.textContent = statusCount[key];
 
-/* =====================================================
-   DATABASE STATUS
-===================================================== */
-
-function updateDatabaseStatus(online = navigator.onLine) {
-
-    const badge = document.getElementById("databaseStatus");
-
-    if (!badge) return;
-
-    badge.className = online
-        ? "badge bg-success"
-        : "badge bg-danger";
-
-    badge.textContent = online
-        ? "ONLINE"
-        : "OFFLINE";
-}
-
-window.addEventListener("online", () => {
-    updateDatabaseStatus(true);
-});
-
-window.addEventListener("offline", () => {
-    updateDatabaseStatus(false);
-});
-
-/* =====================================================
-   HISTORY
-===================================================== */
-
-function refreshHistory() {
-
-    const body = document.getElementById("historyBody");
-
-    if (!body) return;
-
-    onValue(ref(database, "history"), (snapshot) => {
-
-        body.innerHTML = "";
-
-        if (!snapshot.exists()) return;
-
-        const history = snapshot.val();
-
-        Object.keys(history)
-            .reverse()
-            .forEach(key => {
-
-                const h = history[key];
-
-                body.insertAdjacentHTML(
-                    "beforeend",
-                    `
-<tr>
-<td>${h.action || ""}</td>
-<td>${h.shop || ""}</td>
-<td>${h.line || ""}</td>
-<td>${h.position || ""}</td>
-<td>${h.coachNo || ""}</td>
-<td>${h.status || ""}</td>
-<td>${new Date(h.time).toLocaleString("en-IN")}</td>
-</tr>
-`
-                );
-
-            });
+        }
 
     });
 
 }
 
-/* =====================================================
-   MANUAL REFRESH
-===================================================== */
+/* ==========================
+   DRAG LOCK
+========================== */
 
-document
-.getElementById("refreshBtn")
-?.addEventListener("click", () => {
+window.addEventListener("dragstart", () => {
+
+    dragInProgress = true;
+
+});
+
+window.addEventListener("dragend", () => {
+
+    setTimeout(() => {
+
+        dragInProgress = false;
+
+    }, 200);
+
+});
+
+/* ==========================
+   MOBILE TOUCH LOCK
+========================== */
+
+window.addEventListener("touchstart", () => {
+
+    dragInProgress = false;
+
+});
+
+window.addEventListener("touchmove", () => {
+
+    dragInProgress = true;
+
+}, { passive:true });
+
+window.addEventListener("touchend", () => {
+
+    setTimeout(() => {
+
+        dragInProgress = false;
+
+    }, 200);
+
+});
+
+/* ==========================
+   BOARD REFRESH
+========================== */
+
+function refreshBoard() {
 
     drawBoard();
+
+    applyStatusColours();
 
     updateCounters();
 
     updateLastUpdate();
 
-    refreshHistory();
+}
+
+/* ==========================
+   AUTO REFRESH
+========================== */
+
+setInterval(() => {
+
+    updateLastUpdate();
+
+},30000);
+
+console.log("BOARD PART-3 LOADED");
+
+/* =====================================================
+   PART - 4
+   SEARCH • EXPORT • PRINT • FULLSCREEN
+===================================================== */
+
+/* ==========================
+   LIVE SEARCH
+========================== */
+
+const searchBox = document.getElementById("searchBox");
+const searchResult = document.getElementById("searchResult");
+
+if (searchBox) {
+
+    searchBox.addEventListener("input", () => {
+
+        const keyword = searchBox.value.trim().toUpperCase();
+
+        document.querySelectorAll(".coach-table td").forEach(cell => {
+            cell.classList.remove("search-match");
+        });
+
+        if (searchResult) searchResult.innerHTML = "";
+
+        if (!keyword) return;
+
+        let found = false;
+
+        document.querySelectorAll(".coach-table td").forEach(cell => {
+
+            const values = [
+                cell.dataset.coach,
+                cell.dataset.shop,
+                cell.dataset.line,
+                cell.dataset.position,
+                cell.dataset.type,
+                cell.dataset.status
+            ].map(v => (v || "").toUpperCase());
+
+            if (values.some(v => v.includes(keyword))) {
+
+                found = true;
+
+                cell.classList.add("search-match");
+
+                cell.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                if (searchResult) {
+
+                    searchResult.innerHTML = `
+                    <div class="alert alert-success mb-0">
+                        <b>Coach :</b> ${cell.dataset.coach || "-"}<br>
+                        <b>Shop :</b> ${cell.dataset.shop || "-"}<br>
+                        <b>Line :</b> ${cell.dataset.line || "-"}<br>
+                        <b>Position :</b> ${cell.dataset.position || "-"}<br>
+                        <b>Status :</b> ${cell.dataset.status || "-"}
+                    </div>`;
+
+                }
+
+            }
+
+        });
+
+        if (!found && searchResult) {
+
+            searchResult.innerHTML = `
+            <div class="alert alert-danger mb-0">
+                Coach Not Found
+            </div>`;
+
+        }
+
+    });
+
+}
+
+/* ==========================
+   REFRESH BUTTON
+========================== */
+
+document.getElementById("refreshBtn")
+?.addEventListener("click", () => {
+
+    refreshBoard();
 
 });
 
-/* =====================================================
+/* ==========================
    CSV EXPORT
-===================================================== */
+========================== */
 
-document
-.getElementById("excelBtn")
+document.getElementById("excelBtn")
 ?.addEventListener("click", () => {
 
     let csv =
@@ -1056,78 +888,55 @@ document
 
     Object.keys(boardData).forEach(line => {
 
-        const row = boardData[line];
+        Object.keys(boardData[line]).forEach(position => {
 
-        if (!row) return;
+            const c = boardData[line][position];
 
-        Object.keys(row).forEach(position => {
-
-            const coach = row[position];
-
-            if (!coach) return;
+            if (!c) return;
 
             csv += [
-
-                coach.shop || "",
-
+                c.shop,
                 line,
-
                 position,
-
-                coach.coachNo || "",
-
-                coach.coachType || "",
-
-                coach.status || ""
-
+                c.coachNo,
+                c.coachType,
+                c.status
             ].join(",") + "\n";
 
         });
 
     });
 
-    const blob = new Blob(
-        [csv],
-        { type: "text/csv;charset=utf-8;" }
-    );
+    const blob = new Blob([csv], {
+        type: "text/csv"
+    });
 
-    const link = document.createElement("a");
+    const a = document.createElement("a");
 
-    link.href = URL.createObjectURL(blob);
+    a.href = URL.createObjectURL(blob);
 
-    link.download = "MR_COACH_BOARD.csv";
+    a.download = "MR_COACH_BOARD.csv";
 
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
+    a.click();
 
 });
 
-/* =====================================================
-   PART - 4B
-   PDF • FULLSCREEN • SHORTCUTS • FINAL
-===================================================== */
-
-/* =====================================================
+/* ==========================
    PDF PRINT
-===================================================== */
+========================== */
 
-document
-.getElementById("pdfBtn")
+document.getElementById("pdfBtn")
 ?.addEventListener("click", () => {
 
     window.print();
 
 });
 
-/* =====================================================
-   FULL SCREEN
-===================================================== */
+/* ==========================
+   FULLSCREEN
+========================== */
 
-document
-.getElementById("fullscreenBtn")
+document.getElementById("fullscreenBtn")
 ?.addEventListener("click", async () => {
 
     try {
@@ -1150,62 +959,126 @@ document
 
 });
 
-/* =====================================================
-   CLEAR MODAL
-===================================================== */
+/* ==========================
+   DATABASE STATUS
+========================== */
 
-function clearModal() {
+function updateDatabaseStatus() {
 
-    document.getElementById("modalCoachNo").value = "";
-    document.getElementById("modalCoachType").selectedIndex = 0;
-    document.getElementById("modalStatus").selectedIndex = 0;
+    const badge =
+        document.getElementById("databaseStatus");
 
-}
+    if (!badge) return;
 
-/* =====================================================
-   MODAL CLOSED
-===================================================== */
+    if (navigator.onLine) {
 
-if (coachModal) {
+        badge.className = "badge bg-success";
+        badge.textContent = "ONLINE";
 
-    coachModal._element.addEventListener(
-        "hidden.bs.modal",
-        () => {
+    } else {
 
-            currentCell = null;
+        badge.className = "badge bg-danger";
+        badge.textContent = "OFFLINE";
 
-            clearModal();
-
-        }
-    );
+    }
 
 }
 
+window.addEventListener("online", updateDatabaseStatus);
+window.addEventListener("offline", updateDatabaseStatus);
+
+updateDatabaseStatus();
+
+console.log("BOARD PART-4 LOADED");
+
 /* =====================================================
+   PART - 4A
+   HISTORY • SHORTCUTS • STARTUP
+===================================================== */
+
+import {
+    ref,
+    get
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+/* ==========================
+   HISTORY PANEL
+========================== */
+
+async function refreshHistory() {
+
+    const body = document.getElementById("historyBody");
+
+    if (!body) return;
+
+    try {
+
+        const snapshot = await get(ref(database, "history"));
+
+        body.innerHTML = "";
+
+        if (!snapshot.exists()) return;
+
+        const history = snapshot.val();
+
+        Object.keys(history)
+            .reverse()
+            .forEach(key => {
+
+                const h = history[key];
+
+                body.innerHTML += `
+<tr>
+<td>${h.action || ""}</td>
+<td>${h.shop || ""}</td>
+<td>${h.line || ""}</td>
+<td>${h.position || ""}</td>
+<td>${h.coachNo || ""}</td>
+<td>${h.status || ""}</td>
+<td>${new Date(h.time).toLocaleString("en-IN")}</td>
+</tr>`;
+
+            });
+
+    } catch (err) {
+
+        console.error("History Error :", err);
+
+    }
+
+}
+
+/* ==========================
+   AUTO HISTORY REFRESH
+========================== */
+
+setInterval(refreshHistory, 30000);
+
+/* ==========================
    KEYBOARD SHORTCUTS
-===================================================== */
+========================== */
 
-document.addEventListener("keydown", e => {
+document.addEventListener("keydown", (e) => {
+
+    /* ESC → Close Modal */
 
     if (e.key === "Escape") {
 
-        if (coachModal) {
-
-            coachModal.hide();
-
-        }
+        coachModal.hide();
 
     }
+
+    /* CTRL + R → Refresh */
 
     if (e.ctrlKey && e.key.toLowerCase() === "r") {
 
         e.preventDefault();
 
-        drawBoard();
-
-        updateCounters();
+        refreshBoard();
 
     }
+
+    /* CTRL + H → History */
 
     if (e.ctrlKey && e.key.toLowerCase() === "h") {
 
@@ -1217,21 +1090,25 @@ document.addEventListener("keydown", e => {
 
 });
 
-/* =====================================================
-   WINDOW EVENTS
-===================================================== */
+/* ==========================
+   PAGE VISIBILITY
+========================== */
 
-window.addEventListener("visibilitychange", () => {
+document.addEventListener("visibilitychange", () => {
 
     if (!document.hidden) {
 
-        drawBoard();
+        refreshBoard();
 
-        updateCounters();
+        refreshHistory();
 
     }
 
 });
+
+/* ==========================
+   WINDOW LOAD
+========================== */
 
 window.addEventListener("load", () => {
 
@@ -1245,9 +1122,119 @@ window.addEventListener("load", () => {
 
 });
 
+/* ==========================
+   PUBLIC API
+========================== */
+
+window.boardAPI = {
+
+    refreshBoard,
+    refreshHistory,
+    updateCounters,
+    loadBoard
+
+};
+
+console.log("BOARD PART-4A LOADED");
+
 /* =====================================================
-   TV MODE
+   PART - 4B
+   FINAL CLEANUP • MODAL • PERFORMANCE
 ===================================================== */
+
+/* ==========================
+   CLEAR MODAL
+========================== */
+
+function clearModal() {
+
+    document.getElementById("modalCoachNo").value = "";
+
+    document.getElementById("modalCoachType").selectedIndex = 0;
+
+    document.getElementById("modalStatus").selectedIndex = 0;
+
+}
+
+/* ==========================
+   MODAL HIDDEN
+========================== */
+
+coachModal._element.addEventListener("hidden.bs.modal", () => {
+
+    currentCell = null;
+
+    dragInProgress = false;
+
+    clearModal();
+
+});
+
+/* ==========================
+   WINDOW FOCUS
+========================== */
+
+window.addEventListener("focus", () => {
+
+    refreshDragDrop();
+
+});
+
+/* ==========================
+   ONLINE / OFFLINE
+========================== */
+
+window.addEventListener("online", () => {
+
+    updateDatabaseStatus();
+
+    refreshBoard();
+
+});
+
+window.addEventListener("offline", () => {
+
+    updateDatabaseStatus();
+
+});
+
+/* ==========================
+   ESC CANCEL DRAG
+========================== */
+
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === "Escape") {
+
+        dragInProgress = false;
+
+    }
+
+});
+
+/* ==========================
+   ERROR HANDLER
+========================== */
+
+window.addEventListener("error", (event) => {
+
+    console.error(event.error);
+
+    dragInProgress = false;
+
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+
+    console.error(event.reason);
+
+    dragInProgress = false;
+
+});
+
+/* ==========================
+   TV MODE
+========================== */
 
 if (window.innerWidth >= 1920) {
 
@@ -1255,28 +1242,42 @@ if (window.innerWidth >= 1920) {
 
 }
 
-/* =====================================================
+/* ==========================
+   STARTUP
+========================== */
+
+window.addEventListener("load", () => {
+
+    updateDatabaseStatus();
+
+    refreshHistory();
+
+    updateCounters();
+
+    refreshDragDrop();
+
+});
+
+/* ==========================
    PUBLIC API
-===================================================== */
+========================== */
 
 window.boardAPI = {
 
     loadBoard,
     drawBoard,
+    refreshBoard,
     refreshHistory,
     updateCounters,
-    duplicateCoach
+    duplicateCoach,
+    isAdmin
 
 };
 
-/* =====================================================
-   END
-===================================================== */
-
 console.log("==================================");
 console.log("MR CO-ORDINATION BOARD READY");
+console.log("Board.js Final Stable");
+console.log("Desktop + Mobile Supported");
 console.log("Firebase Connected");
-console.log("Live Sync Enabled");
-console.log("Drag & Drop Enabled");
-console.log("History Enabled");
 console.log("==================================");
+
