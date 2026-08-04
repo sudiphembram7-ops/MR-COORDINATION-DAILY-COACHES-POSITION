@@ -66,9 +66,9 @@ onAuthStateChanged(auth, (user) => {
     }
 
     loadCoachData();
-
+enableDragDrop();
 });
-
+}
 /* ==========================================
    DOM READY
 ========================================== */
@@ -144,10 +144,11 @@ function getFormData() {
 
 function clearForm() {
 
+    document.getElementById("shop").selectedIndex = 0;
+    document.getElementById("line").selectedIndex = 0;
+    document.getElementById("position").selectedIndex = 0;
     document.getElementById("coachNo").value = "";
-
     document.getElementById("coachType").selectedIndex = 0;
-
     document.getElementById("status").selectedIndex = 0;
 
 }
@@ -513,10 +514,7 @@ function updateDashboardStats() {
 
     });
 const totalEntry = document.getElementById("totalEntry");
-if (totalEntry) {
-    totalEntry.textContent = rows.length;
-}
-    document.getElementById("totalEntry").textContent = rows.length;
+if (totalEntry) totalEntry.textContent = rows.length;
     document.getElementById("poCount").textContent = po;
     document.getElementById("lmCount").textContent = lm;
     document.getElementById("medCount").textContent = med;
@@ -573,7 +571,7 @@ if (refreshBtn) {
 updateDashboardStats();
 alert("Board Refreshed");
 
-        alert("Board Refreshed");
+      
 
     });
 
@@ -590,13 +588,8 @@ alert("Board Refreshed");
 ========================================== */
 
 window.addEventListener("online", () => {
-
     console.log("Internet Connected");
-
-    loadCoachData();
-
 });
-
 window.addEventListener("offline", () => {
 
     alert("Internet Connection Lost");
