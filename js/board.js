@@ -982,3 +982,5 @@ setInterval(() => {
     }
 
 }, 1000);
+
+console.log("BOARD JS LOADED");
