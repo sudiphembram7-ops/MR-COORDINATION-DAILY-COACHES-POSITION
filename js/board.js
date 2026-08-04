@@ -82,12 +82,21 @@ const coachModal = new bootstrap.Modal(
    START
 ===================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
+let coachModal;
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    coachModal =
+    new bootstrap.Modal(
+        document.getElementById("coachModal")
+    );
+
+
     startClock();
     loadBoard();
     enableCellClick();
     enableDragDrop();
-    updateCounters();
+
 });
 /* =====================================================
    LIVE CLOCK
@@ -487,35 +496,7 @@ async function deleteCoach(){
    HISTORY
 ===================================================== */
 
-async function writeHistory(action, coach) {
 
-    await push(
-
-        ref(database, "history"),
-
-        {
-
-            action,
-
-            shop: coach.shop,
-
-            line: coach.line,
-
-            position: coach.position,
-
-            coachNo: coach.coachNo,
-
-            coachType: coach.coachType,
-
-            status: coach.status,
-
-            time: new Date().toISOString()
-
-        }
-
-    );
-
-}
 
 
 /* =====================================================
