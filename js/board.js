@@ -16,6 +16,7 @@ import {
     firebaseDeleteCoach
 } from "./firebase-board.js";
 import {
+    database,
     auth
 } from "./firebase-config.js";
 
@@ -175,7 +176,19 @@ function drawBoard() {
             const card = cell.querySelector(".coach-card");
 
 if(card){
-    card.innerHTML="";
+
+card.innerHTML = html;
+
+}else{
+
+cell.innerHTML =
+`
+<div class="coach-card">
+${html}
+</div>
+`;
+
+}
 }else{
     cell.innerHTML='<div class="coach-card"></div>';
 }
@@ -366,33 +379,108 @@ document
 ===================================================== */
 async function saveCoach(){
 
-    if(!checkAdmin())
+    if(!checkAdmin()) return;
+
+    const coach = getModalData();
+
+    if(!coach.coachNo){
+        alert("Coach Number Required");
         return;
+    }
 
 
-    const coach =
-    getModalData();
+    if(duplicateCoach(coach.coachNo)){
+        alert("Coach Already Exists");
+        return;
+    }
 
+
+    try{
+
+        await firebaseSaveCoach(coach);
+
+        alert("Coach Saved");
+
+        coachModal.hide();
+
+    }catch(err){
+
+        console.error(err);
+        alert("Save Failed");
+
+    }
+
+}
 /* =====================================================
    UPDATE
 ===================================================== */
 
 async function updateCoach(){
 
-    if(!checkAdmin())
-        return;
+    if(!checkAdmin()) return;
 
 
-    const coach =
-    getModalData();
+    const coach = getModalData();
+
+
+    try{
+
+        await firebaseUpdateCoach(coach);
+
+        alert("Coach Updated");
+
+        coachModal.hide();
+
+
+    }catch(err){
+
+        console.error(err);
+
+        alert("Update Failed");
+
+    }
+
+}
 /* =====================================================
    DELETE
 ===================================================== */
 
 async function deleteCoach(){
 
-    if(!checkAdmin())
-        return;
+    if(!checkAdmin()) return;
+
+
+    const line =
+    document.getElementById("modalLine").value;
+
+
+    const position =
+    document.getElementById("modalPosition").value;
+
+
+    try{
+
+        await firebaseDeleteCoach(
+            line,
+            position
+        );
+
+
+        alert("Coach Deleted");
+
+
+        coachModal.hide();
+
+
+    }catch(err){
+
+        console.error(err);
+
+        alert("Delete Failed");
+
+    }
+
+}
 /* =====================================================
    HISTORY
 ===================================================== */
@@ -700,7 +788,7 @@ function applyStatusColours() {
             "status-med",
             "status-rl",
             "status-r1",
-            "status-rs"
+            "status-rs",
             "status-l",
             "status-hvy"
         );
