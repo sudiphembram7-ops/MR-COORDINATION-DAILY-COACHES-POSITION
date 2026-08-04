@@ -72,15 +72,7 @@ export function isAdmin() {
    START APPLICATION
 ========================== */
 
-document.addEventListener("DOMContentLoaded", () => {
 
-    console.log("Board Starting...");
-
-    startClock();
-
-    loadBoard();
-
-});
 
 /* ==========================
    LIVE CLOCK
@@ -1075,17 +1067,7 @@ document.addEventListener("keydown", (e) => {
    PAGE VISIBILITY
 ========================== */
 
-document.addEventListener("visibilitychange", () => {
 
-    if (!document.hidden) {
-
-        refreshBoard();
-
-        refreshHistory();
-
-    }
-
-});
 
 /* ==========================
    WINDOW LOAD
@@ -1155,19 +1137,7 @@ window.addEventListener("focus", () => {
    ONLINE / OFFLINE
 ========================== */
 
-window.addEventListener("online", () => {
 
-    updateDatabaseStatus();
-
-    refreshBoard();
-
-});
-
-window.addEventListener("offline", () => {
-
-    updateDatabaseStatus();
-
-});
 
 /* ==========================
    ESC CANCEL DRAG
