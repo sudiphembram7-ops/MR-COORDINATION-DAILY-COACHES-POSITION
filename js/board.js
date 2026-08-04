@@ -15,6 +15,52 @@ import {
     firebaseUpdateCoach,
     firebaseDeleteCoach
 } from "./firebase-board.js";
+import {
+    auth
+} from "./firebase-config.js";
+
+
+import {
+
+    onAuthStateChanged
+
+}
+from
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+
+let adminLoggedIn = false;
+
+
+onAuthStateChanged(auth,(user)=>{
+
+    adminLoggedIn = !!user;
+
+
+    console.log(
+        "Admin Status:",
+        adminLoggedIn
+    );
+
+});
+
+
+function checkAdmin(){
+
+    if(!adminLoggedIn){
+
+        alert(
+        "Please login as Admin"
+        );
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
 /* =====================================================
    GLOBAL VARIABLES
 ===================================================== */
