@@ -616,8 +616,21 @@ async function dropCoach(e) {
     } else {
         updates[`coachBoard/${fromLine}/${fromPos}`] = null;
     }
+try {
 
-    
+    await update(ref(database), updates);
+    console.log("MOVE SUCCESS");
+
+}catch (err) {
+
+    console.error("Drag & Drop Error:", err.message);
+    console.error(err);
+
+    alert(
+        "Drag & Drop Failed: " + err.message
+    );
+
+}
 
     dragCell = null;
 }
