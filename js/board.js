@@ -10,8 +10,13 @@
 import { database, auth } from "./firebase-config.js";
 
 import {
-    ref,
-    onValue
+  ref,
+  onValue,
+  set,
+  update,
+  remove,
+  push,
+  get
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 import {
