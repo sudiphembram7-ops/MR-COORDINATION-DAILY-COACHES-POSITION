@@ -157,6 +157,7 @@ function drawBoard() {
 });
 
 refreshDragDrop();
+enableCellClick();
 applyStatusColours();
 updateCounters();}
 /* =====================================================
