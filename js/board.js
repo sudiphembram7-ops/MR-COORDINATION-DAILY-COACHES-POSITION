@@ -1107,16 +1107,6 @@ window.addEventListener("load", () => {
    PUBLIC API
 ========================== */
 
-window.boardAPI = {
-
-    refreshBoard,
-    refreshHistory,
-    updateCounters,
-    loadBoard
-
-};
-
-console.log("BOARD PART-4A LOADED");
 
 /* =====================================================
    PART - 4B
