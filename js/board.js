@@ -505,19 +505,63 @@ async function deleteCoach(){
    ENABLE DRAG
 ===================================================== */
 
-function enableDragDrop() {
+function enableDragDrop(){
 
-    document.querySelectorAll(".coach-table td").forEach(cell => {
+    const cells = document.querySelectorAll(".coach-table td");
+
+    console.log("Total Drag Cells:", cells.length);
+
+    cells.forEach(cell=>{
 
         cell.draggable = true;
 
-        cell.removeEventListener("dragstart", dragStart);
-        cell.removeEventListener("dragover", dragOver);
-        cell.removeEventListener("drop", dropCoach);
+        cell.ondragstart = function(e){
 
-        cell.addEventListener("dragstart", dragStart);
-        cell.addEventListener("dragover", dragOver);
-        cell.addEventListener("drop", dropCoach);
+            console.log("START DRAG:", this.id);
+
+            dragCell = this;
+
+            e.dataTransfer.setData(
+                "text/plain",
+                this.id
+            );
+
+        };
+
+
+        cell.ondragover = function(e){
+
+            e.preventDefault();
+
+        };
+
+
+        cell.ondrop = function(e){
+
+            e.preventDefault();
+
+            console.log(
+                "DROP:",
+                this.id
+            );
+
+            if(!dragCell){
+                console.log("No drag cell");
+                return;
+            }
+
+
+            console.log(
+                "FROM:",
+                dragCell.id,
+                "TO:",
+                this.id
+            );
+
+
+            dragCell = null;
+
+        };
 
     });
 
