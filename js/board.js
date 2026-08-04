@@ -3,80 +3,40 @@
    PART - 1
 ===================================================== */
 
-/* ==========================
-   IMPORTS
-========================== */
-
-import { database, auth } from "./firebase-config.js";
 
 import {
-  ref,
-  onValue,
-  set,
-  update,
-  remove,
-  push,
-  get
+    ref,
+    get,
+    push,
+    onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
-import {
-    enableDragDrop,
-    refreshDragDrop
-} from "./dragdrop.js";
-
-/* ==========================
+/* =====================================================
    GLOBAL VARIABLES
-========================== */
+===================================================== */
 
 let boardData = {};
 let currentCell = null;
-let adminLoggedIn = false;
-let isBoardLoaded = false;
+let dragCell = null;
+let lastMove = null;
 
-/* Prevent click immediately after drag */
-let dragInProgress = false;
-
-/* Bootstrap Modal */
 const coachModal = new bootstrap.Modal(
     document.getElementById("coachModal")
 );
 
-/* ==========================
-   AUTH
-========================== */
+/* =====================================================
+   START
+===================================================== */
 
-onAuthStateChanged(auth, (user) => {
-
-    adminLoggedIn = !!user;
-
-    console.log(
-        "Admin Login :",
-        adminLoggedIn
-    );
-
+document.addEventListener("DOMContentLoaded", () => {
+    startClock();
+    loadBoard();
+    enableCellClick();
+    enableDragDrop();
+    updateCounters();
 });
-
-/* ==========================
-   CHECK ADMIN
-========================== */
-
-export function isAdmin() {
-    return adminLoggedIn;
-}
-
-/* ==========================
-   START APPLICATION
-========================== */
-
-
-
-/* ==========================
+/* =====================================================
    LIVE CLOCK
-========================== */
+===================================================== */
 
 function startClock() {
 
@@ -90,73 +50,49 @@ function updateClock() {
 
     const now = new Date();
 
-    document.getElementById("liveDate").textContent =
-        now.toLocaleDateString("en-IN");
+    const date = document.getElementById("liveDate");
+    const time = document.getElementById("liveTime");
 
-    document.getElementById("liveTime").textContent =
-        now.toLocaleTimeString("en-IN");
+    if (date)
+        date.innerText = now.toLocaleDateString("en-IN");
+
+    if (time)
+        time.innerText = now.toLocaleTimeString("en-IN");
 
 }
 
-/* ==========================
+/* =====================================================
    LOAD BOARD
-========================== */
+===================================================== */
 
 function loadBoard() {
 
-    const boardRef = ref(database, "coachBoard");
+    onValue(ref(database, "coachBoard"), (snapshot) => {
 
-    onValue(boardRef, (snapshot) => {
-
-        boardData = snapshot.exists()
-            ? snapshot.val()
-            : {};
+        boardData = snapshot.exists() ? snapshot.val() : {};
 
         drawBoard();
 
         updateCounters();
 
-        if (!isBoardLoaded) {
-
-            enableDragDrop();
-
-            enableCellClick();
-
-            isBoardLoaded = true;
-
-        } else {
-
-            refreshDragDrop();
-
-        }
-
         updateLastUpdate();
-
-        console.log("Board Loaded");
 
     }, (error) => {
 
-        console.error(error);
-
-        alert("Board Load Failed");
+        console.error("Firebase Sync Error:", error);
 
     });
 
 }
 /* =====================================================
-   PART - 2
-   DRAW BOARD + CELL CLICK + MODAL
-===================================================== */
-
-/* ==========================
    DRAW BOARD
-========================== */
+===================================================== */
 
 function drawBoard() {
 
     document.querySelectorAll(".coach-table td").forEach(cell => {
 
-        cell.innerHTML = `<div class="coach-card"></div>`;
+        cell.innerHTML = "";
 
         cell.dataset.shop = "";
         cell.dataset.line = "";
@@ -172,18 +108,26 @@ function drawBoard() {
         Object.keys(boardData[line]).forEach(position => {
 
             const coach = boardData[line][position];
+
             if (!coach) return;
 
             const cell = document.getElementById(`${line}_${position}`);
+
             if (!cell) return;
 
-            const card = cell.querySelector(".coach-card");
-
-            card.innerHTML = `
+            const html = `
                 <div class="coach-no">${coach.coachNo || ""}</div>
                 <div class="coach-type">${coach.coachType || ""}</div>
                 <div class="coach-status">${coach.status || ""}</div>
             `;
+
+            const card = cell.querySelector(".coach-card");
+
+if(card){
+    card.innerHTML="";
+}else{
+    cell.innerHTML='<div class="coach-card"></div>';
+}
 
             cell.dataset.shop = coach.shop || "";
             cell.dataset.line = line;
@@ -197,74 +141,66 @@ function drawBoard() {
     });
 
     applyStatusColours();
+    updateCounters();
+    enableDragDrop();
+}
 
-    refreshDragDrop();
+/* =====================================================
+   LAST UPDATE
+===================================================== */
 
-    enableCellClick();
+function updateLastUpdate() {
+
+    const now = new Date();
+
+    const last = document.getElementById("lastUpdate");
+
+    if (last) {
+
+        last.innerText =
+            "Updated : " +
+            now.toLocaleTimeString("en-IN");
+
+    }
 
 }
 
-/* ==========================
-   STATUS COLOUR
-========================== */
+/* =====================================================
+   PART - 2
+   CELL CLICK + SAVE + UPDATE + DELETE
+===================================================== */
 
-
-
-/* ==========================
+/* =====================================================
    ENABLE CELL CLICK
-========================== */
+===================================================== */
 
 function enableCellClick() {
 
-    document.querySelectorAll(".coach-card").forEach(card => {
+    document.addEventListener("click", (e) => {
 
-        card.onclick = null;
+        const td = e.target.closest(".coach-table td");
 
-        card.onclick = (e) => {
+        if (!td) return;
 
-            e.preventDefault();
-            e.stopPropagation();
+        currentCell = td;
 
-            /* Ignore click after drag */
-            if (dragInProgress) return;
-
-            const td = card.closest("td");
-            if (!td) return;
-
-            currentCell = td;
-
-            openModal(td);
-
-        };
+        openModal(td);
 
     });
 
 }
 
-/* ==========================
+/* =====================================================
    OPEN MODAL
-========================== */
+===================================================== */
 
 function openModal(cell) {
 
-    if (!adminLoggedIn) {
-
-        alert("Admin Login Required");
-
-        return;
-
-    }
-
     const [line, position] = cell.id.split("_");
 
-    document.getElementById("modalShop").value =
-        getShop(line);
-
-    document.getElementById("modalLine").value =
-        line;
-
-    document.getElementById("modalPosition").value =
-        position;
+    document.getElementById("modalShop").value = getShop(line);
+    document.getElementById("modalLine").value = line;
+    document.getElementById("modalPosition").value = position;
 
     document.getElementById("modalCoachNo").value =
         cell.dataset.coach || "";
@@ -279,34 +215,11 @@ function openModal(cell) {
 
 }
 
-/* ==========================
-   LAST UPDATE
-========================== */
-
-function updateLastUpdate() {
-
-    const last = document.getElementById("lastUpdate");
-
-    if (!last) return;
-
-    last.textContent =
-        "Updated : " +
-        new Date().toLocaleTimeString("en-IN");
-
-}
-
 /* =====================================================
-   PART - 2A
-   SHOP + MODAL DATA + DUPLICATE CHECK
+   SHOP NAME
 ===================================================== */
 
-/* ==========================
-   GET SHOP NAME
-========================== */
-
 function getShop(line) {
-
-    if (!line) return "";
 
     if (line.startsWith("N")) return "N SHOP";
     if (line.startsWith("M")) return "M SHOP";
@@ -319,243 +232,110 @@ function getShop(line) {
 
 }
 
-/* ==========================
-   GET MODAL DATA
-========================== */
+/* =====================================================
+   MODAL DATA
+===================================================== */
 
 function getModalData() {
 
     return {
 
-        shop: document.getElementById("modalShop").value.trim(),
+        shop: document.getElementById("modalShop").value,
+        line: document.getElementById("modalLine").value,
+        position: document.getElementById("modalPosition").value,
 
-        line: document.getElementById("modalLine").value.trim(),
+        coachNo:
+            document.getElementById("modalCoachNo")
+            .value.trim(),
 
-        position: document.getElementById("modalPosition").value.trim(),
+        coachType:
+            document.getElementById("modalCoachType")
+            .value,
 
-        coachNo: document.getElementById("modalCoachNo")
-            .value
-            .trim()
-            .toUpperCase(),
+        status:
+            document.getElementById("modalStatus")
+            .value,
 
-        coachType: document.getElementById("modalCoachType").value,
-
-        status: document.getElementById("modalStatus").value,
-
-        updatedAt: Date.now()
+        updatedAt:
+            new Date().toISOString()
 
     };
 
 }
 
-/* ==========================
-   DUPLICATE COACH CHECK
-========================== */
+/* =====================================================
+   DUPLICATE CHECK
+===================================================== */
 
 function duplicateCoach(coachNo) {
 
     if (!coachNo) return false;
 
-    coachNo = coachNo.trim().toUpperCase();
-
     for (const line in boardData) {
 
         if (!boardData[line]) continue;
 
-        for (const position in boardData[line]) {
+        for (const pos in boardData[line]) {
 
-            const coach = boardData[line][position];
+            const coach = boardData[line][pos];
 
             if (!coach) continue;
 
-            const oldCoach =
-                (coach.coachNo || "")
-                .trim()
-                .toUpperCase();
-
             if (
-                oldCoach === coachNo &&
+                coach.coachNo === coachNo &&
                 currentCell &&
-                !(
-                    line === currentCell.dataset.line &&
-                    position === currentCell.dataset.position
-                )
+                !(line === currentCell.dataset.line &&
+                  pos === currentCell.dataset.position)
             ) {
-
                 return true;
-
             }
-
         }
-
     }
 
     return false;
-
 }
-
-/* ==========================
+/* =====================================================
    BUTTON EVENTS
-========================== */
+===================================================== */
 
 document
-    .getElementById("saveCoachBtn")
-    ?.addEventListener("click", saveCoach);
+.getElementById("saveCoachBtn")
+?.addEventListener("click", saveCoach);
 
 document
-    .getElementById("updateCoachBtn")
-    ?.addEventListener("click", updateCoach);
+.getElementById("updateCoachBtn")
+?.addEventListener("click", updateCoach);
 
 document
-    .getElementById("deleteCoachBtn")
-    ?.addEventListener("click", deleteCoach);
-    
-    /* =====================================================
-   PART - 2B
-   SAVE • UPDATE • DELETE
+.getElementById("deleteCoachBtn")
+?.addEventListener("click", deleteCoach);
+
+/* =====================================================
+   SAVE
 ===================================================== */
 
 
+/* =====================================================
+   UPDATE
+===================================================== */
 
-/* ==========================
-   SAVE COACH
-========================== */
 
-async function saveCoach() {
+/* =====================================================
+   DELETE
+===================================================== */
 
-    if (!adminLoggedIn) {
-        alert("Admin Login Required");
-        return;
-    }
 
-    const coach = getModalData();
-
-    if (coach.coachNo === "") {
-        alert("Enter Coach Number");
-        return;
-    }
-
-    if (duplicateCoach(coach.coachNo)) {
-        alert("Duplicate Coach Number");
-        return;
-    }
-
-    try {
-
-        await set(
-            ref(database, `coachBoard/${coach.line}/${coach.position}`),
-            coach
-        );
-
-        await writeHistory("SAVE", coach);
-
-        coachModal.hide();
-
-        alert("Coach Saved Successfully");
-
-    } catch (err) {
-
-        console.error(err);
-
-        alert("Save Failed");
-
-    }
-
-}
-
-/* ==========================
-   UPDATE COACH
-========================== */
-
-async function updateCoach() {
-
-    if (!adminLoggedIn) {
-        alert("Admin Login Required");
-        return;
-    }
-
-    const coach = getModalData();
-
-    if (coach.coachNo === "") {
-        alert("Enter Coach Number");
-        return;
-    }
-
-    try {
-
-        await update(
-            ref(database, `coachBoard/${coach.line}/${coach.position}`),
-            {
-                shop: coach.shop,
-                coachNo: coach.coachNo,
-                coachType: coach.coachType,
-                status: coach.status,
-                updatedAt: Date.now()
-            }
-        );
-
-        await writeHistory("UPDATE", coach);
-
-        coachModal.hide();
-
-        alert("Coach Updated Successfully");
-
-    } catch (err) {
-
-        console.error(err);
-
-        alert("Update Failed");
-
-    }
-
-}
-
-/* ==========================
-   DELETE COACH
-========================== */
-
-async function deleteCoach() {
-
-    if (!adminLoggedIn) {
-        alert("Admin Login Required");
-        return;
-    }
-
-    if (!confirm("Delete this Coach?")) return;
-
-    const coach = getModalData();
-
-    try {
-
-        await remove(
-            ref(database, `coachBoard/${coach.line}/${coach.position}`)
-        );
-
-        await writeHistory("DELETE", coach);
-
-        coachModal.hide();
-
-        alert("Coach Deleted Successfully");
-
-    } catch (err) {
-
-        console.error(err);
-
-        alert("Delete Failed");
-
-    }
-
-}
-
-/* ==========================
-   WRITE HISTORY
-========================== */
+/* =====================================================
+   HISTORY
+===================================================== */
 
 async function writeHistory(action, coach) {
 
-    try {
+    await push(
 
-        await push(ref(database, "history"), {
+        ref(database, "history"),
+
+        {
 
             action,
 
@@ -571,316 +351,355 @@ async function writeHistory(action, coach) {
 
             status: coach.status,
 
-            user: auth.currentUser?.email || "Admin",
+            time: new Date().toISOString()
 
-            time: Date.now()
+        }
 
-        });
-
-        console.log("History Saved");
-
-    } catch (err) {
-
-        console.error("History Error :", err);
-
-    }
+    );
 
 }
 
+
 /* =====================================================
    PART - 3
-   STATUS • COUNTERS • DRAG CONTROL
+   100% WORKING DRAG & DROP
 ===================================================== */
 
-/* ==========================
-   APPLY STATUS COLOUR
-========================== */
 
-function applyStatusColours() {
+/* =====================================================
+   ENABLE DRAG
+===================================================== */
+
+function enableDragDrop() {
 
     document.querySelectorAll(".coach-table td").forEach(cell => {
 
-        cell.classList.remove(
-            "status-po",
-            "status-lm",
-            "status-med",
-            "status-rl",
-            "status-r1",
-            "status-rs",
-            "status-s",
-            "status-l",
-            "status-hvy"
-        );
+        cell.draggable = true;
 
-        const status = (cell.dataset.status || "").toLowerCase();
+        cell.removeEventListener("dragstart", dragStart);
+        cell.removeEventListener("dragover", dragOver);
+        cell.removeEventListener("drop", dropCoach);
 
-        if (status !== "") {
-
-            cell.classList.add("status-" + status);
-
-        }
+        cell.addEventListener("dragstart", dragStart);
+        cell.addEventListener("dragover", dragOver);
+        cell.addEventListener("drop", dropCoach);
 
     });
 
 }
 
-/* ==========================
+/* =====================================================
+   DRAG START
+===================================================== */
+
+function dragStart(e) {
+
+    if (!this.dataset.line || !this.dataset.position) {
+        e.preventDefault();
+        return;
+    }
+
+    dragCell = this;
+
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", this.id);
+
+}
+/* =====================================================
+   DRAG OVER
+===================================================== */
+
+function dragOver(e) {
+
+    e.preventDefault();
+
+    e.dataTransfer.dropEffect = "move";
+
+}
+
+/* =====================================================
+   DROP
+===================================================== */
+
+async function dropCoach(e) {
+
+    e.preventDefault();
+
+    if (!dragCell || dragCell === this) {
+        dragCell = null;
+        return;
+    }
+
+    const fromLine = dragCell.dataset.line;
+    const fromPos = dragCell.dataset.position;
+
+    const toLine = this.dataset.line;
+    const toPos = this.dataset.position;
+
+    if (!fromLine || !fromPos || !toLine || !toPos) {
+        dragCell = null;
+        return;
+    }
+
+    const fromCoach = boardData[fromLine]?.[fromPos];
+
+    if (!fromCoach) {
+        dragCell = null;
+        return;
+    }
+
+    const toCoach = boardData[toLine]?.[toPos] || null;
+
+    lastMove = {
+        fromLine,
+        fromPos,
+        toLine,
+        toPos,
+        fromCoach: structuredClone(fromCoach),
+        toCoach: toCoach ? structuredClone(toCoach) : null
+    };
+
+    const updates = {};
+
+    updates[`coachBoard/${toLine}/${toPos}`] = {
+        ...fromCoach,
+        line: toLine,
+        position: toPos
+    };
+
+    if (toCoach) {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = {
+            ...toCoach,
+            line: fromLine,
+            position: fromPos
+        };
+    } else {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = null;
+    }
+
+    try {
+
+        await update(ref(database), updates);
+
+        await writeHistory("MOVE", {
+            ...fromCoach,
+            line: toLine,
+            position: toPos
+        });
+
+    } catch (err) {
+
+        console.error("Drag & Drop Error:", err);
+        alert("Drag & Drop Failed");
+
+    }
+
+    dragCell = null;
+}
+
+/* =====================================================
+   CTRL + Z
+===================================================== */
+
+document.addEventListener("keydown", async (e) => {
+
+    if (!(e.ctrlKey && e.key.toLowerCase() === "z")) return;
+    if (!lastMove) return;
+
+    try {
+
+        const updates = {};
+
+        updates[`coachBoard/${lastMove.fromLine}/${lastMove.fromPos}`] =
+            lastMove.fromCoach;
+
+        updates[`coachBoard/${lastMove.toLine}/${lastMove.toPos}`] =
+            lastMove.toCoach;
+
+        await update(ref(database), updates);
+
+        await writeHistory("UNDO", lastMove.fromCoach);
+
+        lastMove = null;
+
+        alert("Undo Successful");
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Undo Failed");
+
+    }
+
+});
+/* =====================================================
+   HIGHLIGHT
+===================================================== */
+
+document.addEventListener("dragenter", e => {
+
+    const td = e.target.closest(".coach-table td");
+
+    if (td)
+        td.classList.add("table-info");
+
+});
+
+document.addEventListener("dragleave", e => {
+
+    const td = e.target.closest(".coach-table td");
+
+    if (td)
+        td.classList.remove("table-info");
+
+});
+
+document.addEventListener("drop", e => {
+
+    const td = e.target.closest(".coach-table td");
+
+    if (td)
+        td.classList.remove("table-info");
+
+});
+
+
+/* =====================================================
+   PART - 4
+   DASHBOARD / SEARCH / EXPORT / STATUS
+===================================================== */
+
+/* =====================================================
    DASHBOARD COUNTERS
-========================== */
+===================================================== */
 
 function updateCounters() {
 
-    let total = 0;
+    const cells = document.querySelectorAll(".coach-table td");
+
+    let total = cells.length;
     let occupied = 0;
 
-    const statusCount = {
-        PO:0,
-        LM:0,
-        MED:0,
-        RL:0,
-        R1:0,
-        RS:0,
-        S:0,
-        L:0,
-        HVY:0
-    };
+    cells.forEach(cell => {
 
-    document.querySelectorAll(".coach-table td").forEach(cell => {
-
-        total++;
-
-        if ((cell.dataset.coach || "").trim() !== "") {
-
+        if ((cell.dataset.coach || "").trim()) {
             occupied++;
-
-        }
-
-        const status =
-            (cell.dataset.status || "").toUpperCase();
-
-        if (statusCount.hasOwnProperty(status)) {
-
-            statusCount[status]++;
-
         }
 
     });
 
     const free = total - occupied;
 
-    document.getElementById("totalCoach").textContent = total;
-    document.getElementById("occupiedCoach").textContent = occupied;
-    document.getElementById("freeCoach").textContent = free;
+    document.getElementById("totalCoach") &&
+        (document.getElementById("totalCoach").textContent = total);
 
-    Object.keys(statusCount).forEach(key => {
+    document.getElementById("occupiedCoach") &&
+        (document.getElementById("occupiedCoach").textContent = occupied);
 
-        const el = document.getElementById(
-            key.toLowerCase() + "Count"
-        );
-
-        if (el) {
-
-            el.textContent = statusCount[key];
-
-        }
-
-    });
-
+    document.getElementById("freeCoach") &&
+        (document.getElementById("freeCoach").textContent = free);
 }
-
-/* ==========================
-   DRAG LOCK
-========================== */
-
-window.addEventListener("dragstart", () => {
-
-    dragInProgress = true;
-
-});
-
-window.addEventListener("dragend", () => {
-
-    setTimeout(() => {
-
-        dragInProgress = false;
-
-    }, 200);
-
-});
-
-/* ==========================
-   MOBILE TOUCH LOCK
-========================== */
-
-window.addEventListener("touchstart", () => {
-
-    dragInProgress = false;
-
-});
-
-window.addEventListener("touchmove", () => {
-
-    dragInProgress = true;
-
-}, { passive:true });
-
-window.addEventListener("touchend", () => {
-
-    setTimeout(() => {
-
-        dragInProgress = false;
-
-    }, 200);
-
-});
-
-/* ==========================
-   BOARD REFRESH
-========================== */
-
-function refreshBoard() {
-
-    drawBoard();
-
-    applyStatusColours();
-
-    updateCounters();
-
-    updateLastUpdate();
-
-}
-
-/* ==========================
-   AUTO REFRESH
-========================== */
-
-setInterval(() => {
-
-    updateLastUpdate();
-
-},30000);
-
-console.log("BOARD PART-3 LOADED");
-
 /* =====================================================
-   PART - 4
-   SEARCH • EXPORT • PRINT • FULLSCREEN
+   STATUS COLOURS
 ===================================================== */
 
-/* ==========================
-   LIVE SEARCH
-========================== */
+function applyStatusColours() {
 
-const searchBox = document.getElementById("searchBox");
-const searchResult = document.getElementById("searchResult");
+    document.querySelectorAll(".coach-table td").forEach(td => {
 
-if (searchBox) {
+        td.classList.remove(
+            "status-po",
+            "status-s",
+            "status-lm",
+            "status-med",
+            "status-rl",
+            "status-r1",
+            "status-rs"
+            "status-l",
+            "status-hvy"
+        );
 
-    searchBox.addEventListener("input", () => {
+        const status = (td.dataset.status || "").toUpperCase();
 
-        const keyword = searchBox.value.trim().toUpperCase();
+        switch (status) {
 
-        document.querySelectorAll(".coach-table td").forEach(cell => {
-            cell.classList.remove("search-match");
-        });
+            case "PO":
+                td.classList.add("status-po");
+                break;
+            case "S":
+                td.classList.add("status-s");
+                break;
 
-        if (searchResult) searchResult.innerHTML = "";
+            case "LM":
+                td.classList.add("status-lm");
+                break;
 
-        if (!keyword) return;
+            case "MED":
+                td.classList.add("status-med");
+                break;
 
-        let found = false;
+            case "RL":
+                td.classList.add("status-rl");
+                break;
+                
 
-        document.querySelectorAll(".coach-table td").forEach(cell => {
+            case "R1":
+                td.classList.add("status-r1");
+                break;
+            case "RS":
+                td.classList.add("status-rs");
+                break;
 
-            const values = [
-                cell.dataset.coach,
-                cell.dataset.shop,
-                cell.dataset.line,
-                cell.dataset.position,
-                cell.dataset.type,
-                cell.dataset.status
-            ].map(v => (v || "").toUpperCase());
-
-            if (values.some(v => v.includes(keyword))) {
-
-                found = true;
-
-                cell.classList.add("search-match");
-
-                cell.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-
-                if (searchResult) {
-
-                    searchResult.innerHTML = `
-                    <div class="alert alert-success mb-0">
-                        <b>Coach :</b> ${cell.dataset.coach || "-"}<br>
-                        <b>Shop :</b> ${cell.dataset.shop || "-"}<br>
-                        <b>Line :</b> ${cell.dataset.line || "-"}<br>
-                        <b>Position :</b> ${cell.dataset.position || "-"}<br>
-                        <b>Status :</b> ${cell.dataset.status || "-"}
-                    </div>`;
-
-                }
-
-            }
-
-        });
-
-        if (!found && searchResult) {
-
-            searchResult.innerHTML = `
-            <div class="alert alert-danger mb-0">
-                Coach Not Found
-            </div>`;
-
+            case "L":
+                td.classList.add("status-l");
+                break;
+            case "HVY":
+                td.classList.add("status-hvy");
+                break;
         }
 
     });
 
 }
 
-/* ==========================
-   REFRESH BUTTON
-========================== */
+/* =====================================================
+   SEARCH
+===================================================== */
 
-document.getElementById("refreshBtn")
-?.addEventListener("click", () => {
 
-    refreshBoard();
+/* =====================================================
+   PDF
+===================================================== */
+
+document.getElementById("pdfBtn")?.addEventListener("click", () => {
+
+    window.print();
 
 });
 
-/* ==========================
-   CSV EXPORT
-========================== */
+/* =====================================================
+   EXPORT CSV
+===================================================== */
 
 document.getElementById("excelBtn")
 ?.addEventListener("click", () => {
 
-    let csv =
-"Shop,Line,Position,Coach No,Coach Type,Status\n";
+    let csv = "";
 
-    Object.keys(boardData).forEach(line => {
+    document.querySelectorAll(".coach-table tr").forEach(row => {
 
-        Object.keys(boardData[line]).forEach(position => {
+        let cols = [];
 
-            const c = boardData[line][position];
+        row.querySelectorAll("th,td").forEach(col => {
 
-            if (!c) return;
-
-            csv += [
-                c.shop,
-                line,
-                position,
-                c.coachNo,
-                c.coachType,
-                c.status
-            ].join(",") + "\n";
+            cols.push(
+                `"${col.innerText.replace(/\n/g, " ")}"`
+            );
 
         });
+
+        csv += cols.join(",") + "\n";
 
     });
 
@@ -898,20 +717,19 @@ document.getElementById("excelBtn")
 
 });
 
-/* ==========================
-   PDF PRINT
-========================== */
+/* =====================================================
+   REFRESH
+===================================================== */
 
-document.getElementById("pdfBtn")
-?.addEventListener("click", () => {
+document.getElementById("refreshBtn")?.addEventListener("click", () => {
 
-    window.print();
+    loadBoard();
 
 });
 
-/* ==========================
+/* =====================================================
    FULLSCREEN
-========================== */
+===================================================== */
 
 document.getElementById("fullscreenBtn")
 ?.addEventListener("click", async () => {
@@ -936,246 +754,9 @@ document.getElementById("fullscreenBtn")
 
 });
 
-/* ==========================
-   DATABASE STATUS
-========================== */
-
-function updateDatabaseStatus() {
-
-    const badge =
-        document.getElementById("databaseStatus");
-
-    if (!badge) return;
-
-    if (navigator.onLine) {
-
-        badge.className = "badge bg-success";
-        badge.textContent = "ONLINE";
-
-    } else {
-
-        badge.className = "badge bg-danger";
-        badge.textContent = "OFFLINE";
-
-    }
-
-}
-
-window.addEventListener("online", updateDatabaseStatus);
-window.addEventListener("offline", updateDatabaseStatus);
-
-updateDatabaseStatus();
-
-console.log("BOARD PART-4 LOADED");
-
 /* =====================================================
-   PART - 4A
-   HISTORY • SHORTCUTS • STARTUP
-===================================================== */
-
-
-/* ==========================
-   HISTORY PANEL
-========================== */
-
-async function refreshHistory() {
-
-    const body = document.getElementById("historyBody");
-
-    if (!body) return;
-
-    try {
-
-        const snapshot = await get(ref(database, "history"));
-
-        body.innerHTML = "";
-
-        if (!snapshot.exists()) return;
-
-        const history = snapshot.val();
-
-        Object.keys(history)
-            .reverse()
-            .forEach(key => {
-
-                const h = history[key];
-
-                body.innerHTML += `
-<tr>
-<td>${h.action || ""}</td>
-<td>${h.shop || ""}</td>
-<td>${h.line || ""}</td>
-<td>${h.position || ""}</td>
-<td>${h.coachNo || ""}</td>
-<td>${h.status || ""}</td>
-<td>${new Date(h.time).toLocaleString("en-IN")}</td>
-</tr>`;
-
-            });
-
-    } catch (err) {
-
-        console.error("History Error :", err);
-
-    }
-
-}
-
-/* ==========================
-   AUTO HISTORY REFRESH
-========================== */
-
-setInterval(refreshHistory, 30000);
-
-/* ==========================
-   KEYBOARD SHORTCUTS
-========================== */
-
-document.addEventListener("keydown", (e) => {
-
-    /* ESC → Close Modal */
-
-    if (e.key === "Escape") {
-
-        coachModal.hide();
-
-    }
-
-    /* CTRL + R → Refresh */
-
-    if (e.ctrlKey && e.key.toLowerCase() === "r") {
-
-        e.preventDefault();
-
-        refreshBoard();
-
-    }
-
-    /* CTRL + H → History */
-
-    if (e.ctrlKey && e.key.toLowerCase() === "h") {
-
-        e.preventDefault();
-
-        refreshHistory();
-
-    }
-
-});
-
-/* ==========================
-   PAGE VISIBILITY
-========================== */
-
-
-
-/* ==========================
-   WINDOW LOAD
-========================== */
-
-window.addEventListener("load", () => {
-
-    updateDatabaseStatus();
-
-    refreshHistory();
-
-    updateCounters();
-
-    console.log("MR CO-ORDINATION BOARD READY");
-
-});
-
-/* ==========================
-   PUBLIC API
-========================== */
-
-
-/* =====================================================
-   PART - 4B
-   FINAL CLEANUP • MODAL • PERFORMANCE
-===================================================== */
-
-/* ==========================
-   CLEAR MODAL
-========================== */
-
-function clearModal() {
-
-    document.getElementById("modalCoachNo").value = "";
-
-    document.getElementById("modalCoachType").selectedIndex = 0;
-
-    document.getElementById("modalStatus").selectedIndex = 0;
-
-}
-
-/* ==========================
-   MODAL HIDDEN
-========================== */
-
-coachModal._element.addEventListener("hidden.bs.modal", () => {
-
-    currentCell = null;
-
-    dragInProgress = false;
-
-    clearModal();
-
-});
-
-/* ==========================
-   WINDOW FOCUS
-========================== */
-
-window.addEventListener("focus", () => {
-
-    refreshDragDrop();
-
-});
-
-/* ==========================
-   ONLINE / OFFLINE
-========================== */
-
-
-
-/* ==========================
-   ESC CANCEL DRAG
-========================== */
-
-document.addEventListener("keydown", (e) => {
-
-    if (e.key === "Escape") {
-
-        dragInProgress = false;
-
-    }
-
-});
-
-/* ==========================
-   ERROR HANDLER
-========================== */
-
-window.addEventListener("error", (event) => {
-
-    console.error(event.error);
-
-    dragInProgress = false;
-
-});
-
-window.addEventListener("unhandledrejection", (event) => {
-
-    console.error(event.reason);
-
-    dragInProgress = false;
-
-});
-
-/* ==========================
    TV MODE
-========================== */
+===================================================== */
 
 if (window.innerWidth >= 1920) {
 
@@ -1183,42 +764,50 @@ if (window.innerWidth >= 1920) {
 
 }
 
-/* ==========================
-   STARTUP
-========================== */
+/* =====================================================
+   SHORTCUT KEYS
+===================================================== */
 
-window.addEventListener("load", () => {
+document.addEventListener("keydown", e => {
 
-    updateDatabaseStatus();
+    if (e.ctrlKey && e.key === "f") {
 
-    refreshHistory();
+        e.preventDefault();
 
-    updateCounters();
+        document.getElementById("searchBox")?.focus();
 
-    refreshDragDrop();
+    }
+
+    if (e.key === "F11") {
+
+        e.preventDefault();
+
+        if (!document.fullscreenElement) {
+
+            document.documentElement.requestFullscreen();
+
+        } else {
+
+            document.exitFullscreen();
+
+        }
+
+    }
 
 });
 
-/* ==========================
-   PUBLIC API
-========================== */
+/* =====================================================
+   FOOTER CLOCK
+===================================================== */
 
-window.boardAPI = {
+setInterval(() => {
 
-    loadBoard,
-    drawBoard,
-    refreshBoard,
-    refreshHistory,
-    updateCounters,
-    duplicateCoach,
-    isAdmin
+    const t = document.getElementById("lastUpdateTime");
 
-};
+    if (t) {
 
-console.log("==================================");
-console.log("MR CO-ORDINATION BOARD READY");
-console.log("Board.js Final Stable");
-console.log("Desktop + Mobile Supported");
-console.log("Firebase Connected");
-console.log("==================================");
+        t.textContent = new Date().toLocaleTimeString("en-IN");
 
+    }
+
+}, 1000);
