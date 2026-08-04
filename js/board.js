@@ -74,9 +74,7 @@ let currentCell = null;
 let dragCell = null;
 let lastMove = null;
 
-const coachModal = new bootstrap.Modal(
-    document.getElementById("coachModal")
-);
+
 
 /* =====================================================
    START
@@ -187,9 +185,7 @@ function drawBoard() {
 
             const card = cell.querySelector(".coach-card");
 
-const card = cell.querySelector(".coach-card");
 
-const card = cell.querySelector(".coach-card");
 
 if(card){
 
@@ -506,6 +502,33 @@ async function deleteCoach(){
    100% WORKING DRAG & DROP
 ===================================================== */
 
+
+/* =====================================================
+   ENABLE DRAG
+===================================================== */
+
+function enableDragDrop() {
+
+    document.querySelectorAll(".coach-table td").forEach(cell => {
+
+        cell.draggable = true;
+
+        cell.removeEventListener("dragstart", dragStart);
+        cell.removeEventListener("dragover", dragOver);
+        cell.removeEventListener("drop", dropCoach);
+
+        cell.addEventListener("dragstart", dragStart);
+        cell.addEventListener("dragover", dragOver);
+        cell.addEventListener("drop", dropCoach);
+
+    });
+
+}
+
+/* =====================================================
+   DRAG START
+===================================================== */
+
 function dragStart(e){
 
     if(!adminLoggedIn){
@@ -537,45 +560,6 @@ function dragStart(e){
         "text/plain",
         this.id
     );
-
-}
-/* =====================================================
-   ENABLE DRAG
-===================================================== */
-
-function enableDragDrop() {
-
-    document.querySelectorAll(".coach-table td").forEach(cell => {
-
-        cell.draggable = true;
-
-        cell.removeEventListener("dragstart", dragStart);
-        cell.removeEventListener("dragover", dragOver);
-        cell.removeEventListener("drop", dropCoach);
-
-        cell.addEventListener("dragstart", dragStart);
-        cell.addEventListener("dragover", dragOver);
-        cell.addEventListener("drop", dropCoach);
-
-    });
-
-}
-
-/* =====================================================
-   DRAG START
-===================================================== */
-
-function dragStart(e) {
-
-    if (!this.dataset.line || !this.dataset.position) {
-        e.preventDefault();
-        return;
-    }
-
-    dragCell = this;
-
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", this.id);
 
 }
 /* =====================================================
