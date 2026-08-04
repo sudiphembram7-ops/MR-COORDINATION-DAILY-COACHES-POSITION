@@ -529,36 +529,21 @@ function enableDragDrop() {
 
 function dragStart(e){
 
+    console.log("Dragging:", this.id);
+
     if(!adminLoggedIn){
-
         e.preventDefault();
-
         alert("Login required for movement");
-
         return;
-
     }
-
-
-    if(!this.dataset.line || !this.dataset.position){
-
-        e.preventDefault();
-
-        return;
-
-    }
-
 
     dragCell = this;
 
-
-    e.dataTransfer.effectAllowed="move";
-
+    e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData(
         "text/plain",
         this.id
     );
-
 }
 /* =====================================================
    DRAG OVER
