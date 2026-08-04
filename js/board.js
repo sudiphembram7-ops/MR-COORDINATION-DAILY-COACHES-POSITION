@@ -216,21 +216,7 @@ function drawBoard() {
    STATUS COLOUR
 ========================== */
 
-function applyStatusColours() {
 
-    document.querySelectorAll(".coach-table td").forEach(cell => {
-
-        cell.className = "";
-
-        const status = (cell.dataset.status || "").toLowerCase();
-
-        if (status) {
-            cell.classList.add("status-" + status);
-        }
-
-    });
-
-}
 
 /* ==========================
    ENABLE CELL CLICK
