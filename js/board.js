@@ -8,8 +8,11 @@ import {
     ref,
     get,
     push,
-    onValue
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    onValue,
+    update
+}
+from
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 import {
     firebaseSaveCoach,
     firebaseUpdateCoach,
@@ -520,24 +523,39 @@ async function writeHistory(action, coach) {
    100% WORKING DRAG & DROP
 ===================================================== */
 
-function dragStart(event){
+function dragStart(e){
+
+    if(!adminLoggedIn){
+
+        e.preventDefault();
+
+        alert("Login required for movement");
+
+        return;
+
+    }
 
 
-if(!adminLoggedIn){
+    if(!this.dataset.line || !this.dataset.position){
 
-    event.preventDefault();
+        e.preventDefault();
 
-    alert(
-    "Login required for movement"
+        return;
+
+    }
+
+
+    dragCell = this;
+
+
+    e.dataTransfer.effectAllowed="move";
+
+    e.dataTransfer.setData(
+        "text/plain",
+        this.id
     );
 
-    return;
-
 }
-
-
-const cell =
-event.currentTarget;
 /* =====================================================
    ENABLE DRAG
 ===================================================== */
