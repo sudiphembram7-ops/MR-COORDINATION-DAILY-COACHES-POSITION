@@ -1,281 +1,124 @@
-/* ==========================================================
-   MR CO-ORDINATION
-   firebase-board.js
-   Production Ready - Part 1 (Core)
-========================================================== */
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   board.js
+   PART 1A-1
+   IMPORTS + GLOBAL VARIABLES
+===================================================== */
 
 import { database } from "./firebase-config.js";
 
 import {
     ref,
-    get,
-    set,
-    update,
-    remove,
-    push,
-    onValue
+    onValue,
+    update
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-import {
-    getAuth
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
 
-/* ==========================================================
-   CONSTANTS
-========================================================== */
+let boardData = {};
+let currentCell = null;
+let dragCell = null;
+let lastMove = null;
+let unsubscribeBoard = null;
 
-const auth = getAuth();
+/* =====================================================
+   DOM CACHE
+===================================================== */
 
-export const BOARD_PATH = "coachBoard";
-export const HISTORY_PATH = "history";
-export const AUDIT_PATH = "auditLog";
+const coachTable = document.querySelector(".coach-table");
 
-/* ==========================================================
-   REFERENCES
-========================================================== */
+const liveDate = document.getElementById("liveDate");
+const liveTime = document.getElementById("liveTime");
+const lastUpdate = document.getElementById("lastUpdate");
 
-const boardRef = ref(database, BOARD_PATH);
-const historyRef = ref(database, HISTORY_PATH);
-const auditRef = ref(database, AUDIT_PATH);
+const totalCoach = document.getElementById("totalCoach");
+const occupiedCoach = document.getElementById("occupiedCoach");
+const freeCoach = document.getElementById("freeCoach");
 
-/* ==========================================================
-   HELPERS
-========================================================== */
+/* =====================================================
+   BOOTSTRAP MODAL
+===================================================== */
 
-function timestamp() {
-    return Date.now();
-}
+const coachModalElement =
+    document.getElementById("coachModal");
 
-function currentUser() {
-    return auth.currentUser
-        ? auth.currentUser.email
-        : "SYSTEM";
-}
-
-function coachRef(line, position) {
-    return ref(database, `${BOARD_PATH}/${line}/${position}`);
-}
-
-/* ==========================================================
-   LIVE BOARD LISTENER
-========================================================== */
-
-export function listenBoard(callback) {
-
-    return onValue(
-        boardRef,
-        (snapshot) => {
-
-            if (snapshot.exists()) {
-                callback(snapshot.val());
-            } else {
-                callback({});
-            }
-
-        },
-        (error) => {
-
-            console.error("Board Listener Error:", error);
-
-        }
-    );
-
-}
-
-/* ==========================================================
-   GET SINGLE COACH
-========================================================== */
-
-export async function getCoach(line, position) {
-
-    const snapshot = await get(
-        coachRef(line, position)
-    );
-
-    return snapshot.exists()
-        ? snapshot.val()
+const coachModal =
+    coachModalElement
+        ? new bootstrap.Modal(coachModalElement)
         : null;
 
-}
+/* =====================================================
+   CONSTANTS
+===================================================== */
 
-/* ==========================================================
-   GET COMPLETE BOARD
-========================================================== */
+const BOARD_PATH = "coachBoard";
 
-export async function getBoard() {
+/* =====================================================
+   START
+===================================================== */
 
-    const snapshot = await get(boardRef);
+document.addEventListener("DOMContentLoaded", initializeBoard);
 
-    return snapshot.exists()
-        ? snapshot.val()
-        : {};
+console.log("board.js Part 1A-1 Loaded");
 
-}
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   board.js
+   PART 1A-2
+   INITIALIZATION + FIREBASE LISTENER
+===================================================== */
 
-/* ==========================================================
-   WRITE HISTORY
-========================================================== */
+/* =====================================================
+   INITIALIZE BOARD
+===================================================== */
 
-export async function writeHistory(action, coach = {}) {
+function initializeBoard() {
 
-    return push(historyRef, {
+    startClock();
 
-        action,
-        coachNo: coach.coachNo || "",
-        shop: coach.shop || "",
-        line: coach.line || "",
-        position: coach.position || "",
-        coachType: coach.coachType || "",
-        status: coach.status || "",
-        user: currentUser(),
-        time: timestamp()
+    bindGlobalEvents();
 
-    });
+    subscribeBoard();
 
-}
-
-/* ==========================================================
-   WRITE AUDIT LOG
-========================================================== */
-
-export async function writeAudit(action, coach = {}) {
-
-    return push(auditRef, {
-
-        action,
-        coachNo: coach.coachNo || "",
-        shop: coach.shop || "",
-        line: coach.line || "",
-        position: coach.position || "",
-        coachType: coach.coachType || "",
-        status: coach.status || "",
-        user: currentUser(),
-        time: timestamp()
-
-    });
+    console.log("MR CO-ORDINATION BOARD INITIALIZED");
 
 }
 
-/* ==========================================================
-   VERSION
-========================================================== */
+/* =====================================================
+   FIREBASE SUBSCRIPTION
+===================================================== */
 
-export const VERSION = "3.0.0";
+function subscribeBoard() {
 
-console.log(
-    `MR CO-ORDINATION Firebase Ready v${VERSION}`
-);
+    // Prevent duplicate listeners
+    if (typeof unsubscribeBoard === "function") {
+        unsubscribeBoard();
+    }
 
+    unsubscribeBoard = onValue(
 
-/* ==========================================================
-   HELPERS
-========================================================== */
+        ref(database, BOARD_PATH),
 
-function now() {
-    return Date.now();
-}
+        (snapshot) => {
 
-function currentUser() {
+            boardData = snapshot.exists()
+                ? snapshot.val()
+                : {};
 
-    return auth.currentUser
-        ? auth.currentUser.email
-        : "System";
+            drawBoard();
 
-}
+            updateCounters();
 
-function coachRef(line, position) {
-
-    return ref(
-        database,
-        `${BOARD_PATH}/${line}/${position}`
-    );
-
-}
-
-/* ==========================================================
-   HISTORY
-========================================================== */
-
-export async function writeHistory(action, coach = {}) {
-
-    return push(historyRef, {
-
-        action,
-
-        shop: coach.shop || "",
-
-        line: coach.line || "",
-
-        position: coach.position || "",
-
-        coachNo: coach.coachNo || "",
-
-        coachType: coach.coachType || "",
-
-        status: coach.status || "",
-
-        user: currentUser(),
-
-        time: now()
-
-    });
-
-}
-
-/* ==========================================================
-   AUDIT LOG
-========================================================== */
-
-export async function writeAudit(action, coach = {}) {
-
-    return push(auditRef, {
-
-        action,
-
-        shop: coach.shop || "",
-
-        line: coach.line || "",
-
-        position: coach.position || "",
-
-        coachNo: coach.coachNo || "",
-
-        coachType: coach.coachType || "",
-
-        status: coach.status || "",
-
-        user: currentUser(),
-
-        timestamp: now()
-
-    });
-
-}
-
-/* ==========================================================
-   LISTEN BOARD
-========================================================== */
-
-export function listenBoard(callback) {
-
-    return onValue(
-
-        boardRef,
-
-        snapshot => {
-
-            callback(
-                snapshot.exists()
-                    ? snapshot.val()
-                    : {}
-            );
+            updateLastUpdate();
 
         },
 
-        error => {
+        (error) => {
 
             console.error(
-                "Board Listener Error",
+                "Firebase Board Listener Error:",
                 error
             );
 
@@ -285,688 +128,904 @@ export function listenBoard(callback) {
 
 }
 
-/* ==========================================================
-   GET COACH
-========================================================== */
+/* =====================================================
+   GLOBAL EVENTS
+===================================================== */
 
-export async function getCoach(line, position) {
+function bindGlobalEvents() {
 
-    const snap = await get(
-        coachRef(line, position)
-    );
+    window.addEventListener("online", () => {
 
-    return snap.exists()
-        ? snap.val()
-        : null;
+        console.log("Internet Connected");
 
-}
+    });
 
-/* ==========================================================
-   SAVE COACH
-========================================================== */
+    window.addEventListener("offline", () => {
 
-export async function saveCoach(coach) {
+        console.warn("Internet Disconnected");
 
-    if (!coach.line || !coach.position) {
-        throw new Error("Invalid coach location.");
-    }
-
-    if (!coach.coachNo) {
-        throw new Error("Coach Number is required.");
-    }
-
-    const duplicate = await duplicateCoach(coach.coachNo);
-
-    if (duplicate) {
-        throw new Error(
-            `Coach ${coach.coachNo} already exists.`
-        );
-    }
-
-    const data = {
-
-        shop: coach.shop || "",
-
-        line: coach.line,
-
-        position: coach.position,
-
-        coachNo: coach.coachNo.trim().toUpperCase(),
-
-        coachType: coach.coachType || "",
-
-        status: coach.status || "PO",
-
-        updatedAt: now(),
-
-        updatedBy: currentUser()
-
-    };
-
-    await set(
-        coachRef(coach.line, coach.position),
-        data
-    );
-
-    await writeHistory("SAVE", data);
-
-    await writeAudit("SAVE", data);
-
-    return true;
+    });
 
 }
 
-/* ==========================================================
-   UPDATE COACH
-========================================================== */
+/* =====================================================
+   PAGE UNLOAD
+===================================================== */
 
-export async function updateCoach(coach) {
+window.addEventListener("beforeunload", () => {
 
-    if (!coach.line || !coach.position) {
-        throw new Error("Invalid coach location.");
+    if (typeof unsubscribeBoard === "function") {
+
+        unsubscribeBoard();
+
     }
 
-    const data = {
+});
 
-        shop: coach.shop || "",
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   board.js
+   PART 1A-3
+   LIVE CLOCK + LAST UPDATE
+===================================================== */
 
-        coachNo: coach.coachNo.trim().toUpperCase(),
+/* =====================================================
+   LIVE CLOCK
+===================================================== */
 
-        coachType: coach.coachType || "",
+let clockTimer = null;
 
-        status: coach.status || "PO",
+function startClock() {
 
-        updatedAt: now(),
+    if (clockTimer) {
+        clearInterval(clockTimer);
+    }
 
-        updatedBy: currentUser()
+    refreshClock();
 
-    };
-
-    await update(
-        coachRef(coach.line, coach.position),
-        data
-    );
-
-    await writeHistory(
-        "UPDATE",
-        {
-            ...coach,
-            ...data
-        }
-    );
-
-    await writeAudit(
-        "UPDATE",
-        {
-            ...coach,
-            ...data
-        }
-    );
-
-    return true;
+    clockTimer = setInterval(refreshClock, 1000);
 
 }
 
-/* ==========================================================
-   DELETE COACH
-========================================================== */
+function refreshClock() {
 
-export async function deleteCoach(
-    line,
-    position
-) {
+    const now = new Date();
 
-    const coach =
-        await getCoach(
-            line,
-            position
-        );
+    if (liveDate) {
 
-    if (!coach)
-        return false;
-
-    await remove(
-        coachRef(
-            line,
-            position
-        )
-    );
-
-    await writeHistory(
-        "DELETE",
-        coach
-    );
-
-    await writeAudit(
-        "DELETE",
-        coach
-    );
-
-    return true;
-
-}
-
-/* ==========================================================
-   DUPLICATE CHECK
-========================================================== */
-
-export async function duplicateCoach(
-    coachNo
-) {
-
-    if (!coachNo)
-        return false;
-
-    const snapshot =
-        await get(boardRef);
-
-    if (!snapshot.exists())
-        return false;
-
-    const board =
-        snapshot.val();
-
-    coachNo =
-        coachNo
-        .trim()
-        .toUpperCase();
-
-    for (const line in board) {
-
-        for (const position in board[line]) {
-
-            const coach =
-                board[line][position];
-
-            if (!coach)
-                continue;
-
-            if (
-                (
-                    coach.coachNo || ""
-                )
-                .trim()
-                .toUpperCase()
-                === coachNo
-            ) {
-
-                return true;
-
+        liveDate.textContent = now.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
             }
-
-        }
-
-    }
-
-    return false;
-
-}
-
-/* ==========================================================
-   GET ALL COACHES
-========================================================== */
-
-export async function getAllCoaches() {
-
-    const snapshot =
-        await get(boardRef);
-
-    if (!snapshot.exists())
-        return {};
-
-    return snapshot.val();
-
-}
-
-/* ==========================================================
-   DRAG & DROP
-   MOVE / SWAP COACH
-========================================================== */
-
-export async function updateCoachPosition(
-    fromLine,
-    fromPosition,
-    toLine,
-    toPosition
-) {
-
-    if (
-        fromLine === toLine &&
-        fromPosition === toPosition
-    ) {
-        return false;
-    }
-
-    const fromRef = coachRef(
-        fromLine,
-        fromPosition
-    );
-
-    const toRef = coachRef(
-        toLine,
-        toPosition
-    );
-
-    const fromSnap = await get(fromRef);
-
-    if (!fromSnap.exists()) {
-        throw new Error("Source coach not found.");
-    }
-
-    const fromCoach = fromSnap.val();
-
-    const toSnap = await get(toRef);
-
-    const toCoach = toSnap.exists()
-        ? toSnap.val()
-        : null;
-
-    const updates = {};
-
-    /* Move Source -> Target */
-
-    updates[
-        `${BOARD_PATH}/${toLine}/${toPosition}`
-    ] = {
-
-        ...fromCoach,
-
-        line: toLine,
-
-        position: toPosition,
-
-        updatedAt: now(),
-
-        updatedBy: currentUser()
-
-    };
-
-    /* Swap অথবা Empty */
-
-    if (toCoach) {
-
-        updates[
-            `${BOARD_PATH}/${fromLine}/${fromPosition}`
-        ] = {
-
-            ...toCoach,
-
-            line: fromLine,
-
-            position: fromPosition,
-
-            updatedAt: now(),
-
-            updatedBy: currentUser()
-
-        };
-
-    } else {
-
-        updates[
-            `${BOARD_PATH}/${fromLine}/${fromPosition}`
-        ] = null;
-
-    }
-
-    await update(
-        ref(database),
-        updates
-    );
-
-    await writeHistory(
-        "MOVE",
-        {
-
-            ...fromCoach,
-
-            line: toLine,
-
-            position: toPosition
-
-        }
-    );
-
-    await writeAudit(
-        "MOVE",
-        {
-
-            ...fromCoach,
-
-            line: toLine,
-
-            position: toPosition
-
-        }
-    );
-
-    return true;
-
-}
-
-/* ==========================================================
-   MOVE WITHOUT SWAP
-========================================================== */
-
-export async function moveCoach(
-    fromLine,
-    fromPosition,
-    toLine,
-    toPosition
-) {
-
-    const coach =
-        await getCoach(
-            fromLine,
-            fromPosition
         );
 
-    if (!coach)
-        throw new Error("Coach not found.");
+    }
 
-    const target =
-        await getCoach(
-            toLine,
-            toPosition
+    if (liveTime) {
+
+        liveTime.textContent = now.toLocaleTimeString(
+            "en-IN",
+            {
+                hour12: false
+            }
         );
 
-    if (target)
-
-
-     throw new Error("Target position is occupied.");
-
-    await remove(
-        coachRef(
-            fromLine,
-            fromPosition
-        )
-    );
-
-    await set(
-        coachRef(
-            toLine,
-            toPosition
-        ),
-        {
-
-            ...coach,
-
-            line: toLine,
-
-            position: toPosition,
-
-            updatedAt: now(),
-
-            updatedBy: currentUser()
-
-        }
-    );
-
-    await writeHistory(
-        "MOVE",
-        coach
-    );
-
-    return true;
+    }
 
 }
 
-/* ==========================================================
-   UPDATE SINGLE FIELD
-========================================================== */
+/* =====================================================
+   LAST UPDATE
+===================================================== */
 
-export async function updateCoachStatus(
-    line,
-    position,
-    status
-) {
+function updateLastUpdate() {
 
-    await update(
-        coachRef(
-            line,
-            position
-        ),
-        {
+    if (!lastUpdate) return;
 
-            status,
-
-            updatedAt: now(),
-
-            updatedBy: currentUser()
-
-        }
-    );
+    lastUpdate.textContent =
+        "Updated : " +
+        new Date().toLocaleTimeString("en-IN");
 
 }
 
-/* ==========================================================
-   TRANSACTION COUNTER
-========================================================== */
+/* =====================================================
+   AUTO REFRESH COUNTERS
+===================================================== */
 
-export async function increaseMoveCounter() {
+let counterTimer = null;
 
-    const counterRef = ref(
-        database,
-        "statistics/moves"
-    );
+function startCounterRefresh() {
 
-    await runTransaction(
-        counterRef,
-        value => {
+    if (counterTimer) {
+        clearInterval(counterTimer);
+    }
 
-            return (value || 0) + 1;
+    counterTimer = setInterval(() => {
 
-        }
-    );
+        updateCounters();
+
+    }, 3000);
 
 }
 
-/* ==========================================================
-   SEARCH COACH
-========================================================== */
+/* =====================================================
+   CLEANUP
+===================================================== */
 
-export async function searchCoach(keyword) {
+window.addEventListener("beforeunload", () => {
 
-    keyword = (keyword || "")
-        .trim()
-        .toUpperCase();
+    if (clockTimer) {
+        clearInterval(clockTimer);
+    }
 
-    if (!keyword) return [];
+    if (counterTimer) {
+        clearInterval(counterTimer);
+    }
 
-    const board = await getAllCoaches();
+});
 
-    const result = [];
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 1B-1
+   CLEAR BOARD + DRAW COACH
+===================================================== */
 
-    Object.keys(board).forEach(line => {
+/* =====================================================
+   CLEAR BOARD
+===================================================== */
 
-        Object.keys(board[line]).forEach(position => {
+function clearBoard() {
 
-            const coach = board[line][position];
+    coachTable
+        ?.querySelectorAll("td")
+        .forEach(cell => {
 
-            if (!coach) return;
+            cell.innerHTML = "";
 
-            const text = [
+            cell.removeAttribute("data-shop");
+            cell.removeAttribute("data-line");
+            cell.removeAttribute("data-position");
+            cell.removeAttribute("data-coach");
+            cell.removeAttribute("data-type");
+            cell.removeAttribute("data-status");
 
-                coach.coachNo,
+            cell.classList.remove(
+                "status-po",
+                "status-s",
+                "status-lm",
+                "status-med",
+                "status-rl",
+                "status-r1",
+                "status-rs",
+                "status-l",
+                "status-hvy"
+            );
 
-                coach.shop,
+        });
 
-                coach.coachType,
+}
 
-                coach.status,
+/* =====================================================
+   DRAW SINGLE COACH
+===================================================== */
 
+function drawCoach(cell, line, position, coach) {
+
+    if (!cell || !coach) return;
+
+    cell.dataset.shop = coach.shop || "";
+    cell.dataset.line = line;
+    cell.dataset.position = position;
+    cell.dataset.coach = coach.coachNo || "";
+    cell.dataset.type = coach.coachType || "";
+    cell.dataset.status = coach.status || "";
+
+    cell.innerHTML = `
+        <div class="coach-card">
+
+            <div class="coach-no">
+                ${coach.coachNo || ""}
+            </div>
+
+            <div class="coach-type">
+                ${coach.coachType || ""}
+            </div>
+
+            <div class="coach-status">
+                ${coach.status || ""}
+            </div>
+
+        </div>
+    `;
+
+}
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 1B-2
+   DRAW BOARD
+===================================================== */
+
+/* =====================================================
+   DRAW COMPLETE BOARD
+===================================================== */
+
+function drawBoard() {
+
+    clearBoard();
+
+    if (!boardData || typeof boardData !== "object") {
+        return;
+    }
+
+    for (const line in boardData) {
+
+        const positions = boardData[line];
+
+        if (!positions) continue;
+
+        for (const position in positions) {
+
+            const coach = positions[position];
+
+            if (!coach) continue;
+
+            const cell = document.getElementById(
+                `${line}_${position}`
+            );
+
+            if (!cell) continue;
+
+            drawCoach(
+                cell,
                 line,
+                position,
+                coach
+            );
 
-                position
+        }
 
-            ]
-            .join(" ")
-            .toUpperCase();
+    }
 
-            if (text.includes(keyword)) {
+    applyStatusColours();
 
-                result.push({
-                    line,
-                    position,
-                    ...coach
-                });
+    updateCounters();
 
+    enableDragDrop();
+
+}
+
+/* =====================================================
+   SAFE RENDER
+===================================================== */
+
+function renderBoard() {
+
+    try {
+
+        drawBoard();
+
+    } catch (error) {
+
+        console.error(
+            "Board Render Error:",
+            error
+        );
+
+    }
+
+}
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 1B-3
+   STATUS COLOURS
+===================================================== */
+
+/* =====================================================
+   STATUS CLASS LIST
+===================================================== */
+
+const STATUS_CLASSES = [
+    "status-po",
+    "status-s",
+    "status-lm",
+    "status-med",
+    "status-rl",
+    "status-r1",
+    "status-rs",
+    "status-l",
+    "status-hvy"
+];
+
+/* =====================================================
+   STATUS -> CSS CLASS MAP
+===================================================== */
+
+const STATUS_MAP = {
+    PO: "status-po",
+    S: "status-s",
+    LM: "status-lm",
+    MED: "status-med",
+    RL: "status-rl",
+    R1: "status-r1",
+    RS: "status-rs",
+    L: "status-l",
+    HVY: "status-hvy"
+};
+
+/* =====================================================
+   APPLY STATUS COLOURS
+===================================================== */
+
+function applyStatusColours() {
+
+    coachTable
+        ?.querySelectorAll("td")
+        .forEach(cell => {
+
+            cell.classList.remove(...STATUS_CLASSES);
+
+            const status = (
+                cell.dataset.status || ""
+            )
+                .trim()
+                .toUpperCase();
+
+            const cssClass = STATUS_MAP[status];
+
+            if (cssClass) {
+                cell.classList.add(cssClass);
             }
 
         });
 
+}
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 1C-1
+   BUTTON EVENTS
+===================================================== */
+
+function bindButtons() {
+
+    bindRefreshButton();
+    bindPdfButton();
+    bindFullscreenButton();
+    bindSearchShortcut();
+
+}
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+function bindRefreshButton() {
+
+    const btn = document.getElementById("refreshBtn");
+
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+
+        renderBoard();
+
+        updateCounters();
+
+        updateLastUpdate();
+
     });
 
-    return result;
-
 }
 
-/* ==========================================================
-   GET HISTORY
-========================================================== */
+/* =====================================================
+   PDF
+===================================================== */
 
-export async function getHistory() {
+function bindPdfButton() {
 
-    const snapshot = await get(historyRef);
+    const btn = document.getElementById("pdfBtn");
 
-    if (!snapshot.exists())
-        return {};
+    if (!btn) return;
 
-    return snapshot.val();
+    btn.addEventListener("click", () => {
 
-}
+        window.print();
 
-/* ==========================================================
-   BACKUP BOARD
-========================================================== */
-
-export async function backupBoard() {
-
-    const board = await getAllCoaches();
-
-    return JSON.stringify(board);
-
-}
-
-/* ==========================================================
-   RESTORE BOARD
-========================================================== */
-
-export async function restoreBoard(data) {
-
-    const board =
-        typeof data === "string"
-            ? JSON.parse(data)
-            : data;
-
-    await set(boardRef, board);
-
-    return true;
-
-}
-
-/* ==========================================================
-   CLEAR BOARD
-========================================================== */
-
-export async function clearBoard() {
-
-    await remove(boardRef);
-
-    await writeHistory("CLEAR", {
-        coachNo: "ALL"
     });
 
-    return true;
+}
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+function bindFullscreenButton() {
+
+    const btn = document.getElementById("fullscreenBtn");
+
+    if (!btn) return;
+
+    btn.addEventListener("click", toggleFullscreen);
 
 }
 
-/* ==========================================================
-   BOARD EXISTS
-========================================================== */
-
-export async function boardExists() {
-
-    const snapshot = await get(boardRef);
-
-    return snapshot.exists();
-
-}
-
-/* ==========================================================
-   EXPORT JSON
-========================================================== */
-
-export async function exportBoard() {
-
-    return await getAllCoaches();
-
-}
-
-/* ==========================================================
-   DATABASE STATUS
-========================================================== */
-
-export async function getDatabaseStatus() {
+async function toggleFullscreen() {
 
     try {
 
-        await get(boardRef);
+        if (!document.fullscreenElement) {
 
-        return true;
+            await document.documentElement.requestFullscreen();
 
-    } catch {
+        } else {
 
-        return false;
+            await document.exitFullscreen();
+
+        }
+
+    } catch (error) {
+
+        console.error("Fullscreen Error:", error);
 
     }
 
 }
 
-/* ==========================================================
-   VERSION
-========================================================== */
+/* =====================================================
+   SEARCH SHORTCUT
+===================================================== */
 
-export const VERSION = "2.0.0";
+function bindSearchShortcut() {
 
-/* ==========================================================
-   INITIALIZE
-========================================================== */
+    document.addEventListener("keydown", (e) => {
 
-console.log(
-    "MR CO-ORDINATION Firebase Board Ready",
-    VERSION
+        if (!(e.ctrlKey && e.key.toLowerCase() === "f")) {
+            return;
+        }
+
+        e.preventDefault();
+
+        document.getElementById("searchBox")?.focus();
+
+    });
+
+}
+
+console.log("board.js Part 1C-1 Loaded");
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 1C-2
+   ONLINE • AUTO REFRESH • FOOTER CLOCK • TV MODE
+===================================================== */
+
+/* =====================================================
+   CONNECTION STATUS
+===================================================== */
+
+function updateConnectionStatus(isOnline = navigator.onLine) {
+
+    const status =
+        document.getElementById("dbStatus");
+
+    if (!status) return;
+
+    status.textContent =
+        isOnline ? "ONLINE" : "OFFLINE";
+
+    status.classList.toggle(
+        "text-success",
+        isOnline
+    );
+
+    status.classList.toggle(
+        "text-danger",
+        !isOnline
+    );
+
+}
+
+/* =====================================================
+   NETWORK EVENTS
+===================================================== */
+
+window.addEventListener("online", () => {
+
+    updateConnectionStatus(true);
+
+});
+
+window.addEventListener("offline", () => {
+
+    updateConnectionStatus(false);
+
+});
+
+/* =====================================================
+   AUTO REFRESH COUNTERS
+===================================================== */
+
+let autoRefreshTimer = null;
+
+function startAutoRefresh() {
+
+    if (autoRefreshTimer) {
+
+        clearInterval(autoRefreshTimer);
+
+    }
+
+    autoRefreshTimer = setInterval(() => {
+
+        updateCounters();
+
+    }, 3000);
+
+}
+
+/* =====================================================
+   FOOTER CLOCK
+===================================================== */
+
+let footerClockTimer = null;
+
+function startFooterClock() {
+
+    const footer =
+        document.getElementById("lastUpdateTime");
+
+    if (!footer) return;
+
+    const refresh = () => {
+
+        footer.textContent =
+            new Date().toLocaleTimeString("en-IN");
+
+    };
+
+    refresh();
+
+    if (footerClockTimer) {
+
+        clearInterval(footerClockTimer);
+
+    }
+
+    footerClockTimer =
+        setInterval(refresh, 1000);
+
+}
+
+/* =====================================================
+   TV MODE
+===================================================== */
+
+function enableTVMode() {
+
+    if (window.innerWidth >= 1920) {
+
+        document.body.classList.add("tv-mode");
+
+    } else {
+
+        document.body.classList.remove("tv-mode");
+
+    }
+
+}
+
+window.addEventListener(
+    "resize",
+    enableTVMode
 );
 
-/* ==========================================================
-   PART 2
-   CRUD OPERATIONS
-========================================================== */
+/* =====================================================
+   START SERVICES
+===================================================== */
 
-/* ==========================================================
-   CHECK DUPLICATE COACH
-========================================================== */
+startAutoRefresh();
+startFooterClock();
+enableTVMode();
+updateConnectionStatus();
 
-export async function duplicateCoach(coachNo) {
+/* =====================================================
+   CLEANUP
+===================================================== */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        clearInterval(autoRefreshTimer);
+        clearInterval(footerClockTimer);
+
+    }
+);
+
+console.log("board.js Part 1C-2 Loaded");
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 2A-1
+   CELL CLICK + MODAL
+===================================================== */
+
+/* =====================================================
+   ENABLE CELL CLICK
+===================================================== */
+
+function enableCellClick() {
+
+    coachTable?.addEventListener("click", handleCellClick);
+
+}
+
+function handleCellClick(event) {
+
+    const cell = event.target.closest("td");
+
+    if (!cell || !coachTable.contains(cell)) return;
+
+    currentCell = cell;
+
+    openModal(cell);
+
+}
+
+/* =====================================================
+   OPEN MODAL
+===================================================== */
+
+function openModal(cell) {
+
+    if (!coachModal) return;
+
+    document.getElementById("modalShop").value =
+        cell.dataset.shop || getShop(cell.dataset.line);
+
+    document.getElementById("modalLine").value =
+        cell.dataset.line || "";
+
+    document.getElementById("modalPosition").value =
+        cell.dataset.position || "";
+
+    document.getElementById("modalCoachNo").value =
+        cell.dataset.coach || "";
+
+    document.getElementById("modalCoachType").value =
+        cell.dataset.type || "";
+
+    document.getElementById("modalStatus").value =
+        cell.dataset.status || "PO";
+
+    coachModal.show();
+
+}
+
+/* =====================================================
+   CLOSE MODAL
+===================================================== */
+
+function closeModal() {
+
+    resetModal();
+
+    coachModal?.hide();
+
+}
+
+/* =====================================================
+   RESET MODAL
+===================================================== */
+
+function resetModal() {
+
+    document.getElementById("modalCoachNo").value = "";
+
+    document.getElementById("modalCoachType").selectedIndex = 0;
+
+    document.getElementById("modalStatus").selectedIndex = 0;
+
+}
+
+/* =====================================================
+   SHOP NAME
+===================================================== */
+
+function getShop(line = "") {
+
+    if (line.startsWith("N")) return "N SHOP";
+    if (line.startsWith("M")) return "M SHOP";
+    if (line.startsWith("SCR")) return "MR SCR SHOP";
+    if (line.startsWith("F")) return "CR SHOP";
+    if (line.startsWith("J")) return "J SHOP";
+    if (line.startsWith("L")) return "LIFTING BAY";
+
+    return "";
+
+}
+
+/* =====================================================
+   MODAL EVENTS
+===================================================== */
+
+coachModalElement?.addEventListener(
+    "shown.bs.modal",
+    () => {
+
+        document
+            .getElementById("modalCoachNo")
+            ?.focus();
+
+    }
+);
+
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === "Escape" && coachModal) {
+
+        closeModal();
+
+    }
+
+});
+
+console.log("board.js Part 2A-1 Loaded");
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 2A-2
+   MODAL DATA + VALIDATION
+===================================================== */
+
+/* =====================================================
+   GET MODAL DATA
+===================================================== */
+
+function getModalData() {
+
+    return {
+
+        shop:
+            document.getElementById("modalShop")
+            ?.value
+            .trim() || "",
+
+        line:
+            document.getElementById("modalLine")
+            ?.value
+            .trim() || "",
+
+        position:
+            document.getElementById("modalPosition")
+            ?.value
+            .trim() || "",
+
+        coachNo:
+            document.getElementById("modalCoachNo")
+            ?.value
+            .trim()
+            .toUpperCase() || "",
+
+        coachType:
+            document.getElementById("modalCoachType")
+            ?.value
+            .trim() || "",
+
+        status:
+            document.getElementById("modalStatus")
+            ?.value
+            .trim()
+            .toUpperCase() || "PO"
+
+    };
+
+}
+
+/* =====================================================
+   VALIDATE MODAL DATA
+===================================================== */
+
+function validateModalData(coach) {
+
+    if (!coach.line) {
+        alert("Line is required.");
+        return false;
+    }
+
+    if (!coach.position) {
+        alert("Position is required.");
+        return false;
+    }
+
+    if (!coach.coachNo) {
+        alert("Coach Number is required.");
+        return false;
+    }
+
+    if (!coach.coachType) {
+        alert("Coach Type is required.");
+        return false;
+    }
+
+    return true;
+
+}
+
+/* =====================================================
+   COACH NUMBER FORMAT
+===================================================== */
+
+const coachNoInput =
+    document.getElementById("modalCoachNo");
+
+coachNoInput?.addEventListener("input", function () {
+
+    this.value = this.value
+        .toUpperCase()
+        .replace(/[^A-Z0-9-]/g, "");
+
+});
+
+/* =====================================================
+   ENTER KEY SUPPORT
+===================================================== */
+
+coachNoInput?.addEventListener("keydown", (e) => {
+
+    if (e.key !== "Enter") return;
+
+    e.preventDefault();
+
+    if (typeof saveCoach === "function") {
+        saveCoach();
+    }
+
+});
+
+/* =====================================================
+   DUPLICATE CHECK (LOCAL CACHE)
+===================================================== */
+
+function isDuplicateCoach(coachNo, line, position) {
 
     if (!coachNo) return false;
 
     coachNo = coachNo.trim().toUpperCase();
 
-    const board = await getBoard();
+    for (const boardLine in boardData) {
 
-    for (const line in board) {
+        const positions = boardData[boardLine];
 
-        for (const position in board[line]) {
+        if (!positions) continue;
 
-            const coach = board[line][position];
+        for (const boardPos in positions) {
+
+            const coach = positions[boardPos];
 
             if (!coach) continue;
 
-            if ((coach.coachNo || "").trim().toUpperCase() === coachNo) {
+            if (
+                boardLine === line &&
+                boardPos === position
+            ) {
+                continue;
+            }
 
+            if (
+                (coach.coachNo || "")
+                    .trim()
+                    .toUpperCase() === coachNo
+            ) {
                 return true;
-
             }
 
         }
@@ -977,186 +1036,507 @@ export async function duplicateCoach(coachNo) {
 
 }
 
-/* ==========================================================
+console.log("board.js Part 2A-2 Loaded");
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 2B-1
+   SAVE • UPDATE • DELETE
+===================================================== */
+
+/* =====================================================
    SAVE COACH
-========================================================== */
+===================================================== */
 
-export async function saveCoach(coach) {
+async function saveCoach() {
 
-    if (!coach.line || !coach.position)
-        throw new Error("Invalid Location");
+    try {
 
-    if (!coach.coachNo)
-        throw new Error("Coach Number Required");
+        const coach = getModalData();
 
-    if (await duplicateCoach(coach.coachNo))
-        throw new Error("Duplicate Coach Number");
+        if (!validateModalData(coach)) return;
 
-    const data = {
+        if (isDuplicateCoach(
+            coach.coachNo,
+            coach.line,
+            coach.position
+        )) {
 
-        shop: coach.shop || "",
-
-        line: coach.line,
-
-        position: coach.position,
-
-        coachNo: coach.coachNo.trim().toUpperCase(),
-
-        coachType: coach.coachType || "",
-
-        status: coach.status || "PO",
-
-        updatedAt: timestamp(),
-
-        updatedBy: currentUser()
-
-    };
-
-    await set(
-        coachRef(coach.line, coach.position),
-        data
-    );
-
-    await writeHistory("SAVE", data);
-
-    await writeAudit("SAVE", data);
-
-    return true;
-
-}
-
-/* ==========================================================
-   UPDATE COACH
-========================================================== */
-
-export async function updateCoach(coach) {
-
-    if (!coach.line || !coach.position)
-        throw new Error("Invalid Location");
-
-    const data = {
-
-        shop: coach.shop || "",
-
-        coachNo: coach.coachNo.trim().toUpperCase(),
-
-        coachType: coach.coachType || "",
-
-        status: coach.status || "PO",
-
-        updatedAt: timestamp(),
-
-        updatedBy: currentUser()
-
-    };
-
-    await update(
-        coachRef(coach.line, coach.position),
-        data
-    );
-
-    await writeHistory("UPDATE", {
-        ...coach,
-        ...data
-    });
-
-    await writeAudit("UPDATE", {
-        ...coach,
-        ...data
-    });
-
-    return true;
-
-}
-
-/* ==========================================================
-   DELETE COACH
-========================================================== */
-
-export async function deleteCoach(line, position) {
-
-    const coach = await getCoach(line, position);
-
-    if (!coach)
-        return false;
-
-    await remove(
-        coachRef(line, position)
-    );
-
-    await writeHistory("DELETE", coach);
-
-    await writeAudit("DELETE", coach);
-
-    return true;
-
-}
-
-/* ==========================================================
-   UPDATE STATUS
-========================================================== */
-
-export async function updateCoachStatus(
-    line,
-    position,
-    status
-) {
-
-    await update(
-        coachRef(line, position),
-        {
-
-            status,
-
-            updatedAt: timestamp(),
-
-            updatedBy: currentUser()
+            alert("Coach Number already exists.");
+            return;
 
         }
-    );
 
-    return true;
+        await firebaseSaveCoach(coach);
+
+        closeModal();
+
+    } catch (error) {
+
+        console.error("Save Error:", error);
+
+        alert(error.message || "Unable to save coach.");
+
+    }
 
 }
 
-console.log("firebase-board.js Part 2 Loaded");
+/* =====================================================
+   UPDATE COACH
+===================================================== */
 
-/* ==========================================================
-   PART 3
-   MOVE • SWAP • SEARCH
-========================================================== */
+async function updateCoach() {
 
-/* ==========================================================
-   MOVE / SWAP COACH
-========================================================== */
+    try {
 
-export async function updateCoachPosition(
+        const coach = getModalData();
+
+        if (!validateModalData(coach)) return;
+
+        await firebaseUpdateCoach(coach);
+
+        closeModal();
+
+    } catch (error) {
+
+        console.error("Update Error:", error);
+
+        alert(error.message || "Unable to update coach.");
+
+    }
+
+}
+
+/* =====================================================
+   DELETE COACH
+===================================================== */
+
+async function deleteCoach() {
+
+    try {
+
+        const coach = getModalData();
+
+        if (!coach.line || !coach.position) {
+
+            alert("Invalid coach location.");
+            return;
+
+        }
+
+        if (!confirm(
+            `Delete coach "${coach.coachNo || "EMPTY"}"?`
+        )) {
+            return;
+        }
+
+        await firebaseDeleteCoach(
+            coach.line,
+            coach.position
+        );
+
+        closeModal();
+
+    } catch (error) {
+
+        console.error("Delete Error:", error);
+
+        alert(error.message || "Unable to delete coach.");
+
+    }
+
+}
+
+/* =====================================================
+   BUTTON EVENTS
+===================================================== */
+
+document
+    .getElementById("saveCoachBtn")
+    ?.addEventListener("click", saveCoach);
+
+document
+    .getElementById("updateCoachBtn")
+    ?.addEventListener("click", updateCoach);
+
+document
+    .getElementById("deleteCoachBtn")
+    ?.addEventListener("click", deleteCoach);
+
+console.log("board.js Part 2B-1 Loaded");
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 2B-2
+   HISTORY • SHORTCUTS • UI HELPERS
+===================================================== */
+
+/* =====================================================
+   WRITE HISTORY
+   (Only if firebase-board.js doesn't already do it)
+===================================================== */
+
+async function writeHistory(action, coach) {
+
+    try {
+
+        await push(
+            ref(database, "history"),
+            {
+                action,
+                shop: coach.shop || "",
+                line: coach.line || "",
+                position: coach.position || "",
+                coachNo: coach.coachNo || "",
+                coachType: coach.coachType || "",
+                status: coach.status || "",
+                time: new Date().toISOString()
+            }
+        );
+
+    } catch (error) {
+
+        console.error("History Error:", error);
+
+    }
+
+}
+
+/* =====================================================
+   MODAL SHORTCUTS
+===================================================== */
+
+document.addEventListener("keydown", (e) => {
+
+    /* Ctrl + S = Save */
+
+    if (e.ctrlKey && e.key.toLowerCase() === "s") {
+
+        if (!coachModalElement?.classList.contains("show"))
+            return;
+
+        e.preventDefault();
+
+        saveCoach();
+
+    }
+
+    /* Ctrl + Delete = Delete */
+
+    if (e.ctrlKey && e.key === "Delete") {
+
+        if (!coachModalElement?.classList.contains("show"))
+            return;
+
+        e.preventDefault();
+
+        deleteCoach();
+
+    }
+
+});
+
+/* =====================================================
+   AFTER CRUD SUCCESS
+===================================================== */
+
+function afterCrudSuccess() {
+
+    updateCounters();
+
+    updateLastUpdate();
+
+    renderBoard();
+
+}
+
+/* =====================================================
+   CLEAR CURRENT CELL
+===================================================== */
+
+function clearCurrentSelection() {
+
+    currentCell = null;
+
+}
+
+/* =====================================================
+   MODAL HIDDEN EVENT
+===================================================== */
+
+coachModalElement?.addEventListener(
+    "hidden.bs.modal",
+    () => {
+
+        resetModal();
+
+        clearCurrentSelection();
+
+    }
+);
+
+console.log("board.js Part 2B-2 Loaded");
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 3A-1
+   DRAG INITIALIZATION + DRAG START
+===================================================== */
+
+/* =====================================================
+   ENABLE DRAG & DROP
+===================================================== */
+
+function enableDragDrop() {
+
+    coachTable
+        ?.querySelectorAll("td")
+        .forEach(cell => {
+
+            cell.draggable = true;
+
+            cell.removeEventListener("dragstart", dragStart);
+            cell.removeEventListener("dragend", dragEnd);
+
+            cell.addEventListener("dragstart", dragStart);
+            cell.addEventListener("dragend", dragEnd);
+
+        });
+
+}
+
+/* =====================================================
+   DRAG START
+===================================================== */
+
+function dragStart(event) {
+
+    const cell = event.currentTarget;
+
+    /* Empty cell cannot be dragged */
+
+    if (!cell.dataset.coach) {
+
+        event.preventDefault();
+
+        return;
+
+    }
+
+    dragCell = cell;
+
+    cell.classList.add("dragging");
+
+    event.dataTransfer.effectAllowed = "move";
+
+    event.dataTransfer.setData(
+        "text/plain",
+        cell.id
+    );
+
+}
+
+/* =====================================================
+   DRAG END
+===================================================== */
+
+function dragEnd(event) {
+
+    event.currentTarget.classList.remove("dragging");
+
+    document
+        .querySelectorAll(".drag-over")
+        .forEach(td => {
+
+            td.classList.remove("drag-over");
+
+        });
+
+}
+
+console.log("board.js Part 3A-1 Loaded");
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 3A-2
+   DRAG OVER • DRAG ENTER • DRAG LEAVE
+===================================================== */
+
+/* =====================================================
+   ENABLE DROP EVENTS
+===================================================== */
+
+function enableDropEvents() {
+
+    coachTable
+        ?.querySelectorAll("td")
+        .forEach(cell => {
+
+            cell.removeEventListener("dragover", dragOver);
+            cell.removeEventListener("dragenter", dragEnter);
+            cell.removeEventListener("dragleave", dragLeave);
+            cell.removeEventListener("drop", dropCoach);
+
+            cell.addEventListener("dragover", dragOver);
+            cell.addEventListener("dragenter", dragEnter);
+            cell.addEventListener("dragleave", dragLeave);
+            cell.addEventListener("drop", dropCoach);
+
+        });
+
+}
+
+/* =====================================================
+   DRAG OVER
+===================================================== */
+
+function dragOver(event) {
+
+    event.preventDefault();
+
+    event.dataTransfer.dropEffect = "move";
+
+}
+
+/* =====================================================
+   DRAG ENTER
+===================================================== */
+
+function dragEnter(event) {
+
+    event.preventDefault();
+
+    const cell = event.currentTarget;
+
+    if (!dragCell || cell === dragCell) return;
+
+    cell.classList.add("drag-over");
+
+}
+
+/* =====================================================
+   DRAG LEAVE
+===================================================== */
+
+function dragLeave(event) {
+
+    event.currentTarget.classList.remove("drag-over");
+
+}
+
+/* =====================================================
+   UPDATE DROP EVENTS
+===================================================== */
+
+/* drawBoard() শেষে একবার call করুন */
+
+enableDropEvents();
+
+console.log("board.js Part 3A-2 Loaded");
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 3B-1A
+   DROP VALIDATION + MOVE PREPARATION
+===================================================== */
+
+async function dropCoach(event) {
+
+    event.preventDefault();
+
+    const targetCell = event.currentTarget;
+
+    targetCell.classList.remove("drag-over");
+
+    /* Nothing dragged */
+
+    if (!dragCell) return;
+
+    /* Same Cell */
+
+    if (dragCell === targetCell) {
+
+        dragCell = null;
+        return;
+
+    }
+
+    /* Source */
+
+    const fromLine = dragCell.dataset.line;
+    const fromPosition = dragCell.dataset.position;
+
+    /* Target */
+
+    const toLine = targetCell.dataset.line;
+    const toPosition = targetCell.dataset.position;
+
+    if (
+        !fromLine ||
+        !fromPosition ||
+        !toLine ||
+        !toPosition
+    ) {
+
+        dragCell = null;
+        return;
+
+    }
+
+    const sourceCoach =
+        boardData[fromLine]?.[fromPosition];
+
+    if (!sourceCoach) {
+
+        dragCell = null;
+        return;
+
+    }
+
+    const targetCoach =
+        boardData[toLine]?.[toPosition] || null;
+
+    /* Save Undo Snapshot */
+
+    lastMove = {
+
+        fromLine,
+        fromPosition,
+
+        toLine,
+        toPosition,
+
+        sourceCoach: structuredClone(sourceCoach),
+
+        targetCoach: targetCoach
+            ? structuredClone(targetCoach)
+            : null
+
+    };
+
+    /* Continue in Part 3B-1B */
+
+}
+
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 3B-1B
+   FIREBASE UPDATE • MOVE • SWAP • CLEANUP
+===================================================== */
+
+async function executeMove(
     fromLine,
     fromPosition,
     toLine,
-    toPosition
+    toPosition,
+    sourceCoach,
+    targetCoach
 ) {
-
-    if (
-        fromLine === toLine &&
-        fromPosition === toPosition
-    ) {
-        return false;
-    }
-
-    const source = await getCoach(
-        fromLine,
-        fromPosition
-    );
-
-    if (!source) {
-        throw new Error("Source Coach Not Found");
-    }
-
-    const target = await getCoach(
-        toLine,
-        toPosition
-    );
 
     const updates = {};
 
@@ -1166,35 +1546,32 @@ export async function updateCoachPosition(
         `${BOARD_PATH}/${toLine}/${toPosition}`
     ] = {
 
-        ...source,
+        ...sourceCoach,
 
         line: toLine,
 
         position: toPosition,
 
-        updatedAt: timestamp(),
-
-        updatedBy: currentUser()
+        updatedAt: Date.now()
 
     };
 
-    /* Swap or Empty */
 
-    if (target) {
+    /* Swap OR Empty */
+
+    if (targetCoach) {
 
         updates[
             `${BOARD_PATH}/${fromLine}/${fromPosition}`
         ] = {
 
-            ...target,
+            ...targetCoach,
 
             line: fromLine,
 
             position: fromPosition,
 
-            updatedAt: timestamp(),
-
-            updatedBy: currentUser()
+            updatedAt: Date.now()
 
         };
 
@@ -1206,296 +1583,970 @@ export async function updateCoachPosition(
 
     }
 
+
     await update(
         ref(database),
         updates
     );
 
-    await writeHistory("MOVE", {
-
-        coachNo: source.coachNo,
-
-        line: toLine,
-
-        position: toPosition,
-
-        shop: source.shop,
-
-        coachType: source.coachType,
-
-        status: source.status
-
-    });
-
-    await writeAudit("MOVE", {
-
-        coachNo: source.coachNo,
-
-        line: toLine,
-
-        position: toPosition,
-
-        shop: source.shop,
-
-        coachType: source.coachType,
-
-        status: source.status
-
-    });
-
-    return true;
-
 }
 
-/* ==========================================================
-   SEARCH COACH
-========================================================== */
 
-export async function searchCoach(keyword) {
+/* =====================================================
+   COMPLETE DROP HANDLER
+===================================================== */
 
-    keyword = (keyword || "")
-        .trim()
-        .toUpperCase();
+async function completeDropMove() {
 
-    if (!keyword)
-        return [];
-
-    const board = await getBoard();
-
-    const result = [];
-
-    Object.keys(board).forEach(line => {
-
-        Object.keys(board[line]).forEach(position => {
-
-            const coach = board[line][position];
-
-            if (!coach)
-                return;
-
-            const text = [
-
-                coach.coachNo,
-
-                coach.shop,
-
-                coach.coachType,
-
-                coach.status,
-
-                line,
-
-                position
-
-            ]
-            .join(" ")
-            .toUpperCase();
-
-            if (text.includes(keyword)) {
-
-                result.push({
-
-                    line,
-
-                    position,
-
-                    ...coach
-
-                });
-
-            }
-
-        });
-
-    });
-
-    return result;
-
-}
-
-/* ==========================================================
-   GET ALL COACHES
-========================================================== */
-
-export async function getAllCoaches() {
-
-    return await getBoard();
-
-}
-
-/* ==========================================================
-   DATABASE STATUS
-========================================================== */
-
-export async function getDatabaseStatus() {
+    if (!lastMove) return;
 
     try {
 
-        await get(boardRef);
+        await executeMove(
 
-        return true;
+            lastMove.fromLine,
+
+            lastMove.fromPosition,
+
+            lastMove.toLine,
+
+            lastMove.toPosition,
+
+            lastMove.sourceCoach,
+
+            lastMove.targetCoach
+
+        );
+
+
+        await writeHistory(
+            "MOVE",
+            {
+
+                ...lastMove.sourceCoach,
+
+                line: lastMove.toLine,
+
+                position: lastMove.toPosition
+
+            }
+        );
+
+
+        renderBoard();
+
+        updateCounters();
+
+        updateLastUpdate();
+
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Move Error:",
+            error
+        );
 
-        return false;
+        alert(
+            "Coach Movement Failed"
+        );
+
+    }
+
+
+    dragCell = null;
+
+}
+
+
+/* =====================================================
+   CONNECT WITH DROP EVENT
+===================================================== */
+
+const originalDropCoach = dropCoach;
+
+dropCoach = async function(event) {
+
+    await originalDropCoach(event);
+
+    await completeDropMove();
+
+};
+
+
+console.log("board.js Part 3B-1B Loaded");
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 3B-2
+   UNDO • CLEANUP • RECOVERY
+===================================================== */
+
+
+/* =====================================================
+   UNDO LAST MOVE
+===================================================== */
+
+async function undoLastMove() {
+
+    if (!lastMove) {
+
+        return;
+
+    }
+
+    try {
+
+        const updates = {};
+
+
+        /* Restore Source */
+
+        updates[
+            `${BOARD_PATH}/${lastMove.fromLine}/${lastMove.fromPosition}`
+        ] = lastMove.sourceCoach;
+
+
+        /* Restore Target */
+
+        updates[
+            `${BOARD_PATH}/${lastMove.toLine}/${lastMove.toPosition}`
+        ] = lastMove.targetCoach;
+
+
+        await update(
+            ref(database),
+            updates
+        );
+
+
+        await writeHistory(
+            "UNDO",
+            lastMove.sourceCoach
+        );
+
+
+        lastMove = null;
+
+
+        renderBoard();
+
+        updateCounters();
+
+        updateLastUpdate();
+
+
+    } catch(error) {
+
+
+        console.error(
+            "Undo Error:",
+            error
+        );
+
+
+        alert(
+            "Undo Failed"
+        );
 
     }
 
 }
 
-console.log("firebase-board.js Part 3 Loaded");
+
+/* =====================================================
+   KEYBOARD UNDO
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    (event) => {
 
 
-/* ==========================================================
-   PART 4
-   BACKUP • RESTORE • EXPORT • STATISTICS
-========================================================== */
+        if (
+            event.ctrlKey &&
+            event.key.toLowerCase() === "z"
+        ) {
 
-import {
-    runTransaction
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* ==========================================================
-   BACKUP BOARD
-========================================================== */
+            event.preventDefault();
 
-export async function backupBoard() {
+            undoLastMove();
 
-    const board = await getBoard();
 
-    return JSON.stringify(board, null, 2);
+        }
 
-}
 
-/* ==========================================================
-   RESTORE BOARD
-========================================================== */
+    }
+);
 
-export async function restoreBoard(data) {
 
-    const board =
-        typeof data === "string"
-            ? JSON.parse(data)
-            : data;
+/* =====================================================
+   CLEAR DRAG STATE
+===================================================== */
 
-    await set(boardRef, board);
+function clearDragState() {
 
-    return true;
 
-}
+    dragCell = null;
 
-/* ==========================================================
-   EXPORT BOARD
-========================================================== */
 
-export async function exportBoard() {
+    document
+        .querySelectorAll(
+            ".dragging, .drag-over"
+        )
+        .forEach(cell => {
 
-    return await getBoard();
 
-}
+            cell.classList.remove(
+                "dragging",
+                "drag-over"
+            );
 
-/* ==========================================================
-   CLEAR BOARD
-========================================================== */
-
-export async function clearBoard() {
-
-    await remove(boardRef);
-
-    await writeHistory("CLEAR", {
-        coachNo: "ALL"
-    });
-
-    await writeAudit("CLEAR", {
-        coachNo: "ALL"
-    });
-
-    return true;
-
-}
-
-/* ==========================================================
-   BOARD EXISTS
-========================================================== */
-
-export async function boardExists() {
-
-    const snap = await get(boardRef);
-
-    return snap.exists();
-
-}
-
-/* ==========================================================
-   MOVE COUNTER
-========================================================== */
-
-export async function increaseMoveCounter() {
-
-    const counterRef = ref(
-        database,
-        "statistics/moves"
-    );
-
-    await runTransaction(counterRef, value => {
-
-        return (value || 0) + 1;
-
-    });
-
-}
-
-/* ==========================================================
-   GET STATISTICS
-========================================================== */
-
-export async function getStatistics() {
-
-    const board = await getBoard();
-
-    let total = 0;
-    let occupied = 0;
-
-    Object.keys(board).forEach(line => {
-
-        Object.keys(board[line]).forEach(position => {
-
-            total++;
-
-            if (board[line][position]?.coachNo) {
-
-                occupied++;
-
-            }
 
         });
 
-    });
-
-    return {
-
-        total,
-
-        occupied,
-
-        free: total - occupied
-
-    };
 
 }
 
-/* ==========================================================
-   VERSION
-========================================================== */
 
-export const VERSION = "3.0.0";
+/* =====================================================
+   GLOBAL DROP CLEANUP
+===================================================== */
 
-/* ==========================================================
-   INITIALIZATION
-========================================================== */
+document.addEventListener(
+    "drop",
+    () => {
+
+        clearDragState();
+
+    }
+);
+
+
+document.addEventListener(
+    "dragend",
+    () => {
+
+        clearDragState();
+
+    }
+);
+
+
+/* =====================================================
+   FINAL DRAG INITIALIZATION
+===================================================== */
+
+function refreshDragEvents() {
+
+    enableDragDrop();
+
+    enableDropEvents();
+
+}
+
+
+/* =====================================================
+   PERFORMANCE SAFE REFRESH
+===================================================== */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        clearDragState();
+
+    }
+);
+
 
 console.log(
-    `MR CO-ORDINATION Firebase Board Ready v${VERSION}`
+    "board.js Part 3B-2 Loaded"
+);
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 4A
+   DASHBOARD • COUNTERS • STATUS
+===================================================== */
+
+
+/* =====================================================
+   UPDATE DASHBOARD COUNTERS
+===================================================== */
+
+function updateCounters() {
+
+
+    const cells =
+        document.querySelectorAll(
+            ".coach-table td"
+        );
+
+
+    let total = cells.length;
+
+    let occupied = 0;
+
+    let free = 0;
+
+
+
+    cells.forEach(cell => {
+
+
+        const coach =
+            cell.dataset.coach;
+
+
+        if (coach && coach.trim()) {
+
+
+            occupied++;
+
+
+        } else {
+
+
+            free++;
+
+
+        }
+
+
+    });
+
+
+
+    const totalEl =
+        document.getElementById(
+            "totalCoach"
+        );
+
+
+    const occupiedEl =
+        document.getElementById(
+            "occupiedCoach"
+        );
+
+
+    const freeEl =
+        document.getElementById(
+            "freeCoach"
+        );
+
+
+
+    if(totalEl)
+
+        totalEl.textContent =
+            total;
+
+
+
+    if(occupiedEl)
+
+        occupiedEl.textContent =
+            occupied;
+
+
+
+    if(freeEl)
+
+        freeEl.textContent =
+            free;
+
+
+
+}
+
+
+
+/* =====================================================
+   STATUS SUMMARY
+===================================================== */
+
+function getStatusSummary(){
+
+
+    const summary = {
+
+        PO:0,
+
+        LM:0,
+
+        MED:0,
+
+        RL:0,
+
+        WIP:0,
+
+        HOLD:0
+
+    };
+
+
+
+    document
+    .querySelectorAll(
+        ".coach-table td"
+    )
+    .forEach(cell=>{
+
+
+        const status =
+            (
+                cell.dataset.status || ""
+            )
+            .toUpperCase();
+
+
+
+        if(summary[status] !== undefined){
+
+            summary[status]++;
+
+        }
+
+
+
+    });
+
+
+
+    return summary;
+
+
+}
+
+
+
+/* =====================================================
+   UPDATE STATUS DISPLAY
+===================================================== */
+
+function updateStatusCounter(){
+
+
+    const status =
+        getStatusSummary();
+
+
+
+    Object.keys(status)
+    .forEach(key=>{
+
+
+        const element =
+            document.getElementById(
+                `status-${key}`
+            );
+
+
+
+        if(element){
+
+
+            element.textContent =
+                status[key];
+
+
+        }
+
+
+
+    });
+
+
+}
+
+
+
+/* =====================================================
+   DATABASE CONNECTION STATUS
+===================================================== */
+
+function updateConnectionStatus(
+    online
+){
+
+
+    const status =
+        document.getElementById(
+            "dbStatus"
+        );
+
+
+
+    if(!status)
+        return;
+
+
+
+    if(online){
+
+
+        status.textContent =
+            "ONLINE";
+
+
+        status.className =
+            "badge bg-success";
+
+
+
+    }else{
+
+
+        status.textContent =
+            "OFFLINE";
+
+
+        status.className =
+            "badge bg-danger";
+
+
+    }
+
+
+}
+
+
+
+/* =====================================================
+   NETWORK MONITOR
+===================================================== */
+
+window.addEventListener(
+    "online",
+    ()=>{
+
+        updateConnectionStatus(
+            true
+        );
+
+    }
+);
+
+
+
+window.addEventListener(
+    "offline",
+    ()=>{
+
+
+        updateConnectionStatus(
+            false
+        );
+
+
+    }
+);
+
+
+
+/* =====================================================
+   AUTO DASHBOARD UPDATE
+===================================================== */
+
+setInterval(()=>{
+
+
+    updateCounters();
+
+
+    updateStatusCounter();
+
+
+},3000);
+
+
+
+console.log(
+    "board.js Part 4A Loaded"
+);
+
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PART 4B
+   SEARCH • EXPORT • FULLSCREEN • TV MODE
+===================================================== */
+
+
+/* =====================================================
+   SEARCH COACH
+===================================================== */
+
+const searchBox =
+    document.getElementById(
+        "searchBox"
+    );
+
+
+searchBox?.addEventListener(
+    "input",
+    function(){
+
+
+        const keyword =
+            this.value
+            .trim()
+            .toUpperCase();
+
+
+
+        document
+        .querySelectorAll(
+            ".coach-table td"
+        )
+        .forEach(cell=>{
+
+
+            cell.classList.remove(
+                "search-highlight"
+            );
+
+
+
+            const text =
+                cell.innerText
+                .toUpperCase();
+
+
+
+            if(
+                keyword &&
+                text.includes(keyword)
+            ){
+
+                cell.classList.add(
+                    "search-highlight"
+                );
+
+
+            }
+
+
+
+        });
+
+
+
+    }
+);
+
+
+
+/* =====================================================
+   EXPORT CSV
+===================================================== */
+
+function exportCSV(){
+
+
+    let csv = "";
+
+
+
+    document
+    .querySelectorAll(
+        ".coach-table tr"
+    )
+    .forEach(row=>{
+
+
+        let data=[];
+
+
+
+        row
+        .querySelectorAll(
+            "th,td"
+        )
+        .forEach(cell=>{
+
+
+            data.push(
+                `"${cell.innerText
+                .replace(/"/g,'""')}"`
+            );
+
+
+        });
+
+
+
+        csv +=
+            data.join(",")
+            + "\n";
+
+
+    });
+
+
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                "text/csv;charset=utf-8;"
+            }
+        );
+
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+
+    link.href=url;
+
+
+    link.download =
+        "MR_CO_ORDINATION_BOARD.csv";
+
+
+
+    link.click();
+
+
+
+    URL.revokeObjectURL(url);
+
+
+
+}
+
+
+
+/* =====================================================
+   EXCEL BUTTON
+===================================================== */
+
+document
+.getElementById("excelBtn")
+?.addEventListener(
+    "click",
+    exportCSV
+);
+
+
+
+/* =====================================================
+   PDF PRINT
+===================================================== */
+
+document
+.getElementById("pdfBtn")
+?.addEventListener(
+    "click",
+    ()=>{
+
+
+        window.print();
+
+
+    }
+);
+
+
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+document
+.getElementById("fullscreenBtn")
+?.addEventListener(
+    "click",
+    async()=>{
+
+
+        try{
+
+
+            if(
+                !document.fullscreenElement
+            ){
+
+
+                await document
+                .documentElement
+                .requestFullscreen();
+
+
+
+            }else{
+
+
+                await document
+                .exitFullscreen();
+
+
+
+            }
+
+
+
+        }
+        catch(error){
+
+
+            console.error(
+                "Fullscreen Error",
+                error
+            );
+
+
+        }
+
+
+    }
+);
+
+
+
+/* =====================================================
+   TV MODE
+===================================================== */
+
+function enableTVMode(){
+
+
+    if(
+        window.innerWidth >= 1920
+    ){
+
+
+        document.body
+        .classList
+        .add(
+            "tv-mode"
+        );
+
+
+    }else{
+
+
+        document.body
+        .classList
+        .remove(
+            "tv-mode"
+        );
+
+
+    }
+
+
+}
+
+
+
+window.addEventListener(
+    "resize",
+    enableTVMode
+);
+
+
+enableTVMode();
+
+
+
+/* =====================================================
+   KEYBOARD SHORTCUTS
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    event=>{
+
+
+        /* CTRL + F */
+
+        if(
+            event.ctrlKey &&
+            event.key.toLowerCase()
+            === "f"
+        ){
+
+            event.preventDefault();
+
+
+            searchBox?.focus();
+
+
+        }
+
+
+
+        /* F11 */
+
+        if(
+            event.key === "F11"
+        ){
+
+            event.preventDefault();
+
+
+            document
+            .getElementById(
+                "fullscreenBtn"
+            )
+            ?.click();
+
+
+        }
+
+
+
+    }
+);
+
+
+
+/* =====================================================
+   FOOTER LIVE TIME
+===================================================== */
+
+setInterval(()=>{
+
+
+    const el =
+        document.getElementById(
+            "lastUpdateTime"
+        );
+
+
+
+    if(el){
+
+
+        el.textContent =
+            new Date()
+            .toLocaleTimeString(
+                "en-IN"
+            );
+
+
+    }
+
+
+},1000);
+
+
+
+console.log(
+    "board.js Part 4B Loaded"
 );
