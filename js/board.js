@@ -10,6 +10,11 @@ import {
     push,
     onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import {
+    firebaseSaveCoach,
+    firebaseUpdateCoach,
+    firebaseDeleteCoach
+} from "./firebase-board.js";
 /* =====================================================
    GLOBAL VARIABLES
 ===================================================== */
