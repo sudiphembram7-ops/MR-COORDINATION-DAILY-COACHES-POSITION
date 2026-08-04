@@ -3,7 +3,7 @@
    PART - 1
 ===================================================== */
 
-
+console.log("BOARD JS STARTED");
 import {
     ref,
     get,
@@ -186,6 +186,8 @@ function drawBoard() {
             `;
 
             const card = cell.querySelector(".coach-card");
+
+const card = cell.querySelector(".coach-card");
 
 const card = cell.querySelector(".coach-card");
 
