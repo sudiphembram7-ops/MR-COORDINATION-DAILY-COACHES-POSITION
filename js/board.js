@@ -93,17 +93,18 @@ function loadBoard() {
 
     onValue(ref(database, "coachBoard"), (snapshot) => {
 
+        console.log("Exists:", snapshot.exists());
+        console.log("Data:", snapshot.val());
+
         boardData = snapshot.exists() ? snapshot.val() : {};
 
         drawBoard();
 
         updateCounters();
 
-        updateLastUpdate();
-
     }, (error) => {
 
-        console.error("Firebase Sync Error:", error);
+        console.error(error);
 
     });
 
