@@ -1,166 +1,172 @@
 /* =====================================================
-   MR CO-ORDINATION BOARD
-   firebase-board.js
-   FIREBASE CRUD FUNCTIONS
+   FIREBASE BOARD DATABASE CONTROL
 ===================================================== */
 
-import { database } from "./firebase-config.js";
 
 import {
+    database
+} from "./firebase-config.js";
+
+
+import {
+
     ref,
     set,
     update,
     remove,
     push
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+}
+from
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
-const BOARD_PATH = "coachBoard";
+
+const BOARD_PATH =
+"coachBoard";
 
 
-/* =====================================================
-   SAVE COACH
-===================================================== */
+
+/* ==========================
+ SAVE
+========================== */
 
 export async function firebaseSaveCoach(coach){
 
-    const path =
-        `${BOARD_PATH}/${coach.line}/${coach.position}`;
 
-    await set(
-        ref(database, path),
-        {
-            shop: coach.shop,
-            line: coach.line,
-            position: coach.position,
-
-            coachNo: coach.coachNo,
-            coachType: coach.coachType,
-            status: coach.status,
-
-            updatedAt:
-                new Date().toISOString()
-        }
-    );
+const path =
+`${BOARD_PATH}/${coach.line}/${coach.position}`;
 
 
-    await saveHistory(
-        "SAVE",
-        coach
-    );
+await set(
+ref(database,path),
+coach
+);
+
+
+
+await writeHistory(
+"SAVE",
+coach
+);
+
+
 
 }
 
 
 
-/* =====================================================
-   UPDATE COACH
-===================================================== */
+/* ==========================
+ UPDATE
+========================== */
 
 export async function firebaseUpdateCoach(coach){
 
-    const path =
-        `${BOARD_PATH}/${coach.line}/${coach.position}`;
+
+const path =
+`${BOARD_PATH}/${coach.line}/${coach.position}`;
 
 
-    await update(
-        ref(database, path),
-        {
-            shop: coach.shop,
-            line: coach.line,
-            position: coach.position,
-
-            coachNo: coach.coachNo,
-            coachType: coach.coachType,
-            status: coach.status,
-
-            updatedAt:
-                new Date().toISOString()
-        }
-    );
+await update(
+ref(database,path),
+coach
+);
 
 
-    await saveHistory(
-        "UPDATE",
-        coach
-    );
+
+await writeHistory(
+"UPDATE",
+coach
+);
+
+
 
 }
 
 
 
-/* =====================================================
-   DELETE COACH
-===================================================== */
+/* ==========================
+ DELETE
+========================== */
 
 export async function firebaseDeleteCoach(
-    line,
-    position
+line,
+position
 ){
 
-    const path =
-        `${BOARD_PATH}/${line}/${position}`;
+
+await remove(
+
+ref(
+database,
+`${BOARD_PATH}/${line}/${position}`
+)
+
+);
 
 
-    await remove(
-        ref(database, path)
-    );
 
+await writeHistory(
+"DELETE",
+{
+line,
+position
+}
+);
 
-    await saveHistory(
-        "DELETE",
-        {
-            line,
-            position
-        }
-    );
 
 }
 
 
 
-/* =====================================================
-   HISTORY SAVE
-===================================================== */
+/* ==========================
+ HISTORY
+========================== */
 
-async function saveHistory(
-    action,
-    coach
+async function writeHistory(
+action,
+coach
 ){
 
-    await push(
-        ref(database,"history"),
-        {
 
-            action,
+await push(
 
-            shop:
-                coach.shop || "",
+ref(database,"history"),
 
-            line:
-                coach.line || "",
+{
 
-            position:
-                coach.position || "",
+action,
 
-            coachNo:
-                coach.coachNo || "",
+shop:
+coach.shop || "",
 
-            coachType:
-                coach.coachType || "",
+line:
+coach.line || "",
 
-            status:
-                coach.status || "",
+position:
+coach.position || "",
 
-            time:
-                new Date().toISOString()
+coachNo:
+coach.coachNo || "",
 
-        }
-    );
+coachType:
+coach.coachType || "",
+
+status:
+coach.status || "",
+
+time:
+new Date().toISOString()
 
 }
+
+);
+
+
+}
+
 
 
 console.log(
-"firebase-board.js Loaded"
+"firebase-board.js Ready"
 );
