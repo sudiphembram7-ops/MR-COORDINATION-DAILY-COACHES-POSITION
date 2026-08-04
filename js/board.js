@@ -175,22 +175,21 @@ function drawBoard() {
 
             const card = cell.querySelector(".coach-card");
 
+const card = cell.querySelector(".coach-card");
+
 if(card){
 
-card.innerHTML = html;
+    card.innerHTML = html;
 
 }else{
 
-cell.innerHTML =
-`
-<div class="coach-card">
-${html}
-</div>
-`;
+    cell.innerHTML =
+    `
+    <div class="coach-card">
+        ${html}
+    </div>
+    `;
 
-}
-}else{
-    cell.innerHTML='<div class="coach-card"></div>';
 }
 
             cell.dataset.shop = coach.shop || "";
