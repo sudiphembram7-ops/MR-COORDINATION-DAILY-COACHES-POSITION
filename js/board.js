@@ -364,18 +364,35 @@ document
 /* =====================================================
    SAVE
 ===================================================== */
+async function saveCoach(){
 
+    if(!checkAdmin())
+        return;
+
+
+    const coach =
+    getModalData();
 
 /* =====================================================
    UPDATE
 ===================================================== */
 
+async function updateCoach(){
 
+    if(!checkAdmin())
+        return;
+
+
+    const coach =
+    getModalData();
 /* =====================================================
    DELETE
 ===================================================== */
 
+async function deleteCoach(){
 
+    if(!checkAdmin())
+        return;
 /* =====================================================
    HISTORY
 ===================================================== */
@@ -416,7 +433,24 @@ async function writeHistory(action, coach) {
    100% WORKING DRAG & DROP
 ===================================================== */
 
+function dragStart(event){
 
+
+if(!adminLoggedIn){
+
+    event.preventDefault();
+
+    alert(
+    "Login required for movement"
+    );
+
+    return;
+
+}
+
+
+const cell =
+event.currentTarget;
 /* =====================================================
    ENABLE DRAG
 ===================================================== */
