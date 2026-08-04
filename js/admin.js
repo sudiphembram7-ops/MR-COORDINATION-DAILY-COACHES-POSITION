@@ -512,9 +512,14 @@ function updateDashboardStats() {
     });
 const totalEntry = document.getElementById("totalEntry");
 if (totalEntry) totalEntry.textContent = rows.length;
-    document.getElementById("poCount").textContent = po;
-    document.getElementById("lmCount").textContent = lm;
-    document.getElementById("medCount").textContent = med;
+    const poCount = document.getElementById("poCount");
+if (poCount) poCount.textContent = po;
+
+const lmCount = document.getElementById("lmCount");
+if (lmCount) lmCount.textContent = lm;
+
+const medCount = document.getElementById("medCount");
+if (medCount) medCount.textContent = med;
 
     const rlCount = document.getElementById("rlCount");
     if (rlCount) rlCount.textContent = rl;
