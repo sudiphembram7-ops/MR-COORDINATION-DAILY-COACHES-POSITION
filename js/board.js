@@ -996,10 +996,6 @@ console.log("BOARD PART-4 LOADED");
    HISTORY • SHORTCUTS • STARTUP
 ===================================================== */
 
-import {
-    ref,
-    get
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 /* ==========================
    HISTORY PANEL
