@@ -135,8 +135,6 @@ function loadBoard() {
 
         drawBoard();
 
-        updateCounters();
-
         updateLastUpdate();
 
     }, (error) => {
