@@ -512,7 +512,10 @@ function updateDashboardStats() {
         }
 
     });
-
+const totalEntry = document.getElementById("totalEntry");
+if (totalEntry) {
+    totalEntry.textContent = rows.length;
+}
     document.getElementById("totalEntry").textContent = rows.length;
     document.getElementById("poCount").textContent = po;
     document.getElementById("lmCount").textContent = lm;
@@ -566,7 +569,9 @@ if (refreshBtn) {
 
     refreshBtn.addEventListener("click", () => {
 
-        loadCoachData();
+        renderHistory(boardData);
+updateDashboardStats();
+alert("Board Refreshed");
 
         alert("Board Refreshed");
 
@@ -578,11 +583,7 @@ if (refreshBtn) {
    AUTO REFRESH
 ========================================== */
 
-setInterval(() => {
 
-    loadCoachData();
-
-}, 10000);
 
 /* ==========================================
    LIVE CONNECTION STATUS
@@ -608,15 +609,7 @@ window.addEventListener("offline", () => {
 
 
 
-onAuthStateChanged(auth, (user) => {
 
-    if (user) {
-
-        enableDragDrop();
-
-    }
-
-});
 
 /* ==========================================
    INITIALIZE
