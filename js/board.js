@@ -3,16 +3,16 @@
    PART - 1
 ===================================================== */
 
-console.log("BOARD JS STARTED");
 import {
     ref,
     get,
     push,
     onValue,
     update
-}
-from
-"https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+
+console.log("BOARD JS LOADED");
 import {
     firebaseSaveCoach,
     firebaseUpdateCoach,
