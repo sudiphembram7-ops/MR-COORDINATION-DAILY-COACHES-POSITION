@@ -11,7 +11,8 @@
 import {
     ref,
     onValue,
-    update
+    update,
+    push
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 import {
@@ -1096,31 +1097,6 @@ setInterval(() => {
    WRITE HISTORY
 ========================== */
 
-async function writeHistory(action, coach = {}) {
-
-    try {
-
-        await push(
-            ref(database, "history"),
-            {
-                action,
-                shop: coach.shop || "",
-                line: coach.line || "",
-                position: coach.position || "",
-                coachNo: coach.coachNo || "",
-                coachType: coach.coachType || "",
-                status: coach.status || "",
-                time: new Date().toISOString()
-            }
-        );
-
-    } catch (err) {
-
-        console.error("History Error :", err);
-
-    }
-
-}
 
 /* ==========================
    DATABASE STATUS
