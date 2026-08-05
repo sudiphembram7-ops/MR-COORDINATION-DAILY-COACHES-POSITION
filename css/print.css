@@ -9,13 +9,29 @@
     margin:6mm;
 }
 
-@media print{
+@media print {
 
-    *{
-        -webkit-print-color-adjust:exact !important;
-        print-color-adjust:exact !important;
-        box-sizing:border-box;
+    body{
+        margin:0;
+        padding:0;
     }
+
+    .header{
+        position:fixed;
+        top:0;
+        left:0;
+        right:0;
+    }
+
+    .print-board{
+        margin-top:90px;
+    }
+
+    .shop-card{
+        page-break-inside: avoid;
+    }
+
+}
 
     html,
     body{
