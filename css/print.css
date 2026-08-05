@@ -58,7 +58,7 @@ body{
 .row{
     --bs-gutter-x:4px;
     --bs-gutter-y:4px;
-    margin-bottom:4px;
+    margin-bottom:2px;
 }
 
 /* SHOP */
@@ -70,9 +70,9 @@ body{
 }
 
 .shop-title{
-    font-size:11px;
+    font-size:5px;
     font-weight:bold;
-    padding:2px !important;
+    padding:1px !important;
     margin:0;
 }
 
@@ -109,7 +109,7 @@ thead th{
     justify-content:center;
     align-items:center;
     text-align:center;
-    font-size:7px;
+    font-size:4px;
     font-weight:bold;
     line-height:1.1;
     word-break:break-word;
