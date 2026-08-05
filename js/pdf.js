@@ -1,113 +1,104 @@
-<script>
+/* =====================================================
+   MR CO-ORDINATION
+   PRINT.JS
+===================================================== */
 
-// ===============================
-// Live Date & Time
-// ===============================
-function updateDateTime() {
+import { database } from "./firebase-config.js";
 
-    const now = new Date();
+import {
+    ref,
+    get
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    document.getElementById("date").innerHTML =
-        now.toLocaleDateString("en-GB");
+const BOARD_PATH = "coachBoard";
 
-    document.getElementById("time").innerHTML =
-        now.toLocaleTimeString();
-}
+/* =========================
+   START
+========================= */
 
-setInterval(updateDateTime,1000);
-updateDateTime();
+document.addEventListener("DOMContentLoaded", async () => {
 
+    startClock();
 
-// ===============================
-// Live Search + Highlight + Scroll
-// ===============================
+    await loadBoard();
 
-const searchBox = document.getElementById("search");
-
-searchBox.addEventListener("keyup",function(){
-
-    let value = this.value.trim().toUpperCase();
-
-    let found = false;
-
-    document.querySelectorAll("td").forEach(td=>{
-
-        td.classList.remove("highlight");
-
-        if(value!=="" &&
-           td.innerText.toUpperCase().includes(value)){
-
-            td.classList.add("highlight");
-
-            td.scrollIntoView({
-                behavior:"smooth",
-                block:"center"
-            });
-
-            found = true;
-        }
-
-    });
+    document.getElementById("lastUpdate").textContent =
+        "Last Update : " + new Date().toLocaleString();
 
 });
 
+/* =========================
+   DATE & TIME
+========================= */
 
-// ===============================
-// Coach Statistics
-// ===============================
+function startClock() {
 
-function updateStatistics(){
+    function update() {
 
-    const total =
-    document.querySelectorAll("td").length;
+        const now = new Date();
 
-    document.getElementById("totalCoach").innerHTML =
-    total;
+        document.getElementById("liveDate").textContent =
+            now.toLocaleDateString("en-IN");
+
+        document.getElementById("liveTime").textContent =
+            now.toLocaleTimeString("en-IN");
+
+    }
+
+    update();
+
+    setInterval(update, 1000);
 
 }
 
-updateStatistics();
+/* =========================
+   LOAD BOARD
+========================= */
 
+async function loadBoard() {
 
-// ===============================
-// Full Screen
-// ===============================
+    try {
 
-function fullScreen(){
+        const snapshot = await get(ref(database, BOARD_PATH));
 
-    if(!document.fullscreenElement){
+        if (!snapshot.exists()) return;
 
-        document.documentElement.requestFullscreen();
+        const board = snapshot.val();
 
-    }else{
+        Object.keys(board).forEach(key => {
 
-        document.exitFullscreen();
+            drawCoach(key, board[key]);
+
+        });
+
+    } catch (err) {
+
+        console.error(err);
 
     }
 
 }
 
+/* =========================
+   DRAW COACH
+========================= */
 
-// ===============================
-// Auto Refresh
-// ===============================
+function drawCoach(cellId, coach) {
 
-// Refresh every 30 seconds
-setInterval(function(){
+    const cell = document.getElementById(cellId);
 
-    console.log("Board Refreshed");
+    if (!cell) return;
 
-},30000);
+    cell.innerHTML = `
+        <div class="coach-card status-${(coach.status || "").toLowerCase()}">
 
+            <div>${coach.coachNo || ""}</div>
 
-// ===============================
-// Print Board
-// ===============================
+            <small>${coach.type || ""}</small>
 
-function printBoard(){
+            <div>${coach.status || ""}</div>
 
-    window.print();
+        </div>
+    `;
 
 }
-
-</script>
