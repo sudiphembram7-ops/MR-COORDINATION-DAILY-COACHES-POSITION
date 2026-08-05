@@ -156,5 +156,9 @@ window.addEventListener("load", () => {
 window.addEventListener("afterprint", () => {
 
     window.close();
+await loadBoard();
 
+setTimeout(() => {
+    window.print();
+}, 500);
 });
