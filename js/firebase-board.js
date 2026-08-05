@@ -8,17 +8,16 @@ import {
 } from "./firebase-config.js";
 
 
-import {
+import { database } from "./firebase-config.js";
 
+import {
     ref,
+    get,
     set,
     update,
     remove,
     push
-
-}
-from
-"https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
 
@@ -27,6 +26,46 @@ const BOARD_PATH =
 
 
 
+export async function updateCoachPosition(
+    fromLine,
+    fromPos,
+    toLine,
+    toPos
+) {
+
+    const fromRef = ref(database, `coachBoard/${fromLine}/${fromPos}`);
+    const toRef = ref(database, `coachBoard/${toLine}/${toPos}`);
+
+    const fromSnap = await get(fromRef);
+    const toSnap = await get(toRef);
+
+    if (!fromSnap.exists()) {
+        throw new Error("Source coach not found");
+    }
+
+    const fromCoach = fromSnap.val();
+    const toCoach = toSnap.exists() ? toSnap.val() : null;
+
+    const updates = {};
+
+    updates[`coachBoard/${toLine}/${toPos}`] = {
+        ...fromCoach,
+        line: toLine,
+        position: toPos
+    };
+
+    if (toCoach) {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = {
+            ...toCoach,
+            line: fromLine,
+            position: fromPos
+        };
+    } else {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = null;
+    }
+
+    await update(ref(database), updates);
+}
 /* ==========================
  SAVE
 ========================== */
