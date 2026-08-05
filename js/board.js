@@ -22,6 +22,10 @@ import {
     database,
     auth
 } from "./firebase-config.js";
+import {
+    enableDragDrop,
+    refreshDragDrop
+} from "./dragdrop.js";
 
 
 import {
@@ -213,6 +217,7 @@ if(card){
 
     applyStatusColours();
     updateCounters();
+    refreshDragDrop();
 
 }
 
@@ -245,21 +250,7 @@ function updateLastUpdate() {
    ENABLE CELL CLICK
 ===================================================== */
 
-function enableCellClick() {
 
-    document.addEventListener("click", (e) => {
-
-        const td = e.target.closest(".coach-table td");
-
-        if (!td) return;
-
-        currentCell = td;
-
-        openModal(td);
-
-    });
-
-}
 
 /* =====================================================
    OPEN MODAL
