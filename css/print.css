@@ -1,7 +1,6 @@
 /* ==========================================
    MR CO-ORDINATION
-   Production print.css
-   A4 Landscape - One Page
+   PRODUCTION PRINT.CSS
 ========================================== */
 
 @page{
@@ -9,58 +8,34 @@
     margin:5mm;
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
 html,
 body{
     width:297mm;
     height:210mm;
+    margin:0;
+    padding:0;
     background:#fff;
     font-family:Arial,Helvetica,sans-serif;
     color:#000;
 }
 
 body{
-    zoom:0.60;
+    zoom:0.63;
+    overflow:hidden;
 }
 
-/* ==========================
-   PRINT
-========================== */
-
-@media print{
-
-html,
-body{
-    overflow:hidden !important;
-}
-
-body{
-    zoom:0.60;
-    -webkit-print-color-adjust:exact;
-    print-color-adjust:exact;
-}
-
-}
-
-/* ==========================
-   HEADER
-========================== */
+/* HEADER */
 
 .header{
+    text-align:center;
     padding:4px !important;
     margin-bottom:4px;
-    text-align:center;
 }
 
 .header h3{
     font-size:16px;
-    font-weight:bold;
     margin:0;
+    font-weight:bold;
 }
 
 .header h5{
@@ -72,50 +47,23 @@ body{
     font-size:9px;
 }
 
-/* ==========================
-   BOARD
-========================== */
+/* BOARD */
 
 .print-board{
     width:100%;
+    padding:0;
 }
 
 .row{
-    margin-bottom:4px !important;
+    --bs-gutter-x:4px;
+    --bs-gutter-y:4px;
+    margin-bottom:4px;
 }
 
-.row>*{
-    padding-left:3px !important;
-    padding-right:3px !important;
-}
-
-/* ==========================
-   SECOND ROW
-========================== */
-
-.second-row{
-    display:flex;
-    flex-wrap:nowrap;
-    align-items:flex-start;
-}
-
-.second-row>.col-3{
-    flex:0 0 24%;
-    max-width:24%;
-}
-
-.second-row>.col-9{
-    flex:0 0 76%;
-    max-width:76%;
-}
-
-/* ==========================
-   SHOP
-========================== */
+/* SHOP */
 
 .shop-card{
     border:1px solid #000;
-    margin-bottom:4px;
     page-break-inside:avoid;
     break-inside:avoid;
 }
@@ -123,19 +71,17 @@ body{
 .shop-title{
     font-size:11px;
     font-weight:bold;
-    padding:3px !important;
+    padding:2px !important;
     margin:0;
 }
 
-/* ==========================
-   TABLE
-========================== */
+/* TABLE */
 
 table{
     width:100%;
     border-collapse:collapse;
     table-layout:fixed;
-    margin-bottom:0 !important;
+    margin:0;
 }
 
 th,
@@ -146,7 +92,6 @@ td{
     padding:1px;
     height:18px;
     font-size:7px;
-    line-height:1.1;
 }
 
 thead th{
@@ -154,29 +99,26 @@ thead th{
     font-weight:bold;
 }
 
-/* ==========================
-   COACH CARD
-========================== */
+/* COACH */
 
 .coach-card{
-    min-height:15px;
+    width:100%;
+    min-height:14px;
     display:flex;
     justify-content:center;
     align-items:center;
     text-align:center;
     font-size:7px;
     font-weight:bold;
-    overflow:hidden;
-    word-break:break-word;
     line-height:1.1;
+    word-break:break-word;
+    overflow:hidden;
 }
 
-/* ==========================
-   LEGEND
-========================== */
+/* LEGEND */
 
 .card{
-    margin-top:4px !important;
+    margin-top:3px !important;
 }
 
 .card-header{
@@ -191,35 +133,58 @@ thead th{
 
 .badge{
     font-size:7px;
-    padding:3px 6px;
     margin:1px;
+    padding:3px 6px;
     border:1px solid #000;
 }
 
-/* ==========================
-   HIDE
-========================== */
+/* HIDE */
 
 nav,
 .navbar,
-footer,
-.modal,
 .btn,
 input,
 select,
-textarea{
+textarea,
+footer,
+.modal{
     display:none !important;
 }
 
-/* ==========================
-   PAGE BREAK
-========================== */
+/* PRINT */
 
-tr,
-td,
-th,
-table,
+@media print{
+
+html,
+body{
+    width:297mm;
+    height:210mm;
+}
+
+body{
+    zoom:0.63;
+}
+
+.container-fluid{
+    padding:0;
+}
+
+.row{
+    --bs-gutter-x:4px;
+    --bs-gutter-y:4px;
+}
+
 .shop-card{
     page-break-inside:avoid;
     break-inside:avoid;
+}
+
+table{
+    page-break-inside:avoid;
+}
+
+tr{
+    page-break-inside:avoid;
+}
+
 }
