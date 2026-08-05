@@ -952,7 +952,7 @@ searchBox?.addEventListener("input", function () {
 ========================== */
 
 /* ==========================
-   PDF / PRINT
+   PDF / PRINT PAGE
 ========================== */
 
 document.getElementById("pdfBtn")
@@ -961,7 +961,6 @@ document.getElementById("pdfBtn")
     window.open("print.html", "_blank");
 
 });
-
 /* ==========================
    EXPORT CSV
 ========================== */
