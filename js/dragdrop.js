@@ -7,24 +7,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth
 
 const auth = getAuth();
 
-function dragStart(e) {
 
-    if (!auth.currentUser) {
-        e.preventDefault();
-        return;
-    }
-
-    document.body.dataset.dragging = "true";
-
-    const td = e.target.closest("td");
-
-    if (!td) return;
-
-    dragSource = td.id;
-    isDragging = true;
-
-    e.dataTransfer.effectAllowed = "move";
-}
 import {
     updateCoachPosition
 } from "./firebase-board.js";
@@ -90,7 +73,26 @@ export function enableDragDrop() {
 /* ==========================================
    DESKTOP DRAG START
 ========================================== */
+function dragStart(e) {
 
+    if (!auth.currentUser) {
+        e.preventDefault();
+        return;
+    }
+
+    document.body.dataset.dragging = "true";
+
+    const td = e.target.closest("td");
+    if (!td) return;
+
+    dragSource = td.id;
+    isDragging = true;
+
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", td.id);
+
+    console.log("Drag Start:", td.id);
+}
 
 
 /* ==========================================
