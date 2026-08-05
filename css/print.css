@@ -1,60 +1,225 @@
-/* ===============================
-   PRINT LAYOUT FIX
-=============================== */
+/* ==========================================
+   MR CO-ORDINATION
+   Production print.css
+   A4 Landscape - One Page
+========================================== */
+
+@page{
+    size:A4 landscape;
+    margin:5mm;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,
+body{
+    width:297mm;
+    height:210mm;
+    background:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#000;
+}
+
+body{
+    zoom:0.60;
+}
+
+/* ==========================
+   PRINT
+========================== */
+
+@media print{
+
+html,
+body{
+    overflow:hidden !important;
+}
+
+body{
+    zoom:0.60;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+}
+
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+.header{
+    padding:4px !important;
+    margin-bottom:4px;
+    text-align:center;
+}
+
+.header h3{
+    font-size:16px;
+    font-weight:bold;
+    margin:0;
+}
+
+.header h5{
+    font-size:11px;
+    margin:2px 0;
+}
+
+.header span{
+    font-size:9px;
+}
+
+/* ==========================
+   BOARD
+========================== */
 
 .print-board{
     width:100%;
 }
 
-.print-board .row{
-    display:flex !important;
-    flex-wrap:nowrap !important;
+.row{
+    margin-bottom:4px !important;
+}
+
+.row>*{
+    padding-left:3px !important;
+    padding-right:3px !important;
+}
+
+/* ==========================
+   SECOND ROW
+========================== */
+
+.second-row{
+    display:flex;
+    flex-wrap:nowrap;
     align-items:flex-start;
-    margin-bottom:10px;
 }
 
-.print-board .col-4{
-    flex:0 0 32%;
-    max-width:32%;
-    width:32%;
-    padding-right:5px;
+.second-row>.col-3{
+    flex:0 0 24%;
+    max-width:24%;
 }
 
-.print-board .col-8{
-    flex:0 0 68%;
-    max-width:68%;
-    width:68%;
-    padding-left:5px;
+.second-row>.col-9{
+    flex:0 0 76%;
+    max-width:76%;
 }
 
-.print-board .col-6{
-    flex:0 0 50%;
-    max-width:50%;
-    width:50%;
-}
+/* ==========================
+   SHOP
+========================== */
 
 .shop-card{
-    width:100%;
+    border:1px solid #000;
+    margin-bottom:4px;
+    page-break-inside:avoid;
+    break-inside:avoid;
 }
 
-.coach-table{
+.shop-title{
+    font-size:11px;
+    font-weight:bold;
+    padding:3px !important;
+    margin:0;
+}
+
+/* ==========================
+   TABLE
+========================== */
+
+table{
     width:100%;
+    border-collapse:collapse;
     table-layout:fixed;
+    margin-bottom:0 !important;
 }
 
-.coach-table th,
-.coach-table td{
+th,
+td{
+    border:1px solid #000 !important;
+    text-align:center;
+    vertical-align:middle;
+    padding:1px;
+    height:18px;
     font-size:7px;
-    padding:2px;
-    height:22px;
+    line-height:1.1;
 }
+
+thead th{
+    font-size:8px;
+    font-weight:bold;
+}
+
+/* ==========================
+   COACH CARD
+========================== */
 
 .coach-card{
-    min-height:18px;
-    font-size:7px;
+    min-height:15px;
     display:flex;
     justify-content:center;
     align-items:center;
     text-align:center;
+    font-size:7px;
+    font-weight:bold;
+    overflow:hidden;
     word-break:break-word;
+    line-height:1.1;
+}
+
+/* ==========================
+   LEGEND
+========================== */
+
+.card{
+    margin-top:4px !important;
+}
+
+.card-header{
+    padding:3px;
+    font-size:9px;
+    font-weight:bold;
+}
+
+.card-body{
+    padding:4px;
+}
+
+.badge{
+    font-size:7px;
+    padding:3px 6px;
+    margin:1px;
+    border:1px solid #000;
+}
+
+/* ==========================
+   HIDE
+========================== */
+
+nav,
+.navbar,
+footer,
+.modal,
+.btn,
+input,
+select,
+textarea{
+    display:none !important;
+}
+
+/* ==========================
+   PAGE BREAK
+========================== */
+
+tr,
+td,
+th,
+table,
+.shop-card{
+    page-break-inside:avoid;
+    break-inside:avoid;
 }
