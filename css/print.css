@@ -1,173 +1,60 @@
-/* ==========================================
-   MR CO-ORDINATION
-   print.css
-   Desktop A4 Landscape
-========================================== */
+/* ===============================
+   PRINT LAYOUT FIX
+=============================== */
 
-@page{
-    size:A4 landscape;
-    margin:6mm;
+.print-board{
+    width:100%;
 }
 
-@media print {
-
-    body{
-        margin:0;
-        padding:0;
-    }
-
-    .header{
-        position:fixed;
-        top:0;
-        left:0;
-        right:0;
-    }
-
-    .print-board{
-        margin-top:90px;
-    }
-
-    .shop-card{
-        page-break-inside: avoid;
-    }
-
+.print-board .row{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    align-items:flex-start;
+    margin-bottom:10px;
 }
 
-    html,
-    body{
-        width:297mm;
-        min-height:210mm;
-        margin:0;
-        padding:0;
-        background:#fff;
-        font-family:Arial,Helvetica,sans-serif;
-        color:#000;
-        overflow:hidden;
-    }
+.print-board .col-4{
+    flex:0 0 32%;
+    max-width:32%;
+    width:32%;
+    padding-right:5px;
+}
 
-    body{
-        zoom:0.68;          /* প্রয়োজনে 0.60–0.75 করুন */
-    }
+.print-board .col-8{
+    flex:0 0 68%;
+    max-width:68%;
+    width:68%;
+    padding-left:5px;
+}
 
-    /* ===== Header ===== */
+.print-board .col-6{
+    flex:0 0 50%;
+    max-width:50%;
+    width:50%;
+}
 
-    .header{
-        padding:6px !important;
-        margin-bottom:8px;
-    }
+.shop-card{
+    width:100%;
+}
 
-    .header h3{
-        font-size:18px;
-        margin:0;
-        font-weight:700;
-    }
+.coach-table{
+    width:100%;
+    table-layout:fixed;
+}
 
-    .header h5{
-        font-size:13px;
-        margin:2px 0;
-    }
+.coach-table th,
+.coach-table td{
+    font-size:7px;
+    padding:2px;
+    height:22px;
+}
 
-    /* ===== Layout ===== */
-
-    .print-board{
-        width:100%;
-    }
-
-    .row{
-        margin-bottom:8px;
-    }
-
-    .shop-card{
-        border:1px solid #000;
-        margin-bottom:6px;
-        page-break-inside:avoid;
-        break-inside:avoid;
-    }
-
-    .shop-title{
-        font-size:12px;
-        font-weight:bold;
-        padding:4px !important;
-        margin:0;
-        text-align:center;
-    }
-
-    /* ===== Tables ===== */
-
-    table{
-        width:100%;
-        border-collapse:collapse;
-        table-layout:fixed;
-    }
-
-    th,
-    td{
-        border:1px solid #000 !important;
-        text-align:center;
-        vertical-align:middle;
-        padding:2px;
-        font-size:8px;
-        height:24px;
-    }
-
-    thead th{
-        font-size:9px;
-        font-weight:bold;
-    }
-
-    .coach-card{
-        width:100%;
-        min-height:18px;
-        font-size:8px;
-        font-weight:bold;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        text-align:center;
-        overflow:hidden;
-        word-break:break-word;
-    }
-
-    /* ===== Legend ===== */
-
-    .badge{
-        border:1px solid #000;
-        margin:2px;
-        font-size:8px;
-        padding:4px 8px;
-    }
-
-    /* ===== Hide Screen Only Items ===== */
-
-    nav,
-    .navbar,
-    footer,
-    .modal,
-    .btn,
-    input,
-    select,
-    textarea,
-    #searchBox,
-    #excelBtn,
-    #pdfBtn,
-    #refreshBtn,
-    #fullscreenBtn,
-    #databaseStatus,
-    #totalCoach,
-    #occupiedCoach,
-    #freeCoach{
-        display:none !important;
-    }
-
-    /* ===== Avoid Page Break ===== */
-
-    tr,
-    td,
-    th{
-        page-break-inside:avoid;
-    }
-
-    .shop-card{
-        page-break-inside:avoid;
-    }
+.coach-card{
+    min-height:18px;
+    font-size:7px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    word-break:break-word;
 }
