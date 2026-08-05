@@ -951,10 +951,14 @@ searchBox?.addEventListener("input", function () {
    PDF
 ========================== */
 
+/* ==========================
+   PDF / PRINT
+========================== */
+
 document.getElementById("pdfBtn")
 ?.addEventListener("click", () => {
 
-    window.print();
+    window.open("print.html", "_blank");
 
 });
 
