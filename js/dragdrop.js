@@ -104,9 +104,6 @@ function dragEnd() {
 
     document.body.dataset.dragging = "false";
 }
-
-}
-
 /* ==========================================
    DESKTOP DRAG OVER
 ========================================== */
