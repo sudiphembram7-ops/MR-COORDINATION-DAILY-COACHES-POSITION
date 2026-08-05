@@ -22,10 +22,6 @@ import {
     database,
     auth
 } from "./firebase-config.js";
-import {
-    enableDragDrop,
-    refreshDragDrop
-} from "./dragdrop.js";
 
 
 import {
@@ -97,7 +93,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     startClock();
     loadBoard();
     enableCellClick();
-
+    enableDragDrop();
 
 });
 /* =====================================================
@@ -217,8 +213,7 @@ if(card){
 
     applyStatusColours();
     updateCounters();
-    refreshDragDrop();
-
+    enableDragDrop();
 }
 
 /* =====================================================
@@ -250,7 +245,21 @@ function updateLastUpdate() {
    ENABLE CELL CLICK
 ===================================================== */
 
+function enableCellClick() {
 
+    document.addEventListener("click", (e) => {
+
+        const td = e.target.closest(".coach-table td");
+
+        if (!td) return;
+
+        currentCell = td;
+
+        openModal(td);
+
+    });
+
+}
 
 /* =====================================================
    OPEN MODAL
@@ -520,16 +529,113 @@ function enableDragDrop() {
    DRAG START
 ===================================================== */
 
+function dragStart(e){
 
+    console.log("Dragging:", this.id);
+
+    if(!adminLoggedIn){
+        e.preventDefault();
+        alert("Login required for movement");
+        return;
+    }
+
+    dragCell = this;
+
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData(
+        "text/plain",
+        this.id
+    );
+}
 /* =====================================================
    DRAG OVER
 ===================================================== */
 
+function dragOver(e) {
+
+    e.preventDefault();
+
+    e.dataTransfer.dropEffect = "move";
+
+}
 
 /* =====================================================
    DROP
 ===================================================== */
 
+async function dropCoach(e) {
+
+    e.preventDefault();
+
+    if (!dragCell || dragCell === this) {
+        dragCell = null;
+        return;
+    }
+
+    const fromLine = dragCell.dataset.line;
+    const fromPos = dragCell.dataset.position;
+
+    const toLine = this.dataset.line;
+    const toPos = this.dataset.position;
+
+    if (!fromLine || !fromPos || !toLine || !toPos) {
+        dragCell = null;
+        return;
+    }
+
+    const fromCoach = boardData[fromLine]?.[fromPos];
+
+    if (!fromCoach) {
+        dragCell = null;
+        return;
+    }
+
+    const toCoach = boardData[toLine]?.[toPos] || null;
+
+    lastMove = {
+        fromLine,
+        fromPos,
+        toLine,
+        toPos,
+        fromCoach: structuredClone(fromCoach),
+        toCoach: toCoach ? structuredClone(toCoach) : null
+    };
+
+    const updates = {};
+
+    updates[`coachBoard/${toLine}/${toPos}`] = {
+        ...fromCoach,
+        line: toLine,
+        position: toPos
+    };
+
+    if (toCoach) {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = {
+            ...toCoach,
+            line: fromLine,
+            position: fromPos
+        };
+    } else {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = null;
+    }
+try {
+
+    await update(ref(database), updates);
+    console.log("MOVE SUCCESS");
+
+}catch (err) {
+
+    console.error("Drag & Drop Error:", err.message);
+    console.error(err);
+
+    alert(
+        "Drag & Drop Failed: " + err.message
+    );
+
+}
+
+    dragCell = null;
+}
 
 /* =====================================================
    CTRL + Z
