@@ -20,8 +20,9 @@ body{
 }
 
 body{
-    zoom:0.52;
-    overflow:hidden;
+    transform:scale(0.52);
+    transform-origin:top left;
+    width:192%;
 }
 
 /* HEADER */
