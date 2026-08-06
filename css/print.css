@@ -10,10 +10,10 @@
 
 html,
 body{
-    width:297mm;
-    height:210mm;
     margin:0;
     padding:0;
+    width:auto;
+    height:auto;
     background:#fff;
     font-family:Arial,Helvetica,sans-serif;
     color:#000;
@@ -46,8 +46,9 @@ body{
 
 .print-board{
     width:100%;
-    padding:0;
+    max-width:none;
     margin:0;
+    padding:0;
 }
 
 /* ROW */
@@ -152,18 +153,22 @@ footer,
 
 /* PRINT */
 
-@media print{
+@media print {
 
-html,
-body{
-    margin:0 !important;
-    padding:0 !important;
-}
+    html,
+    body{
+        width:auto !important;
+        height:auto !important;
+        overflow:visible !important;
+    }
 
-.container-fluid{
-    width:100%;
-    padding:0 !important;
-}
+    .print-board{
+        width:100% !important;
+        margin:0 !important;
+        padding:0 !important;
+    }
+
+
 
 .row,
 .shop-card,
