@@ -19,33 +19,27 @@ body{
     color:#000;
 }
 
-body{
-    transform:scale(0.85);
-    transform-origin:top left;
-    width:117%;
-}
-
 /* HEADER */
 
 .header{
     text-align:center;
-    padding:4px !important;
-    margin-bottom:4px;
+    padding:3px 0 !important;
+    margin:0 0 3px 0 !important;
 }
 
 .header h3{
-    font-size:16px;
+    font-size:15px;
     margin:0;
-    font-weight:bold;
+    font-weight:700;
 }
 
 .header h5{
-    font-size:11px;
-    margin:2px 0;
+    font-size:10px;
+    margin:0;
 }
 
 .header span{
-    font-size:9px;
+    font-size:8px;
 }
 
 /* BOARD */
@@ -53,90 +47,94 @@ body{
 .print-board{
     width:100%;
     padding:0;
+    margin:0;
 }
 
+/* ROW */
+
 .row{
-    --bs-gutter-x:4px;
-    --bs-gutter-y:4px;
-    margin-bottom:2px;
+    --bs-gutter-x:3px;
+    --bs-gutter-y:3px;
+    margin:0 0 2px 0 !important;
+    break-inside:avoid;
+    page-break-inside:avoid;
 }
 
 /* SHOP */
 
 .shop-card{
     border:1px solid #000;
+    margin:0;
+    padding:0;
     page-break-inside:avoid;
     break-inside:avoid;
 }
 
 .shop-title{
-    font-size:5px;
-    font-weight:bold;
-    padding:1px !important;
     margin:0;
-}
-
-/* TABLE */
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    table-layout:fixed;
-    margin:0;
-}
-
-th,
-td{
-    border:1px solid #000 !important;
-    text-align:center;
-    vertical-align:middle;
-    padding:1px;
-    height:18px;
-    font-size:7px;
-}
-
-thead th{
+    padding:2px 0 !important;
     font-size:8px;
     font-weight:bold;
 }
 
-/* COACH */
+/* TABLE */
+
+.coach-table{
+    width:100%;
+    margin:0;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+.coach-table th,
+.coach-table td{
+    border:1px solid #000 !important;
+    padding:1px;
+    height:14px;
+    font-size:7px;
+    text-align:center;
+    vertical-align:middle;
+}
+
+.coach-table thead th{
+    height:14px;
+    font-size:7px;
+    font-weight:bold;
+}
 
 .coach-card{
     width:100%;
-    min-height:14px;
+    min-height:12px;
     display:flex;
-    justify-content:center;
     align-items:center;
-    text-align:center;
-    font-size:4px;
+    justify-content:center;
+    font-size:5px;
     font-weight:bold;
-    line-height:1.1;
-    word-break:break-word;
+    line-height:1;
     overflow:hidden;
+    word-break:break-word;
 }
 
 /* LEGEND */
 
 .card{
-    margin-top:3px !important;
+    margin-top:2px !important;
+    page-break-inside:avoid;
 }
 
 .card-header{
-    padding:3px;
-    font-size:9px;
-    font-weight:bold;
+    padding:2px;
+    font-size:8px;
 }
 
 .card-body{
-    padding:4px;
+    padding:3px;
 }
 
 .badge{
-    font-size:7px;
+    font-size:6px;
+    padding:2px 5px;
     margin:1px;
-    padding:3px 6px;
-    border:1px solid #000;
 }
 
 /* HIDE */
@@ -158,34 +156,29 @@ footer,
 
 html,
 body{
-    width:297mm;
-    height:210mm;
-}
-
-body{
-    zoom:0.63;
+    margin:0 !important;
+    padding:0 !important;
 }
 
 .container-fluid{
-    padding:0;
+    width:100%;
+    padding:0 !important;
 }
 
-.row{
-    --bs-gutter-x:4px;
-    --bs-gutter-y:4px;
-}
-
-.shop-card{
-    page-break-inside:avoid;
-    break-inside:avoid;
-}
-
-table{
-    page-break-inside:avoid;
-}
-
+.row,
+.shop-card,
+table,
 tr{
-    page-break-inside:avoid;
+    page-break-inside:avoid !important;
+    break-inside:avoid !important;
+}
+
+thead{
+    display:table-header-group;
+}
+
+tfoot{
+    display:table-footer-group;
 }
 
 }
