@@ -89,12 +89,7 @@ body{
 
 .coach-table th,
 .coach-table td{
-    border:1px solid #000 !important;
-    padding:1px;
-    height:14px;
-    font-size:7px;
-    text-align:center;
-    vertical-align:middle;
+    height:18px;
 }
 
 .coach-table thead th{
