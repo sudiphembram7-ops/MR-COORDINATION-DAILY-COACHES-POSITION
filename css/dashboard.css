@@ -1,230 +1,1168 @@
-/* ==========================================
-   dashboard.css
+/* =========================================================
    MR CO-ORDINATION DASHBOARD
-   Production Version 2.0
-========================================== */
+   PRODUCTION CSS
+   PART - 1
+========================================================= */
 
-/* Dashboard Background */
+/* =========================
+   ROOT VARIABLES
+========================= */
+
+:root{
+
+    --primary:#0d6efd;
+    --success:#198754;
+    --danger:#dc3545;
+    --warning:#ffc107;
+    --info:#0dcaf0;
+    --secondary:#6c757d;
+
+    --dark:#212529;
+    --light:#f8f9fa;
+
+    --shadow:
+        0 4px 15px rgba(0,0,0,.15);
+
+    --radius:12px;
+
+}
+
+/* =========================
+   RESET
+========================= */
+
+*{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+}
+
+html{
+
+    scroll-behavior:smooth;
+
+}
 
 body{
-    background:#f5f7fa;
-    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+
+    background:#eef3f8;
+
+    font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+    color:#222;
+
 }
 
-/* Header */
+/* =========================
+   LOADING SCREEN
+========================= */
 
-.dashboard-header{
-    background:#003366;
-    color:#fff;
-    padding:20px;
-    text-align:center;
+#loadingScreen{
+
+    position:fixed;
+
+    inset:0;
+
+    background:#fff;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:99999;
+
+    transition:.4s;
+
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.bg-primary{
+
+    border-radius:0 0 15px 15px;
+
+    box-shadow:var(--shadow);
+
+}
+
+.bg-primary h2{
+
+    font-size:32px;
+
+    font-weight:700;
+
+}
+
+.bg-primary h3{
+
+    font-size:24px;
+
+    font-weight:600;
+
+}
+
+.bg-primary h5{
+
+    margin-top:10px;
+
+    font-size:18px;
+
+}
+
+/* =========================
+   LIVE INFO
+========================= */
+
+.alert{
+
+    border:none;
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+}
+
+.alert strong{
+
+    color:#000;
+
+}
+
+#liveDate,
+#liveTime,
+#lastUpdate{
+
+    font-weight:700;
+
+    color:var(--primary);
+
+}
+
+/* =========================
+   SEARCH BOX
+========================= */
+
+#searchBox{
+
+    height:46px;
+
     border-radius:10px;
-    margin-bottom:20px;
-    box-shadow:0 4px 10px rgba(0,0,0,.15);
-}
 
-.dashboard-header h2{
-    margin:0;
-    font-weight:bold;
-}
-
-.dashboard-header p{
-    margin:5px 0 0;
-    font-size:15px;
-}
-
-/* Summary Cards */
-
-.summary-card{
-    border:none;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,.12);
-    transition:.3s;
-    margin-bottom:20px;
-}
-
-.summary-card:hover{
-    transform:translateY(-5px);
-}
-
-.summary-card .card-body{
-    text-align:center;
-}
-
-.summary-card h5{
     font-size:16px;
-    color:#666;
+
+    border:2px solid #ddd;
+
 }
 
-.summary-card h2{
-    font-size:34px;
-    font-weight:bold;
-    color:#003366;
+#searchBox:focus{
+
+    border-color:var(--primary);
+
+    box-shadow:0 0 8px rgba(13,110,253,.25);
+
 }
 
-/* Chart Cards */
+/* =========================
+   BUTTONS
+========================= */
 
-.chart-card{
+.btn{
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* =========================
+   COMMON CARD STYLE
+========================= */
+
+.card{
+
     border:none;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,.12);
-    margin-bottom:20px;
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    overflow:hidden;
+
+    transition:.25s;
+
 }
 
-.chart-card .card-header{
-    background:#003366;
-    color:#fff;
-    font-weight:bold;
+.card:hover{
+
+    transform:translateY(-4px);
+
 }
 
-/* Chart Size */
+/* =========================
+   CARD HEADERS
+========================= */
 
-canvas{
-    width:100% !important;
-    height:320px !important;
+.card-header{
+
+    font-weight:700;
+
+    font-size:18px;
+
+    letter-spacing:.5px;
+
 }
 
-/* Table */
+/* =========================
+   SUMMARY CARDS
+========================= */
+
+.card h2{
+
+    font-size:38px;
+
+    font-weight:700;
+
+    margin-top:10px;
+
+}
+
+.card h6{
+
+    color:#666;
+
+    font-size:15px;
+
+}
+
+/* =========================
+   SECTION SPACING
+========================= */
+
+hr{
+
+    margin:25px 0;
+
+    border-top:2px solid #ddd;
+
+}
+/* =========================================================
+   MR CO-ORDINATION DASHBOARD
+   PRODUCTION CSS
+   PART - 2
+========================================================= */
+
+
+/* =========================
+   SHOP & STATUS TABLES
+========================= */
 
 .table{
-    background:#fff;
+
+    margin-bottom:0;
+
+    vertical-align:middle;
+
 }
 
 .table thead{
-    background:#003366;
+
+    background:#212529;
+
     color:#fff;
+
 }
 
-.table th,
-.table td{
+.table thead th{
+
     text-align:center;
-    vertical-align:middle;
+
+    font-size:15px;
+
+    padding:12px;
+
+    white-space:nowrap;
+
 }
 
-/* Status Badge */
+.table tbody td{
+
+    padding:11px;
+
+    font-size:15px;
+
+    vertical-align:middle;
+
+}
+
+.table-hover tbody tr:hover{
+
+    background:#edf5ff;
+
+    transition:.25s;
+
+}
+
+
+/* =========================
+   RECENT UPDATE TABLE
+========================= */
+
+#recentTable tr{
+
+    transition:.25s;
+
+}
+
+#recentTable tr:hover{
+
+    background:#e8f4ff;
+
+}
+
+#recentTable td{
+
+    white-space:nowrap;
+
+}
+
+
+/* =========================
+   TABLE RESPONSIVE
+========================= */
+
+.table-responsive{
+
+    overflow-x:auto;
+
+    border-radius:12px;
+
+}
+
+
+/* =========================
+   STATUS COLORS
+========================= */
 
 .status-po{
-    background:#28a745;
+
+    background:#198754;
+
     color:#fff;
+
+    font-weight:bold;
+
 }
 
 .status-lm{
+
     background:#ffc107;
+
     color:#000;
+
+    font-weight:bold;
+
 }
 
 .status-med{
+
     background:#dc3545;
+
     color:#fff;
+
+    font-weight:bold;
+
 }
 
 .status-rl{
+
     background:#0d6efd;
+
     color:#fff;
+
+    font-weight:bold;
+
 }
 
-.status-wip{
-    background:#17a2b8;
+.status-r1{
+
+    background:#0dcaf0;
+
     color:#fff;
+
+    font-weight:bold;
+
 }
 
 .status-hold{
+
     background:#6c757d;
+
     color:#fff;
+
+    font-weight:bold;
+
 }
 
-/* Buttons */
+
+/* =========================
+   QUICK STATUS CARDS
+========================= */
+
+.card.bg-success,
+.card.bg-warning,
+.card.bg-danger,
+.card.bg-primary,
+.card.bg-info,
+.card.bg-secondary{
+
+    transition:.3s;
+
+}
+
+.card.bg-success:hover,
+.card.bg-warning:hover,
+.card.bg-danger:hover,
+.card.bg-primary:hover,
+.card.bg-info:hover,
+.card.bg-secondary:hover{
+
+    transform:translateY(-5px);
+
+}
+
+
+/* =========================
+   DATABASE STATUS
+========================= */
+
+#headerDbStatus,
+#footerDbStatus{
+
+    font-weight:700;
+
+}
+
+.connected{
+
+    color:#198754;
+
+}
+
+.disconnected{
+
+    color:#dc3545;
+
+}
+
+
+/* =========================
+   BADGES
+========================= */
+
+.badge{
+
+    font-size:13px;
+
+    padding:8px 12px;
+
+    border-radius:20px;
+
+}
+
+
+/* =========================
+   CARD BODY
+========================= */
+
+.card-body{
+
+    padding:18px;
+
+}
+
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+    height:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#f1f1f1;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#999;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#666;
+
+}
+
+
+/* =========================
+   TABLE ANIMATION
+========================= */
+
+.table tbody tr{
+
+    animation:fadeRow .25s ease;
+
+}
+
+@keyframes fadeRow{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(6px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+/* =========================================================
+   MR CO-ORDINATION DASHBOARD
+   PRODUCTION CSS
+   PART - 3
+========================================================= */
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+
+    margin-top:30px;
+
+}
+
+footer .card{
+
+    border-radius:12px;
+
+}
+
+footer strong{
+
+    color:#333;
+
+}
+
+
+/* =========================
+   SEARCH HIGHLIGHT
+========================= */
+
+.search-match{
+
+    background:#fff3cd !important;
+
+    animation:highlightBlink .8s infinite alternate;
+
+}
+
+@keyframes highlightBlink{
+
+    from{
+
+        background:#fff3cd;
+
+    }
+
+    to{
+
+        background:#ffe082;
+
+    }
+
+}
+
+
+/* =========================
+   LOADING SPINNER
+========================= */
+
+.spinner-border{
+
+    width:4rem;
+
+    height:4rem;
+
+}
+
+#loadingScreen h4{
+
+    margin-top:15px;
+
+    color:#0d6efd;
+
+    font-weight:700;
+
+}
+
+
+/* =========================
+   BUTTON EFFECT
+========================= */
 
 .btn{
-    border-radius:8px;
-    font-weight:600;
+
+    transition:
+        transform .25s,
+        box-shadow .25s;
+
 }
 
-/* Search */
+.btn:hover{
 
-.search-box{
-    border-radius:30px;
-    padding:10px 15px;
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.18);
+
 }
 
-/* Footer */
+.btn:active{
 
-.dashboard-footer{
-    margin-top:30px;
-    background:#003366;
-    color:#fff;
+    transform:scale(.97);
+
+}
+
+
+/* =========================
+   LINKS
+========================= */
+
+a{
+
+    text-decoration:none;
+
+}
+
+
+/* =========================
+   CARD TITLE
+========================= */
+
+.card-header h5{
+
+    margin:0;
+
+    font-weight:700;
+
+}
+
+
+/* =========================
+   UTILITY
+========================= */
+
+.text-right{
+
+    text-align:right;
+
+}
+
+.text-center{
+
     text-align:center;
-    padding:12px;
-    border-radius:10px;
+
 }
 
-/* TV Mode */
+.hidden{
 
-@media screen and (min-width:1920px){
+    display:none !important;
+
+}
+
+.fade-in{
+
+    animation:fadeIn .4s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+
+/* =========================
+   STATUS LABELS
+========================= */
+
+.status-label{
+
+    display:inline-block;
+
+    padding:4px 10px;
+
+    border-radius:20px;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    color:#fff;
+
+}
+
+.status-label.po{
+
+    background:#198754;
+
+}
+
+.status-label.lm{
+
+    background:#ffc107;
+
+    color:#000;
+
+}
+
+.status-label.med{
+
+    background:#dc3545;
+
+}
+
+.status-label.rl{
+
+    background:#0d6efd;
+
+}
+
+.status-label.r1{
+
+    background:#0dcaf0;
+
+}
+
+.status-label.hold{
+
+    background:#6c757d;
+
+}
+
+
+/* =========================
+   AUTO REFRESH LABEL
+========================= */
+
+#autoRefreshStatus{
+
+    font-weight:600;
+
+    color:#198754;
+
+}
+
+
+/* =========================
+   PRINT BUTTON
+========================= */
+
+#printDashboard{
+
+    min-width:110px;
+
+}
+
+
+/* =========================
+   EXPORT BUTTON
+========================= */
+
+#exportCSV{
+
+    min-width:120px;
+
+}
+
+
+/* =========================
+   LIVE BOARD BUTTON
+========================= */
+
+.btn-warning{
+
+    font-weight:700;
+
+}
+
+
+/* =========================
+   SECTION GAP
+========================= */
+
+.row{
+
+    margin-bottom:12px;
+
+}
+
+/* =========================================================
+   MR CO-ORDINATION DASHBOARD
+   PRODUCTION CSS
+   PART - 4 (FINAL)
+========================================================= */
+
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width:992px){
+
+    .bg-primary h2{
+
+        font-size:26px;
+
+    }
+
+    .bg-primary h3{
+
+        font-size:20px;
+
+    }
+
+    .bg-primary h5{
+
+        font-size:16px;
+
+    }
+
+    .card h2{
+
+        font-size:30px;
+
+    }
+
+    .btn{
+
+        margin-bottom:8px;
+
+    }
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width:768px){
 
     body{
-        zoom:1.2;
+
+        font-size:14px;
+
     }
 
-    .summary-card h2{
-        font-size:42px;
+    .bg-primary{
+
+        padding:18px !important;
+
     }
 
-    canvas{
-        height:450px !important;
-    }
+    .bg-primary h2{
 
-}
-
-/* Tablet */
-
-@media(max-width:992px){
-
-    .summary-card{
-        margin-bottom:15px;
-    }
-
-}
-
-/* Mobile */
-
-@media(max-width:768px){
-
-    .dashboard-header h2{
         font-size:22px;
+
     }
 
-    .summary-card h2{
+    .bg-primary h3{
+
+        font-size:18px;
+
+    }
+
+    .bg-primary h5{
+
+        font-size:14px;
+
+    }
+
+    .card{
+
+        margin-bottom:15px;
+
+    }
+
+    .card h2{
+
         font-size:28px;
-    }
 
-    canvas{
-        height:250px !important;
     }
 
     .table{
-        font-size:12px;
+
+        font-size:13px;
+
+    }
+
+    .table th,
+    .table td{
+
+        padding:8px;
+
+    }
+
+    .btn{
+
+        width:100%;
+
+        margin-bottom:10px;
+
+    }
+
+    .text-end{
+
+        text-align:center !important;
+
+    }
+
+    footer .row>div{
+
+        text-align:center !important;
+
+        margin-bottom:10px;
+
     }
 
 }
 
-/* Print */
+
+/* =========================
+   SMALL MOBILE
+========================= */
+
+@media (max-width:480px){
+
+    .card h2{
+
+        font-size:24px;
+
+    }
+
+    .table{
+
+        font-size:12px;
+
+    }
+
+    #searchBox{
+
+        font-size:14px;
+
+    }
+
+}
+
+
+/* =========================
+   TV MODE
+========================= */
+
+@media (min-width:1920px){
+
+    body{
+
+        zoom:1.15;
+
+    }
+
+    .container-fluid{
+
+        max-width:1800px;
+
+        margin:auto;
+
+    }
+
+    .card h2{
+
+        font-size:44px;
+
+    }
+
+    .table{
+
+        font-size:18px;
+
+    }
+
+}
+
+
+/* =========================
+   PRINT
+========================= */
 
 @media print{
 
-    .btn,
-    .search-box,
-    nav{
-        display:none;
-    }
-
     body{
+
         background:#fff;
+
     }
 
-    .chart-card,
-    .summary-card{
-        box-shadow:none;
+    .btn,
+    #loadingScreen{
+
+        display:none !important;
+
     }
+
+    .card{
+
+        box-shadow:none;
+
+        border:1px solid #000;
+
+    }
+
+    .table{
+
+        font-size:11px;
+
+    }
+
+    .table th,
+    .table td{
+
+        padding:5px;
+
+    }
+
+    a{
+
+        text-decoration:none;
+
+        color:#000;
+
+    }
+
+}
+
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+.card{
+
+    animation:fadeUp .4s ease;
+
+}
+
+
+/* =========================
+   FOCUS
+========================= */
+
+button:focus,
+input:focus{
+
+    outline:none;
+
+    box-shadow:0 0 8px rgba(13,110,253,.35);
+
+}
+
+
+/* =========================
+   FINAL
+========================= */
+
+.container-fluid{
+
+    padding-bottom:25px;
+
+}
+
+.table td{
+
+    vertical-align:middle;
+
+}
+
+.card-body{
+
+    overflow:auto;
 
 }
