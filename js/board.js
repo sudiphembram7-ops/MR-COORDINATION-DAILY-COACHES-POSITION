@@ -1,151 +1,104 @@
 /* =====================================================
    MR CO-ORDINATION BOARD
-   PART - 1A
-   IMPORTS + GLOBALS + INITIALIZATION
+   PART - 1
 ===================================================== */
-
-/* ==========================
-   FIREBASE IMPORTS
-========================== */
 
 import {
     ref,
+    get,
+    push,
     onValue,
     update
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
+console.log("BOARD JS LOADED");
+import {
+    firebaseSaveCoach,
+    firebaseUpdateCoach,
+    firebaseDeleteCoach
+} from "./firebase-board.js";
 import {
     database,
     auth
 } from "./firebase-config.js";
 
+
 import {
-    firebaseSaveCoach,
-    firebaseUpdateCoach,
-    firebaseDeleteCoach,
-    updateCoachPosition
-} from "./firebase-board.js";
 
-/* ==========================
-   START
-========================== */
+    onAuthStateChanged
 
-console.log("==================================");
-console.log("MR CO-ORDINATION BOARD STARTING...");
-console.log("==================================");
+}
+from
+"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-/* ==========================
-   GLOBAL VARIABLES
-========================== */
-
-let boardData = {};
-
-let currentCell = null;
-
-let dragCell = null;
-
-let lastMove = null;
-
-let coachModal = null;
 
 let adminLoggedIn = false;
 
-let boardListenerStarted = false;
 
-let searchResults = [];
-
-let currentSearchIndex = 0;
-
-let popupTimer = null;
-
-/* ==========================
-   DOM ELEMENTS
-========================== */
-
-const searchBox = document.getElementById("searchBox");
-
-const dbStatus = document.getElementById("databaseStatus");
-
-const footerStatus = document.getElementById("footerDatabase");
-
-/* ==========================
-   ADMIN LOGIN STATUS
-========================== */
-
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth,(user)=>{
 
     adminLoggedIn = !!user;
 
+
     console.log(
-        "Admin Login :",
-        adminLoggedIn ? "YES" : "NO"
+        "Admin Status:",
+        adminLoggedIn
     );
 
 });
 
-/* ==========================
-   ADMIN CHECK
-========================== */
 
-function checkAdmin() {
+function checkAdmin(){
 
-    if (!adminLoggedIn) {
+    if(!adminLoggedIn){
 
-        alert("Please Login As Admin");
+        alert(
+        "Please login as Admin"
+        );
 
         return false;
 
     }
 
+
     return true;
 
 }
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
 
-/* ==========================
-   PAGE LOAD
-========================== */
+let boardData = {};
+let currentCell = null;
+let dragCell = null;
+let lastMove = null;
 
-document.addEventListener("DOMContentLoaded", () => {
 
-    console.log("Loading Board...");
 
-    coachModal = new bootstrap.Modal(
+/* =====================================================
+   START
+===================================================== */
+
+let coachModal;
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    coachModal =
+    new bootstrap.Modal(
         document.getElementById("coachModal")
     );
 
+
     startClock();
-
     loadBoard();
-
     enableCellClick();
-
     enableDragDrop();
 
-    if (searchBox) {
-
-        searchBox.addEventListener(
-            "input",
-            searchCoach
-        );
-
-    }
-
-    console.log("Part-1A Loaded Successfully");
-
 });
-
 /* =====================================================
-   PART - 1B
-   LIVE CLOCK + FIREBASE REALTIME + LAST UPDATE
+   LIVE CLOCK
 ===================================================== */
-
-/* ==========================
-   LIVE DATE & TIME
-========================== */
 
 function startClock() {
 
@@ -159,267 +112,166 @@ function updateClock() {
 
     const now = new Date();
 
-    const liveDate = document.getElementById("liveDate");
-    const liveTime = document.getElementById("liveTime");
+    const date = document.getElementById("liveDate");
+    const time = document.getElementById("liveTime");
 
-    if (liveDate) {
+    if (date)
+        date.innerText = now.toLocaleDateString("en-IN");
 
-        liveDate.textContent =
-            now.toLocaleDateString("en-IN");
-
-    }
-
-    if (liveTime) {
-
-        liveTime.textContent =
-            now.toLocaleTimeString("en-IN");
-
-    }
+    if (time)
+        time.innerText = now.toLocaleTimeString("en-IN");
 
 }
 
-/* ==========================
+/* =====================================================
    LOAD BOARD
-========================== */
+===================================================== */
 
 function loadBoard() {
 
-    if (boardListenerStarted) return;
+    onValue(ref(database, "coachBoard"), (snapshot) => {
 
-    boardListenerStarted = true;
+        boardData = snapshot.exists() ? snapshot.val() : {};
 
-    console.log("Starting Firebase Listener...");
+        drawBoard();
 
-    const boardRef = ref(database, "coachBoard");
+        updateLastUpdate();
 
-    onValue(
+    }, (error) => {
 
-        boardRef,
+        console.error("Firebase Sync Error:", error);
 
-        (snapshot) => {
-
-            boardData = snapshot.exists()
-                ? snapshot.val()
-                : {};
-
-            console.log("Board Synced");
-
-            drawBoard();
-
-            updateCounters();
-
-            applyStatusColours();
-
-            updateLastUpdate();
-
-        },
-
-        (error) => {
-
-            console.error(
-                "Firebase Listener Error:",
-                error
-            );
-
-        }
-
-    );
+    });
 
 }
-
-/* ==========================
-   LAST UPDATE
-========================== */
-
-function updateLastUpdate() {
-
-    const now =
-        new Date().toLocaleTimeString("en-IN");
-
-    const top =
-        document.getElementById("lastUpdate");
-
-    const footer =
-        document.getElementById("lastUpdateTime");
-
-    if (top) {
-
-        top.textContent = "Updated : " + now;
-
-    }
-
-    if (footer) {
-
-        footer.textContent = now;
-
-    }
-
-}
-
-/* ==========================
-   DATABASE STATUS
-========================== */
-
-onValue(
-
-    ref(database, ".info/connected"),
-
-    (snapshot) => {
-
-        const connected = snapshot.val();
-
-        if (connected) {
-
-            if (dbStatus) {
-
-                dbStatus.innerHTML =
-                    '<span class="text-success">● Connected</span>';
-
-            }
-
-            if (footerStatus) {
-
-                footerStatus.innerHTML =
-                    '<span class="text-success">● Connected</span>';
-
-            }
-
-        } else {
-
-            if (dbStatus) {
-
-                dbStatus.innerHTML =
-                    '<span class="text-danger">● Offline</span>';
-
-            }
-
-            if (footerStatus) {
-
-                footerStatus.innerHTML =
-                    '<span class="text-danger">● Offline</span>';
-
-            }
-
-        }
-
-    }
-
-);
-
-console.log("Part-1B Loaded Successfully");
-
 /* =====================================================
-   PART - 1C
-   DRAW BOARD + CELL CLICK + MODAL + UTILITIES
-===================================================== */
-
-/* ==========================
    DRAW BOARD
-========================== */
+===================================================== */
 
 function drawBoard() {
 
     document.querySelectorAll(".coach-table td").forEach(cell => {
 
-        const parts = cell.id.split("_");
+        cell.innerHTML = "";
 
-        if (parts.length !== 2) return;
-
-        const [line, position] = parts;
-
-        cell.innerHTML = `<div class="coach-card"></div>`;
-
-        cell.dataset.shop = getShop(line);
-        cell.dataset.line = line;
-        cell.dataset.position = position;
+        cell.dataset.shop = "";
+        cell.dataset.line = "";
+        cell.dataset.position = "";
         cell.dataset.coach = "";
         cell.dataset.type = "";
         cell.dataset.status = "";
 
     });
 
-    for (const line in boardData) {
+    Object.keys(boardData).forEach(line => {
 
-        if (!boardData[line]) continue;
-
-        for (const position in boardData[line]) {
+        Object.keys(boardData[line]).forEach(position => {
 
             const coach = boardData[line][position];
 
-            if (!coach) continue;
+            if (!coach) return;
 
-            const cell =
-                document.getElementById(`${line}_${position}`);
+            const cell = document.getElementById(`${line}_${position}`);
 
-            if (!cell) continue;
+            if (!cell) return;
 
-            const card = cell.querySelector(".coach-card");
-
-            if (!card) continue;
-
-            card.innerHTML = `
+            const html = `
                 <div class="coach-no">${coach.coachNo || ""}</div>
                 <div class="coach-type">${coach.coachType || ""}</div>
                 <div class="coach-status">${coach.status || ""}</div>
             `;
 
-            cell.dataset.shop = coach.shop || getShop(line);
+            const card = cell.querySelector(".coach-card");
+
+
+
+if(card){
+
+    card.innerHTML = html;
+
+}else{
+
+    cell.innerHTML =
+    `
+    <div class="coach-card">
+        ${html}
+    </div>
+    `;
+
+}
+
+            cell.dataset.shop = coach.shop || "";
             cell.dataset.line = line;
             cell.dataset.position = position;
             cell.dataset.coach = coach.coachNo || "";
             cell.dataset.type = coach.coachType || "";
             cell.dataset.status = coach.status || "";
 
-        }
+        });
 
-    }
+    });
 
     applyStatusColours();
     updateCounters();
     enableDragDrop();
+}
+
+/* =====================================================
+   LAST UPDATE
+===================================================== */
+
+function updateLastUpdate() {
+
+    const now = new Date();
+
+    const last = document.getElementById("lastUpdate");
+
+    if (last) {
+
+        last.innerText =
+            "Updated : " +
+            now.toLocaleTimeString("en-IN");
+
+    }
 
 }
 
-/* ==========================
+/* =====================================================
+   PART - 2
+   CELL CLICK + SAVE + UPDATE + DELETE
+===================================================== */
+
+/* =====================================================
    ENABLE CELL CLICK
-========================== */
+===================================================== */
 
 function enableCellClick() {
 
-    document.querySelectorAll(".coach-table td").forEach(cell => {
+    document.addEventListener("click", (e) => {
 
-        cell.onclick = () => {
+        const td = e.target.closest(".coach-table td");
 
-            currentCell = cell;
+        if (!td) return;
 
-            openModal(cell);
+        currentCell = td;
 
-        };
+        openModal(td);
 
     });
 
 }
 
-/* ==========================
+/* =====================================================
    OPEN MODAL
-========================== */
+===================================================== */
 
 function openModal(cell) {
 
-    const parts = cell.id.split("_");
+    const [line, position] = cell.id.split("_");
 
-    if (parts.length !== 2) return;
-
-    const [line, position] = parts;
-
-    document.getElementById("modalShop").value =
-        getShop(line);
-
-    document.getElementById("modalLine").value =
-        line;
-
-    document.getElementById("modalPosition").value =
-        position;
+    document.getElementById("modalShop").value = getShop(line);
+    document.getElementById("modalLine").value = line;
+    document.getElementById("modalPosition").value = position;
 
     document.getElementById("modalCoachNo").value =
         cell.dataset.coach || "";
@@ -428,19 +280,17 @@ function openModal(cell) {
         cell.dataset.type || "";
 
     document.getElementById("modalStatus").value =
-        cell.dataset.status || "";
+        cell.dataset.status || "PO";
 
     coachModal.show();
 
 }
 
-/* ==========================
+/* =====================================================
    SHOP NAME
-========================== */
+===================================================== */
 
 function getShop(line) {
-
-    if (!line) return "";
 
     if (line.startsWith("N")) return "N SHOP";
     if (line.startsWith("M")) return "M SHOP";
@@ -453,42 +303,40 @@ function getShop(line) {
 
 }
 
-/* ==========================
-   GET MODAL DATA
-========================== */
+/* =====================================================
+   MODAL DATA
+===================================================== */
 
 function getModalData() {
 
     return {
 
         shop: document.getElementById("modalShop").value,
-
         line: document.getElementById("modalLine").value,
-
         position: document.getElementById("modalPosition").value,
 
-        coachNo: document
-            .getElementById("modalCoachNo")
-            .value
-            .trim(),
+        coachNo:
+            document.getElementById("modalCoachNo")
+            .value.trim(),
 
-        coachType: document
-            .getElementById("modalCoachType")
+        coachType:
+            document.getElementById("modalCoachType")
             .value,
 
-        status: document
-            .getElementById("modalStatus")
+        status:
+            document.getElementById("modalStatus")
             .value,
 
-        updatedAt: new Date().toISOString()
+        updatedAt:
+            new Date().toISOString()
 
     };
 
 }
 
-/* ==========================
+/* =====================================================
    DUPLICATE CHECK
-========================== */
+===================================================== */
 
 function duplicateCoach(coachNo) {
 
@@ -498,387 +346,323 @@ function duplicateCoach(coachNo) {
 
         if (!boardData[line]) continue;
 
-        for (const position in boardData[line]) {
+        for (const pos in boardData[line]) {
 
-            const coach = boardData[line][position];
+            const coach = boardData[line][pos];
 
             if (!coach) continue;
 
             if (
                 coach.coachNo === coachNo &&
-                (
-                    !currentCell ||
-                    currentCell.id !== `${line}_${position}`
-                )
+                currentCell &&
+                !(line === currentCell.dataset.line &&
+                  pos === currentCell.dataset.position)
             ) {
-
                 return true;
-
             }
-
         }
-
     }
 
     return false;
-
 }
-
-console.log("Part-1C Loaded Successfully");
-
 /* =====================================================
-   PART - 2
-   SAVE + UPDATE + DELETE
+   BUTTON EVENTS
 ===================================================== */
 
-/* ==========================
-   BUTTON EVENTS
-========================== */
+document
+.getElementById("saveCoachBtn")
+?.addEventListener("click", saveCoach);
 
 document
-    .getElementById("saveCoachBtn")
-    ?.addEventListener("click", saveCoach);
+.getElementById("updateCoachBtn")
+?.addEventListener("click", updateCoach);
 
 document
-    .getElementById("updateCoachBtn")
-    ?.addEventListener("click", updateCoach);
+.getElementById("deleteCoachBtn")
+?.addEventListener("click", deleteCoach);
 
-document
-    .getElementById("deleteCoachBtn")
-    ?.addEventListener("click", deleteCoach);
+/* =====================================================
+   SAVE
+===================================================== */
+async function saveCoach(){
 
-/* ==========================
-   SAVE COACH
-========================== */
-
-async function saveCoach() {
-
-    if (!checkAdmin()) return;
+    if(!checkAdmin()) return;
 
     const coach = getModalData();
 
-    if (!coach.coachNo) {
+    if(!coach.coachNo){
         alert("Coach Number Required");
         return;
     }
 
-    if (!coach.coachType) {
-        alert("Select Coach Type");
-        return;
-    }
 
-    if (!coach.status) {
-        alert("Select Coach Status");
-        return;
-    }
-
-    if (duplicateCoach(coach.coachNo)) {
+    if(duplicateCoach(coach.coachNo)){
         alert("Coach Already Exists");
         return;
     }
 
-    try {
+
+    try{
 
         await firebaseSaveCoach(coach);
 
+        alert("Coach Saved");
+
         coachModal.hide();
 
-        clearModal();
+    }catch(err){
 
-        console.log("Coach Saved");
-
-        alert("Coach Saved Successfully");
-
-    } catch (err) {
-
-        console.error("Save Error :", err);
-
+        console.error(err);
         alert("Save Failed");
 
     }
 
 }
+/* =====================================================
+   UPDATE
+===================================================== */
 
-/* ==========================
-   UPDATE COACH
-========================== */
+async function updateCoach(){
 
-async function updateCoach() {
+    if(!checkAdmin()) return;
 
-    if (!checkAdmin()) return;
 
     const coach = getModalData();
 
-    if (!coach.coachNo) {
-        alert("Coach Number Required");
-        return;
-    }
 
-    try {
+    try{
 
         await firebaseUpdateCoach(coach);
 
+        alert("Coach Updated");
+
         coachModal.hide();
 
-        clearModal();
 
-        console.log("Coach Updated");
+    }catch(err){
 
-        alert("Coach Updated Successfully");
-
-    } catch (err) {
-
-        console.error("Update Error :", err);
+        console.error(err);
 
         alert("Update Failed");
 
     }
 
 }
+/* =====================================================
+   DELETE
+===================================================== */
 
-/* ==========================
-   DELETE COACH
-========================== */
+async function deleteCoach(){
 
-async function deleteCoach() {
+    if(!checkAdmin()) return;
 
-    if (!checkAdmin()) return;
 
     const line =
-        document.getElementById("modalLine").value;
+    document.getElementById("modalLine").value;
+
 
     const position =
-        document.getElementById("modalPosition").value;
+    document.getElementById("modalPosition").value;
 
-    if (!line || !position) {
 
-        alert("Invalid Position");
-
-        return;
-
-    }
-
-    if (!confirm("Delete this Coach?")) {
-
-        return;
-
-    }
-
-    try {
+    try{
 
         await firebaseDeleteCoach(
             line,
             position
         );
 
+
+        alert("Coach Deleted");
+
+
         coachModal.hide();
 
-        clearModal();
 
-        console.log("Coach Deleted");
+    }catch(err){
 
-        alert("Coach Deleted Successfully");
-
-    } catch (err) {
-
-        console.error("Delete Error :", err);
+        console.error(err);
 
         alert("Delete Failed");
 
     }
 
 }
+/* =====================================================
+   HISTORY
+===================================================== */
 
-/* ==========================
-   CLEAR MODAL
-========================== */
 
-function clearModal() {
 
-    document.getElementById("modalCoachNo").value = "";
-
-    document.getElementById("modalCoachType").value = "";
-
-    document.getElementById("modalStatus").value = "";
-
-}
-
-/* ==========================
-   MODAL CLOSE EVENT
-========================== */
-
-document
-    .getElementById("coachModal")
-    ?.addEventListener(
-        "hidden.bs.modal",
-        clearModal
-    );
-
-console.log("Part-2 Loaded Successfully");
 
 /* =====================================================
    PART - 3
-   DRAG & DROP + SWAP + UNDO
+   100% WORKING DRAG & DROP
 ===================================================== */
 
-/* ==========================
-   ENABLE DRAG & DROP
-========================== */
+
+/* =====================================================
+   ENABLE DRAG
+===================================================== */
 
 function enableDragDrop() {
 
-    document.querySelectorAll(".coach-table td").forEach(cell => {
+    const cells = document.querySelectorAll(".coach-table td");
+
+    cells.forEach(cell => {
 
         cell.draggable = true;
 
         cell.removeEventListener("dragstart", dragStart);
         cell.removeEventListener("dragover", dragOver);
         cell.removeEventListener("drop", dropCoach);
-        cell.removeEventListener("dragenter", dragEnter);
-        cell.removeEventListener("dragleave", dragLeave);
 
         cell.addEventListener("dragstart", dragStart);
         cell.addEventListener("dragover", dragOver);
         cell.addEventListener("drop", dropCoach);
-        cell.addEventListener("dragenter", dragEnter);
-        cell.addEventListener("dragleave", dragLeave);
 
     });
 
 }
 
-/* ==========================
+/* =====================================================
    DRAG START
-========================== */
+===================================================== */
 
-function dragStart(e) {
+function dragStart(e){
 
-    if (!checkAdmin()) {
+    console.log("Dragging:", this.id);
 
+    if(!adminLoggedIn){
         e.preventDefault();
+        alert("Login required for movement");
         return;
-
-    }
-
-    if (!this.dataset.coach) {
-
-        e.preventDefault();
-        return;
-
     }
 
     dragCell = this;
 
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", this.id);
-
+    e.dataTransfer.setData(
+        "text/plain",
+        this.id
+    );
 }
-
-/* ==========================
+/* =====================================================
    DRAG OVER
-========================== */
+===================================================== */
 
 function dragOver(e) {
 
     e.preventDefault();
 
-}
-
-/* ==========================
-   HIGHLIGHT
-========================== */
-
-function dragEnter() {
-
-    this.classList.add("table-info");
+    e.dataTransfer.dropEffect = "move";
 
 }
 
-function dragLeave() {
-
-    this.classList.remove("table-info");
-
-}
-
-/* ==========================
-   DROP COACH
-========================== */
+/* =====================================================
+   DROP
+===================================================== */
 
 async function dropCoach(e) {
 
     e.preventDefault();
 
-    this.classList.remove("table-info");
-
-    if (!dragCell) return;
-
-    if (dragCell === this) {
-
+    if (!dragCell || dragCell === this) {
         dragCell = null;
         return;
-
     }
 
-    const [fromLine, fromPos] = dragCell.id.split("_");
-    const [toLine, toPos] = this.id.split("_");
+    const fromLine = dragCell.dataset.line;
+    const fromPos = dragCell.dataset.position;
 
-    try {
+    const toLine = this.dataset.line;
+    const toPos = this.dataset.position;
 
-        await updateCoachPosition(
-            fromLine,
-            fromPos,
-            toLine,
-            toPos
-        );
+    if (!fromLine || !fromPos || !toLine || !toPos) {
+        dragCell = null;
+        return;
+    }
 
-        lastMove = {
+    const fromCoach = boardData[fromLine]?.[fromPos];
 
-            fromLine,
-            fromPos,
-            toLine,
-            toPos
+    if (!fromCoach) {
+        dragCell = null;
+        return;
+    }
 
+    const toCoach = boardData[toLine]?.[toPos] || null;
+
+    lastMove = {
+        fromLine,
+        fromPos,
+        toLine,
+        toPos,
+        fromCoach: structuredClone(fromCoach),
+        toCoach: toCoach ? structuredClone(toCoach) : null
+    };
+
+    const updates = {};
+
+    updates[`coachBoard/${toLine}/${toPos}`] = {
+        ...fromCoach,
+        line: toLine,
+        position: toPos
+    };
+
+    if (toCoach) {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = {
+            ...toCoach,
+            line: fromLine,
+            position: fromPos
         };
-
-        console.log("Coach Moved");
-
-    } catch (err) {
-
-        console.error("Move Error :", err);
-
-        alert("Coach Movement Failed");
-
+    } else {
+        updates[`coachBoard/${fromLine}/${fromPos}`] = null;
     }
+try {
 
-    dragCell = null;
+    await update(ref(database), updates);
+    console.log("MOVE SUCCESS");
+
+}catch (err) {
+
+    console.error("Drag & Drop Error:", err.message);
+    console.error(err);
+
+    alert(
+        "Drag & Drop Failed: " + err.message
+    );
 
 }
 
-/* ==========================
+    dragCell = null;
+}
+
+/* =====================================================
    CTRL + Z
-========================== */
+===================================================== */
 
 document.addEventListener("keydown", async (e) => {
 
     if (!(e.ctrlKey && e.key.toLowerCase() === "z")) return;
-
     if (!lastMove) return;
 
     try {
 
-        await updateCoachPosition(
+        const updates = {};
 
-            lastMove.toLine,
-            lastMove.toPos,
+        updates[`coachBoard/${lastMove.fromLine}/${lastMove.fromPos}`] =
+            lastMove.fromCoach;
 
-            lastMove.fromLine,
-            lastMove.fromPos
+        updates[`coachBoard/${lastMove.toLine}/${lastMove.toPos}`] =
+            lastMove.toCoach;
 
-        );
+        await update(ref(database), updates);
 
-        alert("Undo Successful");
+        await writeHistory("UNDO", lastMove.fromCoach);
 
         lastMove = null;
+
+        alert("Undo Successful");
 
     } catch (err) {
 
@@ -889,39 +673,76 @@ document.addEventListener("keydown", async (e) => {
     }
 
 });
+/* =====================================================
+   HIGHLIGHT
+===================================================== */
 
-/* ==========================
-   ESC CANCEL DRAG
-========================== */
+document.addEventListener("dragenter", e => {
 
-document.addEventListener("keydown", (e) => {
+    const td = e.target.closest(".coach-table td");
 
-    if (e.key === "Escape") {
-
-        dragCell = null;
-
-        document
-            .querySelectorAll(".coach-table td")
-            .forEach(td => {
-
-                td.classList.remove("table-info");
-
-            });
-
-    }
+    if (td)
+        td.classList.add("table-info");
 
 });
 
-console.log("Part-3 Loaded Successfully");
+document.addEventListener("dragleave", e => {
+
+    const td = e.target.closest(".coach-table td");
+
+    if (td)
+        td.classList.remove("table-info");
+
+});
+
+document.addEventListener("drop", e => {
+
+    const td = e.target.closest(".coach-table td");
+
+    if (td)
+        td.classList.remove("table-info");
+
+});
+
 
 /* =====================================================
    PART - 4
-   STATUS COLOURS + COUNTERS + DASHBOARD
+   DASHBOARD / SEARCH / EXPORT / STATUS
 ===================================================== */
 
-/* ==========================
+/* =====================================================
+   DASHBOARD COUNTERS
+===================================================== */
+
+function updateCounters() {
+
+    const cells = document.querySelectorAll(".coach-table td");
+
+    let total = cells.length;
+    let occupied = 0;
+
+    cells.forEach(cell => {
+
+        if ((cell.dataset.coach || "").trim()) {
+            occupied++;
+        }
+
+    });
+
+    const free = total - occupied;
+
+    document.getElementById("totalCoach") &&
+        (document.getElementById("totalCoach").textContent = total);
+
+    document.getElementById("occupiedCoach") &&
+        (document.getElementById("occupiedCoach").textContent = occupied);
+
+    document.getElementById("freeCoach") &&
+        (document.getElementById("freeCoach").textContent = free);
+}
+/* =====================================================
    STATUS COLOURS
-========================== */
+===================================================== */
 
 function applyStatusColours() {
 
@@ -939,12 +760,13 @@ function applyStatusColours() {
             "status-hvy"
         );
 
-        switch ((td.dataset.status || "").toUpperCase()) {
+        const status = (td.dataset.status || "").toUpperCase();
+
+        switch (status) {
 
             case "PO":
                 td.classList.add("status-po");
                 break;
-
             case "S":
                 td.classList.add("status-s");
                 break;
@@ -960,11 +782,11 @@ function applyStatusColours() {
             case "RL":
                 td.classList.add("status-rl");
                 break;
+                
 
             case "R1":
                 td.classList.add("status-r1");
                 break;
-
             case "RS":
                 td.classList.add("status-rs");
                 break;
@@ -972,7 +794,6 @@ function applyStatusColours() {
             case "L":
                 td.classList.add("status-l");
                 break;
-
             case "HVY":
                 td.classList.add("status-hvy");
                 break;
@@ -982,359 +803,153 @@ function applyStatusColours() {
 
 }
 
-/* ==========================
-   COUNTERS
-========================== */
+/* =====================================================
+   SEARCH
+===================================================== */
 
-function updateCounters() {
 
-    let total = 0;
-    let occupied = 0;
-    let free = 0;
+/* =====================================================
+   PDF
+===================================================== */
 
-    document.querySelectorAll(".coach-table td").forEach(td => {
+document.getElementById("pdfBtn")?.addEventListener("click", () => {
 
-        total++;
+    window.print();
 
-        if (td.dataset.coach) {
-            occupied++;
+});
+
+/* =====================================================
+   EXPORT CSV
+===================================================== */
+
+document.getElementById("excelBtn")
+?.addEventListener("click", () => {
+
+    let csv = "";
+
+    document.querySelectorAll(".coach-table tr").forEach(row => {
+
+        let cols = [];
+
+        row.querySelectorAll("th,td").forEach(col => {
+
+            cols.push(
+                `"${col.innerText.replace(/\n/g, " ")}"`
+            );
+
+        });
+
+        csv += cols.join(",") + "\n";
+
+    });
+
+    const blob = new Blob([csv], {
+        type: "text/csv"
+    });
+
+    const a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+
+    a.download = "MR_COACH_BOARD.csv";
+
+    a.click();
+
+});
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+document.getElementById("refreshBtn")?.addEventListener("click", () => {
+
+    loadBoard();
+
+});
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+document.getElementById("fullscreenBtn")
+?.addEventListener("click", async () => {
+
+    try {
+
+        if (!document.fullscreenElement) {
+
+            await document.documentElement.requestFullscreen();
+
         } else {
-            free++;
-        }
 
-    });
-
-    document.getElementById("totalCoach") &&
-        (document.getElementById("totalCoach").textContent = total);
-
-    document.getElementById("occupiedCoach") &&
-        (document.getElementById("occupiedCoach").textContent = occupied);
-
-    document.getElementById("freeCoach") &&
-        (document.getElementById("freeCoach").textContent = free);
-
-}
-
-/* ==========================
-   STATUS SUMMARY
-========================== */
-
-function updateStatusSummary() {
-
-    const summary = {};
-
-    document.querySelectorAll(".coach-table td").forEach(td => {
-
-        const status = (td.dataset.status || "").toUpperCase();
-
-        if (!status) return;
-
-        summary[status] = (summary[status] || 0) + 1;
-
-    });
-
-    Object.keys(summary).forEach(status => {
-
-        const el = document.getElementById(
-            `status${status}`
-        );
-
-        if (el) {
-
-            el.textContent = summary[status];
+            await document.exitFullscreen();
 
         }
 
-    });
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+});
+
+/* =====================================================
+   TV MODE
+===================================================== */
+
+if (window.innerWidth >= 1920) {
+
+    document.body.classList.add("tv-mode");
 
 }
 
-/* ==========================
-   DASHBOARD REFRESH
-========================== */
+/* =====================================================
+   SHORTCUT KEYS
+===================================================== */
 
-function refreshDashboard() {
+document.addEventListener("keydown", e => {
 
-    applyStatusColours();
+    if (e.ctrlKey && e.key === "f") {
 
-    updateCounters();
+        e.preventDefault();
 
-    updateStatusSummary();
+        document.getElementById("searchBox")?.focus();
 
-}
+    }
 
-/* ==========================
-   AUTO REFRESH
-========================== */
+    if (e.key === "F11") {
+
+        e.preventDefault();
+
+        if (!document.fullscreenElement) {
+
+            document.documentElement.requestFullscreen();
+
+        } else {
+
+            document.exitFullscreen();
+
+        }
+
+    }
+
+});
+
+/* =====================================================
+   FOOTER CLOCK
+===================================================== */
 
 setInterval(() => {
 
-    refreshDashboard();
+    const t = document.getElementById("lastUpdateTime");
 
-}, 10000);
+    if (t) {
 
-/* ==========================
-   WINDOW ONLINE / OFFLINE
-========================== */
-
-window.addEventListener("online", () => {
-
-    console.log("Internet Connected");
-
-});
-
-window.addEventListener("offline", () => {
-
-    console.log("Internet Disconnected");
-
-});
-
-/* ==========================
-   DEBUG
-========================== */
-
-console.log("Part-4 Loaded Successfully");
-
-/* =====================================================
-   PART - 5A
-   SMART LIVE SEARCH
-===================================================== */
-
-/* ==========================
-   SEARCH INITIALIZE
-========================== */
-
-if (searchBox) {
-
-    searchBox.addEventListener("input", searchCoach);
-
-}
-
-
-/* ==========================
-   SHOW CURRENT RESULT
-========================== */
-
-function showCurrentSearchResult() {
-
-    const item = searchResults[currentSearchIndex];
-
-    if (!item) return;
-
-    if (!item.cell) return;
-
-    showCoachDetails(
-
-        item.cell,
-
-        item.coach,
-
-        item.shop,
-
-        item.line,
-
-        item.position
-
-    );
-
-}
-
-console.log("Part-5A Loaded Successfully");
-const searchBox = document.getElementById("searchBox");
-
-if (searchBox) {
-    searchBox.addEventListener("input", searchCoach);
-}
-
-/* =====================================================
-   PART - 5B
-   SHOW COACH DETAILS
-===================================================== */
-
-function showCoachDetails(cell, coach, shop, line, position) {
-
-    // Remove previous highlight
-    document.querySelectorAll(".coach-table td").forEach(td => {
-        td.classList.remove("search-highlight");
-    });
-
-    // Highlight selected cell
-    cell.classList.add("search-highlight");
-
-    // Scroll into view
-    cell.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center"
-    });
-
-    // Create popup if not exists
-    let popup = document.getElementById("coachPopup");
-
-    if (!popup) {
-
-        popup = document.createElement("div");
-        popup.id = "coachPopup";
-        popup.className = "coach-popup";
-
-        document.body.appendChild(popup);
-    }
-
-    popup.innerHTML = `
-        <div class="popup-header">
-            <span>🚆 Coach Details</span>
-            <button id="closeCoachPopup">✕</button>
-        </div>
-
-        <table class="popup-table">
-            <tr>
-                <th>Coach No</th>
-                <td>${coach.coachNo || "-"}</td>
-            </tr>
-
-            <tr>
-                <th>Coach Type</th>
-                <td>${coach.coachType || "-"}</td>
-            </tr>
-
-            <tr>
-                <th>Shop</th>
-                <td>${shop}</td>
-            </tr>
-
-            <tr>
-                <th>Line</th>
-                <td>${line}</td>
-            </tr>
-
-            <tr>
-                <th>Position</th>
-                <td>${position}</td>
-            </tr>
-
-            <tr>
-                <th>Status</th>
-                <td>${coach.status || "-"}</td>
-            </tr>
-
-            <tr>
-                <th>Updated</th>
-                <td>${coach.updatedAt || "-"}</td>
-            </tr>
-        </table>
-    `;
-
-    popup.style.display = "block";
-
-    document.getElementById("closeCoachPopup").onclick = () => {
-
-        popup.style.display = "none";
-        cell.classList.remove("search-highlight");
-
-    };
-
-    clearTimeout(window.popupTimer);
-
-    window.popupTimer = setTimeout(() => {
-
-        popup.style.display = "none";
-        cell.classList.remove("search-highlight");
-
-    }, 10000);
-
-}
-
-
-
-/* ==========================
-   SHORTCUT KEYS
-========================== */
-
-document.addEventListener("keydown", (e) => {
-
-    // Enter = Next Result
-    if (e.key === "Enter") {
-
-        if (searchResults.length > 1) {
-
-            e.preventDefault();
-            nextSearchResult();
-
-        }
+        t.textContent = new Date().toLocaleTimeString("en-IN");
 
     }
 
-    // Shift + Enter = Previous Result
-    if (e.shiftKey && e.key === "Enter") {
+}, 1000);
 
-        e.preventDefault();
-        previousSearchResult();
-
-    }
-
-});
-
-/* =====================================================
-   PART - 5C
-   SEARCH NAVIGATION
-===================================================== */
-
-function createSearchNavigation() {
-
-    if (document.getElementById("searchNavigation")) return;
-
-    const nav = document.createElement("div");
-
-    nav.id = "searchNavigation";
-
-    nav.innerHTML = `
-        <button id="prevSearchBtn" title="Previous Result">◀ Prev</button>
-
-        <button id="nextSearchBtn" title="Next Result">Next ▶</button>
-    `;
-
-    document.body.appendChild(nav);
-
-    document
-        .getElementById("prevSearchBtn")
-        .addEventListener("click", previousSearchResult);
-
-    document
-        .getElementById("nextSearchBtn")
-        .addEventListener("click", nextSearchResult);
-
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    createSearchNavigation();
-
-});
-
-/* ==========================
-   SHORTCUT KEYS
-========================== */
-
-document.addEventListener("keydown", (e) => {
-
-    // Enter = Next Result
-    if (e.key === "Enter") {
-
-        if (searchResults.length > 1) {
-
-            e.preventDefault();
-            nextSearchResult();
-
-        }
-
-    }
-
-    // Shift + Enter = Previous Result
-    if (e.shiftKey && e.key === "Enter") {
-
-        e.preventDefault();
-        previousSearchResult();
-
-    }
-
-});
+console.log("BOARD JS LOADED");
