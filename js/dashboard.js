@@ -515,4 +515,518 @@ function getStatusClass(status) {
 /* ==========================
    PART - 4 STARTS HERE
 ===================================================== */
+/* =====================================================
+   MR CO-ORDINATION DASHBOARD
+   PRODUCTION
+   PART - 4
+   Search + Export + Print + Refresh
+===================================================== */
 
+/* ==========================
+   SEARCH
+========================== */
+
+const searchBox = document.getElementById("searchBox");
+
+if (searchBox) {
+
+    searchBox.addEventListener("input", () => {
+
+        const keyword = searchBox.value.trim().toLowerCase();
+
+        const rows = recentTable.querySelectorAll("tr");
+
+        let found = 0;
+
+        rows.forEach(row => {
+
+            const text = row.innerText.toLowerCase();
+
+            if (!keyword || text.includes(keyword)) {
+
+                row.style.display = "";
+
+                found++;
+
+            } else {
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+        const result = document.getElementById("searchResult");
+
+        if (result) {
+
+            result.textContent =
+                keyword ? `Found : ${found}` : "";
+
+        }
+
+    });
+
+}
+
+/* ==========================
+   EXPORT CSV
+========================== */
+
+const exportBtn =
+document.getElementById("exportCSV");
+
+exportBtn?.addEventListener("click", () => {
+
+    let csv =
+`Time,Shop,Line,Position,Coach No,Coach Type,Status\n`;
+
+    recentUpdates.forEach(item => {
+
+        csv += `"${formatDate(item.time)}",`;
+
+        csv += `"${item.shop}",`;
+
+        csv += `"${item.line}",`;
+
+        csv += `"${item.position}",`;
+
+        csv += `"${item.coachNo}",`;
+
+        csv += `"${item.coachType}",`;
+
+        csv += `"${item.status}"\n`;
+
+    });
+
+    const blob = new Blob([csv], {
+
+        type: "text/csv"
+
+    });
+
+    const link =
+        document.createElement("a");
+
+    link.href =
+        URL.createObjectURL(blob);
+
+    link.download =
+        `Dashboard_${Date.now()}.csv`;
+
+    link.click();
+
+});
+
+/* ==========================
+   PRINT
+========================== */
+
+const printBtn =
+document.getElementById("printDashboard");
+
+printBtn?.addEventListener("click", () => {
+
+    window.print();
+
+});
+
+/* ==========================
+   REFRESH
+========================== */
+
+function refreshDashboard() {
+
+    boardListenerStarted = false;
+
+    loadDashboard();
+
+}
+
+document.getElementById("refreshDashboard")
+?.addEventListener("click", refreshDashboard);
+
+/* ==========================
+   AUTO REFRESH
+========================== */
+
+setInterval(() => {
+
+    refreshDashboard();
+
+}, 30000);
+
+/* ==========================
+   DATABASE STATUS
+========================== */
+
+get(ref(database, BOARD_PATH))
+
+.then(() => {
+
+    setDatabaseStatus(true);
+
+})
+
+.catch(() => {
+
+    setDatabaseStatus(false);
+
+});
+
+/* ==========================
+   FULL SCREEN
+========================== */
+
+const fullscreenBtn =
+document.getElementById("fullscreenBtn");
+
+fullscreenBtn?.addEventListener("click", async () => {
+
+    try {
+
+        if (!document.fullscreenElement) {
+
+            await document.documentElement.requestFullscreen();
+
+        } else {
+
+            await document.exitFullscreen();
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+});
+
+/* ==========================
+   KEYBOARD SHORTCUTS
+========================== */
+
+document.addEventListener("keydown", e => {
+
+    if (e.ctrlKey && e.key.toLowerCase() === "f") {
+
+        e.preventDefault();
+
+        searchBox?.focus();
+
+    }
+
+    if (e.key === "F5") {
+
+        e.preventDefault();
+
+        refreshDashboard();
+
+    }
+
+});
+
+/* ==========================
+   PART - 5 STARTS HERE
+===================================================== */
+/* =====================================================
+   MR CO-ORDINATION DASHBOARD
+   PRODUCTION
+   PART - 5
+   Network + Error Handling + Initialization
+===================================================== */
+
+/* ==========================
+   NETWORK STATUS
+========================== */
+
+window.addEventListener("online", () => {
+
+    console.log("Internet Connected");
+
+    setDatabaseStatus(true);
+
+    refreshDashboard();
+
+});
+
+window.addEventListener("offline", () => {
+
+    console.log("Internet Disconnected");
+
+    setDatabaseStatus(false);
+
+});
+
+/* ==========================
+   LOADING SCREEN
+========================== */
+
+const loadingScreen =
+    document.getElementById("loadingScreen");
+
+function showLoading() {
+
+    if (!loadingScreen) return;
+
+    loadingScreen.style.display = "flex";
+
+}
+
+function hideLoading() {
+
+    if (!loadingScreen) return;
+
+    loadingScreen.style.display = "none";
+
+}
+
+/* ==========================
+   SAFE RELOAD
+========================== */
+
+async function reloadDashboard() {
+
+    try {
+
+        showLoading();
+
+        boardListenerStarted = false;
+
+        loadDashboard();
+
+        updateLastUpdate();
+
+    } catch (err) {
+
+        console.error("Dashboard Reload Error :", err);
+
+    } finally {
+
+        hideLoading();
+
+    }
+
+}
+
+/* ==========================
+   GLOBAL ERROR HANDLER
+========================== */
+
+window.addEventListener("error", e => {
+
+    console.error("Dashboard Error :", e.message);
+
+});
+
+window.addEventListener("unhandledrejection", e => {
+
+    console.error("Promise Error :", e.reason);
+
+});
+
+/* ==========================
+   DASHBOARD API
+========================== */
+
+window.dashboard = {
+
+    refresh: reloadDashboard,
+
+    load: loadDashboard,
+
+    process: processBoardData,
+
+    update: updateDashboardUI,
+
+    render: renderRecentUpdates
+
+};
+
+/* ==========================
+   PAGE INITIALIZATION
+========================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("==================================");
+
+    console.log("MR CO-ORDINATION DASHBOARD");
+
+    console.log("Production Version");
+
+    console.log("Realtime Firebase Connected");
+
+    console.log("Dashboard Ready");
+
+    console.log("==================================");
+
+    reloadDashboard();
+
+});
+
+/* ==========================
+   PAGE VISIBILITY
+========================== */
+
+document.addEventListener("visibilitychange", () => {
+
+    if (!document.hidden) {
+
+        reloadDashboard();
+
+    }
+
+});
+
+/* ==========================
+   WINDOW FOCUS
+========================== */
+
+window.addEventListener("focus", () => {
+
+    reloadDashboard();
+
+});
+
+/* ==========================
+   CLEANUP
+========================== */
+
+window.addEventListener("beforeunload", () => {
+
+    console.log("Dashboard Closed");
+
+});
+
+/* ==========================
+   PART - 6 STARTS HERE
+===================================================== */
+/* =====================================================
+   MR CO-ORDINATION DASHBOARD
+   PRODUCTION
+   PART - 6 (FINAL)
+===================================================== */
+
+/* ==========================
+   VERSION
+========================== */
+
+const DASHBOARD_VERSION = "2.0.0";
+
+/* ==========================
+   DATABASE CONNECTION
+========================== */
+
+onValue(ref(database, ".info/connected"), (snapshot) => {
+
+    const connected = snapshot.val();
+
+    setDatabaseStatus(connected);
+
+});
+
+/* ==========================
+   AUTO CLOCK
+========================== */
+
+setInterval(() => {
+
+    updateLastUpdate();
+
+}, 1000);
+
+/* ==========================
+   DASHBOARD SUMMARY
+========================== */
+
+function printSummary() {
+
+    console.table({
+
+        Total: totalPosition,
+
+        Occupied: occupiedPosition,
+
+        Free: freePosition,
+
+        "N SHOP": shopCounter.n,
+
+        "M SHOP": shopCounter.m,
+
+        "MR SCR SHOP": shopCounter.scr,
+
+        "CR SHOP": shopCounter.cr,
+
+        "J SHOP": shopCounter.j,
+
+        "LIFTING BAY": shopCounter.lift
+
+    });
+
+}
+
+/* ==========================
+   DEBUG OBJECT
+========================== */
+
+window.dashboardDebug = {
+
+    boardData,
+
+    recentUpdates,
+
+    refreshDashboard,
+
+    processBoardData,
+
+    updateDashboardUI,
+
+    renderRecentUpdates,
+
+    printSummary
+
+};
+
+/* ==========================
+   AUTO REFRESH
+========================== */
+
+setInterval(() => {
+
+    reloadDashboard();
+
+}, 60000);
+
+/* ==========================
+   STARTUP
+========================== */
+
+window.addEventListener("load", () => {
+
+    console.log("======================================");
+
+    console.log("MR CO-ORDINATION DASHBOARD");
+
+    console.log("Version :", DASHBOARD_VERSION);
+
+    console.log("Realtime Firebase Connected");
+
+    console.log("Dashboard Started Successfully");
+
+    console.log("======================================");
+
+    reloadDashboard();
+
+});
+
+/* ==========================
+   READY MESSAGE
+========================== */
+
+console.log("Dashboard Ready");
+
+/* ==========================
+   END OF FILE
+========================== */
