@@ -898,54 +898,113 @@ function applyStatusColours() {
 
 }
 
-/* ==========================
-   SEARCH
-========================== */
+/* ==========================================
+   SEARCH.JS
+   Coach Full Details Search
+========================================== */
 
-const searchBox =
-    document.getElementById("searchBox");
+const searchInput = document.getElementById("searchBox");
+const searchResult = document.getElementById("searchResult");
 
-searchBox?.addEventListener("input", function () {
+searchInput.addEventListener("input", searchCoach);
 
-    const keyword =
-        this.value.trim().toLowerCase();
+function searchCoach() {
 
-    let found = 0;
+    const keyword = searchInput.value.trim().toLowerCase();
 
-    document.querySelectorAll(".coach-table td").forEach(td => {
+    if (keyword === "") {
+        searchResult.innerHTML = "";
+        return;
+    }
 
-        td.classList.remove("table-warning");
+    let found = false;
+    let html = "";
 
-        const text = [
-            td.dataset.coach,
-            td.dataset.shop,
-            td.dataset.line,
-            td.dataset.position,
-            td.dataset.type,
-            td.dataset.status
-        ].join(" ").toLowerCase();
+    Object.keys(boardData).forEach(shop => {
 
-        if (keyword && text.includes(keyword)) {
+        Object.keys(boardData[shop]).forEach(line => {
 
-            td.classList.add("table-warning");
+            Object.keys(boardData[shop][line]).forEach(position => {
 
-            found++;
+                const coach = boardData[shop][line][position];
 
-        }
+                if (!coach) return;
+
+                const coachNo = (coach.coachNo || "").toLowerCase();
+                const coachType = (coach.coachType || "").toLowerCase();
+                const status = (coach.status || "").toLowerCase();
+
+                if (
+                    coachNo.includes(keyword) ||
+                    coachType.includes(keyword) ||
+                    shop.toLowerCase().includes(keyword) ||
+                    line.toLowerCase().includes(keyword) ||
+                    position.toLowerCase().includes(keyword) ||
+                    status.includes(keyword)
+                ) {
+
+                    found = true;
+
+                    html += `
+                    <div class="search-card">
+                        <h3>🚆 ${coach.coachNo}</h3>
+
+                        <table>
+
+                            <tr>
+                                <td><b>Coach Type</b></td>
+                                <td>${coach.coachType}</td>
+                            </tr>
+
+                            <tr>
+                                <td><b>Shop</b></td>
+                                <td>${shop}</td>
+                            </tr>
+
+                            <tr>
+                                <td><b>Line</b></td>
+                                <td>${line}</td>
+                            </tr>
+
+                            <tr>
+                                <td><b>Position</b></td>
+                                <td>${position}</td>
+                            </tr>
+
+                            <tr>
+                                <td><b>Status</b></td>
+                                <td>${coach.status}</td>
+                            </tr>
+
+                            <tr>
+                                <td><b>Last Update</b></td>
+                                <td>${coach.lastUpdate || "-"}</td>
+                            </tr>
+
+                        </table>
+                    </div>
+                    `;
+                }
+
+            });
+
+        });
 
     });
 
-    const result =
-        document.getElementById("searchResult");
+    if (!found) {
 
-    if (result) {
-
-        result.textContent =
-            keyword ? `Found : ${found}` : "";
+        html = `
+        <div class="search-empty">
+            ❌ No Coach Found
+        </div>
+        `;
 
     }
 
-});
+    searchResult.innerHTML = html;
+
+}
 
 /* ==========================
    PDF
