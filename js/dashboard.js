@@ -1032,16 +1032,11 @@ window.addEventListener("load", () => {
    WINDOW CLOSE
 ========================== */
 
-window.addEventListener("load", () => {
+window.addEventListener("beforeunload", () => {
 
-    console.clear();
+    stopRealtimeDashboard();
 
-    console.log("========================================");
-    console.log("MR CO-ORDINATION DASHBOARD");
-    console.log("Production Version :", DASHBOARD_VERSION);
-    console.log("Realtime Firebase Connected");
-    console.log("Dashboard Started Successfully");
-    console.log("========================================");
+    console.log("Dashboard Closed");
 
 });
 
@@ -1058,6 +1053,8 @@ console.log("Print Enabled");
 console.log("Auto Refresh Enabled");
 console.log("Production Build Loaded");
 console.log("========================================");
+
+
 
 /* ==========================
    END OF FILE
