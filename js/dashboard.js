@@ -152,9 +152,7 @@ function startRealtimeDashboard() {
     const boardRef = ref(database, BOARD_PATH);
 
     boardListener = onValue(
-
         boardRef,
-
         (snapshot) => {
 
             boardData = snapshot.exists()
@@ -162,29 +160,36 @@ function startRealtimeDashboard() {
                 : {};
 
             processBoardData();
-
             updateDashboardUI();
-
             renderRecentUpdates();
-
             updateLastUpdate();
-
             setDatabaseStatus(true);
 
         },
-
         (error) => {
 
             console.error("Realtime Error :", error);
-
             setDatabaseStatus(false);
 
         }
-
     );
-
 }
 
+/* ==========================
+   STOP REALTIME LISTENER
+========================== */
+
+function stopRealtimeDashboard() {
+
+    if (boardListener) {
+
+        boardListener();      // unsubscribe
+
+        boardListener = null;
+
+    }
+
+}
 /* ==========================
    PROCESS BOARD DATA
 ========================== */
@@ -809,9 +814,17 @@ function hideLoading() {
    SAFE RELOAD
 ========================== */
 
+/* ==========================
+   SAFE RELOAD
+========================== */
+
 function reloadDashboard() {
 
     showLoading();
+
+    stopRealtimeDashboard();
+
+    startRealtimeDashboard();
 
     updateLastUpdate();
 
@@ -906,7 +919,6 @@ console.log("Dashboard Part-5 Loaded");
    VERSION
 ========================== */
 
-const DASHBOARD_VERSION = "3.0.0";
 
 /* ==========================
    AUTO CLOCK
@@ -1016,6 +1028,8 @@ window.addEventListener("load", () => {
 ========================== */
 
 window.addEventListener("beforeunload", () => {
+
+    stopRealtimeDashboard();
 
     console.log("Dashboard Closed");
 
