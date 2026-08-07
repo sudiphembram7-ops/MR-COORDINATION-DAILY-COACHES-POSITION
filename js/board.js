@@ -1140,6 +1140,11 @@ function showCurrentSearchResult() {
 }
 
 console.log("Part-5A Loaded Successfully");
+const searchBox = document.getElementById("searchBox");
+
+if (searchBox) {
+    searchBox.addEventListener("input", searchCoach);
+}
 
 /* =====================================================
    PART - 5B
@@ -1239,42 +1244,7 @@ function showCoachDetails(cell, coach, shop, line, position) {
 
 }
 
-/* =====================================================
-   PART - 5C
-   SEARCH NAVIGATION
-===================================================== */
 
-function createSearchNavigation() {
-
-    if (document.getElementById("searchNavigation")) return;
-
-    const nav = document.createElement("div");
-
-    nav.id = "searchNavigation";
-
-    nav.innerHTML = `
-        <button id="prevSearchBtn" title="Previous Result">◀ Prev</button>
-
-        <button id="nextSearchBtn" title="Next Result">Next ▶</button>
-    `;
-
-    document.body.appendChild(nav);
-
-    document
-        .getElementById("prevSearchBtn")
-        .addEventListener("click", previousSearchResult);
-
-    document
-        .getElementById("nextSearchBtn")
-        .addEventListener("click", nextSearchResult);
-
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    createSearchNavigation();
-
-});
 
 /* ==========================
    SHORTCUT KEYS
