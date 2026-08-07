@@ -1060,6 +1060,161 @@ function showCoachDetails(cell, coach, shop, line, position) {
     }, 10000);
 
 }
+/* =====================================================
+   PART - 5D
+   FINAL SEARCH INTEGRATION
+===================================================== */
+
+let searchResults = [];
+let currentSearchIndex = 0;
+
+function searchCoach() {
+
+    const keyword = searchBox.value.trim().toLowerCase();
+
+    searchResults = [];
+    currentSearchIndex = 0;
+
+    document.querySelectorAll(".coach-table td").forEach(td => {
+        td.classList.remove("search-highlight");
+    });
+
+    const popup = document.getElementById("coachPopup");
+    if (popup) popup.style.display = "none";
+
+    if (!keyword) return;
+
+    for (const line in boardData) {
+
+        if (!boardData[line]) continue;
+
+        for (const position in boardData[line]) {
+
+            const coach = boardData[line][position];
+
+            if (!coach) continue;
+
+            const shop = coach.shop || getShop(line);
+
+            const text = `
+                ${coach.coachNo || ""}
+                ${coach.coachType || ""}
+                ${coach.status || ""}
+                ${shop}
+                ${line}
+                ${position}
+            `.toLowerCase();
+
+            if (text.includes(keyword)) {
+
+                searchResults.push({
+                    cell: document.getElementById(`${line}_${position}`),
+                    coach,
+                    shop,
+                    line,
+                    position
+                });
+
+            }
+
+        }
+
+    }
+
+    if (searchResults.length === 0) {
+
+        alert("Coach Not Found");
+
+        return;
+
+    }
+
+    showCurrentSearchResult();
+
+}
+
+/* ==========================
+   SHOW RESULT
+========================== */
+
+function showCurrentSearchResult(){
+
+    const item = searchResults[currentSearchIndex];
+
+    if(!item || !item.cell) return;
+
+    showCoachDetails(
+        item.cell,
+        item.coach,
+        item.shop,
+        item.line,
+        item.position
+    );
+
+}
+
+/* ==========================
+   NEXT RESULT
+========================== */
+
+function nextSearchResult(){
+
+    if(searchResults.length<=1) return;
+
+    currentSearchIndex++;
+
+    if(currentSearchIndex>=searchResults.length){
+
+        currentSearchIndex=0;
+
+    }
+
+    showCurrentSearchResult();
+
+}
+
+/* ==========================
+   PREVIOUS RESULT
+========================== */
+
+function previousSearchResult(){
+
+    if(searchResults.length<=1) return;
+
+    currentSearchIndex--;
+
+    if(currentSearchIndex<0){
+
+        currentSearchIndex=searchResults.length-1;
+
+    }
+
+    showCurrentSearchResult();
+
+}
+
+/* ==========================
+   ENTER = NEXT RESULT
+========================== */
+
+searchBox?.addEventListener("keydown",(e)=>{
+
+    if(e.key==="Enter"){
+
+        e.preventDefault();
+
+        nextSearchResult();
+
+    }
+
+});
+
+/* ==========================
+   GLOBAL
+========================== */
+
+window.nextSearchResult = nextSearchResult;
+window.previousSearchResult = previousSearchResult;
 
 /* ==========================
    PDF
