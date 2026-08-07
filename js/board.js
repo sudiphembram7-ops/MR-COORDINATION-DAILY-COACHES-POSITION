@@ -803,36 +803,6 @@ document.addEventListener("keydown", async (e) => {
    SEARCH + STATUS + COUNTERS + EXPORT
 ===================================================== */
 
-/* ==========================
-   DASHBOARD COUNTERS
-========================== */
-
-function updateCounters() {
-
-    const cells =
-        document.querySelectorAll(".coach-table td");
-
-    const total = cells.length;
-
-    let occupied = 0;
-
-    cells.forEach(cell => {
-
-        if ((cell.dataset.coach || "").trim()) {
-
-            occupied++;
-
-        }
-
-    });
-
-    const free = total - occupied;
-
-    document.getElementById("totalCoach").textContent = total;
-    document.getElementById("occupiedCoach").textContent = occupied;
-    document.getElementById("freeCoach").textContent = free;
-
-}
 
 /* ==========================
    STATUS COLOURS
@@ -981,6 +951,113 @@ function searchCoach() {
         alert("Coach Not Found");
 
     }
+
+}
+/* =====================================================
+   PART - 5B
+   SHOW COACH DETAILS
+===================================================== */
+
+function showCoachDetails(cell, coach, shop, line, position) {
+
+    // Remove old highlight
+    document.querySelectorAll(".coach-table td").forEach(td => {
+        td.classList.remove("search-highlight");
+    });
+
+    // Highlight current cell
+    cell.classList.add("search-highlight");
+
+    // Auto Scroll
+    cell.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center"
+    });
+
+    // Popup
+    let popup = document.getElementById("coachPopup");
+
+    if (!popup) {
+
+        popup = document.createElement("div");
+        popup.id = "coachPopup";
+
+        document.body.appendChild(popup);
+
+    }
+
+    popup.innerHTML = `
+        <div class="popup-header">
+
+            <span>🚆 Coach Details</span>
+
+            <button id="closeCoachPopup">✕</button>
+
+        </div>
+
+        <table class="popup-table">
+
+            <tr>
+                <td><b>Coach No</b></td>
+                <td>${coach.coachNo || "-"}</td>
+            </tr>
+
+            <tr>
+                <td><b>Coach Type</b></td>
+                <td>${coach.coachType || "-"}</td>
+            </tr>
+
+            <tr>
+                <td><b>Shop</b></td>
+                <td>${shop}</td>
+            </tr>
+
+            <tr>
+                <td><b>Line</b></td>
+                <td>${line}</td>
+            </tr>
+
+            <tr>
+                <td><b>Position</b></td>
+                <td>${position}</td>
+            </tr>
+
+            <tr>
+                <td><b>Status</b></td>
+                <td>${coach.status || "-"}</td>
+            </tr>
+
+            <tr>
+                <td><b>Updated</b></td>
+                <td>${coach.updatedAt || "-"}</td>
+            </tr>
+
+        </table>
+    `;
+
+    popup.style.display = "block";
+
+    document
+        .getElementById("closeCoachPopup")
+        .onclick = () => {
+
+            popup.style.display = "none";
+
+            cell.classList.remove("search-highlight");
+
+        };
+
+    // Auto hide after 10 sec
+    clearTimeout(window.popupTimer);
+
+    window.popupTimer = setTimeout(() => {
+
+        popup.style.display = "none";
+
+        cell.classList.remove("search-highlight");
+
+    }, 10000);
 
 }
 
