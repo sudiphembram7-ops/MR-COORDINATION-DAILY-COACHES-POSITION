@@ -58,7 +58,8 @@ let statusCounter = {
     r1: 0,
     rs: 0,
     hold: 0,
-    hvy: 0
+    hvy: 0,
+    l: 0
 };
 
 /* ==========================
@@ -219,7 +220,8 @@ function processBoardData() {
         r1: 0,
         rs: 0,
         hold: 0,
-        hvy: 0
+        hvy: 0,
+        l: 0
     };
 
     for (const line in boardData) {
@@ -350,8 +352,8 @@ function processStatus(status) {
             break;
 
         case "L":
-        case "HOLD":
-            statusCounter.hold++;
+        case "l":
+            statusCounter.l++;
             break;
 
     }
@@ -666,7 +668,7 @@ document.getElementById("printDashboard")
 document.getElementById("refreshDashboard")
 ?.addEventListener("click", () => {
 
-    location.reload();
+    reloadDashboard();
 
 });
 
@@ -810,9 +812,7 @@ function hideLoading() {
 
 }
 
-/* ==========================
-   SAFE RELOAD
-========================== */
+
 
 /* ==========================
    SAFE RELOAD
@@ -828,7 +828,11 @@ function reloadDashboard() {
 
     updateLastUpdate();
 
-    hideLoading();
+    setTimeout(() => {
+
+        hideLoading();
+
+    }, 300);
 
 }
 
@@ -966,7 +970,8 @@ function printSummary() {
 
         "R1": statusCounter.r1,
 
-        "HOLD": statusCounter.hold
+        "HVY": statusCounter.hvy,
+         "L": statusCounter.l
 
     });
 
@@ -1027,11 +1032,16 @@ window.addEventListener("load", () => {
    WINDOW CLOSE
 ========================== */
 
-window.addEventListener("beforeunload", () => {
+window.addEventListener("load", () => {
 
-    stopRealtimeDashboard();
+    console.clear();
 
-    console.log("Dashboard Closed");
+    console.log("========================================");
+    console.log("MR CO-ORDINATION DASHBOARD");
+    console.log("Production Version :", DASHBOARD_VERSION);
+    console.log("Realtime Firebase Connected");
+    console.log("Dashboard Started Successfully");
+    console.log("========================================");
 
 });
 
