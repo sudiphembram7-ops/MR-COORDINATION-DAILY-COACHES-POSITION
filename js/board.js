@@ -898,47 +898,89 @@ function applyStatusColours() {
 
 }
 
-function showCoachDetails(cell, coach, shop, line, position) {
+/* =====================================================
+   PART - 5A
+   SMART LIVE SEARCH
+===================================================== */
 
-    // পুরনো highlight সরান
-    document.querySelectorAll(".search-highlight").forEach(el=>{
-        el.classList.remove("search-highlight");
+const searchBox = document.getElementById("searchBox");
+
+if (searchBox) {
+
+    searchBox.addEventListener("input", searchCoach);
+
+}
+
+function searchCoach() {
+
+    const keyword = searchBox.value.trim().toLowerCase();
+
+    // পুরনো Highlight সরান
+    document.querySelectorAll(".coach-table td").forEach(td => {
+        td.classList.remove("search-highlight");
     });
 
-    cell.classList.add("search-highlight");
+    // Popup Hide
+    const popup = document.getElementById("coachPopup");
+    if (popup) popup.style.display = "none";
 
-    cell.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-    });
+    if (keyword === "") return;
 
-    let popup = document.getElementById("coachPopup");
+    let found = false;
 
-    if(!popup){
+    for (const line in boardData) {
 
-        popup=document.createElement("div");
-        popup.id="coachPopup";
-        document.body.appendChild(popup);
+        if (!boardData[line]) continue;
+
+        for (const position in boardData[line]) {
+
+            const coach = boardData[line][position];
+
+            if (!coach) continue;
+
+            const shop = coach.shop || getShop(line);
+
+            const coachNo = (coach.coachNo || "").toLowerCase();
+            const coachType = (coach.coachType || "").toLowerCase();
+            const status = (coach.status || "").toLowerCase();
+
+            if (
+                coachNo.includes(keyword) ||
+                coachType.includes(keyword) ||
+                status.includes(keyword) ||
+                shop.toLowerCase().includes(keyword) ||
+                line.toLowerCase().includes(keyword) ||
+                position.toLowerCase().includes(keyword)
+            ) {
+
+                found = true;
+
+                const cell = document.getElementById(`${line}_${position}`);
+
+                if (!cell) continue;
+
+                showCoachDetails(
+                    cell,
+                    coach,
+                    shop,
+                    line,
+                    position
+                );
+
+                break;
+            }
+
+        }
+
+        if (found) break;
 
     }
 
-    popup.innerHTML=`
-        <h3>🚆 Coach Details</h3>
+    if (!found) {
 
-        <b>Coach No :</b> ${coach.coachNo}<br>
-        <b>Coach Type :</b> ${coach.coachType}<br>
-        <b>Shop :</b> ${shop}<br>
-        <b>Line :</b> ${line}<br>
-        <b>Position :</b> ${position}<br>
-        <b>Status :</b> ${coach.status}<br>
-        <b>Last Update :</b> ${coach.lastUpdate || "-"}
-    `;
+        alert("Coach Not Found");
 
-    popup.style.display="block";
-
-    setTimeout(()=>{
-        popup.style.display="none";
-    },7000);
+    }
 
 }
 
