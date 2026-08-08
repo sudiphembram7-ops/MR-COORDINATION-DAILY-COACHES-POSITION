@@ -1,3 +1,9 @@
+/* ==========================================
+   firebase-config.js
+   MR CO-ORDINATION
+   FIREBASE CONFIGURATION
+========================================== */
+
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -11,9 +17,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 
+/* ==========================================
+   FIREBASE CONFIG
+========================================== */
+
 const firebaseConfig = {
 
-    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
+    apiKey: "PASTE_CURRENT_FIREBASE_WEB_API_KEY_HERE",
 
     authDomain:
         "mr-coordi-coach.firebaseapp.com",
@@ -38,9 +48,16 @@ const firebaseConfig = {
 };
 
 
-const app =
-    initializeApp(firebaseConfig);
+/* ==========================================
+   INITIALIZE FIREBASE
+========================================== */
 
+const app = initializeApp(firebaseConfig);
+
+
+/* ==========================================
+   REALTIME DATABASE
+========================================== */
 
 export const database =
     getDatabase(
@@ -49,14 +66,45 @@ export const database =
     );
 
 
+/* ==========================================
+   FIREBASE AUTH
+========================================== */
+
 export const auth =
     getAuth(app);
 
 
+/* ==========================================
+   DEFAULT EXPORT
+========================================== */
+
 export default app;
 
 
+/* ==========================================
+   DEBUG
+========================================== */
+
 console.log(
-    "Firebase App Initialized:",
-    firebaseConfig.projectId
+    "======================================"
+);
+
+console.log(
+    "Firebase App Initialized"
+);
+
+console.log(
+    "Project: mr-coordi-coach"
+);
+
+console.log(
+    "Realtime Database Initialized"
+);
+
+console.log(
+    "Firebase Authentication Initialized"
+);
+
+console.log(
+    "======================================"
 );
