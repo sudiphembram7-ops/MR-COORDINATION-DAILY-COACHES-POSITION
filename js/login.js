@@ -1,3 +1,9 @@
+/* =====================================================
+   MR CO-ORDINATION
+   LOGIN.JS
+   Firebase Authentication
+===================================================== */
+
 import { auth } from "./firebase-config.js";
 
 import {
@@ -5,26 +11,163 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-document.getElementById("loginBtn").addEventListener("click", login);
-console.log("Login button clicked");
+
+// =====================================================
+// LOGIN FUNCTION
+// =====================================================
+
 async function login() {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+
+    const emailElement = document.getElementById("email");
+    const passwordElement = document.getElementById("password");
+
+    if (!emailElement || !passwordElement) {
+        console.error("Email or Password input not found.");
+        alert("Login form error. Please contact Admin.");
+        return;
+    }
+
+    const email = emailElement.value.trim();
+    const password = passwordElement.value;
+
+
+    // ---------------------------------------------------
+    // VALIDATION
+    // ---------------------------------------------------
+
+    if (!email) {
+        alert("Please enter your email.");
+        emailElement.focus();
+        return;
+    }
+
+    if (!password) {
+        alert("Please enter your password.");
+        passwordElement.focus();
+        return;
+    }
+
+
+    // ---------------------------------------------------
+    // FIREBASE LOGIN
+    // ---------------------------------------------------
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+
+        console.log("Firebase login started...");
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+
+        console.log("Firebase login successful.");
 
         alert("Login Successful");
 
-        window.location.href = "admin.html";
+
+        // ------------------------------------------------
+        // REDIRECT TO ADMIN PAGE
+        // ------------------------------------------------
+
+        window.location.replace("admin.html");
+
 
     } catch (error) {
-        console.error(error);
-        alert(error.code);
+
+        console.error("Firebase Login Error:", error);
+
+        let message = "Login failed.";
+
+        switch (error.code) {
+
+            case "auth/invalid-credential":
+                message = "Invalid email or password.";
+                break;
+
+            case "auth/user-not-found":
+                message = "User not found.";
+                break;
+
+            case "auth/wrong-password":
+                message = "Incorrect password.";
+                break;
+
+            case "auth/invalid-email":
+                message = "Invalid email address.";
+                break;
+
+            case "auth/user-disabled":
+                message = "This account has been disabled.";
+                break;
+
+            case "auth/too-many-requests":
+                message = "Too many login attempts. Please try again later.";
+                break;
+
+            case "auth/network-request-failed":
+                message = "Network error. Please check your internet connection.";
+                break;
+
+            default:
+                message = error.message || "Unable to login.";
+        }
+
+        alert(message);
     }
 }
 
-window.logout = async function () {
-    await signOut(auth);
-    window.location.href = "login.html";
-};
+
+// =====================================================
+// LOGOUT FUNCTION
+// =====================================================
+
+async function logout() {
+
+    try {
+
+        await signOut(auth);
+
+        console.log("Logout successful.");
+
+        window.location.replace("login.html");
+
+    } catch (error) {
+
+        console.error("Logout Error:", error);
+
+        alert("Logout failed. Please try again.");
+    }
+}
+
+
+// =====================================================
+// MAKE FUNCTIONS AVAILABLE TO HTML
+// =====================================================
+
+window.login = login;
+window.logout = logout;
+
+
+// =====================================================
+// ENTER KEY LOGIN
+// =====================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const passwordElement = document.getElementById("password");
+
+    if (passwordElement) {
+
+        passwordElement.addEventListener("keydown", (event) => {
+
+            if (event.key === "Enter") {
+                login();
+            }
+
+        });
+    }
+
+});
