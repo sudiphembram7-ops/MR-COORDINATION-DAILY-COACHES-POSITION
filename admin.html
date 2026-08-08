@@ -2,409 +2,715 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>MR CO-ORDINATION ADMIN PANEL</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>MR CO-ORDINATION ADMIN PANEL</title>
 
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/style.css">
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+
 </head>
 
 <body class="bg-light">
 
-<div class="container-fluid py-3">
 
-    <!-- Header -->
-    <div class="card shadow-sm border-0 mb-3">
-        <div class="card-body">
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
+<header class="bg-primary text-white p-3">
 
-                <div>
-                    <h2 class="fw-bold text-primary mb-1">
-                        MR CO-ORDINATION
-                    </h2>
+<div class="container-fluid">
 
-                    <h5 class="text-secondary">
-                        ADMIN PANEL
-                    </h5>
-                </div>
+<div class="row align-items-center">
 
-                <div class="text-end">
+<div class="col-md-8">
 
-                    <div id="currentDate" class="fw-bold"></div>
+<h2 class="fw-bold mb-1">
+INDIAN RAILWAYS
+</h2>
 
-                    <div id="currentTime"
-                        class="text-primary fs-5">
-                    </div>
+<h4 class="mb-0">
+MR CO-ORDINATION
+</h4>
 
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Top Buttons -->
-    <div class="row g-2 mb-3">
-
-        <div class="col-lg-3 col-md-6">
-
-            <button
-                class="btn btn-success w-100"
-                data-bs-toggle="modal"
-                data-bs-target="#coachModal">
-
-                <i class="bi bi-plus-circle"></i>
-
-                Coach Entry
-
-            </button>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-
-            <a href="board.html"
-               class="btn btn-primary w-100">
-
-                <i class="bi bi-grid"></i>
-
-                LIVE BOARD
-
-            </a>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-
-            <button
-                class="btn btn-warning w-100"
-                id="refreshBtn">
-
-                <i class="bi bi-arrow-clockwise"></i>
-
-                Refresh
-
-            </button>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-
-            <button
-                class="btn btn-danger w-100"
-                id="logoutBtn">
-
-                <i class="bi bi-box-arrow-right"></i>
-
-                Logout
-
-            </button>
-
-        </div>
-
-    </div>
-        <!-- ===========================
-         Recent Coach Entry
-    ============================ -->
-
-    <div class="card shadow-sm border-0 mb-3">
-
-        <div class="card-header bg-primary text-white">
-
-            <h5 class="mb-0">
-                <i class="bi bi-clock-history"></i>
-                Recent Coach Entry
-            </h5>
-
-        </div>
-
-        <div class="card-body p-0">
-
-            <div class="table-responsive">
-
-                <table class="table table-bordered table-hover table-striped align-middle mb-0"
-                       id="historyTable">
-
-                    <thead class="table-dark">
-
-                        <tr>
-
-                            <th>Shop</th>
-                            <th>Line</th>
-                            <th>Position</th>
-                            <th>Coach No</th>
-                            <th>Coach Type</th>
-                            <th>Status</th>
-                            <th width="150">Action</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="historyBody">
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- ===========================
-          Coach Entry Modal
-    ============================ -->
-
-    <div class="modal fade"
-         id="coachModal"
-         tabindex="-1"
-         aria-hidden="true">
-
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-
-            <div class="modal-content">
-
-                <div class="modal-header bg-success text-white">
-
-                    <h5 class="modal-title">
-
-                        <i class="bi bi-train-front-fill"></i>
-
-                        Coach Entry
-
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close btn-close-white"
-                            data-bs-dismiss="modal">
-
-                    </button>
-
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="row g-3">
-
-                        <!-- Shop -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Shop
-                            </label>
-
-                            <select
-                                class="form-select"
-                                id="shop">
-
-                                <option value="">Select Shop</option>
-
-                                <option>N SHOP</option>
-                                <option>M SHOP</option>
-                                <option>MR SCR SHOP</option>
-                                <option>CR SHOP</option>
-                                <option>J SHOP</option>
-                                <option>LIFTING BAY</option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- Line -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Line
-                            </label>
-
-                            <select
-                                class="form-select"
-                                id="line">
-
-                                <option value="">Select Line</option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- Position -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Position
-                            </label>
-
-                            <select
-                                class="form-select"
-                                id="position">
-
-                                <option value="">
-                                    Select Position
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- Coach Number -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Coach Number
-                            </label>
-<input type="hidden" id="coachKey">
-                            <input
-                                type="text"
-                                id="coachNo"
-                                class="form-control"
-                                placeholder="Enter Coach Number">
-
-                        </div>
-                        
-                                                <!-- Coach Type -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Coach Type
-                            </label>
-
-                            <select
-                                class="form-select"
-                                id="coachType">
-
-                                <option value="">Select Coach Type</option>
-
-                                <option>ICF</option>
-                                <option>LHB</option>
-                                <option>MEMU</option>
-                                <option>EMU</option>
-                                <option>DEMU</option>
-                                <option>AC</option>
-                                <option>NON AC</option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- Status -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Status
-                            </label>
-
-                            <select
-                                class="form-select"
-                                id="status">
-
-                                <option value="">Select Status</option>
-
-                                <option value="PO">PO</option>
-                                <option value="LM">LM</option>
-                                <option value="MED">MED</option>
-                                <option value="RL">RL</option>
-                                <option value="WIP">WIP</option>
-                                <option value="HOLD">HOLD</option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-                    <hr>
-
-                    <!-- Buttons -->
-
-                    <div class="d-grid gap-2">
-
-                        <button
-                            id="saveBtn"
-                            class="btn btn-success btn-lg">
-
-                            <i class="bi bi-floppy"></i>
-
-                            SAVE
-
-                        </button>
-
-                        <button
-                            id="updateBtn"
-                            class="btn btn-warning btn-lg">
-
-                            <i class="bi bi-pencil-square"></i>
-
-                            UPDATE
-
-                        </button>
-
-                        <button
-                            id="deleteBtn"
-                            class="btn btn-danger btn-lg">
-
-                            <i class="bi bi-trash"></i>
-
-                            DELETE
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
+<small>
+LILUAH WORKSHOP — ADMIN PANEL
+</small>
 
 </div>
 
-<!-- Bootstrap JS -->
+<div class="col-md-4 text-md-end mt-3 mt-md-0">
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<div id="currentDate">
+--
+</div>
 
-<!-- Admin JS -->
+<div id="currentTime"
+class="fs-5 fw-bold">
+--
+</div>
 
-<script type="module" src="js/firebase-config.js"></script>
+</div>
 
-<script type="module" src="js/admin.js"></script>
+</div>
 
-<script>
-function updateClock(){
+</div>
 
-    const now = new Date();
+</header>
 
-    document.getElementById("currentDate").innerHTML =
-        now.toLocaleDateString();
 
-    document.getElementById("currentTime").innerHTML =
-        now.toLocaleTimeString();
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
 
-}
+<nav class="navbar navbar-dark bg-dark">
 
-setInterval(updateClock,1000);
+<div class="container-fluid">
 
-updateClock();
+<span class="navbar-brand fw-bold">
+MR ADMIN
+</span>
+
+<div class="d-flex gap-2">
+
+<a
+href="board.html"
+class="btn btn-primary btn-sm">
+
+<i class="bi bi-grid-3x3-gap"></i>
+LIVE BOARD
+
+</a>
+
+<button
+id="refreshBtn"
+class="btn btn-warning btn-sm">
+
+<i class="bi bi-arrow-clockwise"></i>
+Refresh
+
+</button>
+
+<button
+id="logoutBtn"
+class="btn btn-danger btn-sm">
+
+<i class="bi bi-box-arrow-right"></i>
+Logout
+
+</button>
+
+</div>
+
+</div>
+
+</nav>
+
+
+<!-- =====================================================
+     DATABASE STATUS
+===================================================== -->
+
+<div class="container-fluid mt-3">
+
+<div class="alert alert-light border shadow-sm">
+
+<div class="d-flex justify-content-between align-items-center">
+
+<div>
+
+<strong>
+Firebase Database:
+</strong>
+
+<span id="databaseStatus"
+class="text-danger">
+
+● Connecting...
+
+</span>
+
+</div>
+
+<div>
+
+<strong>
+Admin:
+</strong>
+
+<span id="adminEmail">
+--
+
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     COACH ENTRY
+===================================================== -->
+
+<div class="card shadow-sm border-0 mb-4">
+
+<div class="card-header bg-success text-white">
+
+<h5 class="mb-0">
+
+<i class="bi bi-train-front-fill"></i>
+
+Coach Entry
+
+</h5>
+
+</div>
+
+
+<div class="card-body">
+
+
+<div
+id="adminMessage"
+class="alert d-none">
+</div>
+
+
+<div class="row g-3">
+
+
+<!-- SHOP -->
+
+<div class="col-md-6">
+
+<label
+for="shop"
+class="form-label fw-bold">
+
+Shop
+
+</label>
+
+<select
+id="shop"
+class="form-select">
+
+<option value="">
+Select Shop
+</option>
+
+<option value="N SHOP">
+N SHOP
+</option>
+
+<option value="M SHOP">
+M SHOP
+</option>
+
+<option value="LIFTING BAY">
+LIFTING BAY
+</option>
+
+<option value="MR SCR SHOP">
+MR SCR SHOP
+</option>
+
+<option value="CR SHOP">
+CR SHOP
+</option>
+
+<option value="J SHOP">
+J SHOP
+</option>
+
+</select>
+
+</div>
+
+
+<!-- LINE -->
+
+<div class="col-md-6">
+
+<label
+for="line"
+class="form-label fw-bold">
+
+Line
+
+</label>
+
+<select
+id="line"
+class="form-select">
+
+<option value="">
+Select Line
+</option>
+
+</select>
+
+</div>
+
+
+<!-- POSITION -->
+
+<div class="col-md-6">
+
+<label
+for="position"
+class="form-label fw-bold">
+
+Position
+
+</label>
+
+<select
+id="position"
+class="form-select">
+
+<option value="">
+Select Position
+</option>
+
+</select>
+
+</div>
+
+
+<!-- COACH KEY -->
+
+<input
+type="hidden"
+id="coachKey">
+
+
+<!-- COACH NUMBER -->
+
+<div class="col-md-6">
+
+<label
+for="coachNo"
+class="form-label fw-bold">
+
+Coach Number
+
+</label>
+
+<input
+type="text"
+id="coachNo"
+class="form-control"
+placeholder="Enter Coach Number"
+autocomplete="off">
+
+</div>
+
+
+<!-- COACH TYPE -->
+
+<div class="col-md-6">
+
+<label
+for="coachType"
+class="form-label fw-bold">
+
+Coach Type
+
+</label>
+
+<select
+id="coachType"
+class="form-select">
+
+<option value="">
+Select Coach Type
+</option>
+
+<option>LHB AC</option>
+<option>LHB NAC</option>
+<option>LHB PC</option>
+<option>ICF</option>
+<option>GS</option>
+<option>GSLRD</option>
+<option>SLR</option>
+<option>CZ</option>
+<option>CN</option>
+<option>AC</option>
+<option>RCC</option>
+<option>RE</option>
+<option>ART</option>
+<option>NMG</option>
+<option>NMGH</option>
+<option>NMGHS</option>
+<option>VPU</option>
+<option>VPUH</option>
+<option>VPUHX</option>
+<option>VB</option>
+
+</select>
+
+</div>
+
+
+<!-- STATUS -->
+
+<div class="col-md-6">
+
+<label
+for="status"
+class="form-label fw-bold">
+
+Status
+
+</label>
+
+<select
+id="status"
+class="form-select">
+
+<option value="">
+Select Status
+</option>
+
+<option value="PO">PO</option>
+<option value="S">S</option>
+<option value="LM">LM</option>
+<option value="MED">MED</option>
+<option value="RL">RL</option>
+<option value="R1">R1</option>
+<option value="RS">RS</option>
+<option value="L">L</option>
+<option value="HVY">HVY</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<hr class="my-4">
+
+
+<!-- =====================================================
+     ACTION BUTTONS
+===================================================== -->
+
+<div class="row g-2">
+
+<div class="col-md-4">
+
+<button
+id="saveBtn"
+class="btn btn-success btn-lg w-100">
+
+<i class="bi bi-floppy"></i>
+
+SAVE
+
+</button>
+
+</div>
+
+
+<div class="col-md-4">
+
+<button
+id="updateBtn"
+class="btn btn-warning btn-lg w-100">
+
+<i class="bi bi-pencil-square"></i>
+
+UPDATE
+
+</button>
+
+</div>
+
+
+<div class="col-md-4">
+
+<button
+id="deleteBtn"
+class="btn btn-danger btn-lg w-100">
+
+<i class="bi bi-trash"></i>
+
+DELETE
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="text-center mt-3">
+
+<button
+id="clearBtn"
+class="btn btn-secondary">
+
+<i class="bi bi-eraser"></i>
+
+Clear Form
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     RECENT COACH ENTRY
+===================================================== -->
+
+<div class="card shadow-sm border-0 mb-4">
+
+<div class="card-header bg-primary text-white">
+
+<h5 class="mb-0">
+
+<i class="bi bi-clock-history"></i>
+
+Recent Coach Entry
+
+</h5>
+
+</div>
+
+
+<div class="card-body p-0">
+
+<div class="table-responsive">
+
+<table
+class="table table-bordered table-hover table-striped text-center align-middle mb-0">
+
+<thead class="table-dark">
+
+<tr>
+
+<th>Shop</th>
+<th>Line</th>
+<th>Position</th>
+<th>Coach No</th>
+<th>Coach Type</th>
+<th>Status</th>
+<th>Updated</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="historyBody">
+
+<tr>
+
+<td
+colspan="8"
+class="text-center text-muted">
+
+No Recent Entry
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     QUICK INFORMATION
+===================================================== -->
+
+<div class="row g-3 mb-4">
+
+
+<div class="col-md-3">
+
+<div class="card shadow-sm text-center">
+
+<div class="card-body">
+
+<h6>Total Coaches</h6>
+
+<h3
+id="totalCoach"
+class="text-primary">
+
+0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card shadow-sm text-center">
+
+<div class="card-body">
+
+<h6>Occupied</h6>
+
+<h3
+id="occupiedCoach"
+class="text-success">
+
+0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card shadow-sm text-center">
+
+<div class="card-body">
+
+<h6>Free Positions</h6>
+
+<h3
+id="freeCoach"
+class="text-warning">
+
+0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card shadow-sm text-center">
+
+<div class="card-body">
+
+<h6>Login Status</h6>
+
+<h3
+id="loginStatus"
+class="text-success">
+
+Admin
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="bg-dark text-white p-3">
+
+<div class="container-fluid">
+
+<div class="row">
+
+<div class="col-md-6">
+
+<strong>
+MR CO-ORDINATION
+</strong>
+
+<br>
+
+Liluah Workshop
+
+</div>
+
+<div class="col-md-6 text-md-end">
+
+Database:
+
+<span id="footerDatabase"
+class="text-warning">
+
+● Connecting
+
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</footer>
+
+
+<!-- =====================================================
+     BOOTSTRAP
+===================================================== -->
+
+<script
+src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
 
+
+<!-- =====================================================
+     ADMIN JS
+===================================================== -->
+
+<script
+type="module"
+src="js/admin.js">
+</script>
+
+
 </body>
+
 </html>
