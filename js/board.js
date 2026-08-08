@@ -45,6 +45,8 @@ let boardData = {};
 
 let currentCell = null;
 
+let searchBox = null;
+
 let dragCell = null;
 
 let lastMove = null;
@@ -54,7 +56,6 @@ let coachModal = null;
 let adminLoggedIn = false;
 
 let boardListenerStarted = false;
-
 /* ==========================
    ADMIN LOGIN STATUS
 ========================== */
