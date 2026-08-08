@@ -1,57 +1,803 @@
-@media(max-width:768px){
+/* =========================================================
+   MR CO-ORDINATION BOARD
+   PRODUCTION MOBILE RESPONSIVE CSS
+   Version : 1.0
+========================================================= */
 
-.header h2{
 
-font-size:20px;
+/* =========================================================
+   GLOBAL MOBILE FIX
+========================================================= */
+
+@media (max-width: 767px){
+
+    html,
+    body{
+        width:100%;
+        max-width:100%;
+        min-width:0;
+        margin:0;
+        padding:0;
+        overflow-x:hidden;
+    }
+
+    body{
+        font-size:14px;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .header,
+    header{
+        width:100%;
+        max-width:100%;
+        min-height:72px;
+        box-sizing:border-box;
+    }
+
+    .header h1,
+    header h1{
+        font-size:22px;
+        line-height:1.2;
+        margin:0;
+    }
+
+    .header h2,
+    header h2{
+        font-size:14px;
+        margin:3px 0 0;
+    }
+
+
+    /* =====================================================
+       NAVBAR / MOBILE MENU
+    ===================================================== */
+
+    .navbar{
+        width:100%;
+        box-sizing:border-box;
+    }
+
+    .navbar-toggler{
+        min-width:52px;
+        min-height:52px;
+    }
+
+
+    /* =====================================================
+       MAIN CONTAINER
+    ===================================================== */
+
+    main,
+    .container,
+    .container-fluid{
+        width:100%;
+        max-width:100%;
+        box-sizing:border-box;
+    }
+
+
+    /* =====================================================
+       TOP CONTROLS
+    ===================================================== */
+
+    .controls,
+    .board-controls,
+    .top-controls{
+        width:100%;
+        box-sizing:border-box;
+        padding:12px 16px;
+    }
+
+
+    /* =====================================================
+       SEARCH BOX
+    ===================================================== */
+
+    #searchBox,
+    #searchInput,
+    .search-box,
+    .search-input,
+    input[type="search"]{
+
+        width:100%;
+        max-width:100%;
+        height:52px;
+
+        box-sizing:border-box;
+
+        font-size:18px;
+
+        padding:8px 14px;
+
+        border-radius:10px;
+
+        margin:0 0 10px 0;
+    }
+
+    #searchBox::placeholder,
+    #searchInput::placeholder,
+    .search-box::placeholder,
+    .search-input::placeholder{
+        font-size:16px;
+    }
+
+
+    /* =====================================================
+       BUTTON AREA
+    ===================================================== */
+
+    .button-group,
+    .control-buttons,
+    .action-buttons{
+        width:100%;
+        display:grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0,1fr));
+
+        gap:8px;
+
+        box-sizing:border-box;
+    }
+
+
+    /* =====================================================
+       ALL CONTROL BUTTONS
+    ===================================================== */
+
+    .button-group button,
+    .control-buttons button,
+    .action-buttons button,
+    #excelBtn,
+    #pdfBtn,
+    #refreshBtn,
+    #fullscreenBtn{
+
+        width:100%;
+        min-width:0;
+
+        height:52px;
+
+        padding:6px 8px;
+
+        font-size:16px;
+        font-weight:600;
+
+        border-radius:10px;
+
+        box-sizing:border-box;
+    }
+
+
+    /* =====================================================
+       IF BUTTONS ARE DIRECT CHILDREN OF CONTROLS
+    ===================================================== */
+
+    .controls > button,
+    .board-controls > button,
+    .top-controls > button{
+
+        width:calc(50% - 4px);
+
+        height:52px;
+
+        margin:0 4px 8px 0;
+
+        font-size:16px;
+    }
+
+
+    /* =====================================================
+       STATUS / DATABASE AREA
+    ===================================================== */
+
+    .database-status,
+    #databaseStatus,
+    .db-status{
+
+        width:100%;
+
+        display:flex;
+
+        justify-content:flex-end;
+
+        align-items:center;
+
+        gap:6px;
+
+        min-height:36px;
+
+        font-size:15px;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+    }
+
+
+    /* =====================================================
+       COUNTERS
+    ===================================================== */
+
+    .counters,
+    .counter-container,
+    .board-counters{
+
+        width:100%;
+
+        display:flex;
+
+        justify-content:flex-end;
+
+        align-items:center;
+
+        flex-wrap:wrap;
+
+        gap:6px;
+
+        font-size:14px;
+
+        box-sizing:border-box;
+    }
+
+
+    /* =====================================================
+       HORIZONTAL LINE
+    ===================================================== */
+
+    hr{
+        width:calc(100% - 32px);
+
+        margin:16px auto;
+
+        border:0;
+
+        border-top:1px solid #ccc;
+    }
+
+
+    /* =====================================================
+       SHOP SECTION
+    ===================================================== */
+
+    .shop-section{
+        width:100%;
+        max-width:100%;
+        box-sizing:border-box;
+
+        margin:24px 0 0;
+    }
+
+
+    /* =====================================================
+       SHOP TITLE
+    ===================================================== */
+
+    .shop-title,
+    .shop-header,
+    .section-title{
+
+        width:100%;
+
+        min-height:58px;
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+        box-sizing:border-box;
+
+        padding:8px 10px;
+
+        margin:0 0 10px 0;
+
+        border-radius:18px;
+
+        font-size:24px;
+
+        line-height:1.2;
+
+        font-weight:700;
+
+        text-align:center;
+    }
+
+
+    /* =====================================================
+       TABLE WRAPPER
+    ===================================================== */
+
+    .table-wrapper,
+    .board-table-wrapper,
+    .shop-table-wrapper{
+
+        width:100%;
+
+        max-width:100%;
+
+        overflow-x:auto;
+        overflow-y:hidden;
+
+        -webkit-overflow-scrolling:touch;
+
+        box-sizing:border-box;
+
+        margin:0;
+        padding:0;
+    }
+
+
+    /* =====================================================
+       BOARD TABLE
+    ===================================================== */
+
+    table.board-table,
+    .board-table-wrapper table,
+    .shop-table-wrapper table,
+    .table-wrapper table{
+
+        width:max-content;
+
+        min-width:max-content;
+
+        border-collapse:collapse;
+
+        table-layout:fixed;
+
+        margin:0;
+    }
+
+
+    /* =====================================================
+       TABLE HEADER
+    ===================================================== */
+
+    table.board-table thead th,
+    .board-table-wrapper th,
+    .shop-table-wrapper th,
+    .table-wrapper th{
+
+        width:80px;
+        min-width:80px;
+        max-width:80px;
+
+        height:50px;
+        min-height:50px;
+
+        padding:4px;
+
+        box-sizing:border-box;
+
+        font-size:15px;
+
+        text-align:center;
+        vertical-align:middle;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+    }
+
+
+    /* =====================================================
+       POSITION HEADER
+    ===================================================== */
+
+    table.board-table thead th:first-child,
+    .board-table-wrapper th:first-child,
+    .shop-table-wrapper th:first-child,
+    .table-wrapper th:first-child{
+
+        width:70px;
+        min-width:70px;
+        max-width:70px;
+    }
+
+
+    /* =====================================================
+       POSITION CELLS
+    ===================================================== */
+
+    table.board-table tbody td:first-child,
+    .board-table-wrapper td:first-child,
+    .shop-table-wrapper td:first-child,
+    .table-wrapper td:first-child{
+
+        width:70px;
+        min-width:70px;
+        max-width:70px;
+
+        height:80px;
+        min-height:80px;
+
+        font-size:15px;
+
+        font-weight:700;
+
+        text-align:center;
+        vertical-align:middle;
+
+        box-sizing:border-box;
+    }
+
+
+    /* =====================================================
+       COACH CELLS
+       EXACT 80 × 80 PX
+    ===================================================== */
+
+    table.board-table tbody td:not(:first-child),
+    .board-table-wrapper tbody td:not(:first-child),
+    .shop-table-wrapper tbody td:not(:first-child),
+    .table-wrapper tbody td:not(:first-child){
+
+        width:80px;
+        min-width:80px;
+        max-width:80px;
+
+        height:80px;
+        min-height:80px;
+        max-height:80px;
+
+        padding:3px;
+
+        box-sizing:border-box;
+
+        text-align:center;
+        vertical-align:middle;
+
+        overflow:hidden;
+
+        word-break:break-word;
+
+        white-space:normal;
+
+        font-size:12px;
+
+        line-height:1.25;
+    }
+
+
+    /* =====================================================
+       COACH CARD
+    ===================================================== */
+
+    .coach-card{
+
+        width:100%;
+        height:100%;
+
+        min-width:0;
+        min-height:0;
+
+        display:flex;
+
+        flex-direction:column;
+
+        justify-content:center;
+
+        align-items:center;
+
+        text-align:center;
+
+        overflow:hidden;
+
+        box-sizing:border-box;
+
+        padding:2px;
+    }
+
+
+    /* =====================================================
+       COACH NUMBER
+    ===================================================== */
+
+    .coach-number,
+    .coach-no{
+
+        width:100%;
+
+        font-size:12px;
+
+        font-weight:700;
+
+        line-height:1.15;
+
+        white-space:normal;
+
+        overflow-wrap:anywhere;
+    }
+
+
+    /* =====================================================
+       COACH TYPE
+    ===================================================== */
+
+    .coach-type{
+
+        width:100%;
+
+        font-size:11px;
+
+        line-height:1.15;
+
+        white-space:normal;
+
+        overflow-wrap:anywhere;
+    }
+
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    .coach-status,
+    .status{
+
+        width:100%;
+
+        font-size:11px;
+
+        font-weight:700;
+
+        line-height:1.15;
+
+        white-space:normal;
+
+        overflow:hidden;
+    }
+
+
+    /* =====================================================
+       STATUS COLOURS
+    ===================================================== */
+
+    .status-po{
+        background:#198754 !important;
+        color:#fff !important;
+    }
+
+    .status-lm{
+        background:#ffc107 !important;
+        color:#000 !important;
+    }
+
+    .status-med{
+        background:#dc3545 !important;
+        color:#fff !important;
+    }
+
+    .status-rl{
+        background:#0d6efd !important;
+        color:#fff !important;
+    }
+
+    .status-wip{
+        background:#0dcaf0 !important;
+        color:#000 !important;
+    }
+
+    .status-hold{
+        background:#6c757d !important;
+        color:#fff !important;
+    }
+
+
+    /* =====================================================
+       EMPTY COACH CELL
+    ===================================================== */
+
+    .empty-cell,
+    td:empty{
+
+        width:80px;
+        min-width:80px;
+        height:80px;
+    }
+
+
+    /* =====================================================
+       MOBILE MODAL
+    ===================================================== */
+
+    .modal-dialog{
+
+        width:calc(100% - 24px);
+
+        max-width:500px;
+
+        margin:12px auto;
+    }
+
+    .modal-content{
+
+        width:100%;
+
+        border-radius:12px;
+    }
+
+    .modal-body input,
+    .modal-body select{
+
+        width:100%;
+
+        min-height:44px;
+
+        font-size:16px;
+    }
+
+
+    /* =====================================================
+       MOBILE TABLE SCROLLBAR
+    ===================================================== */
+
+    .table-wrapper::-webkit-scrollbar,
+    .board-table-wrapper::-webkit-scrollbar,
+    .shop-table-wrapper::-webkit-scrollbar{
+
+        height:7px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb,
+    .board-table-wrapper::-webkit-scrollbar-thumb,
+    .shop-table-wrapper::-webkit-scrollbar-thumb{
+
+        background:#888;
+
+        border-radius:10px;
+    }
+
+
+    /* =====================================================
+       SEARCH RESULT
+    ===================================================== */
+
+    #searchResult,
+    .search-result{
+
+        width:100%;
+
+        box-sizing:border-box;
+
+        margin-top:6px;
+
+        font-size:14px;
+
+        overflow-wrap:anywhere;
+    }
+
+
+    /* =====================================================
+       FULLSCREEN
+    ===================================================== */
+
+    body.fullscreen .header,
+    body.fullscreen header{
+
+        display:none;
+    }
+
+    body.fullscreen .controls,
+    body.fullscreen .board-controls,
+    body.fullscreen .top-controls{
+
+        padding-top:8px;
+    }
+
+
+    /* =====================================================
+       PREVENT IMAGE / CONTENT OVERFLOW
+    ===================================================== */
+
+    img,
+    iframe,
+    canvas,
+    svg{
+
+        max-width:100%;
+    }
 
 }
 
-.header h4{
 
-font-size:16px;
+/* =========================================================
+   VERY SMALL MOBILE
+   320px – 374px
+========================================================= */
 
+@media (max-width:374px){
+
+    .button-group,
+    .control-buttons,
+    .action-buttons{
+
+        grid-template-columns:1fr;
+    }
+
+    .button-group button,
+    .control-buttons button,
+    .action-buttons button{
+
+        height:46px;
+
+        font-size:15px;
+    }
+
+    .shop-title,
+    .shop-header,
+    .section-title{
+
+        min-height:52px;
+
+        font-size:21px;
+
+        border-radius:15px;
+    }
+
+    table.board-table tbody td:not(:first-child),
+    .board-table-wrapper tbody td:not(:first-child),
+    .shop-table-wrapper tbody td:not(:first-child),
+    .table-wrapper tbody td:not(:first-child){
+
+        width:80px;
+        min-width:80px;
+        max-width:80px;
+
+        height:80px;
+    }
 }
 
-.header h5{
 
-font-size:14px;
+/* =========================================================
+   LANDSCAPE MOBILE
+========================================================= */
 
+@media (max-width:767px) and (orientation:landscape){
+
+    .header,
+    header{
+
+        min-height:60px;
+    }
+
+    .shop-title,
+    .shop-header,
+    .section-title{
+
+        min-height:48px;
+
+        font-size:20px;
+    }
+
+    table.board-table tbody td:not(:first-child),
+    .board-table-wrapper tbody td:not(:first-child),
+    .shop-table-wrapper tbody td:not(:first-child),
+    .table-wrapper tbody td:not(:first-child){
+
+        width:80px;
+        min-width:80px;
+        height:80px;
+    }
 }
 
-.coach-card{
 
-min-height:55px;
+/* =========================================================
+   DESKTOP
+   DO NOT CHANGE DESKTOP BOARD
+========================================================= */
 
-font-size:12px;
+@media (min-width:768px){
 
-padding:3px;
+    .table-wrapper,
+    .board-table-wrapper,
+    .shop-table-wrapper{
 
-}
-
-table{
-
-font-size:12px;
-
-}
-
-.btn{
-
-margin-top:5px;
-
-width:100%;
-
-}
-
-.shop-card{
-
-margin:10px 0;
-
-}
-
-.login-box{
-
-width:95%;
-
-}
-
+        overflow-x:auto;
+    }
 }
