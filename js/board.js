@@ -1616,7 +1616,7 @@ window.board = {
 
 console.log("==================================");
 console.log("MR CO-ORDINATION BOARD READY");
-console.log("Realtime Firebase Connected");
+console.log("Firebase RTDB listener initialized");
 console.log("Drag & Drop Enabled");
 console.log("Search Enabled");
 console.log("Dashboard Ready");
