@@ -2,6 +2,7 @@
    firebase-config.js
    MR CO-ORDINATION
    FIREBASE CONFIGURATION
+   GitHub Pages + iPhone/Safari
 ========================================== */
 
 import {
@@ -9,7 +10,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 
 import {
-    getDatabase
+    getDatabase,
+    forceLongPolling,
+    goOnline
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 import {
@@ -52,14 +55,23 @@ const firebaseConfig = {
    INITIALIZE FIREBASE
 ========================================== */
 
-const app = initializeApp(firebaseConfig);
+const app =
+    initializeApp(firebaseConfig);
+
+
+/* ==========================================
+   IMPORTANT
+   iPhone / Safari / GitHub Pages
+========================================== */
+
+forceLongPolling();
 
 
 /* ==========================================
    REALTIME DATABASE
 ========================================== */
 
-export const database =
+const database =
     getDatabase(
         app,
         firebaseConfig.databaseURL
@@ -67,16 +79,31 @@ export const database =
 
 
 /* ==========================================
+   FORCE DATABASE ONLINE
+========================================== */
+
+goOnline(database);
+
+
+/* ==========================================
    FIREBASE AUTH
 ========================================== */
 
-export const auth =
+const auth =
     getAuth(app);
 
 
 /* ==========================================
-   DEFAULT EXPORT
+   EXPORT
 ========================================== */
+
+export {
+    database,
+    auth
+};
+
+export const FIREBASE_DATABASE_URL =
+    firebaseConfig.databaseURL;
 
 export default app;
 
@@ -94,15 +121,25 @@ console.log(
 );
 
 console.log(
-    "Project: mr-coordi-coach"
+    "Project:",
+    firebaseConfig.projectId
 );
 
 console.log(
-    "Realtime Database Initialized"
+    "Database URL:",
+    firebaseConfig.databaseURL
 );
 
 console.log(
-    "Firebase Authentication Initialized"
+    "Realtime Database: ONLINE"
+);
+
+console.log(
+    "Long Polling: ENABLED"
+);
+
+console.log(
+    "Firebase Auth: INITIALIZED"
 );
 
 console.log(
