@@ -23,7 +23,7 @@ import {
 
 const firebaseConfig = {
 
-    apiKey: "AIzaSyDs7QAXYKov8SSVsrHPZr3Jh9iZ-1qHMEBs",
+    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
 
     authDomain:
         "mr-coordi-coach.firebaseapp.com",
