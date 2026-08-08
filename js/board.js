@@ -1357,42 +1357,151 @@ setInterval(() => {
    DATABASE STATUS
 ========================== */
 
-const dbStatus =
-    document.getElementById("databaseStatus");
+/* =====================================================
+   FIREBASE DATABASE CONNECTION STATUS
+===================================================== */
 
-const footerStatus =
-    document.getElementById("footerDatabase");
+function startDatabaseStatus() {
 
-onValue(
-    ref(database, ".info/connected"),
-    (snap) => {
+    const dbStatus =
+        document.getElementById("databaseStatus");
 
-        const connected = snap.val();
+    const footerStatus =
+        document.getElementById("footerDatabase");
 
-        if (connected) {
+    if (!dbStatus && !footerStatus) {
 
-            if (dbStatus)
-                dbStatus.innerHTML =
-                    '<span class="text-success">● Connected</span>';
+        console.warn(
+            "Database status elements not found"
+        );
 
-            if (footerStatus)
-                footerStatus.innerHTML =
-                    '<span class="text-success">● Connected</span>';
+        return;
 
-        } else {
+    }
 
-            if (dbStatus)
-                dbStatus.innerHTML =
-                    '<span class="text-danger">● Offline</span>';
+    /* ==========================
+       INITIAL STATE
+    ========================== */
 
-            if (footerStatus)
-                footerStatus.innerHTML =
-                    '<span class="text-danger">● Offline</span>';
+    setDatabaseStatus(
+        "connecting",
+        dbStatus,
+        footerStatus
+    );
+
+    /* ==========================
+       FIREBASE CONNECTION
+    ========================== */
+
+    onValue(
+
+        ref(database, ".info/connected"),
+
+        (snapshot) => {
+
+            const connected =
+                snapshot.val() === true;
+
+            console.log(
+                "Firebase RTDB Connected:",
+                connected
+            );
+
+            if (connected) {
+
+                setDatabaseStatus(
+                    "connected",
+                    dbStatus,
+                    footerStatus
+                );
+
+            } else {
+
+                setDatabaseStatus(
+                    "offline",
+                    dbStatus,
+                    footerStatus
+                );
+
+            }
+
+        },
+
+        (error) => {
+
+            console.error(
+                "Firebase Connection Error:",
+                error
+            );
+
+            setDatabaseStatus(
+                "offline",
+                dbStatus,
+                footerStatus
+            );
 
         }
 
+    );
+
+}
+
+
+/* =====================================================
+   SET DATABASE STATUS
+===================================================== */
+
+function setDatabaseStatus(
+    status,
+    dbStatus,
+    footerStatus
+) {
+
+    let html = "";
+
+    switch (status) {
+
+        case "connected":
+
+            html =
+                '<span class="text-success">● Connected</span>';
+
+            break;
+
+        case "connecting":
+
+            html =
+                '<span class="text-warning">● Connecting...</span>';
+
+            break;
+
+        case "offline":
+
+            html =
+                '<span class="text-danger">● Offline</span>';
+
+            break;
+
+        default:
+
+            html =
+                '<span class="text-secondary">● Unknown</span>';
+
     }
-);
+
+    if (dbStatus) {
+
+        dbStatus.innerHTML = html;
+
+    }
+
+    if (footerStatus) {
+
+        footerStatus.innerHTML = html;
+
+    }
+
+}
 
 /* ==========================
    CLEAR MODAL
