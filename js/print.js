@@ -1,19 +1,14 @@
-/* ==========================================
+/* =====================================================
    MR CO-ORDINATION
    PRODUCTION PRINT.JS
+   -----------------------------------------------------
+   PRINT ONLY:
+   ✔ Coach Number
 
-   PRINT:
-   - Coach Number ONLY
-
-   NOT PRINT:
-   - Coach Type
-   - Coach Status
-========================================== */
-
-
-/* ==========================================
-   FIREBASE
-========================================== */
+   DO NOT PRINT:
+   ✘ Coach Type
+   ✘ Coach Status
+===================================================== */
 
 import { database } from "./firebase-config.js";
 
@@ -23,262 +18,477 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
-/* ==========================================
-   CONFIGURATION
-========================================== */
+/* =====================================================
+   CONFIG
+===================================================== */
 
 const BOARD_PATH = "coachBoard";
 
-const PRINT_DELAY = 800;
+const PRINT_DELAY = 1000;
 
 
-/* ==========================================
-   HEADER DATE + TIME
-========================================== */
+/* =====================================================
+   HEADER
+===================================================== */
 
 function updateHeader() {
 
     const now = new Date();
 
+    const dateEl = document.getElementById("liveDate");
+    const timeEl = document.getElementById("liveTime");
 
-    const liveDate =
-        document.getElementById("liveDate");
-
-
-    const liveTime =
-        document.getElementById("liveTime");
-
-
-    if (liveDate) {
-
-        liveDate.textContent =
+    if (dateEl) {
+        dateEl.textContent =
             "Date : " +
             now.toLocaleDateString("en-IN");
-
     }
 
-
-    if (liveTime) {
-
-        liveTime.textContent =
+    if (timeEl) {
+        timeEl.textContent =
             "Time : " +
             now.toLocaleTimeString("en-IN");
-
     }
-
 }
 
 
-/* ==========================================
+/* =====================================================
    LAST UPDATE
-========================================== */
+===================================================== */
 
-function updateLastUpdate(text) {
+function updateLastUpdate() {
 
-    const element =
-        document.getElementById("lastUpdate");
+    const el = document.getElementById("lastUpdate");
 
+    if (el) {
 
-    if (element) {
-
-        element.textContent = text;
+        el.textContent =
+            "Last Update : " +
+            new Date().toLocaleTimeString("en-IN");
 
     }
+}
+
+
+/* =====================================================
+   CLEAR PRINT CELLS
+===================================================== */
+
+function clearPrintCells() {
+
+    document
+        .querySelectorAll(".coach-table td")
+        .forEach(cell => {
+
+            cell.innerHTML =
+                '<div class="coach-card"></div>';
+
+        });
 
 }
 
 
-/* ==========================================
-   CLEAR ALL PRINT CELLS
-========================================== */
+/* =====================================================
+   NORMALIZE TEXT
+===================================================== */
 
-function clearBoardCells() {
+function normalize(value) {
 
-    const cells =
-        document.querySelectorAll(
-            ".coach-table td"
-        );
+    if (
+        value === undefined ||
+        value === null
+    ) {
+        return "";
+    }
 
-
-    cells.forEach(cell => {
-
-        cell.innerHTML =
-            '<div class="coach-card"></div>';
-
-    });
-
+    return String(value)
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "");
 }
 
 
-/* ==========================================
+/* =====================================================
    GET COACH NUMBER
-========================================== */
+===================================================== */
 
 function getCoachNumber(coach) {
 
     if (!coach) {
-
         return "";
-
     }
 
-
     /*
-     * Primary field
-     */
+       Main field
+    */
 
     if (
         coach.coachNo !== undefined &&
-        coach.coachNo !== null
+        coach.coachNo !== null &&
+        String(coach.coachNo).trim() !== ""
     ) {
 
-        return coach.coachNo;
+        return String(coach.coachNo).trim();
 
     }
 
 
     /*
-     * Backup fields
-     */
+       Backup field
+    */
 
     if (
         coach.coachNumber !== undefined &&
-        coach.coachNumber !== null
+        coach.coachNumber !== null &&
+        String(coach.coachNumber).trim() !== ""
     ) {
 
-        return coach.coachNumber;
+        return String(coach.coachNumber).trim();
 
     }
 
 
+    /*
+       Another possible field
+    */
+
     if (
         coach.number !== undefined &&
-        coach.number !== null
+        coach.number !== null &&
+        String(coach.number).trim() !== ""
     ) {
 
-        return coach.number;
+        return String(coach.number).trim();
 
     }
 
 
     return "";
-
 }
 
 
-/* ==========================================
-   PUT COACH NUMBER INTO CELL
-========================================== */
+/* =====================================================
+   BUILD CELL ID FROM COACH DATA
+===================================================== */
 
-function printCoachNumber(cell, coach) {
+function buildCellId(coach) {
+
+    if (!coach) {
+        return "";
+    }
+
+
+    /*
+       If Firebase already contains cellId
+    */
+
+    const directId =
+        coach.cellId ||
+        coach.cellID ||
+        coach.positionId ||
+        coach.positionID;
+
+
+    if (directId) {
+
+        return String(directId).trim();
+
+    }
+
+
+    /*
+       Shop + Line + Position
+
+       Example:
+
+       shop = N SHOP
+       line = N2
+       position = H1
+
+       Result:
+
+       N2_H1
+    */
+
+    let line =
+        coach.line ||
+        coach.lineNo ||
+        coach.lineNumber ||
+        coach.track ||
+        coach.trackNo;
+
+
+    let position =
+        coach.position ||
+        coach.pos ||
+        coach.location;
+
+
+    if (line && position) {
+
+        return (
+            String(line).trim() +
+            "_" +
+            String(position).trim()
+        );
+
+    }
+
+
+    /*
+       Sometimes shop/line may be stored
+       differently.
+    */
+
+    if (
+        coach.shop &&
+        coach.position
+    ) {
+
+        const shop =
+            normalize(coach.shop);
+
+        const pos =
+            String(coach.position).trim();
+
+        /*
+           Try common line fields
+        */
+
+        const possibleLine =
+            coach.line ||
+            coach.lineNo ||
+            coach.lineNumber ||
+            coach.track ||
+            coach.trackNo;
+
+        if (possibleLine) {
+
+            return (
+                String(possibleLine).trim() +
+                "_" +
+                pos
+            );
+
+        }
+
+    }
+
+
+    return "";
+}
+
+
+/* =====================================================
+   DRAW COACH NUMBER
+===================================================== */
+
+function drawCoachNumber(cell, coach) {
 
     if (!cell) {
+        return;
+    }
+
+
+    const coachNo =
+        getCoachNumber(coach);
+
+
+    /*
+       IMPORTANT:
+       Only Coach Number is inserted.
+    */
+
+    cell.innerHTML = "";
+
+
+    if (!coachNo) {
 
         return;
 
     }
 
 
-    const coachNumber =
-        getCoachNumber(coach);
-
-
-    /*
-     * Clear existing content
-     */
-
-    cell.innerHTML = "";
-
-
-    /*
-     * Coach card
-     */
-
-    const coachCard =
+    const card =
         document.createElement("div");
 
-
-    coachCard.className =
+    card.className =
         "coach-card";
 
 
-    /*
-     * Coach number only
-     */
-
-    const numberElement =
+    const number =
         document.createElement("div");
 
-
-    numberElement.className =
+    number.className =
         "coach-number";
 
 
-    numberElement.textContent =
-        String(coachNumber);
+    number.textContent =
+        coachNo;
 
 
-    coachCard.appendChild(
-        numberElement
-    );
+    card.appendChild(number);
 
-
-    cell.appendChild(
-        coachCard
-    );
+    cell.appendChild(card);
 
 }
 
 
-/* ==========================================
-   LOAD BOARD
-========================================== */
+/* =====================================================
+   PROCESS ONE COACH
+===================================================== */
+
+function processCoach(firebaseKey, coach) {
+
+    if (!coach) {
+        return;
+    }
+
+
+    /*
+       FIRST:
+       Try Firebase key itself.
+
+       Example:
+
+       N2_H1
+       SCR9_H1
+       F1_H
+    */
+
+    let cellId =
+        String(firebaseKey || "").trim();
+
+
+    let cell =
+        document.getElementById(cellId);
+
+
+    if (cell) {
+
+        drawCoachNumber(
+            cell,
+            coach
+        );
+
+        console.log(
+            "PRINT MATCH:",
+            cellId,
+            getCoachNumber(coach)
+        );
+
+        return;
+
+    }
+
+
+    /*
+       SECOND:
+       Build ID from coach fields
+    */
+
+    cellId =
+        buildCellId(coach);
+
+
+    if (!cellId) {
+
+        console.warn(
+            "PRINT: Cannot build cell ID:",
+            firebaseKey,
+            coach
+        );
+
+        return;
+
+    }
+
+
+    cell =
+        document.getElementById(cellId);
+
+
+    if (cell) {
+
+        drawCoachNumber(
+            cell,
+            coach
+        );
+
+        console.log(
+            "PRINT MATCH:",
+            cellId,
+            getCoachNumber(coach)
+        );
+
+    } else {
+
+        console.warn(
+            "PRINT: Cell not found:",
+            cellId,
+            coach
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   LOAD FIREBASE BOARD
+===================================================== */
 
 async function loadBoard() {
 
     try {
 
         console.log(
-            "PRINT: Loading coachBoard..."
+            "===================================="
+        );
+
+        console.log(
+            "PRINT: Loading Firebase board..."
+        );
+
+        console.log(
+            "Path:",
+            BOARD_PATH
+        );
+
+        console.log(
+            "===================================="
         );
 
 
-        const boardReference =
-            ref(
-                database,
-                BOARD_PATH
+        const snapshot =
+            await get(
+                ref(
+                    database,
+                    BOARD_PATH
+                )
             );
 
 
-        const snapshot =
-            await get(boardReference);
+        /*
+           Clear existing cells
+        */
+
+        clearPrintCells();
 
 
         /*
-         * Clear old data
-         */
-
-        clearBoardCells();
-
-
-        /*
-         * No data
-         */
+           No Firebase data
+        */
 
         if (!snapshot.exists()) {
 
             console.warn(
-                "PRINT: coachBoard is empty."
+                "PRINT: coachBoard is EMPTY"
             );
 
-
-            updateLastUpdate(
-                "Last Update : No Data"
-            );
-
+            updateLastUpdate();
 
             schedulePrint();
-
 
             return;
 
@@ -289,91 +499,137 @@ async function loadBoard() {
             snapshot.val();
 
 
+        console.log(
+            "PRINT: Firebase data:",
+            board
+        );
+
+
         /*
-         * Firebase board data
-         */
+           =================================================
+           CASE 1
 
-        Object.entries(board).forEach(
-            ([cellId, coach]) => {
+           coachBoard:
+
+           {
+               N2_H1: {
+                   coachNo: "12345",
+                   ...
+               }
+           }
+           =================================================
+        */
+
+        if (
+            typeof board === "object" &&
+            !Array.isArray(board)
+        ) {
+
+            Object.entries(board)
+                .forEach(
+                    ([key, value]) => {
+
+                        /*
+                           Direct coach record
+                        */
+
+                        if (
+                            value &&
+                            typeof value === "object" &&
+                            !Array.isArray(value)
+                        ) {
+
+                            /*
+                               Check whether this is
+                               actually a coach object.
+                            */
+
+                            const coachNo =
+                                getCoachNumber(value);
 
 
-                const cell =
-                    document.getElementById(
-                        cellId
-                    );
+                            if (
+                                coachNo ||
+                                value.line ||
+                                value.position ||
+                                value.shop
+                            ) {
+
+                                processCoach(
+                                    key,
+                                    value
+                                );
+
+                                return;
+
+                            }
 
 
-                /*
-                 * Ignore IDs which do not
-                 * exist in print.html
-                 */
+                            /*
+                               Nested board structure
+                            */
 
-                if (!cell) {
+                            Object.entries(value)
+                                .forEach(
+                                    ([nestedKey, nestedValue]) => {
 
-                    return;
+                                        if (
+                                            nestedValue &&
+                                            typeof nestedValue === "object"
+                                        ) {
 
-                }
+                                            processCoach(
+                                                nestedKey,
+                                                nestedValue
+                                            );
 
+                                        }
 
-                /*
-                 * IMPORTANT:
-                 *
-                 * Only coachNo is used.
-                 *
-                 * coachType = NOT USED
-                 * status    = NOT USED
-                 */
+                                    }
+                                );
 
-                printCoachNumber(
-                    cell,
-                    coach
+                        }
+
+                    }
                 );
 
-            }
-        );
+        }
 
 
-        /*
-         * Last update time
-         */
-
-        updateLastUpdate(
-            "Last Update : " +
-            new Date().toLocaleTimeString(
-                "en-IN"
-            )
-        );
+        updateLastUpdate();
 
 
         console.log(
-            "PRINT: Board loaded successfully."
+            "PRINT: Coach numbers loaded."
         );
 
 
         /*
-         * Start printing
-         */
+           Give browser time to render
+        */
 
         schedulePrint();
 
 
     } catch (error) {
 
+        console.error(
+            "===================================="
+        );
 
         console.error(
-            "PRINT: Firebase error:",
-            error
+            "PRINT FIREBASE ERROR"
+        );
+
+        console.error(error);
+
+        console.error(
+            "===================================="
         );
 
 
-        updateLastUpdate(
-            "Last Update : Database Error"
-        );
+        updateLastUpdate();
 
-
-        /*
-         * Still allow print dialog
-         */
 
         schedulePrint();
 
@@ -382,73 +638,67 @@ async function loadBoard() {
 }
 
 
-/* ==========================================
+/* =====================================================
    AUTO PRINT
-========================================== */
+===================================================== */
 
 function schedulePrint() {
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        window.focus();
+            console.log(
+                "PRINT: Opening print dialog..."
+            );
 
-        window.print();
+            window.focus();
 
-    }, PRINT_DELAY);
+            window.print();
+
+        },
+        PRINT_DELAY
+    );
 
 }
 
 
-/* ==========================================
+/* =====================================================
    AFTER PRINT
-========================================== */
+===================================================== */
 
 window.addEventListener(
     "afterprint",
     () => {
 
         console.log(
-            "PRINT: Print dialog closed."
+            "PRINT: Print completed."
         );
 
     }
 );
 
 
-/* ==========================================
+/* =====================================================
    START
-========================================== */
+===================================================== */
 
 window.addEventListener(
     "DOMContentLoaded",
     () => {
-
 
         console.log(
             "MR CO-ORDINATION PRINT.JS LOADED"
         );
 
 
-        /*
-         * Initial header
-         */
-
         updateHeader();
 
-
-        /*
-         * Update clock every second
-         */
 
         setInterval(
             updateHeader,
             1000
         );
 
-
-        /*
-         * Load Firebase board
-         */
 
         loadBoard();
 
