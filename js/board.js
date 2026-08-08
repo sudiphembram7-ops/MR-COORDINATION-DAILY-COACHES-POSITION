@@ -49,7 +49,224 @@ let boardListenerStarted = false;
 let searchResults = [];
 let currentSearchIndex = 0;
 let popupTimer = null;
+/* =====================================================
+   FIREBASE DIAGNOSTIC
+===================================================== */
 
+let firebaseLastError = null;
+let firebaseErrorBox = null;
+
+
+/* =====================================================
+   FIREBASE ERROR PANEL
+===================================================== */
+
+function showFirebaseError(
+    source,
+    error
+) {
+
+    firebaseLastError = error;
+
+    console.error(
+        "Firebase Error:",
+        source,
+        error
+    );
+
+
+    let box =
+        document.getElementById(
+            "firebaseErrorBox"
+        );
+
+
+    if (!box) {
+
+        box =
+            document.createElement(
+                "div"
+            );
+
+        box.id =
+            "firebaseErrorBox";
+
+        document.body.appendChild(
+            box
+        );
+    }
+
+
+    const code =
+        error?.code ||
+        "unknown";
+
+
+    const message =
+        error?.message ||
+        String(error) ||
+        "Unknown Firebase error";
+
+
+    box.innerHTML = `
+
+        <div style="
+            background:#b71c1c;
+            color:#fff;
+            padding:16px;
+            border-radius:12px;
+            margin:12px;
+            box-shadow:0 4px 15px rgba(0,0,0,.35);
+            font-family:Arial,sans-serif;
+            position:relative;
+            z-index:99999;
+        ">
+
+            <div style="
+                font-size:20px;
+                font-weight:bold;
+                margin-bottom:10px;
+            ">
+                🔴 Firebase Database Error
+            </div>
+
+
+            <div style="
+                background:#fff;
+                color:#111;
+                padding:12px;
+                border-radius:8px;
+                font-size:14px;
+                line-height:1.6;
+            ">
+
+                <b>Source:</b>
+                ${escapeHTML(source)}
+
+                <br>
+
+                <b>Error Code:</b>
+                ${escapeHTML(code)}
+
+                <br>
+
+                <b>Message:</b>
+                ${escapeHTML(message)}
+
+                <br>
+
+                <b>Online:</b>
+                ${navigator.onLine ? "YES" : "NO"}
+
+                <br>
+
+                <b>Time:</b>
+                ${new Date().toLocaleString("en-IN")}
+
+            </div>
+
+
+            <div style="
+                margin-top:12px;
+                display:flex;
+                gap:8px;
+            ">
+
+                <button
+                    type="button"
+                    onclick="window.retryFirebaseConnection()"
+                    style="
+                        padding:10px 16px;
+                        border:0;
+                        border-radius:8px;
+                        background:#fff;
+                        color:#b71c1c;
+                        font-weight:bold;
+                    "
+                >
+                    🔄 Retry
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="window.hideFirebaseError()"
+                    style="
+                        padding:10px 16px;
+                        border:0;
+                        border-radius:8px;
+                        background:#333;
+                        color:#fff;
+                        font-weight:bold;
+                    "
+                >
+                    ✕ Hide
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+
+    box.style.display =
+        "block";
+}
+
+
+/* =====================================================
+   HIDE FIREBASE ERROR
+===================================================== */
+
+function hideFirebaseError() {
+
+    const box =
+        document.getElementById(
+            "firebaseErrorBox"
+        );
+
+
+    if (box) {
+
+        box.style.display =
+            "none";
+    }
+}
+
+
+/* =====================================================
+   RETRY FIREBASE
+===================================================== */
+
+window.retryFirebaseConnection =
+    function () {
+
+        hideFirebaseError();
+
+        console.log(
+            "Retrying Firebase connection..."
+        );
+
+
+        setDatabaseStatus(
+            "connecting",
+
+            document.getElementById(
+                "databaseStatus"
+            ),
+
+            document.getElementById(
+                "footerDatabase"
+            )
+        );
+
+
+        loadBoard();
+    };
+
+
+window.hideFirebaseError =
+    hideFirebaseError;
 
 /* =====================================================
    START
@@ -201,29 +418,56 @@ function updateClock() {
    LOAD BOARD
 ===================================================== */
 
+/* =====================================================
+   LOAD BOARD
+   FIREBASE ERROR VISIBLE ON SCREEN
+===================================================== */
+
 function loadBoard() {
 
     if (
         boardListenerStarted
     ) {
+
+        console.log(
+            "Firebase board listener already started"
+        );
+
         return;
     }
+
+
+    console.log(
+        "Starting Firebase coachBoard listener..."
+    );
 
 
     boardListenerStarted =
         true;
 
 
-    onValue(
-
+    const boardRef =
         ref(
             database,
             "coachBoard"
-        ),
+        );
+
+
+    onValue(
+
+        boardRef,
 
         snapshot => {
 
             try {
+
+                console.log(
+                    "Firebase coachBoard snapshot received"
+                );
+
+
+                hideFirebaseError();
+
 
                 boardData =
                     snapshot.exists()
@@ -231,30 +475,77 @@ function loadBoard() {
                         : {};
 
 
+                console.log(
+                    "Firebase board data:",
+                    boardData
+                );
+
+
                 drawBoard();
 
                 updateLastUpdate();
 
+
+                setDatabaseStatus(
+
+                    "connected",
+
+                    document.getElementById(
+                        "databaseStatus"
+                    ),
+
+                    document.getElementById(
+                        "footerDatabase"
+                    )
+                );
+
             }
+
             catch (error) {
 
                 console.error(
-                    "Draw board error:",
+                    "Draw Board Error:",
+                    error
+                );
+
+
+                showFirebaseError(
+                    "drawBoard()",
                     error
                 );
             }
         },
 
+
         error => {
 
             console.error(
-                "Firebase board error:",
+                "Firebase coachBoard Error:",
+                error
+            );
+
+
+            setDatabaseStatus(
+
+                "offline",
+
+                document.getElementById(
+                    "databaseStatus"
+                ),
+
+                document.getElementById(
+                    "footerDatabase"
+                )
+            );
+
+
+            showFirebaseError(
+                "coachBoard listener",
                 error
             );
         }
     );
 }
-
 
 /* =====================================================
    LAST UPDATE
@@ -2798,6 +3089,10 @@ window.addEventListener(
    DATABASE STATUS
 ===================================================== */
 
+/* =====================================================
+   DATABASE STATUS
+===================================================== */
+
 function startDatabaseStatus() {
 
     const dbStatus =
@@ -2819,6 +3114,11 @@ function startDatabaseStatus() {
     );
 
 
+    console.log(
+        "Checking Firebase .info/connected..."
+    );
+
+
     onValue(
 
         ref(
@@ -2830,6 +3130,12 @@ function startDatabaseStatus() {
 
             const connected =
                 snapshot.val() === true;
+
+
+            console.log(
+                "Firebase .info/connected:",
+                connected
+            );
 
 
             setDatabaseStatus(
@@ -2844,10 +3150,11 @@ function startDatabaseStatus() {
             );
         },
 
+
         error => {
 
             console.error(
-                "Database status error:",
+                "Firebase connection status error:",
                 error
             );
 
@@ -2857,11 +3164,15 @@ function startDatabaseStatus() {
                 dbStatus,
                 footerStatus
             );
+
+
+            showFirebaseError(
+                ".info/connected",
+                error
+            );
         }
     );
 }
-
-
 /* =====================================================
    SET DATABASE STATUS
 ===================================================== */
@@ -2933,37 +3244,50 @@ function initializeNetworkStatus() {
     );
 
 
-    window.addEventListener(
-        "offline",
-        () => {
+    /* =====================================================
+   GLOBAL ERROR HANDLER
+===================================================== */
 
-            console.warn(
-                "Internet Disconnected"
-            );
+window.addEventListener(
+    "error",
+    event => {
 
-
-            const dbStatus =
-                document.getElementById(
-                    "databaseStatus"
-                );
-
-
-            const footerStatus =
-                document.getElementById(
-                    "footerDatabase"
-                );
+        console.error(
+            "MR Board Error:",
+            event.message,
+            event.error
+        );
 
 
-            setDatabaseStatus(
+        if (
+            event.error
+        ) {
 
-                "offline",
-
-                dbStatus,
-
-                footerStatus
+            showFirebaseError(
+                "JavaScript / Runtime",
+                event.error
             );
         }
-    );
+    }
+);
+
+
+window.addEventListener(
+    "unhandledrejection",
+    event => {
+
+        console.error(
+            "MR Board Promise Error:",
+            event.reason
+        );
+
+
+        showFirebaseError(
+            "Unhandled Promise",
+            event.reason
+        );
+    }
+);
 }
 
 
