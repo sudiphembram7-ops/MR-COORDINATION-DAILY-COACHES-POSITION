@@ -228,6 +228,10 @@ function loadBoard() {
     const boardRef =
         ref(database, "coachBoard");
 
+    console.log(
+        "Starting Firebase Board Listener..."
+    );
+
     onValue(
 
         boardRef,
@@ -236,11 +240,11 @@ function loadBoard() {
 
             boardData =
                 snapshot.exists()
-                ? snapshot.val()
-                : {};
+                    ? snapshot.val()
+                    : {};
 
             console.log(
-                "Realtime Sync",
+                "Realtime Sync SUCCESS",
                 boardData
             );
 
@@ -253,8 +257,18 @@ function loadBoard() {
         (error) => {
 
             console.error(
-                "Firebase Error:",
+                "Firebase Board Read Error:",
                 error
+            );
+
+            console.error(
+                "Firebase Error Code:",
+                error?.code
+            );
+
+            console.error(
+                "Firebase Error Message:",
+                error?.message
             );
 
         }
@@ -262,7 +276,6 @@ function loadBoard() {
     );
 
 }
-
 /* ==========================
    LAST UPDATE
 ========================== */
