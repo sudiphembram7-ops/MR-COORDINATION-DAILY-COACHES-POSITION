@@ -1,7 +1,7 @@
 /* =====================================================
    MR CO-ORDINATION
    FIREBASE ADMIN LOGIN
-   Production Version
+   FINAL PRODUCTION VERSION
 ===================================================== */
 
 import {
@@ -13,32 +13,72 @@ import {
 } from "./firebase-config.js";
 
 
+console.log("=================================");
 console.log("LOGIN JS LOADED");
+console.log("AUTH OBJECT:", auth);
+console.log("=================================");
 
 
 /* =====================================================
-   LOGIN FUNCTION
+   ELEMENTS
+===================================================== */
+
+const emailInput =
+    document.getElementById("email");
+
+const passwordInput =
+    document.getElementById("password");
+
+const loginBtn =
+    document.getElementById("loginBtn");
+
+const message =
+    document.getElementById("message");
+
+
+/* =====================================================
+   CHECK ELEMENTS
+===================================================== */
+
+if (!emailInput) {
+    console.error("ERROR: #email not found");
+}
+
+if (!passwordInput) {
+    console.error("ERROR: #password not found");
+}
+
+if (!loginBtn) {
+    console.error("ERROR: #loginBtn not found");
+}
+
+
+/* =====================================================
+   SHOW MESSAGE
+===================================================== */
+
+function showMessage(
+    text,
+    type = "danger"
+) {
+
+    if (!message) return;
+
+    message.textContent = text;
+
+    message.className =
+        `mt-3 text-center text-${type}`;
+
+}
+
+
+/* =====================================================
+   LOGIN
 ===================================================== */
 
 async function login() {
 
-    const emailInput =
-        document.getElementById("email");
-
-    const passwordInput =
-        document.getElementById("password");
-
-    if (!emailInput || !passwordInput) {
-
-        alert("Email or Password field not found");
-
-        console.error(
-            "Missing #email or #password"
-        );
-
-        return;
-
-    }
+    console.log("LOGIN BUTTON CLICKED");
 
 
     const email =
@@ -48,47 +88,62 @@ async function login() {
         passwordInput.value;
 
 
+    /* ==========================
+       VALIDATION
+    ========================== */
+
     if (!email) {
 
-        alert("Please enter Email");
+        showMessage(
+            "Please enter Email",
+            "danger"
+        );
 
         emailInput.focus();
 
         return;
-
     }
 
 
     if (!password) {
 
-        alert("Please enter Password");
+        showMessage(
+            "Please enter Password",
+            "danger"
+        );
 
         passwordInput.focus();
 
         return;
-
     }
 
 
-    const loginBtn =
-        document.getElementById("loginBtn");
+    /* ==========================
+       BUTTON LOADING
+    ========================== */
+
+    loginBtn.disabled = true;
+
+    loginBtn.textContent =
+        "LOGIN...";
+
+
+    showMessage(
+        "Checking login...",
+        "primary"
+    );
 
 
     try {
 
-        if (loginBtn) {
-
-            loginBtn.disabled = true;
-            loginBtn.textContent = "LOGIN...";
-
-        }
-
-
         console.log(
-            "Firebase login started:",
-            email
+            "Firebase authentication starting..."
         );
 
+
+        /* ==========================
+           FIREBASE LOGIN
+        ========================== */
 
         const result =
             await signInWithEmailAndPassword(
@@ -99,100 +154,138 @@ async function login() {
 
 
         console.log(
-            "Login successful:",
+            "LOGIN SUCCESS:",
             result.user.email
         );
 
 
-        alert("Login Successful");
+        showMessage(
+            "Login Successful. Opening Admin...",
+            "success"
+        );
 
 
-        window.location.href =
-            "./admin.html";
+        /* ==========================
+           REDIRECT
+        ========================== */
+
+        setTimeout(() => {
+
+            window.location.href =
+                "admin.html";
+
+        }, 500);
 
 
     } catch (error) {
 
         console.error(
-            "Firebase Login Error:",
-            error
+            "================================="
+        );
+
+        console.error(
+            "FIREBASE LOGIN ERROR"
+        );
+
+        console.error(
+            "CODE:",
+            error.code
+        );
+
+        console.error(
+            "MESSAGE:",
+            error.message
+        );
+
+        console.error(
+            "================================="
         );
 
 
-        let message =
+        let errorMessage =
             "Login Failed";
 
 
         switch (error.code) {
 
+
             case "auth/invalid-credential":
 
-                message =
+                errorMessage =
                     "Invalid Email or Password";
-
-                break;
-
-
-            case "auth/user-not-found":
-
-                message =
-                    "User not found";
-
-                break;
-
-
-            case "auth/wrong-password":
-
-                message =
-                    "Wrong Password";
 
                 break;
 
 
             case "auth/invalid-email":
 
-                message =
+                errorMessage =
                     "Invalid Email Address";
+
+                break;
+
+
+            case "auth/user-not-found":
+
+                errorMessage =
+                    "User Not Found";
+
+                break;
+
+
+            case "auth/wrong-password":
+
+                errorMessage =
+                    "Wrong Password";
 
                 break;
 
 
             case "auth/too-many-requests":
 
-                message =
-                    "Too many login attempts. Please try again later.";
+                errorMessage =
+                    "Too many attempts. Please try again later.";
 
                 break;
 
 
             case "auth/network-request-failed":
 
-                message =
-                    "Network error. Check Internet connection.";
+                errorMessage =
+                    "Network Error. Check Internet.";
+
+                break;
+
+
+            case "auth/user-disabled":
+
+                errorMessage =
+                    "This user account is disabled.";
 
                 break;
 
 
             default:
 
-                message =
+                errorMessage =
                     error.message ||
                     "Login Failed";
 
         }
 
 
-        alert(message);
+        showMessage(
+            errorMessage,
+            "danger"
+        );
 
 
     } finally {
 
-        if (loginBtn) {
+        loginBtn.disabled = false;
 
-            loginBtn.disabled = false;
-            loginBtn.textContent = "LOGIN";
-
-        }
+        loginBtn.textContent =
+            "LOGIN";
 
     }
 
@@ -200,62 +293,78 @@ async function login() {
 
 
 /* =====================================================
-   BUTTON EVENT
+   LOGIN BUTTON
 ===================================================== */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+if (loginBtn) {
 
-        const loginBtn =
-            document.getElementById("loginBtn");
+    loginBtn.addEventListener(
+        "click",
+        login
+    );
 
+    console.log(
+        "LOGIN BUTTON EVENT ATTACHED"
+    );
 
-        if (!loginBtn) {
-
-            console.error(
-                "LOGIN button #loginBtn not found"
-            );
-
-            return;
-
-        }
-
-
-        loginBtn.addEventListener(
-            "click",
-            login
-        );
-
-
-        console.log(
-            "LOGIN BUTTON READY"
-        );
-
-    }
-);
+}
 
 
 /* =====================================================
-   ENTER KEY LOGIN
+   ENTER KEY
 ===================================================== */
 
-document.addEventListener(
-    "keydown",
-    (event) => {
+if (passwordInput) {
 
-        if (event.key === "Enter") {
+    passwordInput.addEventListener(
+        "keydown",
+        (event) => {
 
-            login();
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                login();
+
+            }
 
         }
+    );
 
-    }
-);
+}
 
 
 /* =====================================================
-   OPTIONAL GLOBAL
+   EMAIL ENTER
+===================================================== */
+
+if (emailInput) {
+
+    emailInput.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                passwordInput.focus();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   GLOBAL
 ===================================================== */
 
 window.login = login;
+
+
+console.log(
+    "LOGIN SYSTEM READY"
+);
