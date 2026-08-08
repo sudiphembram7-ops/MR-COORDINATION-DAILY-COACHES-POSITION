@@ -1,36 +1,22 @@
-/* =========================================================
+/* =====================================================
    MR CO-ORDINATION
    ADMIN.JS
    PRODUCTION VERSION
-
+   -----------------------------------------------------
    Features:
-   ✔ Firebase Login Protection
-   ✔ Shop → Line → Position
-   ✔ Coach Entry
-   ✔ Firebase Save
-   ✔ Firebase Update
-   ✔ Firebase Delete
-   ✔ Duplicate Coach Check
-   ✔ Recent Coach Entry
-   ✔ Logout
-   ✔ Database Connection Status
-   ✔ Counters
-   ✔ Clear Form
-========================================================= */
+   1. Firebase Authentication Protection
+   2. Admin Login Check
+   3. Recent Coach Entry
+   4. Firebase Database Status
+   5. Refresh
+   6. Logout
+   7. Realtime History
+===================================================== */
 
 
-/* =========================================================
+/* =====================================================
    FIREBASE IMPORTS
-========================================================= */
-
-import {
-    ref,
-    get,
-    set,
-    update,
-    remove,
-    onValue
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+===================================================== */
 
 import {
     onAuthStateChanged,
@@ -38,1793 +24,174 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 import {
-    database,
-    auth
+    ref,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+import {
+    auth,
+    database
 } from "./firebase-config.js";
 
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+let currentUser = null;
+
+let historyListenerStarted = false;
+
+
+/* =====================================================
+   START
+===================================================== */
 
 console.log("=================================");
 console.log("MR ADMIN JS LOADED");
 console.log("=================================");
 
 
-/* =========================================================
-   GLOBAL VARIABLES
-========================================================= */
-
-let adminUser = null;
-
-let boardData = {};
-
-let editingKey = null;
-
-let databaseConnected = false;
-
-
-/* =========================================================
-   SHOP → LINE → POSITION CONFIGURATION
-========================================================= */
-
-const shopConfig = {
-
-    "N SHOP": {
-
-        lines: {
-
-            "N2": [
-                "H1",
-                "H2",
-                "H3",
-                "D3",
-                "D2",
-                "D1"
-            ],
-
-            "N3": [
-                "H1",
-                "H2",
-                "H3",
-                "D3",
-                "D2",
-                "D1"
-            ],
-
-            "N5": [
-                "H1",
-                "H2",
-                "H3",
-                "D3",
-                "D2",
-                "D1"
-            ],
-
-            "N7": [
-                "H1",
-                "H2",
-                "H3",
-                "D3",
-                "D2",
-                "D1"
-            ],
-
-            "N8": [
-                "H1",
-                "H2",
-                "H3",
-                "D3",
-                "D2",
-                "D1"
-            ]
-
-        }
-
-    },
-
-
-    "M SHOP": {
-
-        lines: {
-
-            "M2": [
-                "H",
-                "C",
-                "D"
-            ],
-
-            "M3": [
-                "H",
-                "C",
-                "D"
-            ],
-
-            "M4": [
-                "H",
-                "C",
-                "D"
-            ],
-
-            "M5": [
-                "H",
-                "C",
-                "D"
-            ],
-
-            "M6": [
-                "H",
-                "C",
-                "D"
-            ]
-
-        }
-
-    },
-
-
-    "LIFTING BAY": {
-
-        lines: {
-
-            "L9": [
-                "H",
-                "C",
-                "D"
-            ],
-
-            "L10": [
-                "H",
-                "C",
-                "D"
-            ]
-
-        }
-
-    },
-
-
-    "MR SCR SHOP": {
-
-        lines: {
-
-            "SCR9": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR10": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR11": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR12": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR13": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR14": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR15": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR16": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR18": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR19": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR21": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "SCR22": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ]
-
-        }
-
-    },
-
-
-    "CR SHOP": {
-
-        lines: {
-
-            "F1": [
-                "H",
-                "D"
-            ],
-
-            "F2": [
-                "H",
-                "D"
-            ],
-
-            "F3": [
-                "H",
-                "D"
-            ],
-
-            "F4": [
-                "H",
-                "D"
-            ],
-
-            "F5": [
-                "H",
-                "D"
-            ],
-
-            "F6": [
-                "H",
-                "D"
-            ],
-
-            "F7": [
-                "H",
-                "D"
-            ],
-
-            "F8": [
-                "H",
-                "D"
-            ],
-
-            "F9": [
-                "H",
-                "D"
-            ],
-
-            "F10": [
-                "H",
-                "D"
-            ],
-
-            "F11": [
-                "H",
-                "D"
-            ]
-
-        }
-
-    },
-
-
-    "J SHOP": {
-
-        lines: {
-
-            "J1": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "J2": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "J3": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "J4": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "J5": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ],
-
-            "J6": [
-                "H1",
-                "H2",
-                "D2",
-                "D1"
-            ]
-
-        }
-
-    }
-
-};
-
-
-/* =========================================================
-   DOM ELEMENTS
-========================================================= */
-
-const shopSelect =
-    document.getElementById("shop");
-
-const lineSelect =
-    document.getElementById("line");
-
-const positionSelect =
-    document.getElementById("position");
-
-const coachNoInput =
-    document.getElementById("coachNo");
-
-const coachTypeSelect =
-    document.getElementById("coachType");
-
-const statusSelect =
-    document.getElementById("status");
-
-const coachKeyInput =
-    document.getElementById("coachKey");
-
-const saveBtn =
-    document.getElementById("saveBtn");
-
-const updateBtn =
-    document.getElementById("updateBtn");
-
-const deleteBtn =
-    document.getElementById("deleteBtn");
-
-const clearBtn =
-    document.getElementById("clearBtn");
-
-const logoutBtn =
-    document.getElementById("logoutBtn");
-
-const refreshBtn =
-    document.getElementById("refreshBtn");
-
-const historyBody =
-    document.getElementById("historyBody");
-
-const adminEmail =
-    document.getElementById("adminEmail");
-
-const loginStatus =
-    document.getElementById("loginStatus");
-
-const databaseStatus =
-    document.getElementById("databaseStatus");
-
-const footerDatabase =
-    document.getElementById("footerDatabase");
-
-const messageBox =
-    document.getElementById("adminMessage");
-
-
-/* =========================================================
-   PAGE INITIALIZATION
-========================================================= */
+/* =====================================================
+   DOM READY
+===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    console.log("ADMIN PAGE READY");
+    console.log("ADMIN DOM READY");
 
-    setupShopListener();
+    initializeAdmin();
+
+});
+
+
+/* =====================================================
+   ADMIN INITIALIZATION
+===================================================== */
+
+function initializeAdmin() {
+
+    setupAuthProtection();
 
     setupButtons();
 
     setupDatabaseStatus();
 
-    setupClock();
-
-});
+}
 
 
-/* =========================================================
-   AUTHENTICATION PROTECTION
-========================================================= */
+/* =====================================================
+   LOGIN PROTECTION
+===================================================== */
 
-onAuthStateChanged(auth, (user) => {
+function setupAuthProtection() {
 
-    if (!user) {
+    onAuthStateChanged(auth, (user) => {
 
-        console.warn(
-            "No Admin Login Found"
-        );
+        if (!user) {
 
-        window.location.replace(
-            "login.html"
-        );
-
-        return;
-
-    }
-
-
-    adminUser = user;
-
-
-    console.log(
-        "Admin authenticated:",
-        user.email
-    );
-
-
-    if (adminEmail) {
-
-        adminEmail.textContent =
-            user.email || "Admin";
-
-    }
-
-
-    if (loginStatus) {
-
-        loginStatus.textContent =
-            "Admin";
-
-        loginStatus.className =
-            "text-success";
-
-    }
-
-
-    loadBoardData();
-
-});
-
-
-/* =========================================================
-   SHOP CHANGE
-========================================================= */
-
-function setupShopListener() {
-
-    shopSelect?.addEventListener(
-        "change",
-        () => {
-
-            const shop =
-                shopSelect.value;
-
-            resetSelect(
-                lineSelect,
-                "Select Line"
+            console.warn(
+                "No Admin Login Found"
             );
 
-            resetSelect(
-                positionSelect,
-                "Select Position"
-            );
+            currentUser = null;
 
+            const loginStatus =
+                document.getElementById("loginStatus");
 
-            if (!shop) return;
+            if (loginStatus) {
 
-
-            const config =
-                shopConfig[shop];
-
-            if (!config) return;
-
-
-            Object.keys(config.lines)
-                .forEach(line => {
-
-                    const option =
-                        document.createElement("option");
-
-                    option.value = line;
-
-                    option.textContent = line;
-
-                    lineSelect.appendChild(
-                        option
-                    );
-
-                });
-
-        }
-    );
-
-
-    lineSelect?.addEventListener(
-        "change",
-        () => {
-
-            const shop =
-                shopSelect.value;
-
-            const line =
-                lineSelect.value;
-
-
-            resetSelect(
-                positionSelect,
-                "Select Position"
-            );
-
-
-            if (!shop || !line) return;
-
-
-            const positions =
-                shopConfig[shop]
-                    ?.lines?.[line];
-
-
-            if (!positions) return;
-
-
-            positions.forEach(position => {
-
-                const option =
-                    document.createElement("option");
-
-                option.value =
-                    position;
-
-                option.textContent =
-                    position;
-
-                positionSelect.appendChild(
-                    option
-                );
-
-            });
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   RESET SELECT
-========================================================= */
-
-function resetSelect(
-    select,
-    placeholder
-) {
-
-    if (!select) return;
-
-    select.innerHTML = "";
-
-    const option =
-        document.createElement("option");
-
-    option.value = "";
-
-    option.textContent =
-        placeholder;
-
-    select.appendChild(option);
-
-}
-
-
-/* =========================================================
-   BUTTON EVENTS
-========================================================= */
-
-function setupButtons() {
-
-    saveBtn?.addEventListener(
-        "click",
-        saveCoach
-    );
-
-    updateBtn?.addEventListener(
-        "click",
-        updateCoach
-    );
-
-    deleteBtn?.addEventListener(
-        "click",
-        deleteCoach
-    );
-
-    clearBtn?.addEventListener(
-        "click",
-        clearForm
-    );
-
-    logoutBtn?.addEventListener(
-        "click",
-        logout
-    );
-
-    refreshBtn?.addEventListener(
-        "click",
-        () => {
-
-            location.reload();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   GET FORM DATA
-========================================================= */
-
-function getFormData() {
-
-    return {
-
-        shop:
-            shopSelect?.value.trim(),
-
-        line:
-            lineSelect?.value.trim(),
-
-        position:
-            positionSelect?.value.trim(),
-
-        coachNo:
-            coachNoInput?.value.trim(),
-
-        coachType:
-            coachTypeSelect?.value.trim(),
-
-        status:
-            statusSelect?.value.trim(),
-
-        updatedAt:
-            new Date().toISOString(),
-
-        updatedBy:
-            adminUser?.email || "Admin"
-
-    };
-
-}
-
-
-/* =========================================================
-   VALIDATE FORM
-========================================================= */
-
-function validateCoach(coach) {
-
-    if (!coach.shop) {
-
-        showMessage(
-            "Please select Shop.",
-            "danger"
-        );
-
-        return false;
-
-    }
-
-
-    if (!coach.line) {
-
-        showMessage(
-            "Please select Line.",
-            "danger"
-        );
-
-        return false;
-
-    }
-
-
-    if (!coach.position) {
-
-        showMessage(
-            "Please select Position.",
-            "danger"
-        );
-
-        return false;
-
-    }
-
-
-    if (!coach.coachNo) {
-
-        showMessage(
-            "Please enter Coach Number.",
-            "danger"
-        );
-
-        coachNoInput?.focus();
-
-        return false;
-
-    }
-
-
-    if (!coach.coachType) {
-
-        showMessage(
-            "Please select Coach Type.",
-            "danger"
-        );
-
-        return false;
-
-    }
-
-
-    if (!coach.status) {
-
-        showMessage(
-            "Please select Status.",
-            "danger"
-        );
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-/* =========================================================
-   DUPLICATE COACH CHECK
-========================================================= */
-
-function findCoachByNumber(
-    coachNo,
-    excludeKey = null
-) {
-
-    for (
-        const line in boardData
-    ) {
-
-        const positions =
-            boardData[line];
-
-        if (!positions) continue;
-
-
-        for (
-            const position in positions
-        ) {
-
-            const coach =
-                positions[position];
-
-            if (!coach) continue;
-
-
-            const key =
-                `${line}_${position}`;
-
-
-            if (
-                coach.coachNo === coachNo &&
-                key !== excludeKey
-            ) {
-
-                return {
-                    line,
-                    position,
-                    coach
-                };
+                loginStatus.innerHTML =
+                    '<span class="text-danger">● Not Logged In</span>';
 
             }
 
-        }
-
-    }
-
-
-    return null;
-
-}
-
-
-/* =========================================================
-   SAVE COACH
-========================================================= */
-
-async function saveCoach() {
-
-    if (!adminUser) {
-
-        showMessage(
-            "Please login as Admin.",
-            "danger"
-        );
-
-        return;
-
-    }
-
-
-    const coach =
-        getFormData();
-
-
-    if (!validateCoach(coach)) {
-        return;
-    }
-
-
-    const duplicate =
-        findCoachByNumber(
-            coach.coachNo
-        );
-
-
-    if (duplicate) {
-
-        showMessage(
-            `Coach ${coach.coachNo} already exists at ${duplicate.line} / ${duplicate.position}.`,
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const key =
-        `${coach.line}_${coach.position}`;
-
-
-    if (
-        boardData[
-            coach.line
-        ]?.[
-            coach.position
-        ]
-    ) {
-
-        showMessage(
-            "This position is already occupied.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        setButtonLoading(
-            saveBtn,
-            true,
-            "Saving..."
-        );
-
-
-        const coachData = {
-
-            ...coach,
-
-            createdAt:
-                new Date().toISOString(),
-
-            createdBy:
-                adminUser.email || "Admin"
-
-        };
-
-
-        await set(
-            ref(
-                database,
-                `coachBoard/${coach.line}/${coach.position}`
-            ),
-            coachData
-        );
-
-
-        await saveHistory(
-            "SAVE",
-            coachData
-        );
-
-
-        showMessage(
-            "Coach saved successfully.",
-            "success"
-        );
-
-
-        clearForm();
-
-
-    } catch (error) {
-
-        console.error(
-            "SAVE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Save failed.",
-            "danger"
-        );
-
-
-    } finally {
-
-        setButtonLoading(
-            saveBtn,
-            false,
-            "SAVE"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE COACH
-========================================================= */
-
-async function updateCoach() {
-
-    if (!adminUser) {
-
-        showMessage(
-            "Please login as Admin.",
-            "danger"
-        );
-
-        return;
-
-    }
-
-
-    const coach =
-        getFormData();
-
-
-    if (!validateCoach(coach)) {
-        return;
-    }
-
-
-    const oldKey =
-        editingKey ||
-        coachKeyInput?.value;
-
-
-    if (!oldKey) {
-
-        showMessage(
-            "Select a coach from Recent Entry before updating.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const [
-        oldLine,
-        oldPosition
-    ] =
-        oldKey.split("_");
-
-
-    const duplicate =
-        findCoachByNumber(
-            coach.coachNo,
-            oldKey
-        );
-
-
-    if (duplicate) {
-
-        showMessage(
-            `Coach ${coach.coachNo} already exists elsewhere.`,
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        setButtonLoading(
-            updateBtn,
-            true,
-            "Updating..."
-        );
-
-
-        const oldRef =
-            ref(
-                database,
-                `coachBoard/${oldLine}/${oldPosition}`
+            /*
+             * Prevent direct access to admin.html
+             */
+
+            window.location.replace(
+                "./login.html"
             );
 
-
-        const newRef =
-            ref(
-                database,
-                `coachBoard/${coach.line}/${coach.position}`
-            );
-
-
-        const updatedCoach = {
-
-            ...coach,
-
-            updatedAt:
-                new Date().toISOString(),
-
-            updatedBy:
-                adminUser.email || "Admin"
-
-        };
-
-
-        if (
-            oldLine !== coach.line ||
-            oldPosition !== coach.position
-        ) {
-
-            const destination =
-                boardData[
-                    coach.line
-                ]?.[
-                    coach.position
-                ];
-
-
-            if (destination) {
-
-                showMessage(
-                    "New position is already occupied.",
-                    "warning"
-                );
-
-                return;
-
-            }
-
-
-            await set(
-                newRef,
-                updatedCoach
-            );
-
-
-            await remove(
-                oldRef
-            );
-
-        } else {
-
-            await update(
-                oldRef,
-                updatedCoach
-            );
+            return;
 
         }
 
 
-        await saveHistory(
-            "UPDATE",
-            updatedCoach
+        /* ==========================
+           USER LOGGED IN
+        ========================== */
+
+        currentUser = user;
+
+        console.log(
+            "Admin Logged In:",
+            user.email
         );
 
 
-        showMessage(
-            "Coach updated successfully.",
-            "success"
-        );
+        const loginStatus =
+            document.getElementById("loginStatus");
 
 
-        clearForm();
+        if (loginStatus) {
 
-
-    } catch (error) {
-
-        console.error(
-            "UPDATE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Update failed.",
-            "danger"
-        );
-
-
-    } finally {
-
-        setButtonLoading(
-            updateBtn,
-            false,
-            "UPDATE"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DELETE COACH
-========================================================= */
-
-async function deleteCoach() {
-
-    if (!adminUser) {
-
-        showMessage(
-            "Please login as Admin.",
-            "danger"
-        );
-
-        return;
-
-    }
-
-
-    const coach =
-        getFormData();
-
-
-    const line =
-        coach.line;
-
-    const position =
-        coach.position;
-
-
-    if (!line || !position) {
-
-        showMessage(
-            "Select Shop, Line and Position.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const existing =
-        boardData[line]?.[position];
-
-
-    if (!existing) {
-
-        showMessage(
-            "No coach found in this position.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            `Delete Coach ${existing.coachNo || ""} from ${line} / ${position}?`
-        );
-
-
-    if (!confirmed) return;
-
-
-    try {
-
-        setButtonLoading(
-            deleteBtn,
-            true,
-            "Deleting..."
-        );
-
-
-        await remove(
-            ref(
-                database,
-                `coachBoard/${line}/${position}`
-            )
-        );
-
-
-        await saveHistory(
-            "DELETE",
-            {
-                ...existing,
-
-                line,
-
-                position,
-
-                deletedAt:
-                    new Date().toISOString(),
-
-                deletedBy:
-                    adminUser.email || "Admin"
-
-            }
-        );
-
-
-        showMessage(
-            "Coach deleted successfully.",
-            "success"
-        );
-
-
-        clearForm();
-
-
-    } catch (error) {
-
-        console.error(
-            "DELETE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Delete failed.",
-            "danger"
-        );
-
-
-    } finally {
-
-        setButtonLoading(
-            deleteBtn,
-            false,
-            "DELETE"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   LOAD BOARD DATA
-========================================================= */
-
-function loadBoardData() {
-
-    onValue(
-
-        ref(
-            database,
-            "coachBoard"
-        ),
-
-        snapshot => {
-
-            boardData =
-                snapshot.exists()
-                    ? snapshot.val()
-                    : {};
-
-
-            console.log(
-                "Admin Board Data:",
-                boardData
-            );
-
-
-            updateCounters();
-
-            loadRecentEntries();
-
-        },
-
-        error => {
-
-            console.error(
-                "Firebase Board Error:",
-                error
-            );
-
-
-            showMessage(
-                "Unable to load Firebase data.",
-                "danger"
-            );
+            loginStatus.innerHTML =
+                '<span class="text-success">● Admin Logged In</span>';
 
         }
 
-    );
 
-}
+        /*
+         * Start history only after authentication
+         */
 
-
-/* =========================================================
-   SAVE HISTORY
-========================================================= */
-
-async function saveHistory(
-    action,
-    coach
-) {
-
-    const historyKey =
-        Date.now().toString();
-
-
-    const historyData = {
-
-        action,
-
-        shop:
-            coach.shop || "",
-
-        line:
-            coach.line || "",
-
-        position:
-            coach.position || "",
-
-        coachNo:
-            coach.coachNo || "",
-
-        coachType:
-            coach.coachType || "",
-
-        status:
-            coach.status || "",
-
-        user:
-            adminUser?.email ||
-            "Admin",
-
-        time:
-            new Date().toISOString()
-
-    };
-
-
-    await set(
-        ref(
-            database,
-            `history/${historyKey}`
-        ),
-        historyData
-    );
-
-}
-
-
-/* =========================================================
-   RECENT ENTRIES
-========================================================= */
-
-function loadRecentEntries() {
-
-    if (!historyBody) return;
-
-
-    const entries = [];
-
-
-    for (
-        const line in boardData
-    ) {
-
-        const positions =
-            boardData[line];
-
-        if (!positions) continue;
-
-
-        for (
-            const position in positions
-        ) {
-
-            const coach =
-                positions[position];
-
-            if (!coach) continue;
-
-
-            entries.push({
-
-                ...coach,
-
-                line,
-
-                position
-
-            });
-
-        }
-
-    }
-
-
-    entries.sort(
-        (a, b) => {
-
-            return (
-                new Date(
-                    b.updatedAt ||
-                    b.createdAt ||
-                    0
-                ) -
-                new Date(
-                    a.updatedAt ||
-                    a.createdAt ||
-                    0
-                )
-            );
-
-        }
-    );
-
-
-    const recent =
-        entries.slice(0, 20);
-
-
-    historyBody.innerHTML = "";
-
-
-    if (!recent.length) {
-
-        historyBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="8"
-                    class="text-center text-muted">
-
-                    No Recent Entry
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-
-    recent.forEach(
-        coach => {
-
-            const tr =
-                document.createElement("tr");
-
-
-            const date =
-                coach.updatedAt ||
-                coach.createdAt;
-
-
-            tr.innerHTML = `
-
-                <td>
-                    ${escapeHTML(coach.shop || "-")}
-                </td>
-
-                <td>
-                    ${escapeHTML(coach.line || "-")}
-                </td>
-
-                <td>
-                    ${escapeHTML(coach.position || "-")}
-                </td>
-
-                <td>
-                    <strong>
-                        ${escapeHTML(coach.coachNo || "-")}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escapeHTML(coach.coachType || "-")}
-                </td>
-
-                <td>
-                    <span class="badge ${getStatusClass(coach.status)}">
-                        ${escapeHTML(coach.status || "-")}
-                    </span>
-                </td>
-
-                <td>
-                    ${formatDate(date)}
-                </td>
-
-                <td>
-
-                    <button
-                        class="btn btn-sm btn-primary edit-history-btn">
-
-                        <i class="bi bi-pencil"></i>
-                        Edit
-
-                    </button>
-
-                </td>
-
-            `;
-
-
-            const editButton =
-                tr.querySelector(
-                    ".edit-history-btn"
-                );
-
-
-            editButton?.addEventListener(
-                "click",
-                () => {
-
-                    editCoach(
-                        coach
-                    );
-
-                }
-            );
-
-
-            historyBody.appendChild(
-                tr
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   EDIT COACH FROM RECENT ENTRY
-========================================================= */
-
-function editCoach(coach) {
-
-    editingKey =
-        `${coach.line}_${coach.position}`;
-
-
-    coachKeyInput.value =
-        editingKey;
-
-
-    shopSelect.value =
-        coach.shop || "";
-
-
-    shopSelect.dispatchEvent(
-        new Event("change")
-    );
-
-
-    lineSelect.value =
-        coach.line || "";
-
-
-    lineSelect.dispatchEvent(
-        new Event("change")
-    );
-
-
-    positionSelect.value =
-        coach.position || "";
-
-
-    coachNoInput.value =
-        coach.coachNo || "";
-
-
-    coachTypeSelect.value =
-        coach.coachType || "";
-
-
-    statusSelect.value =
-        coach.status || "";
-
-
-    window.scrollTo({
-
-        top: 0,
-
-        behavior: "smooth"
+        loadRecentEntries();
 
     });
 
-
-    showMessage(
-        "Coach loaded for editing.",
-        "info"
-    );
-
 }
 
 
-/* =========================================================
-   CLEAR FORM
-========================================================= */
-
-function clearForm() {
-
-    editingKey = null;
-
-
-    if (coachKeyInput)
-        coachKeyInput.value = "";
-
-
-    if (shopSelect)
-        shopSelect.value = "";
-
-
-    resetSelect(
-        lineSelect,
-        "Select Line"
-    );
-
-
-    resetSelect(
-        positionSelect,
-        "Select Position"
-    );
-
-
-    if (coachNoInput)
-        coachNoInput.value = "";
-
-
-    if (coachTypeSelect)
-        coachTypeSelect.value = "";
-
-
-    if (statusSelect)
-        statusSelect.value = "";
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-async function logout() {
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to logout?"
-        );
-
-
-    if (!confirmed) return;
-
-
-    try {
-
-        await signOut(auth);
-
-
-        window.location.replace(
-            "login.html"
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Logout Error:",
-            error
-        );
-
-
-        showMessage(
-            "Logout failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DATABASE STATUS
-========================================================= */
+/* =====================================================
+   DATABASE CONNECTION STATUS
+===================================================== */
 
 function setupDatabaseStatus() {
 
+    const connectedRef =
+        ref(database, ".info/connected");
+
+
     onValue(
 
-        ref(
-            database,
-            ".info/connected"
-        ),
+        connectedRef,
 
-        snapshot => {
+        (snapshot) => {
 
-            databaseConnected =
+            const connected =
                 snapshot.val() === true;
 
 
-            if (databaseConnected) {
+            const databaseStatus =
+                document.getElementById(
+                    "databaseStatus"
+                );
+
+
+            const footerDatabase =
+                document.getElementById(
+                    "footerDatabase"
+                );
+
+
+            if (connected) {
 
                 if (databaseStatus) {
 
                     databaseStatus.innerHTML =
-                        "● Connected";
-
-                    databaseStatus.className =
-                        "text-success";
+                        '<span class="text-success">● Connected</span>';
 
                 }
 
@@ -1832,10 +199,7 @@ function setupDatabaseStatus() {
                 if (footerDatabase) {
 
                     footerDatabase.innerHTML =
-                        "● Connected";
-
-                    footerDatabase.className =
-                        "text-success";
+                        '<span class="text-success">● Connected</span>';
 
                 }
 
@@ -1844,10 +208,7 @@ function setupDatabaseStatus() {
                 if (databaseStatus) {
 
                     databaseStatus.innerHTML =
-                        "● Offline";
-
-                    databaseStatus.className =
-                        "text-danger";
+                        '<span class="text-danger">● Offline</span>';
 
                 }
 
@@ -1855,10 +216,7 @@ function setupDatabaseStatus() {
                 if (footerDatabase) {
 
                     footerDatabase.innerHTML =
-                        "● Offline";
-
-                    footerDatabase.className =
-                        "text-danger";
+                        '<span class="text-danger">● Offline</span>';
 
                 }
 
@@ -1866,7 +224,7 @@ function setupDatabaseStatus() {
 
         },
 
-        error => {
+        (error) => {
 
             console.error(
                 "Database Status Error:",
@@ -1880,179 +238,80 @@ function setupDatabaseStatus() {
 }
 
 
-/* =========================================================
-   COUNTERS
-========================================================= */
+/* =====================================================
+   RECENT COACH ENTRY
+===================================================== */
 
-function updateCounters() {
+function loadRecentEntries() {
 
-    let total = 0;
+    if (historyListenerStarted) {
 
-
-    for (
-        const line in boardData
-    ) {
-
-        const positions =
-            boardData[line];
-
-        if (!positions) continue;
-
-
-        for (
-            const position in positions
-        ) {
-
-            if (
-                positions[position]
-            ) {
-
-                total++;
-
-            }
-
-        }
+        return;
 
     }
 
-
-    const totalElement =
-        document.getElementById(
-            "totalCoach"
-        );
-
-
-    const occupiedElement =
-        document.getElementById(
-            "occupiedCoach"
-        );
-
-
-    if (totalElement) {
-
-        totalElement.textContent =
-            total;
-
-    }
-
-
-    if (occupiedElement) {
-
-        occupiedElement.textContent =
-            total;
-
-    }
+    historyListenerStarted = true;
 
 
     /*
-       Total available positions
-    */
+     * Firebase path
+     *
+     * history/
+     */
 
-    let totalPositions = 0;
-
-
-    Object.values(shopConfig)
-        .forEach(shop => {
-
-            Object.values(shop.lines)
-                .forEach(positions => {
-
-                    totalPositions +=
-                        positions.length;
-
-                });
-
-        });
+    const historyRef =
+        ref(database, "history");
 
 
-    const free =
-        Math.max(
-            totalPositions - total,
-            0
-        );
+    onValue(
+
+        historyRef,
+
+        (snapshot) => {
+
+            const historyData =
+                snapshot.exists()
+                ? snapshot.val()
+                : {};
 
 
-    const freeElement =
+            renderHistory(historyData);
+
+
+            updateLastUpdate();
+
+        },
+
+        (error) => {
+
+            console.error(
+                "History Load Error:",
+                error
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =====================================================
+   RENDER HISTORY
+===================================================== */
+
+function renderHistory(historyData) {
+
+    const tbody =
         document.getElementById(
-            "freeCoach"
+            "historyBody"
         );
 
 
-    if (freeElement) {
+    if (!tbody) {
 
-        freeElement.textContent =
-            free;
-
-    }
-
-}
-
-
-/* =========================================================
-   STATUS CLASS
-========================================================= */
-
-function getStatusClass(status) {
-
-    switch (
-        String(status || "")
-            .toUpperCase()
-    ) {
-
-        case "PO":
-        case "S":
-            return "bg-success";
-
-
-        case "LM":
-            return "bg-warning text-dark";
-
-
-        case "MED":
-            return "bg-danger";
-
-
-        case "RL":
-            return "bg-primary";
-
-
-        case "R1":
-            return "bg-info text-dark";
-
-
-        case "RS":
-            return "bg-secondary";
-
-
-        case "L":
-            return "bg-dark";
-
-
-        case "HVY":
-            return "bg-danger";
-
-
-        default:
-            return "bg-secondary";
-
-    }
-
-}
-
-
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-function showMessage(
-    message,
-    type = "info"
-) {
-
-    if (!messageBox) {
-
-        console.log(
-            `[${type}] ${message}`
+        console.warn(
+            "#historyBody not found"
         );
 
         return;
@@ -2060,276 +319,407 @@ function showMessage(
     }
 
 
-    messageBox.className =
-        `alert alert-${type}`;
+    tbody.innerHTML = "";
 
 
-    messageBox.textContent =
-        message;
+    const entries =
+        Object.entries(historyData);
 
 
-    messageBox.classList.remove(
-        "d-none"
-    );
+    /*
+     * Latest entries first
+     */
+
+    entries.sort((a, b) => {
+
+        const timeA =
+            Number(a[1]?.time || 0);
+
+        const timeB =
+            Number(b[1]?.time || 0);
+
+        return timeB - timeA;
+
+    });
 
 
-    clearTimeout(
-        window.adminMessageTimer
-    );
+    /*
+     * Show latest 20 entries
+     */
+
+    const recentEntries =
+        entries.slice(0, 20);
 
 
-    window.adminMessageTimer =
-        setTimeout(
-            () => {
+    if (recentEntries.length === 0) {
 
-                messageBox.classList.add(
-                    "d-none"
-                );
+        tbody.innerHTML = `
 
-            },
-            5000
-        );
+            <tr>
 
-}
+                <td
+                    colspan="7"
+                    class="text-center text-muted p-4">
 
+                    No Recent Coach Entry
 
-/* =========================================================
-   BUTTON LOADING
-========================================================= */
+                </td>
 
-function setButtonLoading(
-    button,
-    loading,
-    text
-) {
-
-    if (!button) return;
-
-
-    button.disabled =
-        loading;
-
-
-    if (loading) {
-
-        button.dataset.originalText =
-            button.innerHTML;
-
-
-        button.innerHTML = `
-
-            <span
-                class="spinner-border spinner-border-sm me-2">
-            </span>
-
-            ${text}
+            </tr>
 
         `;
 
-    } else {
-
-        button.innerHTML =
-            button.dataset.originalText ||
-            text;
+        return;
 
     }
 
-}
+
+    recentEntries.forEach(
+        ([key, entry]) => {
+
+            const tr =
+                document.createElement("tr");
 
 
-/* =========================================================
-   CLOCK
-========================================================= */
+            const shop =
+                entry.shop || "-";
 
-function setupClock() {
 
-    updateClock();
+            const line =
+                entry.line || "-";
 
-    setInterval(
-        updateClock,
-        1000
+
+            const position =
+                entry.position || "-";
+
+
+            const coachNo =
+                entry.coachNo || "-";
+
+
+            const coachType =
+                entry.coachType || "-";
+
+
+            const status =
+                entry.status || "-";
+
+
+            const action =
+                entry.action || "ENTRY";
+
+
+            tr.innerHTML = `
+
+                <td>
+                    ${escapeHTML(shop)}
+                </td>
+
+                <td>
+                    ${escapeHTML(line)}
+                </td>
+
+                <td>
+                    ${escapeHTML(position)}
+                </td>
+
+                <td>
+                    <strong>
+                        ${escapeHTML(coachNo)}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHTML(coachType)}
+                </td>
+
+                <td>
+                    <span class="badge bg-primary">
+                        ${escapeHTML(status)}
+                    </span>
+                </td>
+
+                <td>
+
+                    <span class="badge bg-secondary">
+                        ${escapeHTML(action)}
+                    </span>
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(tr);
+
+        }
+
     );
 
 }
 
 
-function updateClock() {
-
-    const now =
-        new Date();
-
-
-    const date =
-        document.getElementById(
-            "currentDate"
-        );
-
-
-    const time =
-        document.getElementById(
-            "currentTime"
-        );
-
-
-    if (date) {
-
-        date.textContent =
-            now.toLocaleDateString(
-                "en-IN",
-                {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric"
-                }
-            );
-
-    }
-
-
-    if (time) {
-
-        time.textContent =
-            now.toLocaleTimeString(
-                "en-IN"
-            );
-
-    }
-
-}
-
-
-/* =========================================================
-   DATE FORMAT
-========================================================= */
-
-function formatDate(value) {
-
-    if (!value) return "-";
-
-
-    const date =
-        new Date(value);
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return value;
-
-    }
-
-
-    return date.toLocaleString(
-        "en-IN"
-    );
-
-}
-
-
-/* =========================================================
+/* =====================================================
    HTML ESCAPE
-========================================================= */
+===================================================== */
 
 function escapeHTML(value) {
 
     return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
 
-/* =========================================================
-   KEYBOARD SHORTCUT
-========================================================= */
+/* =====================================================
+   LAST UPDATE
+===================================================== */
 
-document.addEventListener(
-    "keydown",
-    event => {
+function updateLastUpdate() {
 
-        if (
-            event.ctrlKey &&
-            event.key.toLowerCase() === "s"
-        ) {
+    const element =
+        document.getElementById(
+            "lastUpdate"
+        );
 
-            event.preventDefault();
 
-            saveCoach();
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element.textContent =
+        new Date().toLocaleTimeString(
+            "en-IN"
+        );
+
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+function setupButtons() {
+
+    /*
+     * REFRESH
+     */
+
+    const refreshBtn =
+        document.getElementById(
+            "refreshBtn"
+        );
+
+
+    if (refreshBtn) {
+
+        refreshBtn.addEventListener(
+            "click",
+            () => {
+
+                location.reload();
+
+            }
+        );
+
+    }
+
+
+    /*
+     * LOGOUT
+     */
+
+    const logoutBtn =
+        document.getElementById(
+            "logoutBtn"
+        );
+
+
+    if (logoutBtn) {
+
+        logoutBtn.addEventListener(
+            "click",
+            logoutAdmin
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+async function logoutAdmin() {
+
+    if (!currentUser) {
+
+        window.location.replace(
+            "./login.html"
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to logout?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    const logoutBtn =
+        document.getElementById(
+            "logoutBtn"
+        );
+
+
+    try {
+
+        if (logoutBtn) {
+
+            logoutBtn.disabled = true;
+
+            logoutBtn.innerHTML =
+                '<i class="bi bi-hourglass-split"></i> Logging out...';
 
         }
 
 
-        if (
-            event.key === "Escape"
-        ) {
+        await signOut(auth);
 
-            clearForm();
+
+        console.log(
+            "Admin Logout Successful"
+        );
+
+
+        window.location.replace(
+            "./login.html"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Logout Error:",
+            error
+        );
+
+
+        alert(
+            "Logout Failed: " +
+            (error.message || "Unknown error")
+        );
+
+
+        if (logoutBtn) {
+
+            logoutBtn.disabled = false;
+
+            logoutBtn.innerHTML =
+                '<i class="bi bi-box-arrow-right"></i> Logout';
 
         }
+
+    }
+
+}
+
+
+/* =====================================================
+   NETWORK STATUS
+===================================================== */
+
+window.addEventListener(
+    "online",
+    () => {
+
+        console.log(
+            "Internet Connected"
+        );
 
     }
 );
 
 
-/* =========================================================
-   GLOBAL DEBUG
-========================================================= */
+window.addEventListener(
+    "offline",
+    () => {
 
-window.adminBoard = {
+        console.warn(
+            "Internet Disconnected"
+        );
 
-    getData: () => boardData,
+    }
+);
 
-    clearForm,
 
-    saveCoach,
+/* =====================================================
+   GLOBAL ERROR HANDLER
+===================================================== */
 
-    updateCoach,
+window.addEventListener(
+    "error",
+    (event) => {
 
-    deleteCoach,
+        console.error(
+            "Admin JS Error:",
+            event.error || event.message
+        );
 
-    logout
+    }
+);
+
+
+window.addEventListener(
+    "unhandledrejection",
+    (event) => {
+
+        console.error(
+            "Admin Promise Error:",
+            event.reason
+        );
+
+    }
+);
+
+
+/* =====================================================
+   DEBUG
+===================================================== */
+
+window.adminPanel = {
+
+    getCurrentUser: () => currentUser,
+
+    logout: logoutAdmin,
+
+    reloadHistory: loadRecentEntries
 
 };
 
 
-console.log(
-    "================================="
-);
+/* =====================================================
+   READY
+===================================================== */
 
 console.log(
-    "MR ADMIN PANEL READY"
-);
-
-console.log(
-    "Firebase Save : READY"
-);
-
-console.log(
-    "Firebase Update : READY"
-);
-
-console.log(
-    "Firebase Delete : READY"
-);
-
-console.log(
-    "Login Protection : READY"
-);
-
-console.log(
-    "Logout : READY"
-);
-
-console.log(
-    "Recent Entry : READY"
-);
-
-console.log(
-    "================================="
+    "MR CO-ORDINATION ADMIN PANEL READY"
 );
