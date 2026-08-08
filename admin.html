@@ -8,472 +8,129 @@
 
 <title>MR CO-ORDINATION ADMIN PANEL</title>
 
+<!-- Bootstrap -->
 <link
-href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-rel="stylesheet">
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet">
 
+<!-- Bootstrap Icons -->
 <link
-href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-rel="stylesheet">
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet">
 
-<link rel="stylesheet" href="css/style.css">
+<!-- Custom CSS -->
 <link rel="stylesheet" href="css/admin.css">
+<link rel="stylesheet" href="css/style.css">
 
 </head>
 
+
 <body class="bg-light">
+
+
+<div class="container-fluid py-3">
 
 
 <!-- =====================================================
      HEADER
 ===================================================== -->
 
-<header class="bg-primary text-white p-3">
+<div class="card shadow-sm border-0 mb-3">
 
-<div class="container-fluid">
+    <div class="card-body">
 
-<div class="row align-items-center">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
 
-<div class="col-md-8">
+            <div>
 
-<h2 class="fw-bold mb-1">
-INDIAN RAILWAYS
-</h2>
+                <h2 class="fw-bold text-primary mb-1">
+                    MR CO-ORDINATION
+                </h2>
 
-<h4 class="mb-0">
-MR CO-ORDINATION
-</h4>
+                <h5 class="text-secondary">
+                    ADMIN PANEL
+                </h5>
 
-<small>
-LILUAH WORKSHOP — ADMIN PANEL
-</small>
-
-</div>
-
-<div class="col-md-4 text-md-end mt-3 mt-md-0">
-
-<div id="currentDate">
---
-</div>
-
-<div id="currentTime"
-class="fs-5 fw-bold">
---
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</header>
+            </div>
 
 
-<!-- =====================================================
-     NAVBAR
-===================================================== -->
+            <div class="text-end">
 
-<nav class="navbar navbar-dark bg-dark">
+                <div
+                    id="currentDate"
+                    class="fw-bold">
+                </div>
 
-<div class="container-fluid">
+                <div
+                    id="currentTime"
+                    class="text-primary fs-5">
+                </div>
 
-<span class="navbar-brand fw-bold">
-MR ADMIN
-</span>
+            </div>
 
-<div class="d-flex gap-2">
+        </div>
 
-<a
-href="board.html"
-class="btn btn-primary btn-sm">
-
-<i class="bi bi-grid-3x3-gap"></i>
-LIVE BOARD
-
-</a>
-
-<button
-id="refreshBtn"
-class="btn btn-warning btn-sm">
-
-<i class="bi bi-arrow-clockwise"></i>
-Refresh
-
-</button>
-
-<button
-id="logoutBtn"
-class="btn btn-danger btn-sm">
-
-<i class="bi bi-box-arrow-right"></i>
-Logout
-
-</button>
-
-</div>
-
-</div>
-
-</nav>
-
-
-<!-- =====================================================
-     DATABASE STATUS
-===================================================== -->
-
-<div class="container-fluid mt-3">
-
-<div class="alert alert-light border shadow-sm">
-
-<div class="d-flex justify-content-between align-items-center">
-
-<div>
-
-<strong>
-Firebase Database:
-</strong>
-
-<span id="databaseStatus"
-class="text-danger">
-
-● Connecting...
-
-</span>
-
-</div>
-
-<div>
-
-<strong>
-Admin:
-</strong>
-
-<span id="adminEmail">
---
-
-</span>
-
-</div>
-
-</div>
+    </div>
 
 </div>
 
 
 <!-- =====================================================
-     COACH ENTRY
+     ADMIN BUTTONS
 ===================================================== -->
 
-<div class="card shadow-sm border-0 mb-4">
+<div class="row g-2 mb-3">
 
-<div class="card-header bg-success text-white">
 
-<h5 class="mb-0">
+    <!-- LIVE BOARD -->
 
-<i class="bi bi-train-front-fill"></i>
+    <div class="col-lg-4 col-md-6">
 
-Coach Entry
+        <a
+            href="board.html"
+            class="btn btn-primary w-100">
 
-</h5>
+            <i class="bi bi-grid"></i>
 
-</div>
+            LIVE BOARD
 
+        </a>
 
-<div class="card-body">
+    </div>
 
 
-<div
-id="adminMessage"
-class="alert d-none">
-</div>
+    <!-- REFRESH -->
 
+    <div class="col-lg-4 col-md-6">
 
-<div class="row g-3">
+        <button
+            class="btn btn-warning w-100"
+            id="refreshBtn">
 
+            <i class="bi bi-arrow-clockwise"></i>
 
-<!-- SHOP -->
+            Refresh
 
-<div class="col-md-6">
+        </button>
 
-<label
-for="shop"
-class="form-label fw-bold">
+    </div>
 
-Shop
 
-</label>
+    <!-- LOGOUT -->
 
-<select
-id="shop"
-class="form-select">
+    <div class="col-lg-4 col-md-6">
 
-<option value="">
-Select Shop
-</option>
+        <button
+            class="btn btn-danger w-100"
+            id="logoutBtn">
 
-<option value="N SHOP">
-N SHOP
-</option>
+            <i class="bi bi-box-arrow-right"></i>
 
-<option value="M SHOP">
-M SHOP
-</option>
+            Logout
 
-<option value="LIFTING BAY">
-LIFTING BAY
-</option>
+        </button>
 
-<option value="MR SCR SHOP">
-MR SCR SHOP
-</option>
-
-<option value="CR SHOP">
-CR SHOP
-</option>
-
-<option value="J SHOP">
-J SHOP
-</option>
-
-</select>
-
-</div>
-
-
-<!-- LINE -->
-
-<div class="col-md-6">
-
-<label
-for="line"
-class="form-label fw-bold">
-
-Line
-
-</label>
-
-<select
-id="line"
-class="form-select">
-
-<option value="">
-Select Line
-</option>
-
-</select>
-
-</div>
-
-
-<!-- POSITION -->
-
-<div class="col-md-6">
-
-<label
-for="position"
-class="form-label fw-bold">
-
-Position
-
-</label>
-
-<select
-id="position"
-class="form-select">
-
-<option value="">
-Select Position
-</option>
-
-</select>
-
-</div>
-
-
-<!-- COACH KEY -->
-
-<input
-type="hidden"
-id="coachKey">
-
-
-<!-- COACH NUMBER -->
-
-<div class="col-md-6">
-
-<label
-for="coachNo"
-class="form-label fw-bold">
-
-Coach Number
-
-</label>
-
-<input
-type="text"
-id="coachNo"
-class="form-control"
-placeholder="Enter Coach Number"
-autocomplete="off">
-
-</div>
-
-
-<!-- COACH TYPE -->
-
-<div class="col-md-6">
-
-<label
-for="coachType"
-class="form-label fw-bold">
-
-Coach Type
-
-</label>
-
-<select
-id="coachType"
-class="form-select">
-
-<option value="">
-Select Coach Type
-</option>
-
-<option>LHB AC</option>
-<option>LHB NAC</option>
-<option>LHB PC</option>
-<option>ICF</option>
-<option>GS</option>
-<option>GSLRD</option>
-<option>SLR</option>
-<option>CZ</option>
-<option>CN</option>
-<option>AC</option>
-<option>RCC</option>
-<option>RE</option>
-<option>ART</option>
-<option>NMG</option>
-<option>NMGH</option>
-<option>NMGHS</option>
-<option>VPU</option>
-<option>VPUH</option>
-<option>VPUHX</option>
-<option>VB</option>
-
-</select>
-
-</div>
-
-
-<!-- STATUS -->
-
-<div class="col-md-6">
-
-<label
-for="status"
-class="form-label fw-bold">
-
-Status
-
-</label>
-
-<select
-id="status"
-class="form-select">
-
-<option value="">
-Select Status
-</option>
-
-<option value="PO">PO</option>
-<option value="S">S</option>
-<option value="LM">LM</option>
-<option value="MED">MED</option>
-<option value="RL">RL</option>
-<option value="R1">R1</option>
-<option value="RS">RS</option>
-<option value="L">L</option>
-<option value="HVY">HVY</option>
-
-</select>
-
-</div>
-
-</div>
-
-
-<hr class="my-4">
-
-
-<!-- =====================================================
-     ACTION BUTTONS
-===================================================== -->
-
-<div class="row g-2">
-
-<div class="col-md-4">
-
-<button
-id="saveBtn"
-class="btn btn-success btn-lg w-100">
-
-<i class="bi bi-floppy"></i>
-
-SAVE
-
-</button>
-
-</div>
-
-
-<div class="col-md-4">
-
-<button
-id="updateBtn"
-class="btn btn-warning btn-lg w-100">
-
-<i class="bi bi-pencil-square"></i>
-
-UPDATE
-
-</button>
-
-</div>
-
-
-<div class="col-md-4">
-
-<button
-id="deleteBtn"
-class="btn btn-danger btn-lg w-100">
-
-<i class="bi bi-trash"></i>
-
-DELETE
-
-</button>
-
-</div>
-
-</div>
-
-
-<div class="text-center mt-3">
-
-<button
-id="clearBtn"
-class="btn btn-secondary">
-
-<i class="bi bi-eraser"></i>
-
-Clear Form
-
-</button>
-
-</div>
-
-</div>
+    </div>
 
 </div>
 
@@ -482,167 +139,134 @@ Clear Form
      RECENT COACH ENTRY
 ===================================================== -->
 
-<div class="card shadow-sm border-0 mb-4">
-
-<div class="card-header bg-primary text-white">
-
-<h5 class="mb-0">
-
-<i class="bi bi-clock-history"></i>
-
-Recent Coach Entry
-
-</h5>
-
-</div>
+<div class="card shadow-sm border-0 mb-3">
 
 
-<div class="card-body p-0">
+    <div class="card-header bg-primary text-white">
 
-<div class="table-responsive">
+        <h5 class="mb-0">
 
-<table
-class="table table-bordered table-hover table-striped text-center align-middle mb-0">
+            <i class="bi bi-clock-history"></i>
 
-<thead class="table-dark">
+            Recent Coach Entry
 
-<tr>
+        </h5>
 
-<th>Shop</th>
-<th>Line</th>
-<th>Position</th>
-<th>Coach No</th>
-<th>Coach Type</th>
-<th>Status</th>
-<th>Updated</th>
-<th>Action</th>
+    </div>
 
-</tr>
 
-</thead>
+    <div class="card-body p-0">
 
-<tbody id="historyBody">
 
-<tr>
+        <div class="table-responsive">
 
-<td
-colspan="8"
-class="text-center text-muted">
+            <table
+                class="table table-bordered table-hover table-striped align-middle mb-0"
+                id="historyTable">
 
-No Recent Entry
 
-</td>
+                <thead class="table-dark">
 
-</tr>
+                    <tr>
 
-</tbody>
+                        <th>Shop</th>
 
-</table>
+                        <th>Line</th>
 
-</div>
+                        <th>Position</th>
 
-</div>
+                        <th>Coach No</th>
+
+                        <th>Coach Type</th>
+
+                        <th>Status</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="historyBody">
+
+                    <!-- Firebase history will load here -->
+
+                </tbody>
+
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
 
 
 <!-- =====================================================
-     QUICK INFORMATION
+     DATABASE STATUS
 ===================================================== -->
 
-<div class="row g-3 mb-4">
+<div class="card shadow-sm border-0 mb-3">
+
+    <div class="card-body">
+
+        <div class="row text-center">
 
 
-<div class="col-md-3">
+            <div class="col-md-4">
 
-<div class="card shadow-sm text-center">
+                <strong>
+                    Firebase Database
+                </strong>
 
-<div class="card-body">
+                <div
+                    id="databaseStatus"
+                    class="text-success">
 
-<h6>Total Coaches</h6>
+                    ● Checking...
 
-<h3
-id="totalCoach"
-class="text-primary">
+                </div>
 
-0
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
+            </div>
 
 
-<div class="col-md-3">
+            <div class="col-md-4">
 
-<div class="card shadow-sm text-center">
+                <strong>
+                    Login Status
+                </strong>
 
-<div class="card-body">
+                <div
+                    id="loginStatus"
+                    class="text-success">
 
-<h6>Occupied</h6>
+                    ● Checking...
 
-<h3
-id="occupiedCoach"
-class="text-success">
+                </div>
 
-0
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
+            </div>
 
 
-<div class="col-md-3">
+            <div class="col-md-4">
 
-<div class="card shadow-sm text-center">
+                <strong>
+                    Last Update
+                </strong>
 
-<div class="card-body">
+                <div id="lastUpdate">
 
-<h6>Free Positions</h6>
+                    --
 
-<h3
-id="freeCoach"
-class="text-warning">
+                </div>
 
-0
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
+            </div>
 
 
-<div class="col-md-3">
+        </div>
 
-<div class="card shadow-sm text-center">
-
-<div class="card-body">
-
-<h6>Login Status</h6>
-
-<h3
-id="loginStatus"
-class="text-success">
-
-Admin
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
+    </div>
 
 </div>
 
@@ -654,46 +278,57 @@ Admin
      FOOTER
 ===================================================== -->
 
-<footer class="bg-dark text-white p-3">
+<footer class="bg-dark text-white mt-4 p-3">
 
-<div class="container-fluid">
+    <div class="row">
 
-<div class="row">
 
-<div class="col-md-6">
+        <div class="col-md-4">
 
-<strong>
-MR CO-ORDINATION
-</strong>
+            <b>
+                MR CO-ORDINATION
+            </b>
 
-<br>
+            <br>
 
-Liluah Workshop
+            Liluah Workshop
 
-</div>
+        </div>
 
-<div class="col-md-6 text-md-end">
 
-Database:
+        <div class="col-md-4 text-center">
 
-<span id="footerDatabase"
-class="text-warning">
+            Current Time :
 
-● Connecting
+            <span id="footerTime">
+                --
+            </span>
 
-</span>
+        </div>
 
-</div>
 
-</div>
+        <div class="col-md-4 text-end">
 
-</div>
+            Database :
+
+            <span
+                id="footerDatabase"
+                class="text-success">
+
+                ● Connected
+
+            </span>
+
+        </div>
+
+
+    </div>
 
 </footer>
 
 
 <!-- =====================================================
-     BOOTSTRAP
+     BOOTSTRAP JS
 ===================================================== -->
 
 <script
@@ -708,6 +343,60 @@ src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.j
 <script
 type="module"
 src="js/admin.js">
+</script>
+
+
+<!-- =====================================================
+     CLOCK
+===================================================== -->
+
+<script>
+
+function updateClock(){
+
+    const now = new Date();
+
+
+    const date =
+        document.getElementById("currentDate");
+
+    const time =
+        document.getElementById("currentTime");
+
+    const footer =
+        document.getElementById("footerTime");
+
+
+    if(date){
+
+        date.textContent =
+            now.toLocaleDateString("en-IN");
+
+    }
+
+
+    if(time){
+
+        time.textContent =
+            now.toLocaleTimeString("en-IN");
+
+    }
+
+
+    if(footer){
+
+        footer.textContent =
+            now.toLocaleTimeString("en-IN");
+
+    }
+
+}
+
+
+updateClock();
+
+setInterval(updateClock,1000);
+
 </script>
 
 
