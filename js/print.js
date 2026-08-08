@@ -1,6 +1,18 @@
 /* ==========================================
    MR CO-ORDINATION
    PRODUCTION PRINT.JS
+
+   PRINT:
+   - Coach Number ONLY
+
+   NOT PRINT:
+   - Coach Type
+   - Coach Status
+========================================== */
+
+
+/* ==========================================
+   FIREBASE
 ========================================== */
 
 import { database } from "./firebase-config.js";
@@ -10,84 +22,435 @@ import {
     get
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* CLOCK */
+
+/* ==========================================
+   CONFIGURATION
+========================================== */
+
+const BOARD_PATH = "coachBoard";
+
+const PRINT_DELAY = 800;
+
+
+/* ==========================================
+   HEADER DATE + TIME
+========================================== */
 
 function updateHeader() {
 
     const now = new Date();
 
-    const date = now.toLocaleDateString("en-IN");
 
-    const time = now.toLocaleTimeString("en-IN");
+    const liveDate =
+        document.getElementById("liveDate");
 
-    document.getElementById("liveDate").textContent =
-        "Date : " + date;
 
-    document.getElementById("liveTime").textContent =
-        "Time : " + time;
+    const liveTime =
+        document.getElementById("liveTime");
 
-}
 
-/* LOAD BOARD */
+    if (liveDate) {
 
-async function loadBoard() {
+        liveDate.textContent =
+            "Date : " +
+            now.toLocaleDateString("en-IN");
 
-    try {
+    }
 
-        const snap = await get(ref(database, "coachBoard"));
 
-        if (!snap.exists()) {
+    if (liveTime) {
 
-            console.log("No board data");
-            return;
-
-        }
-
-        const board = snap.val();
-
-        Object.keys(board).forEach(id => {
-
-            const cell = document.getElementById(id);
-
-            if (!cell) return;
-
-            const coach = board[id];
-
-            cell.innerHTML = `
-                <div class="coach-card">
-                    <div>${coach.coachNo || ""}</div>
-                    <div>${coach.coachType || ""}</div>
-                    <div>${coach.status || ""}</div>
-                </div>
-            `;
-
-        });
-
-        document.getElementById("lastUpdate").textContent =
-            "Last Update : " + new Date().toLocaleTimeString();
-
-        setTimeout(() => {
-
-            window.print();
-
-        }, 800);
-
-    } catch (err) {
-
-        console.error(err);
+        liveTime.textContent =
+            "Time : " +
+            now.toLocaleTimeString("en-IN");
 
     }
 
 }
 
-/* START */
 
-window.addEventListener("DOMContentLoaded", () => {
+/* ==========================================
+   LAST UPDATE
+========================================== */
 
-    updateHeader();
+function updateLastUpdate(text) {
 
-    loadBoard();
+    const element =
+        document.getElementById("lastUpdate");
 
-    setInterval(updateHeader, 1000);
 
-});
+    if (element) {
+
+        element.textContent = text;
+
+    }
+
+}
+
+
+/* ==========================================
+   CLEAR ALL PRINT CELLS
+========================================== */
+
+function clearBoardCells() {
+
+    const cells =
+        document.querySelectorAll(
+            ".coach-table td"
+        );
+
+
+    cells.forEach(cell => {
+
+        cell.innerHTML =
+            '<div class="coach-card"></div>';
+
+    });
+
+}
+
+
+/* ==========================================
+   GET COACH NUMBER
+========================================== */
+
+function getCoachNumber(coach) {
+
+    if (!coach) {
+
+        return "";
+
+    }
+
+
+    /*
+     * Primary field
+     */
+
+    if (
+        coach.coachNo !== undefined &&
+        coach.coachNo !== null
+    ) {
+
+        return coach.coachNo;
+
+    }
+
+
+    /*
+     * Backup fields
+     */
+
+    if (
+        coach.coachNumber !== undefined &&
+        coach.coachNumber !== null
+    ) {
+
+        return coach.coachNumber;
+
+    }
+
+
+    if (
+        coach.number !== undefined &&
+        coach.number !== null
+    ) {
+
+        return coach.number;
+
+    }
+
+
+    return "";
+
+}
+
+
+/* ==========================================
+   PUT COACH NUMBER INTO CELL
+========================================== */
+
+function printCoachNumber(cell, coach) {
+
+    if (!cell) {
+
+        return;
+
+    }
+
+
+    const coachNumber =
+        getCoachNumber(coach);
+
+
+    /*
+     * Clear existing content
+     */
+
+    cell.innerHTML = "";
+
+
+    /*
+     * Coach card
+     */
+
+    const coachCard =
+        document.createElement("div");
+
+
+    coachCard.className =
+        "coach-card";
+
+
+    /*
+     * Coach number only
+     */
+
+    const numberElement =
+        document.createElement("div");
+
+
+    numberElement.className =
+        "coach-number";
+
+
+    numberElement.textContent =
+        String(coachNumber);
+
+
+    coachCard.appendChild(
+        numberElement
+    );
+
+
+    cell.appendChild(
+        coachCard
+    );
+
+}
+
+
+/* ==========================================
+   LOAD BOARD
+========================================== */
+
+async function loadBoard() {
+
+    try {
+
+        console.log(
+            "PRINT: Loading coachBoard..."
+        );
+
+
+        const boardReference =
+            ref(
+                database,
+                BOARD_PATH
+            );
+
+
+        const snapshot =
+            await get(boardReference);
+
+
+        /*
+         * Clear old data
+         */
+
+        clearBoardCells();
+
+
+        /*
+         * No data
+         */
+
+        if (!snapshot.exists()) {
+
+            console.warn(
+                "PRINT: coachBoard is empty."
+            );
+
+
+            updateLastUpdate(
+                "Last Update : No Data"
+            );
+
+
+            schedulePrint();
+
+
+            return;
+
+        }
+
+
+        const board =
+            snapshot.val();
+
+
+        /*
+         * Firebase board data
+         */
+
+        Object.entries(board).forEach(
+            ([cellId, coach]) => {
+
+
+                const cell =
+                    document.getElementById(
+                        cellId
+                    );
+
+
+                /*
+                 * Ignore IDs which do not
+                 * exist in print.html
+                 */
+
+                if (!cell) {
+
+                    return;
+
+                }
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Only coachNo is used.
+                 *
+                 * coachType = NOT USED
+                 * status    = NOT USED
+                 */
+
+                printCoachNumber(
+                    cell,
+                    coach
+                );
+
+            }
+        );
+
+
+        /*
+         * Last update time
+         */
+
+        updateLastUpdate(
+            "Last Update : " +
+            new Date().toLocaleTimeString(
+                "en-IN"
+            )
+        );
+
+
+        console.log(
+            "PRINT: Board loaded successfully."
+        );
+
+
+        /*
+         * Start printing
+         */
+
+        schedulePrint();
+
+
+    } catch (error) {
+
+
+        console.error(
+            "PRINT: Firebase error:",
+            error
+        );
+
+
+        updateLastUpdate(
+            "Last Update : Database Error"
+        );
+
+
+        /*
+         * Still allow print dialog
+         */
+
+        schedulePrint();
+
+    }
+
+}
+
+
+/* ==========================================
+   AUTO PRINT
+========================================== */
+
+function schedulePrint() {
+
+    setTimeout(() => {
+
+        window.focus();
+
+        window.print();
+
+    }, PRINT_DELAY);
+
+}
+
+
+/* ==========================================
+   AFTER PRINT
+========================================== */
+
+window.addEventListener(
+    "afterprint",
+    () => {
+
+        console.log(
+            "PRINT: Print dialog closed."
+        );
+
+    }
+);
+
+
+/* ==========================================
+   START
+========================================== */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+
+        console.log(
+            "MR CO-ORDINATION PRINT.JS LOADED"
+        );
+
+
+        /*
+         * Initial header
+         */
+
+        updateHeader();
+
+
+        /*
+         * Update clock every second
+         */
+
+        setInterval(
+            updateHeader,
+            1000
+        );
+
+
+        /*
+         * Load Firebase board
+         */
+
+        loadBoard();
+
+    }
+);
