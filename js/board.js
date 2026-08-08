@@ -97,17 +97,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Board Starting...");
 
-    coachModal = new bootstrap.Modal(
-        document.getElementById("coachModal")
-    );
+    /* ==========================
+       SEARCH BOX
+    ========================== */
+
+    searchBox =
+        document.getElementById("searchBox");
+
+    /* ==========================
+       COACH MODAL
+    ========================== */
+
+    const modalElement =
+        document.getElementById("coachModal");
+
+    if (modalElement) {
+
+        coachModal =
+            new bootstrap.Modal(modalElement);
+
+    }
+
+    /* ==========================
+       START CLOCK
+    ========================== */
 
     startClock();
 
+    /* ==========================
+       LOAD BOARD
+    ========================== */
+
     loadBoard();
+
+    /* ==========================
+       CELL CLICK
+    ========================== */
 
     enableCellClick();
 
+    /* ==========================
+       DRAG & DROP
+    ========================== */
+
     enableDragDrop();
+
+    /* ==========================
+       DATABASE STATUS
+    ========================== */
+
+    startDatabaseStatus();
+
+    /* ==========================
+       SEARCH ENTER
+    ========================== */
+
+    if (searchBox) {
+
+        searchBox.addEventListener(
+            "keydown",
+            (e) => {
+
+                if (e.key === "Enter") {
+
+                    e.preventDefault();
+
+                    nextSearchResult();
+
+                }
+
+            }
+        );
+
+    }
+
+    console.log(
+        "Board DOM Initialization Complete"
+    );
 
 });
 
