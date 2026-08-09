@@ -802,7 +802,318 @@ document.addEventListener("keydown", async (e) => {
    PART - 5
    SEARCH + STATUS + COUNTERS + EXPORT
 ===================================================== */
+/* =====================================================
+   PRODUCTION SEARCH
+   Coach No / Shop / Line / Position / Type / Status
+===================================================== */
 
+let searchResults = [];
+let currentSearchIndex = 0;
+
+/* ==========================
+   SEARCH FUNCTION
+========================== */
+
+function searchCoach() {
+
+    const searchBox =
+        document.getElementById("searchBox");
+
+    if (!searchBox) return;
+
+    const keyword =
+        searchBox.value.trim().toLowerCase();
+
+    searchResults = [];
+    currentSearchIndex = 0;
+
+    /* Remove old highlight */
+
+    document
+        .querySelectorAll(".coach-table td")
+        .forEach(td => {
+
+            td.classList.remove("search-highlight");
+
+        });
+
+    /* Hide old popup */
+
+    const popup =
+        document.getElementById("coachPopup");
+
+    if (popup) {
+
+        popup.style.display = "none";
+
+    }
+
+    if (!keyword) return;
+
+
+    /* ==========================
+       SEARCH DATABASE
+    ========================== */
+
+    for (const line in boardData) {
+
+        if (!boardData[line]) continue;
+
+        for (const position in boardData[line]) {
+
+            const coach =
+                boardData[line][position];
+
+            if (!coach) continue;
+
+            const cell =
+                document.getElementById(
+                    `${line}_${position}`
+                );
+
+            if (!cell) continue;
+
+            const shop =
+                coach.shop ||
+                getShop(line);
+
+            const searchText = [
+
+                coach.coachNo || "",
+                coach.coachType || "",
+                coach.status || "",
+                shop || "",
+                line || "",
+                position || ""
+
+            ]
+            .join(" ")
+            .toLowerCase();
+
+
+            if (searchText.includes(keyword)) {
+
+                searchResults.push({
+
+                    cell: cell,
+
+                    coach: coach,
+
+                    shop: shop,
+
+                    line: line,
+
+                    position: position
+
+                });
+
+            }
+
+        }
+
+    }
+
+
+    /* ==========================
+       NOT FOUND
+    ========================== */
+
+    if (searchResults.length === 0) {
+
+        alert(
+            "Coach / Shop / Line / Position Not Found"
+        );
+
+        return;
+
+    }
+
+
+    /* ==========================
+       SHOW FIRST RESULT
+    ========================== */
+
+    showCurrentSearchResult();
+
+}
+
+
+/* =====================================================
+   SHOW CURRENT SEARCH RESULT
+===================================================== */
+
+function showCurrentSearchResult() {
+
+    const item =
+        searchResults[currentSearchIndex];
+
+    if (!item) return;
+
+    if (!item.cell) return;
+
+
+    /* ==========================
+       REMOVE OLD HIGHLIGHT
+    ========================== */
+
+    document
+        .querySelectorAll(".coach-table td")
+        .forEach(td => {
+
+            td.classList.remove(
+                "search-highlight"
+            );
+
+        });
+
+
+    /* ==========================
+       HIGHLIGHT CELL
+    ========================== */
+
+    item.cell.classList.add(
+        "search-highlight"
+    );
+
+
+    /* ==========================
+       SCROLL TO COACH
+    ========================== */
+
+    item.cell.scrollIntoView({
+
+        behavior: "smooth",
+
+        block: "center",
+
+        inline: "center"
+
+    });
+
+
+    /* ==========================
+       SHOW DETAILS
+    ========================== */
+
+    showCoachDetails(
+
+        item.cell,
+
+        item.coach,
+
+        item.shop,
+
+        item.line,
+
+        item.position
+
+    );
+
+}
+
+
+/* =====================================================
+   NEXT SEARCH RESULT
+===================================================== */
+
+function nextSearchResult() {
+
+    if (searchResults.length === 0) return;
+
+    currentSearchIndex++;
+
+    if (
+        currentSearchIndex >=
+        searchResults.length
+    ) {
+
+        currentSearchIndex = 0;
+
+    }
+
+    showCurrentSearchResult();
+
+}
+
+
+/* =====================================================
+   PREVIOUS SEARCH RESULT
+===================================================== */
+
+function previousSearchResult() {
+
+    if (searchResults.length === 0) return;
+
+    currentSearchIndex--;
+
+    if (currentSearchIndex < 0) {
+
+        currentSearchIndex =
+            searchResults.length - 1;
+
+    }
+
+    showCurrentSearchResult();
+
+}
+
+
+/* =====================================================
+   SEARCH BAR INPUT
+===================================================== */
+
+const searchBox =
+    document.getElementById("searchBox");
+
+if (searchBox) {
+
+    /* Search while typing */
+
+    searchBox.addEventListener(
+        "input",
+        searchCoach
+    );
+
+
+    /* Enter = Next Result */
+
+    searchBox.addEventListener(
+        "keydown",
+        (e) => {
+
+            if (e.key === "Enter") {
+
+                e.preventDefault();
+
+                if (
+                    searchResults.length > 0
+                ) {
+
+                    nextSearchResult();
+
+                } else {
+
+                    searchCoach();
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==========================
+   GLOBAL SEARCH BUTTONS
+========================== */
+
+window.nextSearchResult =
+    nextSearchResult;
+
+window.previousSearchResult =
+    previousSearchResult;
 
 /* ==========================
    STATUS COLOURS
