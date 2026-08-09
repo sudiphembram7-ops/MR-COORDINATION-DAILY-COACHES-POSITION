@@ -1,8 +1,8 @@
 /* =====================================================
    MR CO-ORDINATION BOARD
    PRODUCTION BOARD.JS
-   VERSION 6.0
-   FINAL STABLE VERSION
+   VERSION 7.0
+   FINAL STABLE + MOBILE
 ===================================================== */
 
 
@@ -39,33 +39,48 @@ import {
 let boardData = {};
 
 let currentCell = null;
-
 let dragCell = null;
-
 let lastMove = null;
 
 let coachModal = null;
 
 let adminLoggedIn = false;
-
 let authChecked = false;
 
 let boardListenerStarted = false;
 
 let searchResults = [];
-
 let currentSearchIndex = 0;
 
 let popupTimer = null;
 
+let touchTimer = null;
+let touchDragCell = null;
+
+const LONG_PRESS_DELAY = 350;
+
 
 /* =====================================================
-   DOM HELPERS
+   DOM HELPER
 ===================================================== */
 
 function $(id) {
-
     return document.getElementById(id);
+}
+
+
+/* =====================================================
+   TABLE CELL SELECTOR
+   Supports both:
+   .board-table
+   .coach-table
+===================================================== */
+
+function getBoardCells() {
+
+    return document.querySelectorAll(
+        ".board-table tbody td, .coach-table tbody td"
+    );
 
 }
 
@@ -76,12 +91,12 @@ function $(id) {
 
 console.log("========================================");
 console.log("MR CO-ORDINATION BOARD");
-console.log("PRODUCTION BOARD.JS VERSION 6.0");
+console.log("PRODUCTION BOARD.JS VERSION 7.0");
 console.log("========================================");
 
 
 /* =====================================================
-   ADMIN AUTH STATUS
+   ADMIN AUTH
 ===================================================== */
 
 onAuthStateChanged(auth, (user) => {
@@ -111,7 +126,6 @@ function checkAdmin() {
         );
 
         return false;
-
     }
 
     if (!adminLoggedIn) {
@@ -121,11 +135,9 @@ function checkAdmin() {
         );
 
         return false;
-
     }
 
     return true;
-
 }
 
 
@@ -154,9 +166,7 @@ function initializeBoard() {
        BOOTSTRAP MODAL
     ========================================= */
 
-    const modalElement =
-        $("coachModal");
-
+    const modalElement = $("coachModal");
 
     if (
         modalElement &&
@@ -168,19 +178,16 @@ function initializeBoard() {
             bootstrap.Modal.getOrCreateInstance(
                 modalElement
             );
-
     }
 
 
     /* =========================================
-       INITIALIZE ALL FEATURES
+       INITIALIZE
     ========================================= */
 
     startClock();
 
     loadBoard();
-
-    initializeCellClick();
 
     initializeButtons();
 
@@ -196,16 +203,14 @@ function initializeBoard() {
 
     initializeTVMode();
 
-
     console.log(
         "Board Initialization Complete"
     );
-
 }
 
 
 /* =====================================================
-   LIVE CLOCK
+   CLOCK
 ===================================================== */
 
 function startClock() {
@@ -216,43 +221,29 @@ function startClock() {
         updateClock,
         1000
     );
-
 }
 
 
 function updateClock() {
 
-    const now =
-        new Date();
+    const now = new Date();
 
-
-    const date =
-        $("liveDate");
-
-
-    const time =
-        $("liveTime");
-
+    const date = $("liveDate");
+    const time = $("liveTime");
 
     if (date) {
 
         date.textContent =
-            now.toLocaleDateString(
-                "en-IN"
-            );
+            now.toLocaleDateString("en-IN");
 
     }
-
 
     if (time) {
 
         time.textContent =
-            now.toLocaleTimeString(
-                "en-IN"
-            );
+            now.toLocaleTimeString("en-IN");
 
     }
-
 }
 
 
@@ -263,20 +254,16 @@ function updateClock() {
 function loadBoard() {
 
     if (boardListenerStarted) {
-
         return;
-
     }
 
     boardListenerStarted = true;
-
 
     const boardRef =
         ref(
             database,
             "coachBoard"
         );
-
 
     onValue(
 
@@ -289,22 +276,18 @@ function loadBoard() {
                     ? snapshot.val()
                     : {};
 
-
             if (
-                typeof boardData !== "object" ||
-                boardData === null
+                !boardData ||
+                typeof boardData !== "object"
             ) {
 
                 boardData = {};
-
             }
-
 
             console.log(
                 "Firebase Realtime Update",
                 boardData
             );
-
 
             drawBoard();
 
@@ -312,14 +295,8 @@ function loadBoard() {
 
             updateCounters();
 
-
-            /* =====================================
-               KEEP SEARCH ACTIVE
-            ===================================== */
-
             const searchBox =
                 $("searchBox");
-
 
             if (
                 searchBox &&
@@ -327,7 +304,6 @@ function loadBoard() {
             ) {
 
                 searchCoach(false);
-
             }
 
         },
@@ -342,7 +318,6 @@ function loadBoard() {
         }
 
     );
-
 }
 
 
@@ -354,49 +329,37 @@ function updateLastUpdate() {
 
     const now =
         new Date()
-            .toLocaleTimeString(
-                "en-IN"
-            );
-
+            .toLocaleTimeString("en-IN");
 
     const top =
         $("lastUpdate");
 
-
     const footer =
         $("lastUpdateTime");
-
 
     if (top) {
 
         top.textContent =
             "Updated : " + now;
-
     }
-
 
     if (footer) {
 
         footer.textContent =
             now;
-
     }
-
 }
 
 
 /* =====================================================
-   GET SHOP NAME
+   GET SHOP
 ===================================================== */
 
 function getShop(line) {
 
     if (!line) {
-
         return "";
-
     }
-
 
     line =
         String(line)
@@ -404,106 +367,94 @@ function getShop(line) {
             .toUpperCase();
 
 
-    /* IMPORTANT:
-       SCR MUST BE CHECKED BEFORE S/M
-    */
+    /* SCR FIRST */
 
-    if (
-        line.startsWith("SCR")
-    ) {
-
+    if (line.startsWith("SCR")) {
         return "MR SCR SHOP";
-
     }
 
 
-    if (
-        line.startsWith("N")
-    ) {
-
+    if (line.startsWith("N")) {
         return "N SHOP";
-
     }
 
 
-    if (
-        line.startsWith("M")
-    ) {
-
+    if (line.startsWith("M")) {
         return "M SHOP";
-
     }
 
 
-    if (
-        line.startsWith("F")
-    ) {
-
+    if (line.startsWith("F")) {
         return "CR SHOP";
-
     }
 
 
-    if (
-        line.startsWith("J")
-    ) {
-
+    if (line.startsWith("J")) {
         return "J SHOP";
-
     }
 
 
-    if (
-        line.startsWith("L")
-    ) {
-
+    if (line.startsWith("L")) {
         return "LIFTING BAY";
-
     }
 
 
     return "";
-
 }
 
 
 /* =====================================================
-   PARSE CELL ID
-   Example:
-   N2_H1
-   SCR9_H2
-   F1_H3
+   CELL PARTS
 ===================================================== */
 
 function getCellParts(cell) {
 
-    if (!cell || !cell.id) {
+    if (
+        !cell ||
+        !cell.id
+    ) {
 
         return {
             line: "",
             position: ""
         };
-
     }
-
 
     const parts =
         cell.id.split("_");
 
-
     const line =
         parts.shift() || "";
 
-
     const position =
         parts.join("_");
-
 
     return {
         line,
         position
     };
+}
 
+
+/* =====================================================
+   VALID BOARD CELL
+===================================================== */
+
+function isBoardCell(cell) {
+
+    if (!cell) {
+        return false;
+    }
+
+    const {
+        line,
+        position
+    } = getCellParts(cell);
+
+    return !!(
+        line &&
+        position
+    );
 }
 
 
@@ -513,30 +464,12 @@ function getCellParts(cell) {
 
 function escapeHTML(value) {
 
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
@@ -547,54 +480,57 @@ function escapeHTML(value) {
 function drawBoard() {
 
     const cells =
-        document.querySelectorAll(
-            ".coach-table td"
-        );
+        getBoardCells();
 
 
     /* =========================================
-       CLEAR ALL CELLS
+       CLEAR CELLS
     ========================================= */
 
-    cells.forEach(
-        (cell) => {
+    cells.forEach((cell) => {
 
-            const {
-                line,
-                position
-            } =
-                getCellParts(cell);
-
-
-            cell.innerHTML =
-                `<div class="coach-card"></div>`;
-
-
-            cell.dataset.shop =
-                getShop(line);
-
-
-            cell.dataset.line =
-                line;
-
-
-            cell.dataset.position =
-                position;
-
-
-            cell.dataset.coach =
-                "";
-
-
-            cell.dataset.type =
-                "";
-
-
-            cell.dataset.status =
-                "";
-
+        if (!isBoardCell(cell)) {
+            return;
         }
-    );
+
+        const {
+            line,
+            position
+        } = getCellParts(cell);
+
+        cell.innerHTML =
+            `<div class="coach-card"></div>`;
+
+        cell.dataset.shop =
+            getShop(line);
+
+        cell.dataset.line =
+            line;
+
+        cell.dataset.position =
+            position;
+
+        cell.dataset.coach = "";
+
+        cell.dataset.type = "";
+
+        cell.dataset.status = "";
+
+        cell.classList.remove(
+            "status-po",
+            "status-s",
+            "status-lm",
+            "status-med",
+            "status-rl",
+            "status-r1",
+            "status-l",
+            "status-wip",
+            "status-hold",
+            "status-rs",
+            "status-hvy"
+        );
+
+    });
 
 
     /* =========================================
@@ -611,7 +547,6 @@ function drawBoard() {
         ) {
 
             continue;
-
         }
 
 
@@ -622,11 +557,8 @@ function drawBoard() {
             const coach =
                 boardData[line][position];
 
-
             if (!coach) {
-
                 continue;
-
             }
 
 
@@ -634,7 +566,6 @@ function drawBoard() {
                 document.getElementById(
                     `${line}_${position}`
                 );
-
 
             if (!cell) {
 
@@ -644,11 +575,10 @@ function drawBoard() {
                 );
 
                 continue;
-
             }
 
 
-            const card =
+            let card =
                 cell.querySelector(
                     ".coach-card"
                 );
@@ -656,8 +586,15 @@ function drawBoard() {
 
             if (!card) {
 
-                continue;
+                card =
+                    document.createElement("div");
 
+                card.className =
+                    "coach-card";
+
+                cell.innerHTML = "";
+
+                cell.appendChild(card);
             }
 
 
@@ -689,29 +626,24 @@ function drawBoard() {
 
 
             /* =================================
-               DATA ATTRIBUTES
+               DATA
             ================================= */
 
             cell.dataset.shop =
                 coach.shop ||
                 getShop(line);
 
-
             cell.dataset.line =
                 line;
-
 
             cell.dataset.position =
                 position;
 
-
             cell.dataset.coach =
                 coach.coachNo || "";
 
-
             cell.dataset.type =
                 coach.coachType || "";
-
 
             cell.dataset.status =
                 coach.status || "";
@@ -729,6 +661,8 @@ function drawBoard() {
 
     enableDragDrop();
 
+    initializeTouchDrag();
+
 }
 
 
@@ -738,28 +672,32 @@ function drawBoard() {
 
 function initializeCellClick() {
 
-    document
-        .querySelectorAll(
-            ".coach-table td"
-        )
-        .forEach(
-            (cell) => {
+    getBoardCells()
+        .forEach((cell) => {
 
-                cell.onclick =
-                    function () {
-
-                        currentCell =
-                            this;
-
-                        openModal(
-                            this
-                        );
-
-                    };
-
+            if (!isBoardCell(cell)) {
+                return;
             }
-        );
 
+            cell.onclick = function(e) {
+
+                if (
+                    cell.dataset.touchMoved === "true"
+                ) {
+
+                    cell.dataset.touchMoved =
+                        "false";
+
+                    return;
+                }
+
+                currentCell = this;
+
+                openModal(this);
+
+            };
+
+        });
 }
 
 
@@ -770,38 +708,29 @@ function initializeCellClick() {
 function openModal(cell) {
 
     if (!cell) {
-
         return;
-
     }
-
 
     const {
         line,
         position
-    } =
-        getCellParts(cell);
+    } = getCellParts(cell);
 
 
     const modalShop =
         $("modalShop");
 
-
     const modalLine =
         $("modalLine");
-
 
     const modalPosition =
         $("modalPosition");
 
-
     const modalCoachNo =
         $("modalCoachNo");
 
-
     const modalCoachType =
         $("modalCoachType");
-
 
     const modalStatus =
         $("modalStatus");
@@ -812,7 +741,6 @@ function openModal(cell) {
         modalShop.value =
             cell.dataset.shop ||
             getShop(line);
-
     }
 
 
@@ -820,7 +748,6 @@ function openModal(cell) {
 
         modalLine.value =
             line;
-
     }
 
 
@@ -828,7 +755,6 @@ function openModal(cell) {
 
         modalPosition.value =
             position;
-
     }
 
 
@@ -836,7 +762,6 @@ function openModal(cell) {
 
         modalCoachNo.value =
             cell.dataset.coach || "";
-
     }
 
 
@@ -844,7 +769,6 @@ function openModal(cell) {
 
         modalCoachType.value =
             cell.dataset.type || "";
-
     }
 
 
@@ -852,7 +776,6 @@ function openModal(cell) {
 
         modalStatus.value =
             cell.dataset.status || "";
-
     }
 
 
@@ -861,12 +784,11 @@ function openModal(cell) {
         coachModal.show();
 
     }
-
 }
 
 
 /* =====================================================
-   GET MODAL DATA
+   MODAL DATA
 ===================================================== */
 
 function getModalData() {
@@ -895,22 +817,21 @@ function getModalData() {
             new Date().toISOString()
 
     };
-
 }
 
 
 /* =====================================================
-   DUPLICATE COACH CHECK
+   DUPLICATE CHECK
 ===================================================== */
 
-function duplicateCoach(coachNo) {
+function duplicateCoach(
+    coachNo,
+    ignoreCell = null
+) {
 
     if (!coachNo) {
-
         return false;
-
     }
-
 
     const searchNo =
         String(coachNo)
@@ -923,9 +844,7 @@ function duplicateCoach(coachNo) {
     ) {
 
         if (!boardData[line]) {
-
             continue;
-
         }
 
 
@@ -936,11 +855,8 @@ function duplicateCoach(coachNo) {
             const coach =
                 boardData[line][position];
 
-
             if (!coach) {
-
                 continue;
-
             }
 
 
@@ -953,25 +869,25 @@ function duplicateCoach(coachNo) {
 
 
             if (
-                existingNo === searchNo &&
-                (
-                    !currentCell ||
-                    currentCell.id !==
-                    `${line}_${position}`
-                )
+                existingNo === searchNo
             ) {
 
-                return true;
+                const existingCellId =
+                    `${line}_${position}`;
 
+                if (
+                    !ignoreCell ||
+                    existingCellId !==
+                    ignoreCell.id
+                ) {
+
+                    return true;
+                }
             }
-
         }
-
     }
 
-
     return false;
-
 }
 
 
@@ -981,21 +897,12 @@ function duplicateCoach(coachNo) {
 
 function initializeButtons() {
 
-
-    /* =========================================
-       SAVE
-    ========================================= */
-
     $("saveCoachBtn")
         ?.addEventListener(
             "click",
             saveCoach
         );
 
-
-    /* =========================================
-       UPDATE
-    ========================================= */
 
     $("updateCoachBtn")
         ?.addEventListener(
@@ -1004,20 +911,12 @@ function initializeButtons() {
         );
 
 
-    /* =========================================
-       DELETE
-    ========================================= */
-
     $("deleteCoachBtn")
         ?.addEventListener(
             "click",
             deleteCoach
         );
 
-
-    /* =========================================
-       PDF
-    ========================================= */
 
     $("pdfBtn")
         ?.addEventListener(
@@ -1033,20 +932,12 @@ function initializeButtons() {
         );
 
 
-    /* =========================================
-       EXCEL / CSV
-    ========================================= */
-
     $("excelBtn")
         ?.addEventListener(
             "click",
             exportCSV
         );
 
-
-    /* =========================================
-       REFRESH
-    ========================================= */
 
     $("refreshBtn")
         ?.addEventListener(
@@ -1059,10 +950,6 @@ function initializeButtons() {
         );
 
 
-    /* =========================================
-       FULL SCREEN
-    ========================================= */
-
     $("fullscreenBtn")
         ?.addEventListener(
             "click",
@@ -1073,15 +960,63 @@ function initializeButtons() {
 
 
 /* =====================================================
+   VALIDATE COACH
+===================================================== */
+
+function validateCoach(coach) {
+
+    if (!coach.line) {
+
+        alert("Line Required");
+
+        return false;
+    }
+
+
+    if (!coach.position) {
+
+        alert("Position Required");
+
+        return false;
+    }
+
+
+    if (!coach.coachNo) {
+
+        alert("Coach Number Required");
+
+        return false;
+    }
+
+
+    if (!coach.coachType) {
+
+        alert("Select Coach Type");
+
+        return false;
+    }
+
+
+    if (!coach.status) {
+
+        alert("Select Status");
+
+        return false;
+    }
+
+
+    return true;
+}
+
+
+/* =====================================================
    SAVE COACH
 ===================================================== */
 
 async function saveCoach() {
 
     if (!checkAdmin()) {
-
         return;
-
     }
 
 
@@ -1089,58 +1024,8 @@ async function saveCoach() {
         getModalData();
 
 
-    if (!coach.line) {
-
-        alert(
-            "Line Required"
-        );
-
+    if (!validateCoach(coach)) {
         return;
-
-    }
-
-
-    if (!coach.position) {
-
-        alert(
-            "Position Required"
-        );
-
-        return;
-
-    }
-
-
-    if (!coach.coachNo) {
-
-        alert(
-            "Coach Number Required"
-        );
-
-        return;
-
-    }
-
-
-    if (!coach.coachType) {
-
-        alert(
-            "Select Coach Type"
-        );
-
-        return;
-
-    }
-
-
-    if (!coach.status) {
-
-        alert(
-            "Select Status"
-        );
-
-        return;
-
     }
 
 
@@ -1155,7 +1040,6 @@ async function saveCoach() {
         );
 
         return;
-
     }
 
 
@@ -1166,11 +1050,7 @@ async function saveCoach() {
         );
 
 
-        if (coachModal) {
-
-            coachModal.hide();
-
-        }
+        coachModal?.hide();
 
 
         alert(
@@ -1195,7 +1075,6 @@ async function saveCoach() {
         );
 
     }
-
 }
 
 
@@ -1206,9 +1085,7 @@ async function saveCoach() {
 async function updateCoach() {
 
     if (!checkAdmin()) {
-
         return;
-
     }
 
 
@@ -1216,58 +1093,23 @@ async function updateCoach() {
         getModalData();
 
 
-    if (!coach.line) {
-
-        alert(
-            "Line Required"
-        );
-
+    if (!validateCoach(coach)) {
         return;
-
     }
 
 
-    if (!coach.position) {
+    if (
+        duplicateCoach(
+            coach.coachNo,
+            currentCell
+        )
+    ) {
 
         alert(
-            "Position Required"
+            "Another Coach With This Number Already Exists"
         );
 
         return;
-
-    }
-
-
-    if (!coach.coachNo) {
-
-        alert(
-            "Coach Number Required"
-        );
-
-        return;
-
-    }
-
-
-    if (!coach.coachType) {
-
-        alert(
-            "Select Coach Type"
-        );
-
-        return;
-
-    }
-
-
-    if (!coach.status) {
-
-        alert(
-            "Select Status"
-        );
-
-        return;
-
     }
 
 
@@ -1278,11 +1120,7 @@ async function updateCoach() {
         );
 
 
-        if (coachModal) {
-
-            coachModal.hide();
-
-        }
+        coachModal?.hide();
 
 
         alert(
@@ -1307,7 +1145,6 @@ async function updateCoach() {
         );
 
     }
-
 }
 
 
@@ -1318,9 +1155,7 @@ async function updateCoach() {
 async function deleteCoach() {
 
     if (!checkAdmin()) {
-
         return;
-
     }
 
 
@@ -1343,7 +1178,6 @@ async function deleteCoach() {
         );
 
         return;
-
     }
 
 
@@ -1354,7 +1188,6 @@ async function deleteCoach() {
     ) {
 
         return;
-
     }
 
 
@@ -1366,11 +1199,7 @@ async function deleteCoach() {
         );
 
 
-        if (coachModal) {
-
-            coachModal.hide();
-
-        }
+        coachModal?.hide();
 
 
         alert(
@@ -1395,52 +1224,50 @@ async function deleteCoach() {
         );
 
     }
-
 }
 
 
 /* =====================================================
-   DRAG & DROP
+   DESKTOP DRAG & DROP
 ===================================================== */
 
 function enableDragDrop() {
 
-    document
-        .querySelectorAll(
-            ".coach-table td"
-        )
-        .forEach(
-            (cell) => {
+    getBoardCells()
+        .forEach((cell) => {
 
-                cell.draggable = true;
-
-
-                cell.ondragstart =
-                    dragStart;
-
-
-                cell.ondragover =
-                    dragOver;
-
-
-                cell.ondrop =
-                    dropCoach;
-
-
-                cell.ondragenter =
-                    dragEnter;
-
-
-                cell.ondragleave =
-                    dragLeave;
-
-
-                cell.ondragend =
-                    dragEnd;
-
+            if (!isBoardCell(cell)) {
+                return;
             }
-        );
 
+
+            cell.draggable = true;
+
+
+            cell.ondragstart =
+                dragStart;
+
+
+            cell.ondragover =
+                dragOver;
+
+
+            cell.ondrop =
+                dropCoach;
+
+
+            cell.ondragenter =
+                dragEnter;
+
+
+            cell.ondragleave =
+                dragLeave;
+
+
+            cell.ondragend =
+                dragEnd;
+
+        });
 }
 
 
@@ -1455,7 +1282,6 @@ function dragStart(e) {
         e.preventDefault();
 
         return;
-
     }
 
 
@@ -1464,7 +1290,6 @@ function dragStart(e) {
         e.preventDefault();
 
         return;
-
     }
 
 
@@ -1477,21 +1302,16 @@ function dragStart(e) {
     );
 
 
-    if (
-        e.dataTransfer
-    ) {
+    if (e.dataTransfer) {
 
         e.dataTransfer.effectAllowed =
             "move";
-
 
         e.dataTransfer.setData(
             "text/plain",
             this.id
         );
-
     }
-
 }
 
 
@@ -1503,16 +1323,11 @@ function dragOver(e) {
 
     e.preventDefault();
 
-
-    if (
-        e.dataTransfer
-    ) {
+    if (e.dataTransfer) {
 
         e.dataTransfer.dropEffect =
             "move";
-
     }
-
 }
 
 
@@ -1524,11 +1339,9 @@ function dragEnter(e) {
 
     e.preventDefault();
 
-
     this.classList.add(
         "table-info"
     );
-
 }
 
 
@@ -1541,7 +1354,6 @@ function dragLeave() {
     this.classList.remove(
         "table-info"
     );
-
 }
 
 
@@ -1555,62 +1367,32 @@ function dragEnd() {
         "dragging"
     );
 
+    getBoardCells()
+        .forEach((cell) => {
 
-    document
-        .querySelectorAll(
-            ".coach-table td"
-        )
-        .forEach(
-            (cell) => {
+            cell.classList.remove(
+                "table-info"
+            );
 
-                cell.classList.remove(
-                    "table-info"
-                );
-
-            }
-        );
-
+        });
 }
 
 
 /* =====================================================
-   DROP COACH
+   MOVE COACH
 ===================================================== */
 
-async function dropCoach(e) {
-
-    e.preventDefault();
-
-
-    this.classList.remove(
-        "table-info"
-    );
-
-
-    if (!dragCell) {
-
-        return;
-
-    }
-
+async function moveCoach(
+    fromCell,
+    toCell
+) {
 
     if (
-        dragCell === this
+        !fromCell ||
+        !toCell
     ) {
 
-        dragCell = null;
-
         return;
-
-    }
-
-
-    if (!checkAdmin()) {
-
-        dragCell = null;
-
-        return;
-
     }
 
 
@@ -1619,7 +1401,7 @@ async function dropCoach(e) {
         position: fromPos
     } =
         getCellParts(
-            dragCell
+            fromCell
         );
 
 
@@ -1628,7 +1410,7 @@ async function dropCoach(e) {
         position: toPos
     } =
         getCellParts(
-            this
+            toCell
         );
 
 
@@ -1639,10 +1421,7 @@ async function dropCoach(e) {
         !toPos
     ) {
 
-        dragCell = null;
-
         return;
-
     }
 
 
@@ -1655,11 +1434,7 @@ async function dropCoach(e) {
 
 
     if (!fromCoach) {
-
-        dragCell = null;
-
         return;
-
     }
 
 
@@ -1671,18 +1446,12 @@ async function dropCoach(e) {
         ] || null;
 
 
-    /* =========================================
-       SAVE UNDO DATA
-    ========================================= */
-
     lastMove = {
 
         fromLine,
-
         fromPos,
 
         toLine,
-
         toPos,
 
         fromCoach:
@@ -1709,7 +1478,7 @@ async function dropCoach(e) {
 
 
     /* =========================================
-       MOVE TO TARGET
+       TARGET
     ========================================= */
 
     updates[
@@ -1735,7 +1504,7 @@ async function dropCoach(e) {
 
 
     /* =========================================
-       SWAP OR CLEAR SOURCE
+       SOURCE
     ========================================= */
 
     if (toCoach) {
@@ -1778,7 +1547,6 @@ async function dropCoach(e) {
             updates
         );
 
-
         console.log(
             "Coach Movement Successful"
         );
@@ -1804,15 +1572,329 @@ async function dropCoach(e) {
         lastMove = null;
 
     }
+}
+
+
+/* =====================================================
+   DROP
+===================================================== */
+
+async function dropCoach(e) {
+
+    e.preventDefault();
+
+    this.classList.remove(
+        "table-info"
+    );
+
+
+    if (!dragCell) {
+        return;
+    }
+
+
+    if (
+        dragCell === this
+    ) {
+
+        dragCell = null;
+
+        return;
+    }
+
+
+    if (!checkAdmin()) {
+
+        dragCell = null;
+
+        return;
+    }
+
+
+    const source =
+        dragCell;
 
 
     dragCell = null;
+
+
+    await moveCoach(
+        source,
+        this
+    );
+}
+
+
+/* =====================================================
+   MOBILE TOUCH DRAG
+===================================================== */
+
+function initializeTouchDrag() {
+
+    getBoardCells()
+        .forEach((cell) => {
+
+            if (!isBoardCell(cell)) {
+                return;
+            }
+
+
+            cell.addEventListener(
+                "touchstart",
+                handleTouchStart,
+                {
+                    passive: true
+                }
+            );
+
+
+            cell.addEventListener(
+                "touchmove",
+                handleTouchMove,
+                {
+                    passive: false
+                }
+            );
+
+
+            cell.addEventListener(
+                "touchend",
+                handleTouchEnd,
+                {
+                    passive: true
+                }
+            );
+
+
+            cell.addEventListener(
+                "touchcancel",
+                handleTouchCancel,
+                {
+                    passive: true
+                }
+            );
+
+        });
+}
+
+
+/* =====================================================
+   TOUCH START
+===================================================== */
+
+function handleTouchStart(e) {
+
+    const cell = this;
+
+
+    if (!cell.dataset.coach) {
+        return;
+    }
+
+
+    if (!authChecked || !adminLoggedIn) {
+        return;
+    }
+
+
+    touchDragCell = null;
+
+
+    touchTimer =
+        setTimeout(() => {
+
+            touchDragCell =
+                cell;
+
+            cell.classList.add(
+                "dragging"
+            );
+
+            if (
+                navigator.vibrate
+            ) {
+
+                navigator.vibrate(50);
+            }
+
+        }, LONG_PRESS_DELAY);
 
 }
 
 
 /* =====================================================
-   CTRL + Z UNDO
+   TOUCH MOVE
+===================================================== */
+
+function handleTouchMove(e) {
+
+    if (!touchDragCell) {
+        return;
+    }
+
+
+    e.preventDefault();
+
+
+    const touch =
+        e.touches[0];
+
+
+    const element =
+        document.elementFromPoint(
+            touch.clientX,
+            touch.clientY
+        );
+
+
+    const target =
+        element?.closest(
+            ".board-table tbody td, .coach-table tbody td"
+        );
+
+
+    getBoardCells()
+        .forEach((cell) => {
+
+            cell.classList.remove(
+                "table-info"
+            );
+
+        });
+
+
+    if (
+        target &&
+        target !== touchDragCell &&
+        isBoardCell(target)
+    ) {
+
+        target.classList.add(
+            "table-info"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   TOUCH END
+===================================================== */
+
+async function handleTouchEnd(e) {
+
+    clearTimeout(
+        touchTimer
+    );
+
+
+    const source =
+        touchDragCell;
+
+
+    if (!source) {
+        return;
+    }
+
+
+    source.classList.remove(
+        "dragging"
+    );
+
+
+    const touch =
+        e.changedTouches[0];
+
+
+    const element =
+        document.elementFromPoint(
+            touch.clientX,
+            touch.clientY
+        );
+
+
+    const target =
+        element?.closest(
+            ".board-table tbody td, .coach-table tbody td"
+        );
+
+
+    getBoardCells()
+        .forEach((cell) => {
+
+            cell.classList.remove(
+                "table-info"
+            );
+
+        });
+
+
+    touchDragCell = null;
+
+
+    if (
+        !target ||
+        !isBoardCell(target) ||
+        target === source
+    ) {
+
+        return;
+    }
+
+
+    if (!checkAdmin()) {
+        return;
+    }
+
+
+    source.dataset.touchMoved =
+        "true";
+
+
+    await moveCoach(
+        source,
+        target
+    );
+
+}
+
+
+/* =====================================================
+   TOUCH CANCEL
+===================================================== */
+
+function handleTouchCancel() {
+
+    clearTimeout(
+        touchTimer
+    );
+
+
+    if (touchDragCell) {
+
+        touchDragCell.classList.remove(
+            "dragging"
+        );
+    }
+
+
+    getBoardCells()
+        .forEach((cell) => {
+
+            cell.classList.remove(
+                "table-info"
+            );
+
+        });
+
+
+    touchDragCell = null;
+}
+
+
+/* =====================================================
+   CTRL + Z
 ===================================================== */
 
 document.addEventListener(
@@ -1820,28 +1902,21 @@ document.addEventListener(
     async (e) => {
 
         if (
-            !(
-                e.ctrlKey &&
-                e.key.toLowerCase() === "z"
-            )
+            !e.ctrlKey ||
+            e.key.toLowerCase() !== "z"
         ) {
 
             return;
-
         }
 
 
         if (!lastMove) {
-
             return;
-
         }
 
 
         if (!checkAdmin()) {
-
             return;
-
         }
 
 
@@ -1914,7 +1989,6 @@ function initializeSearch() {
         );
 
         return;
-
     }
 
 
@@ -1922,9 +1996,7 @@ function initializeSearch() {
         "input",
         () => {
 
-            searchCoach(
-                true
-            );
+            searchCoach(true);
 
         }
     );
@@ -1934,16 +2006,11 @@ function initializeSearch() {
         "keydown",
         (e) => {
 
-            /* =============================
-               ENTER = NEXT
-            ============================= */
-
             if (
                 e.key === "Enter"
             ) {
 
                 e.preventDefault();
-
 
                 if (
                     searchResults.length
@@ -1954,18 +2021,12 @@ function initializeSearch() {
                 }
                 else {
 
-                    searchCoach(
-                        true
-                    );
+                    searchCoach(true);
 
                 }
 
             }
 
-
-            /* =============================
-               ESCAPE
-            ============================= */
 
             if (
                 e.key === "Escape"
@@ -1994,9 +2055,7 @@ function searchCoach(
 
 
     if (!searchBox) {
-
         return;
-
     }
 
 
@@ -2018,8 +2077,14 @@ function searchCoach(
 
     if (!keyword) {
 
-        return;
+        const result =
+            $("searchResult");
 
+        if (result) {
+            result.textContent = "";
+        }
+
+        return;
     }
 
 
@@ -2028,9 +2093,7 @@ function searchCoach(
     ) {
 
         if (!boardData[line]) {
-
             continue;
-
         }
 
 
@@ -2043,9 +2106,7 @@ function searchCoach(
 
 
             if (!coach) {
-
                 continue;
-
             }
 
 
@@ -2056,9 +2117,7 @@ function searchCoach(
 
 
             if (!cell) {
-
                 continue;
-
             }
 
 
@@ -2070,15 +2129,10 @@ function searchCoach(
             const searchText = [
 
                 coach.coachNo || "",
-
                 coach.coachType || "",
-
                 coach.status || "",
-
                 shop || "",
-
                 line || "",
-
                 position || ""
 
             ]
@@ -2095,13 +2149,9 @@ function searchCoach(
                 searchResults.push({
 
                     cell,
-
                     coach,
-
                     shop,
-
                     line,
-
                     position
 
                 });
@@ -2112,10 +2162,6 @@ function searchCoach(
 
     }
 
-
-    /* =========================================
-       NO RESULT
-    ========================================= */
 
     if (
         searchResults.length === 0
@@ -2130,17 +2176,15 @@ function searchCoach(
         }
 
         return;
-
     }
 
 
     showCurrentSearchResult();
-
 }
 
 
 /* =====================================================
-   SHOW CURRENT SEARCH RESULT
+   SHOW SEARCH RESULT
 ===================================================== */
 
 function showCurrentSearchResult() {
@@ -2148,9 +2192,7 @@ function showCurrentSearchResult() {
     if (
         !searchResults.length
     ) {
-
         return;
-
     }
 
 
@@ -2164,31 +2206,24 @@ function showCurrentSearchResult() {
         !item ||
         !item.cell
     ) {
-
         return;
-
     }
 
 
     showCoachDetails(
 
         item.cell,
-
         item.coach,
-
         item.shop,
-
         item.line,
-
         item.position
 
     );
-
 }
 
 
 /* =====================================================
-   SHOW COACH DETAILS POPUP
+   COACH POPUP
 ===================================================== */
 
 function showCoachDetails(
@@ -2200,9 +2235,7 @@ function showCoachDetails(
 ) {
 
     if (!cell) {
-
         return;
-
     }
 
 
@@ -2214,34 +2247,20 @@ function showCoachDetails(
     );
 
 
-    /* =========================================
-       AUTO SCROLL
-    ========================================= */
+    setTimeout(() => {
 
-    setTimeout(
-        () => {
+        cell.scrollIntoView({
 
-            cell.scrollIntoView({
+            behavior: "smooth",
 
-                behavior:
-                    "smooth",
+            block: "center",
 
-                block:
-                    "center",
+            inline: "center"
 
-                inline:
-                    "center"
+        });
 
-            });
+    }, 50);
 
-        },
-        50
-    );
-
-
-    /* =========================================
-       POPUP
-    ========================================= */
 
     let popup =
         $("coachPopup");
@@ -2254,15 +2273,12 @@ function showCoachDetails(
                 "div"
             );
 
-
         popup.id =
             "coachPopup";
-
 
         document.body.appendChild(
             popup
         );
-
     }
 
 
@@ -2285,7 +2301,9 @@ function showCoachDetails(
             <button
                 type="button"
                 id="closeCoachPopup">
+
                 ✕
+
             </button>
 
         </div>
@@ -2294,107 +2312,72 @@ function showCoachDetails(
         <table class="popup-table">
 
             <tr>
-
-                <td>
-                    <b>Coach Number</b>
-                </td>
-
+                <td><b>Coach Number</b></td>
                 <td>
                     ${escapeHTML(
                         coach.coachNo || "-"
                     )}
                 </td>
-
             </tr>
 
 
             <tr>
-
-                <td>
-                    <b>Coach Type</b>
-                </td>
-
+                <td><b>Coach Type</b></td>
                 <td>
                     ${escapeHTML(
                         coach.coachType || "-"
                     )}
                 </td>
-
             </tr>
 
 
             <tr>
-
-                <td>
-                    <b>Shop</b>
-                </td>
-
+                <td><b>Shop</b></td>
                 <td>
                     ${escapeHTML(
                         shop || "-"
                     )}
                 </td>
-
             </tr>
 
 
             <tr>
-
-                <td>
-                    <b>Line</b>
-                </td>
-
+                <td><b>Line</b></td>
                 <td>
                     ${escapeHTML(
                         line || "-"
                     )}
                 </td>
-
             </tr>
 
 
             <tr>
-
-                <td>
-                    <b>Position</b>
-                </td>
-
+                <td><b>Position</b></td>
                 <td>
                     ${escapeHTML(
                         position || "-"
                     )}
                 </td>
-
             </tr>
 
 
             <tr>
-
-                <td>
-                    <b>Status</b>
-                </td>
-
+                <td><b>Status</b></td>
                 <td>
                     ${escapeHTML(
                         coach.status || "-"
                     )}
                 </td>
-
             </tr>
 
 
             <tr>
-
-                <td>
-                    <b>Updated</b>
-                </td>
-
+                <td><b>Updated</b></td>
                 <td>
                     ${escapeHTML(
                         coach.updatedAt || "-"
                     )}
                 </td>
-
             </tr>
 
         </table>
@@ -2404,8 +2387,7 @@ function showCoachDetails(
             totalResults > 1
                 ? `
 
-                    <div
-                        class="search-navigation">
+                    <div class="search-navigation">
 
                         <button
                             type="button"
@@ -2446,10 +2428,6 @@ function showCoachDetails(
         "block";
 
 
-    /* =========================================
-       CLOSE
-    ========================================= */
-
     $("closeCoachPopup")
         ?.addEventListener(
             "click",
@@ -2463,10 +2441,6 @@ function showCoachDetails(
         );
 
 
-    /* =========================================
-       PREVIOUS
-    ========================================= */
-
     $("previousSearchBtn")
         ?.addEventListener(
             "click",
@@ -2474,20 +2448,12 @@ function showCoachDetails(
         );
 
 
-    /* =========================================
-       NEXT
-    ========================================= */
-
     $("nextSearchBtn")
         ?.addEventListener(
             "click",
             nextSearchResult
         );
 
-
-    /* =========================================
-       AUTO HIDE 15 SEC
-    ========================================= */
 
     clearTimeout(
         popupTimer
@@ -2505,12 +2471,11 @@ function showCoachDetails(
             },
             15000
         );
-
 }
 
 
 /* =====================================================
-   NEXT SEARCH RESULT
+   NEXT SEARCH
 ===================================================== */
 
 function nextSearchResult() {
@@ -2518,9 +2483,7 @@ function nextSearchResult() {
     if (
         searchResults.length <= 1
     ) {
-
         return;
-
     }
 
 
@@ -2533,17 +2496,15 @@ function nextSearchResult() {
     ) {
 
         currentSearchIndex = 0;
-
     }
 
 
     showCurrentSearchResult();
-
 }
 
 
 /* =====================================================
-   PREVIOUS SEARCH RESULT
+   PREVIOUS SEARCH
 ===================================================== */
 
 function previousSearchResult() {
@@ -2551,9 +2512,7 @@ function previousSearchResult() {
     if (
         searchResults.length <= 1
     ) {
-
         return;
-
     }
 
 
@@ -2566,12 +2525,10 @@ function previousSearchResult() {
 
         currentSearchIndex =
             searchResults.length - 1;
-
     }
 
 
     showCurrentSearchResult();
-
 }
 
 
@@ -2586,9 +2543,7 @@ function clearSearch() {
 
 
     if (searchBox) {
-
         searchBox.value = "";
-
     }
 
 
@@ -2601,29 +2556,31 @@ function clearSearch() {
 
     hidePopup();
 
+
+    const result =
+        $("searchResult");
+
+
+    if (result) {
+        result.textContent = "";
+    }
 }
 
 
 /* =====================================================
-   CLEAR SEARCH HIGHLIGHT
+   CLEAR HIGHLIGHT
 ===================================================== */
 
 function clearSearchHighlight() {
 
-    document
-        .querySelectorAll(
-            ".coach-table td"
-        )
-        .forEach(
-            (td) => {
+    getBoardCells()
+        .forEach((cell) => {
 
-                td.classList.remove(
-                    "search-highlight"
-                );
+            cell.classList.remove(
+                "search-highlight"
+            );
 
-            }
-        );
-
+        });
 }
 
 
@@ -2641,14 +2598,12 @@ function hidePopup() {
 
         popup.style.display =
             "none";
-
     }
 
 
     clearTimeout(
         popupTimer
     );
-
 }
 
 
@@ -2656,18 +2611,14 @@ function hidePopup() {
    SEARCH MESSAGE
 ===================================================== */
 
-function showSearchMessage(
-    message
-) {
+function showSearchMessage(message) {
 
     const result =
         $("searchResult");
 
 
     if (!result) {
-
         return;
-
     }
 
 
@@ -2681,16 +2632,11 @@ function showSearchMessage(
 
 
     window.searchMessageTimer =
-        setTimeout(
-            () => {
+        setTimeout(() => {
 
-                result.textContent =
-                    "";
+            result.textContent = "";
 
-            },
-            2500
-        );
-
+        }, 2500);
 }
 
 
@@ -2700,132 +2646,138 @@ function showSearchMessage(
 
 function applyStatusColours() {
 
-    document
-        .querySelectorAll(
-            ".coach-table td"
-        )
-        .forEach(
-            (td) => {
+    getBoardCells()
+        .forEach((td) => {
 
-                td.classList.remove(
+            td.classList.remove(
 
-                    "status-po",
+                "status-po",
+                "status-s",
+                "status-lm",
+                "status-med",
+                "status-rl",
+                "status-r1",
+                "status-l",
+                "status-wip",
+                "status-hold",
+                "status-rs",
+                "status-hvy"
 
-                    "status-s",
-
-                    "status-lm",
-
-                    "status-med",
-
-                    "status-rl",
-
-                    "status-r1",
-
-                    "status-rs",
-
-                    "status-l",
-
-                    "status-hvy"
-
-                );
+            );
 
 
-                const status =
-                    (
-                        td.dataset.status ||
-                        ""
-                    )
-                        .trim()
-                        .toUpperCase();
+            const status =
+                (
+                    td.dataset.status ||
+                    ""
+                )
+                    .trim()
+                    .toUpperCase();
 
 
-                switch (status) {
+            switch (status) {
 
-                    case "PO":
+                case "PO":
 
-                        td.classList.add(
-                            "status-po"
-                        );
+                    td.classList.add(
+                        "status-po"
+                    );
 
-                        break;
-
-
-                    case "S":
-
-                        td.classList.add(
-                            "status-s"
-                        );
-
-                        break;
+                    break;
 
 
-                    case "LM":
+                case "S":
 
-                        td.classList.add(
-                            "status-lm"
-                        );
+                    td.classList.add(
+                        "status-s"
+                    );
 
-                        break;
-
-
-                    case "MED":
-
-                        td.classList.add(
-                            "status-med"
-                        );
-
-                        break;
+                    break;
 
 
-                    case "RL":
+                case "LM":
 
-                        td.classList.add(
-                            "status-rl"
-                        );
+                    td.classList.add(
+                        "status-lm"
+                    );
 
-                        break;
-
-
-                    case "R1":
-
-                        td.classList.add(
-                            "status-r1"
-                        );
-
-                        break;
+                    break;
 
 
-                    case "RS":
+                case "MED":
 
-                        td.classList.add(
-                            "status-rs"
-                        );
+                    td.classList.add(
+                        "status-med"
+                    );
 
-                        break;
-
-
-                    case "L":
-
-                        td.classList.add(
-                            "status-l"
-                        );
-
-                        break;
+                    break;
 
 
-                    case "HVY":
+                case "RL":
 
-                        td.classList.add(
-                            "status-hvy"
-                        );
+                    td.classList.add(
+                        "status-rl"
+                    );
 
-                        break;
+                    break;
 
-                }
+
+                case "R1":
+
+                    td.classList.add(
+                        "status-r1"
+                    );
+
+                    break;
+
+
+                case "L":
+
+                    td.classList.add(
+                        "status-l"
+                    );
+
+                    break;
+
+
+                case "WIP":
+
+                    td.classList.add(
+                        "status-wip"
+                    );
+
+                    break;
+
+
+                case "HOLD":
+
+                    td.classList.add(
+                        "status-hold"
+                    );
+
+                    break;
+
+
+                case "RS":
+
+                    td.classList.add(
+                        "status-rs"
+                    );
+
+                    break;
+
+
+                case "HVY":
+
+                    td.classList.add(
+                        "status-hvy"
+                    );
+
+                    break;
 
             }
-        );
 
+        });
 }
 
 
@@ -2836,65 +2788,36 @@ function applyStatusColours() {
 function updateCounters() {
 
     let total = 0;
-
     let occupied = 0;
-
     let free = 0;
 
 
-    document
-        .querySelectorAll(
-            ".coach-table td"
-        )
-        .forEach(
-            (cell) => {
+    getBoardCells()
+        .forEach((cell) => {
 
-                if (!cell.id) {
-
-                    return;
-
-                }
+            if (!isBoardCell(cell)) {
+                return;
+            }
 
 
-                /* =================================
-                   Only board position cells
-                ================================= */
-
-                const {
-                    line,
-                    position
-                } =
-                    getCellParts(cell);
+            total++;
 
 
-                if (
-                    !line ||
-                    !position
-                ) {
+            if (
+                cell.dataset.coach &&
+                cell.dataset.coach.trim()
+            ) {
 
-                    return;
-
-                }
-
-
-                total++;
-
-
-                if (
-                    cell.dataset.coach
-                ) {
-
-                    occupied++;
-
-                }
-                else {
-
-                    free++;
-
-                }
+                occupied++;
 
             }
-        );
+            else {
+
+                free++;
+
+            }
+
+        });
 
 
     const totalCoach =
@@ -2913,7 +2836,6 @@ function updateCounters() {
 
         totalCoach.textContent =
             total;
-
     }
 
 
@@ -2921,7 +2843,6 @@ function updateCounters() {
 
         occupiedCoach.textContent =
             occupied;
-
     }
 
 
@@ -2929,9 +2850,7 @@ function updateCounters() {
 
         freeCoach.textContent =
             free;
-
     }
-
 }
 
 
@@ -2941,72 +2860,60 @@ function updateCounters() {
 
 function exportCSV() {
 
-    let csv =
-        "";
+    let csv = "";
 
 
     document
         .querySelectorAll(
-            ".coach-table"
+            ".board-table, .coach-table"
         )
-        .forEach(
-            (table) => {
+        .forEach((table) => {
 
-                table
-                    .querySelectorAll(
-                        "tr"
-                    )
-                    .forEach(
-                        (row) => {
+            table
+                .querySelectorAll("tr")
+                .forEach((row) => {
 
-                            const cols = [];
+                    const cols = [];
 
 
-                            row
-                                .querySelectorAll(
-                                    "th,td"
+                    row
+                        .querySelectorAll(
+                            "th,td"
+                        )
+                        .forEach((col) => {
+
+                            const text =
+                                (
+                                    col.innerText ||
+                                    ""
                                 )
-                                .forEach(
-                                    (col) => {
-
-                                        const text =
-                                            (
-                                                col.innerText ||
-                                                ""
-                                            )
-                                                .replace(
-                                                    /\n/g,
-                                                    " "
-                                                )
-                                                .trim();
+                                    .replace(
+                                        /\n/g,
+                                        " "
+                                    )
+                                    .trim();
 
 
-                                        cols.push(
-                                            `"${text.replace(
-                                                /"/g,
-                                                '""'
-                                            )}"`
-                                        );
+                            cols.push(
+                                `"${text.replace(
+                                    /"/g,
+                                    '""'
+                                )}"`
+                            );
 
-                                    }
-                                );
-
-
-                            csv +=
-                                cols.join(
-                                    ","
-                                ) +
-                                "\n";
-
-                        }
-                    );
+                        });
 
 
-                csv +=
-                    "\n";
+                    csv +=
+                        cols.join(",") +
+                        "\n";
 
-            }
-        );
+                });
+
+
+            csv += "\n";
+
+        });
 
 
     const blob =
@@ -3050,17 +2957,13 @@ function exportCSV() {
     link.remove();
 
 
-    setTimeout(
-        () => {
+    setTimeout(() => {
 
-            URL.revokeObjectURL(
-                url
-            );
+        URL.revokeObjectURL(
+            url
+        );
 
-        },
-        1000
-    );
-
+    }, 1000);
 }
 
 
@@ -3084,7 +2987,6 @@ async function toggleFullscreen() {
                 await document
                     .documentElement
                     .requestFullscreen();
-
             }
 
         }
@@ -3096,7 +2998,6 @@ async function toggleFullscreen() {
 
                 await document
                     .exitFullscreen();
-
             }
 
         }
@@ -3110,7 +3011,6 @@ async function toggleFullscreen() {
         );
 
     }
-
 }
 
 
@@ -3124,9 +3024,7 @@ function initializeKeyboard() {
         "keydown",
         (e) => {
 
-            /* =====================================
-               CTRL + F
-            ===================================== */
+            /* CTRL + F */
 
             if (
                 e.ctrlKey &&
@@ -3135,16 +3033,13 @@ function initializeKeyboard() {
 
                 e.preventDefault();
 
-
                 $("searchBox")
                     ?.focus();
 
             }
 
 
-            /* =====================================
-               F11
-            ===================================== */
+            /* F11 */
 
             if (
                 e.key === "F11"
@@ -3157,9 +3052,7 @@ function initializeKeyboard() {
             }
 
 
-            /* =====================================
-               ESC
-            ===================================== */
+            /* ESC */
 
             if (
                 e.key === "Escape"
@@ -3171,7 +3064,6 @@ function initializeKeyboard() {
 
         }
     );
-
 }
 
 
@@ -3212,7 +3104,6 @@ function initializeDatabaseStatus() {
                             ● Connected
                         </span>
                         `;
-
                 }
 
 
@@ -3224,7 +3115,6 @@ function initializeDatabaseStatus() {
                             ● Connected
                         </span>
                         `;
-
                 }
 
             }
@@ -3238,7 +3128,6 @@ function initializeDatabaseStatus() {
                             ● Offline
                         </span>
                         `;
-
                 }
 
 
@@ -3250,7 +3139,6 @@ function initializeDatabaseStatus() {
                             ● Offline
                         </span>
                         `;
-
                 }
 
             }
@@ -3267,7 +3155,6 @@ function initializeDatabaseStatus() {
         }
 
     );
-
 }
 
 
@@ -3299,7 +3186,6 @@ function initializeNetworkStatus() {
 
         }
     );
-
 }
 
 
@@ -3314,9 +3200,7 @@ function initializeModal() {
 
 
     if (!modal) {
-
         return;
-
     }
 
 
@@ -3327,45 +3211,32 @@ function initializeModal() {
             const coachNo =
                 $("modalCoachNo");
 
-
             const coachType =
                 $("modalCoachType");
-
 
             const status =
                 $("modalStatus");
 
 
             if (coachNo) {
-
-                coachNo.value =
-                    "";
-
+                coachNo.value = "";
             }
 
 
             if (coachType) {
-
-                coachType.value =
-                    "";
-
+                coachType.value = "";
             }
 
 
             if (status) {
-
-                status.value =
-                    "";
-
+                status.value = "";
             }
 
 
-            currentCell =
-                null;
+            currentCell = null;
 
         }
     );
-
 }
 
 
@@ -3392,49 +3263,43 @@ function initializeTVMode() {
    AUTO UI REFRESH
 ===================================================== */
 
-setInterval(
-    () => {
+setInterval(() => {
 
-        if (
-            document.readyState !==
-            "loading"
-        ) {
+    if (
+        document.readyState !==
+        "loading"
+    ) {
 
-            updateCounters();
+        updateCounters();
 
-            applyStatusColours();
+        applyStatusColours();
 
-        }
+    }
 
-    },
-    10000
-);
+}, 10000);
 
 
 /* =====================================================
    FOOTER CLOCK
 ===================================================== */
 
-setInterval(
-    () => {
+setInterval(() => {
 
-        const footer =
-            $("lastUpdateTime");
+    const footer =
+        $("lastUpdateTime");
 
 
-        if (footer) {
+    if (footer) {
 
-            footer.textContent =
-                new Date()
-                    .toLocaleTimeString(
-                        "en-IN"
-                    );
+        footer.textContent =
+            new Date()
+                .toLocaleTimeString(
+                    "en-IN"
+                );
 
-        }
+    }
 
-    },
-    1000
-);
+}, 1000);
 
 
 /* =====================================================
@@ -3444,14 +3309,11 @@ setInterval(
 window.nextSearchResult =
     nextSearchResult;
 
-
 window.previousSearchResult =
     previousSearchResult;
 
-
 window.searchCoach =
     searchCoach;
-
 
 window.clearSearch =
     clearSearch;
@@ -3469,7 +3331,6 @@ window.board = {
 
     },
 
-
     drawBoard,
 
     loadBoard,
@@ -3484,7 +3345,9 @@ window.board = {
 
     previousSearchResult,
 
-    clearSearch
+    clearSearch,
+
+    moveCoach
 
 };
 
@@ -3541,6 +3404,10 @@ console.log(
 
 console.log(
     "Drag & Drop : READY"
+);
+
+console.log(
+    "Mobile Long Press Move : READY"
 );
 
 console.log(
