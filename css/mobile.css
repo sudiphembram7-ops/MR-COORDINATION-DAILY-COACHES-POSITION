@@ -1,53 +1,1118 @@
 /* =====================================================
-   SEARCH NAVIGATION
+   MR CO-ORDINATION BOARD
+   PRODUCTION MOBILE.CSS
+   VERSION 5.0
 ===================================================== */
 
-.search-navigation{
 
-    display:flex;
+/* =====================================================
+   MOBILE GLOBAL
+===================================================== */
 
-    align-items:center;
+@media (max-width: 767px){
 
-    justify-content:space-between;
+    html,
+    body{
 
-    gap:10px;
+        width:100%;
 
-    padding:10px;
+        min-width:100%;
 
-    background:#f1f3f5;
+        margin:0;
 
-    border-top:1px solid #ddd;
+        padding:0;
+
+        overflow-x:auto;
+
+        -webkit-text-size-adjust:100%;
+
+    }
+
+
+    body{
+
+        font-size:14px;
+
+    }
+
+
+    /* =================================================
+       HEADER
+    ================================================= */
+
+    .header{
+
+        padding:10px 8px !important;
+
+        text-align:center;
+
+    }
+
+    .header h1{
+
+        font-size:18px !important;
+
+        line-height:1.2;
+
+        margin:0 0 4px 0;
+
+    }
+
+    .header h2{
+
+        font-size:14px !important;
+
+        line-height:1.2;
+
+        margin:0;
+
+    }
+
+
+    /* =================================================
+       DATE / TIME
+    ================================================= */
+
+    #liveDate,
+    #liveTime{
+
+        font-size:12px;
+
+    }
+
+
+    #lastUpdate{
+
+        font-size:11px;
+
+    }
+
+
+    /* =================================================
+       NAVBAR
+    ================================================= */
+
+    .navbar{
+
+        overflow-x:auto;
+
+        white-space:nowrap;
+
+        -webkit-overflow-scrolling:touch;
+
+    }
+
+
+    .navbar a,
+    .navbar button{
+
+        font-size:13px !important;
+
+        padding:7px 10px !important;
+
+    }
+
+
+    /* =================================================
+       CONTROL AREA
+    ================================================= */
+
+    .controls,
+    .control-panel{
+
+        width:100%;
+
+        display:flex;
+
+        flex-wrap:wrap;
+
+        gap:6px;
+
+        padding:6px !important;
+
+        box-sizing:border-box;
+
+    }
+
+
+    .controls > *,
+    .control-panel > *{
+
+        max-width:100%;
+
+    }
+
+
+    /* =================================================
+       SEARCH BOX
+    ================================================= */
+
+    #searchBox{
+
+        width:100% !important;
+
+        min-height:42px;
+
+        font-size:16px !important;
+
+        padding:9px 12px;
+
+        border-radius:7px;
+
+        box-sizing:border-box;
+
+    }
+
+
+    #searchResult{
+
+        width:100%;
+
+        font-size:12px;
+
+        padding:4px 6px;
+
+        text-align:center;
+
+    }
+
+
+    /* =================================================
+       BUTTONS
+    ================================================= */
+
+    #pdfBtn,
+    #excelBtn,
+    #refreshBtn,
+    #fullscreenBtn{
+
+        min-height:40px;
+
+        font-size:13px !important;
+
+        padding:7px 10px !important;
+
+        border-radius:6px;
+
+    }
+
+
+    /* =================================================
+       COUNTER CARDS
+    ================================================= */
+
+    .counter-container,
+    .counters{
+
+        display:grid;
+
+        grid-template-columns:
+            repeat(3, minmax(0,1fr));
+
+        gap:5px;
+
+        width:100%;
+
+        padding:5px;
+
+        box-sizing:border-box;
+
+    }
+
+
+    .counter-card{
+
+        min-width:0;
+
+        padding:7px 3px !important;
+
+        text-align:center;
+
+    }
+
+
+    .counter-card h3{
+
+        font-size:11px !important;
+
+        margin:0;
+
+    }
+
+
+    .counter-card span,
+    .counter-card strong{
+
+        font-size:18px !important;
+
+    }
+
+
+    /* =================================================
+       SHOP SECTION
+    ================================================= */
+
+    .shop-section{
+
+        width:max-content;
+
+        min-width:100%;
+
+    }
+
+
+    .shop-title{
+
+        font-size:15px !important;
+
+        padding:7px !important;
+
+    }
+
+
+    /* =================================================
+       BOARD WRAPPER
+    ================================================= */
+
+    .board-container,
+    .table-responsive{
+
+        width:100%;
+
+        overflow-x:auto;
+
+        overflow-y:hidden;
+
+        -webkit-overflow-scrolling:touch;
+
+        scrollbar-width:thin;
+
+    }
+
+
+    /* =================================================
+       COACH TABLE
+    ================================================= */
+
+    .coach-table{
+
+        width:max-content;
+
+        min-width:max-content;
+
+        border-collapse:collapse;
+
+        table-layout:fixed;
+
+    }
+
+
+    /* =================================================
+       MOBILE CELL
+       80 x 80 SQUARE
+    ================================================= */
+
+    .coach-table td{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        height:80px !important;
+
+        min-height:80px !important;
+
+        max-height:80px !important;
+
+        padding:2px !important;
+
+        box-sizing:border-box;
+
+        text-align:center;
+
+        vertical-align:middle;
+
+        overflow:hidden;
+
+        position:relative;
+
+    }
+
+
+    .coach-table th{
+
+        min-width:80px !important;
+
+        width:80px !important;
+
+        max-width:80px !important;
+
+        height:32px !important;
+
+        padding:4px 2px !important;
+
+        font-size:11px !important;
+
+        white-space:nowrap;
+
+    }
+
+
+    /* =================================================
+       COACH CARD
+    ================================================= */
+
+    .coach-card{
+
+        width:100%;
+
+        height:100%;
+
+        display:flex;
+
+        flex-direction:column;
+
+        justify-content:center;
+
+        align-items:center;
+
+        text-align:center;
+
+        overflow:hidden;
+
+        box-sizing:border-box;
+
+        line-height:1.05;
+
+    }
+
+
+    /* =================================================
+       COACH NUMBER
+    ================================================= */
+
+    .coach-no{
+
+        width:100%;
+
+        font-size:15px !important;
+
+        font-weight:800;
+
+        line-height:1.1;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+
+        text-overflow:ellipsis;
+
+    }
+
+
+    /* =================================================
+       COACH TYPE
+    ================================================= */
+
+    .coach-type{
+
+        width:100%;
+
+        margin-top:2px;
+
+        font-size:10px !important;
+
+        font-weight:600;
+
+        line-height:1.05;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+
+        text-overflow:ellipsis;
+
+    }
+
+
+    /* =================================================
+       STATUS
+    ================================================= */
+
+    .coach-status{
+
+        width:100%;
+
+        margin-top:2px;
+
+        font-size:10px !important;
+
+        font-weight:800;
+
+        line-height:1.05;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+
+        text-overflow:ellipsis;
+
+    }
+
+
+    /* =================================================
+       SEARCH HIGHLIGHT
+    ================================================= */
+
+    .coach-table td.search-highlight{
+
+        outline:4px solid #0d6efd !important;
+
+        outline-offset:-4px;
+
+        z-index:10;
+
+    }
+
+
+    /* =================================================
+       SEARCH POPUP
+    ================================================= */
+
+    #coachPopup{
+
+        position:fixed !important;
+
+        left:8px !important;
+
+        right:8px !important;
+
+        bottom:10px !important;
+
+        top:auto !important;
+
+        width:auto !important;
+
+        max-width:none !important;
+
+        max-height:70vh;
+
+        overflow-y:auto;
+
+        background:#fff;
+
+        border:1px solid #ccc;
+
+        border-radius:10px;
+
+        box-shadow:
+            0 5px 25px rgba(0,0,0,.30);
+
+        z-index:99999;
+
+        box-sizing:border-box;
+
+    }
+
+
+    /* =================================================
+       POPUP HEADER
+    ================================================= */
+
+    .popup-header{
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:space-between;
+
+        gap:8px;
+
+        padding:10px 12px;
+
+        background:#0d6efd;
+
+        color:#fff;
+
+        font-size:14px;
+
+        font-weight:bold;
+
+        position:sticky;
+
+        top:0;
+
+        z-index:2;
+
+    }
+
+
+    #closeCoachPopup{
+
+        width:30px;
+
+        height:30px;
+
+        border:none;
+
+        border-radius:50%;
+
+        background:#fff;
+
+        color:#000;
+
+        font-size:16px;
+
+        font-weight:bold;
+
+        cursor:pointer;
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+        padding:0;
+
+    }
+
+
+    /* =================================================
+       POPUP TABLE
+    ================================================= */
+
+    .popup-table{
+
+        width:100%;
+
+        border-collapse:collapse;
+
+        table-layout:fixed;
+
+        font-size:12px;
+
+    }
+
+
+    .popup-table td{
+
+        padding:7px 8px;
+
+        border-bottom:1px solid #ddd;
+
+        word-break:break-word;
+
+        vertical-align:middle;
+
+    }
+
+
+    .popup-table td:first-child{
+
+        width:38%;
+
+        font-weight:bold;
+
+        background:#f5f5f5;
+
+    }
+
+
+    /* =================================================
+       SEARCH NAVIGATION
+    ================================================= */
+
+    .search-navigation{
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:space-between;
+
+        gap:6px;
+
+        padding:8px;
+
+        background:#f1f3f5;
+
+        border-top:1px solid #ddd;
+
+        position:sticky;
+
+        bottom:0;
+
+    }
+
+
+    .search-navigation button{
+
+        border:none;
+
+        background:#0d6efd;
+
+        color:#fff;
+
+        padding:7px 9px;
+
+        min-height:36px;
+
+        border-radius:6px;
+
+        cursor:pointer;
+
+        font-size:12px;
+
+        font-weight:bold;
+
+        white-space:nowrap;
+
+    }
+
+
+    .search-navigation button:active{
+
+        transform:scale(.97);
+
+    }
+
+
+    .search-navigation span{
+
+        font-size:12px;
+
+        font-weight:bold;
+
+        white-space:nowrap;
+
+        text-align:center;
+
+    }
+
+
+    /* =================================================
+       MODAL
+    ================================================= */
+
+    #coachModal .modal-dialog{
+
+        margin:10px;
+
+        max-width:none;
+
+        width:auto;
+
+    }
+
+
+    #coachModal .modal-content{
+
+        border-radius:10px;
+
+    }
+
+
+    #coachModal .modal-header{
+
+        padding:10px 12px;
+
+    }
+
+
+    #coachModal .modal-title{
+
+        font-size:16px;
+
+    }
+
+
+    #coachModal .modal-body{
+
+        padding:12px;
+
+    }
+
+
+    #coachModal .form-label{
+
+        font-size:12px;
+
+        font-weight:bold;
+
+        margin-bottom:3px;
+
+    }
+
+
+    #coachModal input,
+    #coachModal select{
+
+        width:100%;
+
+        min-height:42px;
+
+        font-size:16px !important;
+
+        padding:7px 9px;
+
+        box-sizing:border-box;
+
+    }
+
+
+    #coachModal .modal-footer{
+
+        display:flex;
+
+        flex-wrap:wrap;
+
+        gap:5px;
+
+        padding:10px;
+
+    }
+
+
+    #coachModal .modal-footer button{
+
+        flex:1 1 auto;
+
+        min-height:40px;
+
+        font-size:13px;
+
+    }
+
+
+    /* =================================================
+       DATABASE STATUS
+    ================================================= */
+
+    #databaseStatus,
+    #footerDatabase{
+
+        font-size:11px !important;
+
+        white-space:nowrap;
+
+    }
+
+
+    /* =================================================
+       FOOTER
+    ================================================= */
+
+    footer{
+
+        font-size:11px !important;
+
+        padding:7px !important;
+
+    }
+
+
+    /* =================================================
+       TOUCH / DRAG
+    ================================================= */
+
+    .coach-table td{
+
+        touch-action:manipulation;
+
+        -webkit-user-select:none;
+
+        user-select:none;
+
+        -webkit-touch-callout:none;
+
+    }
+
+
+    /* =================================================
+       PREVENT TEXT OVERFLOW
+    ================================================= */
+
+    .coach-table{
+
+        word-break:normal;
+
+    }
+
+
+    /* =================================================
+       MOBILE STATUS BADGES
+    ================================================= */
+
+    .status-po,
+    .status-s,
+    .status-lm,
+    .status-med,
+    .status-rl,
+    .status-r1,
+    .status-rs,
+    .status-l,
+    .status-hvy{
+
+        transition:none;
+
+    }
 
 }
 
-.search-navigation button{
 
-    border:none;
+/* =====================================================
+   SMALL MOBILE
+   <= 480px
+===================================================== */
 
-    background:#0d6efd;
+@media (max-width:480px){
 
-    color:#fff;
+    .header h1{
 
-    padding:7px 12px;
+        font-size:16px !important;
 
-    border-radius:6px;
+    }
 
-    cursor:pointer;
 
-    font-weight:bold;
+    .header h2{
+
+        font-size:12px !important;
+
+    }
+
+
+    .coach-table td{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        height:80px !important;
+
+        min-height:80px !important;
+
+        max-height:80px !important;
+
+    }
+
+
+    .coach-table th{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        font-size:10px !important;
+
+    }
+
+
+    .coach-no{
+
+        font-size:14px !important;
+
+    }
+
+
+    .coach-type,
+    .coach-status{
+
+        font-size:9px !important;
+
+    }
+
+
+    #coachPopup{
+
+        left:5px !important;
+
+        right:5px !important;
+
+        bottom:5px !important;
+
+        max-height:75vh;
+
+    }
+
+
+    .popup-header{
+
+        font-size:13px;
+
+        padding:8px 10px;
+
+    }
+
+
+    .popup-table{
+
+        font-size:11px;
+
+    }
+
+
+    .popup-table td{
+
+        padding:6px;
+
+    }
+
+
+    .search-navigation{
+
+        padding:6px;
+
+    }
+
+
+    .search-navigation button{
+
+        min-height:34px;
+
+        padding:6px 8px;
+
+        font-size:11px;
+
+    }
+
+
+    .search-navigation span{
+
+        font-size:11px;
+
+    }
 
 }
 
-.search-navigation button:hover{
 
-    background:#0b5ed7;
+/* =====================================================
+   TABLET
+   768px - 1024px
+===================================================== */
+
+@media (min-width:768px) and (max-width:1024px){
+
+    .coach-table td{
+
+        width:90px !important;
+
+        min-width:90px !important;
+
+        max-width:90px !important;
+
+        height:90px !important;
+
+        min-height:90px !important;
+
+        max-height:90px !important;
+
+    }
+
+
+    .coach-table th{
+
+        width:90px !important;
+
+        min-width:90px !important;
+
+        max-width:90px !important;
+
+    }
+
+
+    .coach-no{
+
+        font-size:16px !important;
+
+    }
+
+
+    .coach-type,
+    .coach-status{
+
+        font-size:10px !important;
+
+    }
+
+
+    #coachPopup{
+
+        max-width:420px;
+
+    }
 
 }
 
-.search-navigation span{
 
-    font-weight:bold;
+/* =====================================================
+   LANDSCAPE MOBILE
+===================================================== */
 
-    white-space:nowrap;
+@media (max-width:767px) and (orientation:landscape){
+
+    #coachPopup{
+
+        max-height:80vh;
+
+        left:auto !important;
+
+        right:8px !important;
+
+        bottom:8px !important;
+
+        width:360px !important;
+
+    }
+
+
+    .coach-table td{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        height:80px !important;
+
+    }
+
+}
+
+
+/* =====================================================
+   ACCESSIBILITY / TOUCH
+===================================================== */
+
+@media (hover:none) and (pointer:coarse){
+
+    button,
+    a{
+
+        -webkit-tap-highlight-color:transparent;
+
+    }
+
+
+    .coach-table td{
+
+        cursor:pointer;
+
+    }
+
+
+    .search-navigation button{
+
+        min-height:40px;
+
+    }
 
 }
