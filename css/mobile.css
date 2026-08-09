@@ -1,41 +1,807 @@
-/* ==========================================
-   MOBILE CONTROL BAR
-========================================== */
+/* =====================================================
+   MR CO-ORDINATION DAILY COACHES POSITION
+   PRODUCTION MOBILE.CSS
+   MOBILE RESPONSIVE + SQUARE BOARD
+===================================================== */
 
-@media (max-width: 768px){
 
-    .control-section,
-    .controls,
-    .board-controls{
+/* =====================================================
+   MOBILE BASE
+===================================================== */
+
+@media (max-width:768px){
+
+    html,
+    body{
+
         width:100%;
+
+        margin:0;
+        padding:0;
+
+        overflow-x:hidden;
+    }
+
+
+    /* =================================================
+       HEADER
+    ================================================= */
+
+    header,
+    .main-header,
+    .top-header{
+
+        width:100%;
+
+        padding:25px 12px;
+
+        text-align:center;
+    }
+
+    header h1,
+    .main-header h1,
+    .top-header h1{
+
+        font-size:32px;
+
+        line-height:1.2;
+
+        margin:0;
+    }
+
+    header h2,
+    .main-header h2,
+    .top-header h2{
+
+        margin-top:18px;
+
+        font-size:28px;
+
+        line-height:1.2;
+    }
+
+    header .date-time,
+    .main-header .date-time{
+
+        margin-top:20px;
+
         display:flex;
+
+        justify-content:center;
+
+        align-items:center;
+
+        gap:25px;
+
         flex-wrap:wrap;
+
+        font-size:19px;
+    }
+
+
+    /* =================================================
+       NAVBAR
+    ================================================= */
+
+    .navbar{
+
+        min-height:70px;
+
+        padding:10px 15px;
+    }
+
+    .navbar-brand{
+
+        font-size:24px;
+    }
+
+
+    /* =================================================
+       MAIN CONTAINER
+    ================================================= */
+
+    .container-fluid,
+    .board-container{
+
+        width:100%;
+
+        padding:15px 0;
+    }
+
+
+    /* =================================================
+       SEARCH
+    ================================================= */
+
+    .search-container,
+    .search-section{
+
+        width:100%;
+
+        padding:0 25px;
+
+        margin:15px 0;
+    }
+
+    #searchBox,
+    #searchInput,
+    .search-box{
+
+        width:100%;
+
+        height:62px;
+
+        min-height:62px;
+
+        padding:10px 15px;
+
+        font-size:20px;
+
+        border-radius:14px;
+    }
+
+
+    /* =================================================
+       CONTROL AREA
+    ================================================= */
+
+    .controls,
+    .control-section,
+    .board-controls{
+
+        width:100%;
+
+        padding:0 42px;
+
+        display:flex;
+
+        flex-wrap:wrap;
+
         align-items:center;
-        gap:8px;
+
+        gap:7px;
+
+        margin:10px 0 20px;
     }
 
-    .control-section > *,
-    .controls > *,
-    .board-controls > *{
-        flex-shrink:0;
+
+    /* =================================================
+       BUTTONS
+    ================================================= */
+
+    .controls button,
+    .control-section button,
+    .board-controls button{
+
+        min-height:55px;
+
+        padding:9px 18px;
+
+        font-size:19px;
+
+        border-radius:10px;
+
+        white-space:nowrap;
     }
 
-    /* Database status */
-    #databaseStatus,
+
+    /* =================================================
+       DATABASE STATUS
+    ================================================= */
+
     .database-status,
+    #databaseStatus,
     #dbStatus{
+
         display:inline-flex !important;
+
         align-items:center;
+
+        justify-content:center;
+
+        gap:5px;
+
+        min-height:50px;
+
+        padding:3px 5px;
+
+        margin:0;
+
+        font-size:17px;
+
         white-space:nowrap !important;
+
         flex-shrink:0;
-        font-size:18px;
     }
 
-    /* Counters */
+    .database-status .status-dot,
+    .status-dot{
+
+        width:18px;
+
+        height:18px;
+
+        flex-shrink:0;
+    }
+
+
+    /* =================================================
+       COUNTERS
+    ================================================= */
+
+    .counters,
+    .counter-section{
+
+        display:inline-flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+        gap:8px;
+
+        margin:0;
+
+        font-size:17px;
+
+        white-space:nowrap;
+
+        flex-shrink:0;
+    }
+
     #totalCoach,
     #occupiedCoach,
     #freeCoach{
+
         display:inline-block;
+
+        min-width:20px;
+
         white-space:nowrap;
     }
+
+
+    /* =================================================
+       DIVIDER
+    ================================================= */
+
+    hr{
+
+        width:calc(100% - 50px);
+
+        margin:25px auto;
+
+        border-top:2px solid #cccccc;
+    }
+
+
+    /* =================================================
+       SHOP HEADER
+    ================================================= */
+
+    .shop-section,
+    .shop-container{
+
+        width:100%;
+
+        margin:30px 0;
+    }
+
+    .shop-title,
+    .shop-header{
+
+        width:100%;
+
+        min-height:115px;
+
+        padding:20px;
+
+        border-radius:35px;
+
+        font-size:28px;
+
+        font-weight:700;
+    }
+
+
+    /* =================================================
+       BOARD WRAPPER
+    ================================================= */
+
+    .board-wrapper,
+    .table-wrapper{
+
+        width:100%;
+
+        max-width:100%;
+
+        overflow-x:auto;
+
+        overflow-y:hidden;
+
+        -webkit-overflow-scrolling:touch;
+
+        margin:0;
+
+        padding:0;
+    }
+
+
+    /* =================================================
+       BOARD TABLE
+    ================================================= */
+
+    table.board-table,
+    .board-table{
+
+        border-collapse:collapse;
+
+        border-spacing:0;
+
+        table-layout:fixed;
+
+        width:max-content;
+
+        min-width:max-content;
+
+        margin:0;
+
+        padding:0;
+    }
+
+
+    /* =================================================
+       TABLE HEADER
+    ================================================= */
+
+    .board-table thead th{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        height:70px !important;
+
+        min-height:70px !important;
+
+        max-height:70px !important;
+
+        padding:0 !important;
+
+        border:4px solid #495057 !important;
+
+        background:#212529;
+
+        color:#ffffff;
+
+        text-align:center;
+
+        vertical-align:middle;
+
+        font-size:18px;
+
+        font-weight:700;
+
+        white-space:nowrap;
+    }
+
+
+    /* =================================================
+       POSITION HEADER
+    ================================================= */
+
+    .board-table thead th:first-child{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+    }
+
+
+    /* =================================================
+       ALL BOARD CELLS
+       80 × 80 SQUARE
+    ================================================= */
+
+    .board-table tbody td{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        height:80px !important;
+
+        min-height:80px !important;
+
+        max-height:80px !important;
+
+        padding:0 !important;
+
+        margin:0 !important;
+
+        border:3px solid #dee2e6 !important;
+
+        text-align:center;
+
+        vertical-align:middle;
+
+        overflow:hidden;
+
+        font-size:17px;
+
+        line-height:1.1;
+    }
+
+
+    /* =================================================
+       POSITION CELLS
+    ================================================= */
+
+    .board-table tbody td:first-child{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        height:80px !important;
+
+        min-height:80px !important;
+
+        max-height:80px !important;
+
+        background:#ffffff;
+
+        color:#212529;
+
+        font-size:18px;
+
+        font-weight:700;
+    }
+
+
+    /* =================================================
+       COACH CONTENT
+    ================================================= */
+
+    .board-table td .coach,
+    .board-table td .coach-number,
+    .coach-number{
+
+        display:flex;
+
+        width:100%;
+
+        height:100%;
+
+        min-height:80px;
+
+        max-height:80px;
+
+        align-items:center;
+
+        justify-content:center;
+
+        text-align:center;
+
+        font-size:16px;
+
+        font-weight:700;
+
+        overflow:hidden;
+
+        word-break:break-word;
+    }
+
+
+    /* =================================================
+       SEARCH RESULT
+    ================================================= */
+
+    #searchResult,
+    .search-result{
+
+        width:100%;
+
+        padding:5px 25px;
+
+        font-size:16px;
+    }
+
+
+    /* =================================================
+       MODAL
+    ================================================= */
+
+    .modal-dialog{
+
+        width:calc(100% - 20px);
+
+        margin:10px auto;
+    }
+
+    .modal-body input,
+    .modal-body select{
+
+        min-height:48px;
+
+        font-size:17px;
+    }
+
+
+    /* =================================================
+       MOBILE STATUS COLORS
+    ================================================= */
+
+    .status-PO,
+    .status-po{
+
+        background:#198754 !important;
+
+        color:#ffffff !important;
+    }
+
+    .status-S,
+    .status-s{
+
+        background:#20c997 !important;
+
+        color:#ffffff !important;
+    }
+
+    .status-LM,
+    .status-lm{
+
+        background:#ffc107 !important;
+
+        color:#212529 !important;
+    }
+
+    .status-MED,
+    .status-med{
+
+        background:#dc3545 !important;
+
+        color:#ffffff !important;
+    }
+
+    .status-RL,
+    .status-rl{
+
+        background:#0d6efd !important;
+
+        color:#ffffff !important;
+    }
+
+    .status-R1,
+    .status-r1{
+
+        background:#6f42c1 !important;
+
+        color:#ffffff !important;
+    }
+
+    .status-L,
+    .status-l{
+
+        background:#fd7e14 !important;
+
+        color:#ffffff !important;
+    }
+
+    .status-WIP,
+    .status-wip{
+
+        background:#0dcaf0 !important;
+
+        color:#212529 !important;
+    }
+
+    .status-HOLD,
+    .status-hold{
+
+        background:#6c757d !important;
+
+        color:#ffffff !important;
+    }
+
+
+    /* =================================================
+       TOUCH
+    ================================================= */
+
+    .board-table td{
+
+        -webkit-tap-highlight-color:transparent;
+
+        touch-action:manipulation;
+    }
+
+
+    /* =================================================
+       SCROLLBAR
+    ================================================= */
+
+    .board-wrapper::-webkit-scrollbar,
+    .table-wrapper::-webkit-scrollbar{
+
+        height:8px;
+    }
+
+    .board-wrapper::-webkit-scrollbar-track,
+    .table-wrapper::-webkit-scrollbar-track{
+
+        background:#eeeeee;
+    }
+
+    .board-wrapper::-webkit-scrollbar-thumb,
+    .table-wrapper::-webkit-scrollbar-thumb{
+
+        background:#777;
+
+        border-radius:10px;
+    }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+   iPhone / 360-390px
+===================================================== */
+
+@media (max-width:420px){
+
+    header h1,
+    .main-header h1,
+    .top-header h1{
+
+        font-size:29px;
+    }
+
+    header h2,
+    .main-header h2,
+    .top-header h2{
+
+        font-size:25px;
+    }
+
+    header .date-time,
+    .main-header .date-time{
+
+        font-size:17px;
+
+        gap:15px;
+    }
+
+    .controls,
+    .control-section,
+    .board-controls{
+
+        padding:0 40px;
+
+        gap:6px;
+    }
+
+    .controls button,
+    .control-section button,
+    .board-controls button{
+
+        padding:8px 15px;
+
+        font-size:18px;
+    }
+
+    .database-status,
+    #databaseStatus,
+    #dbStatus{
+
+        font-size:16px;
+    }
+
+    .counters,
+    .counter-section{
+
+        font-size:16px;
+    }
+
+    .shop-title,
+    .shop-header{
+
+        min-height:105px;
+
+        font-size:26px;
+    }
+
+    .board-table thead th{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+    }
+
+    .board-table tbody td{
+
+        width:80px !important;
+
+        min-width:80px !important;
+
+        max-width:80px !important;
+
+        height:80px !important;
+
+        min-height:80px !important;
+
+        max-height:80px !important;
+    }
+
+}
+
+
+/* =====================================================
+   VERY SMALL SCREEN
+===================================================== */
+
+@media (max-width:360px){
+
+    .controls,
+    .control-section,
+    .board-controls{
+
+        padding:0 25px;
+    }
+
+    .controls button,
+    .control-section button,
+    .board-controls button{
+
+        padding:7px 12px;
+
+        font-size:16px;
+    }
+
+    .board-table thead th{
+
+        width:75px !important;
+
+        min-width:75px !important;
+
+        max-width:75px !important;
+
+        height:65px !important;
+    }
+
+    .board-table tbody td{
+
+        width:75px !important;
+
+        min-width:75px !important;
+
+        max-width:75px !important;
+
+        height:75px !important;
+
+        min-height:75px !important;
+
+        max-height:75px !important;
+    }
+
+    .board-table tbody td:first-child{
+
+        width:75px !important;
+
+        min-width:75px !important;
+
+        max-width:75px !important;
+    }
+
 }
