@@ -1,1271 +1,159 @@
 /* =====================================================
-   MR CO-ORDINATION DAILY COACHES POSITION
-   PRODUCTION MOBILE.CSS
-   VERSION 7.0
-   MOBILE + TABLET RESPONSIVE
-   RECTANGULAR PROFESSIONAL LAYOUT
+   MOBILE WIDTH FIX
+   iPHONE / MOBILE
 ===================================================== */
 
-
-/* =====================================================
-   MOBILE BASE
-===================================================== */
-
-@media (max-width:768px){
+@media (max-width: 768px){
 
     html,
     body{
-
-        width:100%;
-
-        max-width:100%;
-
-        overflow-x:hidden;
-    }
-
-
-    body{
-
-        background:#f4f7fb;
-
-        font-size:14px;
-    }
-
-
-    /* =================================================
-       HEADER
-    ================================================= */
-
-    header,
-    .main-header,
-    .top-header{
-
-        width:100%;
-
-        padding:14px 10px;
-
-        border-bottom:3px solid #06357a;
-    }
-
-
-    header h1,
-    .main-header h1,
-    .top-header h1{
-
-        font-size:22px;
-
-        line-height:1.2;
-
-        letter-spacing:0;
-
-        word-break:normal;
-    }
-
-
-    header h2,
-    .main-header h2,
-    .top-header h2{
-
-        margin-top:5px;
-
-        font-size:17px;
-
-        line-height:1.2;
-    }
-
-
-    header .date-time,
-    .main-header .date-time,
-    .top-header .date-time{
-
-        margin-top:8px;
-
-        gap:8px;
-
-        font-size:13px;
-
-        line-height:1.3;
-    }
-
-
-    /* =================================================
-       NAVBAR
-    ================================================= */
-
-    .navbar{
-
-        min-height:50px;
-
-        padding:5px 8px;
-    }
-
-
-    .navbar-brand{
-
-        font-size:17px;
-
-        white-space:nowrap;
-    }
-
-
-    .navbar-toggler{
-
-        padding:4px 7px;
-
-        font-size:14px;
-    }
-
-
-    .navbar-nav{
-
-        width:100%;
-
-        padding-top:5px;
-    }
-
-
-    .navbar-nav .nav-link{
-
-        padding:8px 5px;
-
-        font-size:14px;
-
-        border-bottom:1px solid rgba(255,255,255,.08);
-    }
-
-
-    /* =================================================
-       MAIN CONTAINER
-    ================================================= */
-
-    .container-fluid,
-    .board-container{
-
-        width:100%;
-
-        max-width:100%;
-
-        padding:10px 8px;
-
-        margin:0;
-    }
-
-
-    /* =================================================
-       SEARCH
-    ================================================= */
-
-    .search-container,
-    .search-section{
-
-        width:100%;
-
-        margin:5px 0 9px;
-    }
-
-
-    #searchBox,
-    #searchInput,
-    .search-box{
-
-        width:100%;
-
-        height:46px;
-
-        min-height:46px;
-
-        padding:7px 12px;
-
-        border-radius:7px;
-
-        font-size:16px;
-
-        border-width:2px;
-    }
-
-
-    /* =================================================
-       CONTROL AREA
-    ================================================= */
-
-    .controls,
-    .control-section,
-    .board-controls{
-
-        width:100%;
-
-        display:grid;
-
-        grid-template-columns:
-            repeat(2, minmax(0,1fr));
-
-        gap:7px;
-
-        margin:7px 0 10px;
-    }
-
-
-    .controls button,
-    .control-section button,
-    .board-controls button,
-    button{
-
-        width:100%;
-
-        min-height:42px;
-
-        padding:7px 6px;
-
-        border-radius:6px;
-
-        font-size:14px;
-
-        font-weight:700;
-
-        white-space:nowrap;
-    }
-
-
-    /* =================================================
-       DATABASE STATUS
-    ================================================= */
-
-    .database-status,
-    #databaseStatus,
-    #dbStatus{
-
-        width:100%;
-
-        min-height:38px;
-
-        padding:5px 8px;
-
-        border-radius:6px;
-
-        font-size:13px;
-
-        justify-content:center;
-    }
-
-
-    .database-status .status-dot,
-    .status-dot{
-
-        width:10px;
-
-        height:10px;
-    }
-
-
-    /* =================================================
-       COUNTERS
-    ================================================= */
-
-    .counters,
-    .counter-section{
-
-        width:100%;
-
-        display:grid;
-
-        grid-template-columns:
-            repeat(3,1fr);
-
-        gap:6px;
-
-        margin:8px 0;
-
-        font-size:12px;
-
-        white-space:normal;
-    }
-
-
-    #totalCoach,
-    #occupiedCoach,
-    #freeCoach{
-
-        min-width:0;
-
-        width:100%;
-
-        height:28px;
-
-        font-size:13px;
-
-        border-radius:5px;
-    }
-
-
-    /* =================================================
-       DIVIDER
-    ================================================= */
-
-    hr{
-
-        margin:10px 0;
-
-        border-top:1px solid #d9dee3;
-    }
-
-
-    /* =================================================
-       SHOP SECTION
-    ================================================= */
-
-    .shop-section,
-    .shop-container{
-
-        width:100%;
-
-        margin:12px 0 17px;
-    }
-
-
-    /* =================================================
-       SHOP HEADER
-    ================================================= */
-
-    .shop-title,
-    .shop-header{
-
-        width:100%;
-
-        min-height:46px;
-
-        height:auto;
-
-        padding:8px 12px;
-
-        border-radius:6px 6px 0 0;
-
-        font-size:18px;
-
-        line-height:1.2;
-
-        justify-content:flex-start;
-
-        text-align:left;
-
-        border-bottom-width:2px;
-    }
-
-
-    /* =================================================
-       BOARD WRAPPER
-    ================================================= */
-
-    .board-wrapper,
-    .table-wrapper{
-
-        width:100%;
-
-        max-width:100%;
-
-        overflow-x:auto;
-
-        overflow-y:hidden;
-
-        -webkit-overflow-scrolling:touch;
-
-        border-left:1px solid #adb5bd;
-
-        border-right:1px solid #adb5bd;
-
-        border-bottom:1px solid #adb5bd;
-
-        box-shadow:
-            0 2px 7px rgba(0,0,0,.06);
-
-        scrollbar-width:thin;
-    }
-
-
-    /* =================================================
-       BOARD TABLE
-    ================================================= */
-
-    table.board-table,
-    .board-table{
-
-        width:max-content !important;
-
+        width:100% !important;
+        max-width:100% !important;
         min-width:0 !important;
 
-        table-layout:fixed;
+        margin:0 !important;
+        padding:0 !important;
 
-        border-collapse:collapse;
-
-        margin:0;
-
-        padding:0;
+        overflow-x:hidden !important;
     }
 
 
-    /* =================================================
-       TABLE HEADER
-    ================================================= */
+    /* ==========================================
+       MAIN PAGE
+    ========================================== */
 
-    .board-table thead th{
+    .container,
+    .container-fluid,
+    .main-container,
+    .main-content,
+    .page-container,
+    .content{
+        width:100% !important;
+        max-width:100% !important;
+        min-width:0 !important;
 
-        width:80px !important;
+        margin-left:0 !important;
+        margin-right:0 !important;
 
-        min-width:80px !important;
+        padding-left:10px !important;
+        padding-right:10px !important;
 
-        max-width:80px !important;
-
-        height:46px;
-
-        min-height:46px;
-
-        max-height:46px;
-
-        padding:3px;
-
-        border:2px solid #343a40;
-
-        font-size:13px;
-
-        line-height:1.05;
-
-        white-space:nowrap;
-
-        overflow:hidden;
+        box-sizing:border-box !important;
     }
 
 
-    .board-table thead th:first-child{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-    }
-
-
-    /* =================================================
-       BOARD CELLS
-       EXACT MOBILE SIZE = 80 × 80
-    ================================================= */
-
-    .board-table tbody td{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-
-        height:80px !important;
-
-        min-height:80px !important;
-
-        max-height:80px !important;
-
-        padding:0;
-
-        border:2px solid #adb5bd;
-
-        font-size:13px;
-
-        overflow:hidden;
-
-        position:relative;
-    }
-
-
-    /* =================================================
-       POSITION CELL
-    ================================================= */
-
-    .board-table tbody td:first-child{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-
-        height:80px !important;
-
-        min-height:80px !important;
-
-        max-height:80px !important;
-
-        font-size:14px;
-
-        font-weight:800;
-
-        background:#f1f3f5;
-
-        border-right:2px solid #6c757d;
-    }
-
-
-    /* =================================================
-       COACH CARD
-    ================================================= */
-
-    .coach-card{
-
-        width:100%;
-
-        height:100%;
-
-        min-height:0;
-
-        padding:3px;
-
-        display:flex;
-
-        flex-direction:column;
-
-        align-items:center;
-
-        justify-content:center;
-
-        gap:1px;
-
-        overflow:hidden;
-    }
-
-
-    /* =================================================
-       COACH NUMBER
-    ================================================= */
-
-    .coach-no,
-    .coach-number{
-
-        width:100%;
-
-        font-size:16px;
-
-        line-height:1.05;
-
-        font-weight:800;
-
-        white-space:nowrap;
-
-        overflow:hidden;
-
-        text-overflow:ellipsis;
-    }
-
-
-    /* =================================================
-       COACH TYPE
-    ================================================= */
-
-    .coach-type{
-
-        width:100%;
-
-        font-size:10px;
-
-        line-height:1.05;
-
-        font-weight:600;
-
-        white-space:nowrap;
-
-        overflow:hidden;
-
-        text-overflow:ellipsis;
-    }
-
-
-    /* =================================================
-       COACH STATUS
-    ================================================= */
-
-    .coach-status{
-
-        min-width:27px;
-
-        max-width:70px;
-
-        padding:2px 4px;
-
-        border-radius:3px;
-
-        font-size:9px;
-
-        line-height:1;
-
-        font-weight:800;
-
-        white-space:nowrap;
-
-        overflow:hidden;
-
-        text-overflow:ellipsis;
-    }
-
-
-    /* =================================================
-       STATUS COLOURS
-    ================================================= */
-
-    .status-PO,
-    .status-po{
-
-        background:#198754 !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-S,
-    .status-s{
-
-        background:#20c997 !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-LM,
-    .status-lm{
-
-        background:#ffc107 !important;
-
-        color:#212529 !important;
-    }
-
-
-    .status-MED,
-    .status-med{
-
-        background:#dc3545 !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-RL,
-    .status-rl{
-
-        background:#0d6efd !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-R1,
-    .status-r1{
-
-        background:#6f42c1 !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-RS,
-    .status-rs{
-
-        background:#6610f2 !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-L,
-    .status-l{
-
-        background:#fd7e14 !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-HVY,
-    .status-hvy{
-
-        background:#343a40 !important;
-
-        color:#ffffff !important;
-    }
-
-
-    .status-WIP,
-    .status-wip{
-
-        background:#0dcaf0 !important;
-
-        color:#212529 !important;
-    }
-
-
-    .status-HOLD,
-    .status-hold{
-
-        background:#6c757d !important;
-
-        color:#ffffff !important;
-    }
-
-
-    /* =================================================
-       SEARCH HIGHLIGHT
-    ================================================= */
-
-    .search-highlight{
-
-        outline:3px solid #ffc107 !important;
-
-        outline-offset:-3px;
-
-        z-index:20;
-
-        box-shadow:
-            inset 0 0 0 1px #ffffff,
-            0 0 8px rgba(255,193,7,.8);
-    }
-
-
-    /* =================================================
-       SEARCH RESULT
-    ================================================= */
-
-    #searchResult,
-    .search-result{
-
-        width:100%;
-
-        min-height:20px;
-
-        margin:4px 0;
-
-        padding:4px 6px;
-
-        font-size:13px;
-
-        line-height:1.3;
-    }
-
-
-    /* =================================================
-       SEARCH POPUP
-    ================================================= */
-
-    #coachPopup{
-
-        width:calc(100vw - 24px);
-
-        max-width:430px;
-
-        max-height:80vh;
-
-        border-radius:8px;
-
-        box-shadow:
-            0 8px 30px rgba(0,0,0,.3);
-    }
-
-
-    .popup-header{
-
-        padding:10px 12px;
-
-        font-size:16px;
-    }
-
-
-    .popup-header button{
-
-        width:auto;
-
-        min-height:30px;
-
-        padding:3px 8px;
-
-        font-size:16px;
-    }
-
-
-    .popup-table td{
-
-        padding:7px;
-
-        font-size:13px;
-    }
-
-
-    .popup-table td:first-child{
-
-        width:40%;
-    }
-
-
-    /* =================================================
-       SEARCH NAVIGATION
-    ================================================= */
-
-    .search-navigation{
-
-        gap:6px;
-
-        padding:7px;
-
-        font-size:13px;
-    }
-
-
-    .search-navigation button{
-
-        width:auto;
-
-        min-height:34px;
-
-        padding:5px 9px;
-
-        font-size:12px;
-    }
-
-
-    /* =================================================
-       MODAL
-    ================================================= */
-
-    .modal-dialog{
-
-        width:auto;
-
-        max-width:none;
-
-        margin:8px;
-    }
-
-
-    .modal-content{
-
-        border-radius:8px;
-    }
-
-
-    .modal-header{
-
-        padding:10px 12px;
-    }
-
-
-    .modal-title{
-
-        font-size:17px;
-    }
-
-
-    .modal-body{
-
-        padding:12px;
-    }
-
-
-    .modal-body label{
-
-        font-size:13px;
-
-        font-weight:600;
-    }
-
-
-    .modal-body input,
-    .modal-body select{
-
-        width:100%;
-
-        min-height:42px;
-
-        font-size:15px;
-
-        border-radius:6px;
-    }
-
-
-    .modal-footer{
-
-        padding:8px 10px;
-
-        gap:5px;
-
-        flex-wrap:wrap;
-    }
-
-
-    .modal-footer button{
-
-        flex:1;
-
-        min-width:90px;
-
-        min-height:40px;
-
-        font-size:13px;
-    }
-
-
-    /* =================================================
-       DRAGGING
-    ================================================= */
-
-    .dragging{
-
-        opacity:.5;
-    }
-
-
-    .table-info{
-
-        outline:3px dashed #0d6efd !important;
-
-        outline-offset:-3px;
-    }
-
-
-    /* =================================================
-       FULLSCREEN
-    ================================================= */
-
-    body.fullscreen-mode .board-wrapper{
-
-        height:calc(100vh - 145px);
-
-        overflow:auto;
-    }
-
-
-    /* =================================================
-       MOBILE SCROLLBAR
-    ================================================= */
-
-    .board-wrapper::-webkit-scrollbar,
-    .table-wrapper::-webkit-scrollbar{
-
-        height:7px;
-    }
-
-
-    .board-wrapper::-webkit-scrollbar-track,
-    .table-wrapper::-webkit-scrollbar-track{
-
-        background:#e9ecef;
-    }
-
-
-    .board-wrapper::-webkit-scrollbar-thumb,
-    .table-wrapper::-webkit-scrollbar-thumb{
-
-        background:#6c757d;
-
-        border-radius:7px;
-    }
-
-}
-
-
-/* =====================================================
-   SMALL MOBILE
-   480px AND BELOW
-===================================================== */
-
-@media (max-width:480px){
+    /* ==========================================
+       HEADER
+    ========================================== */
 
     header,
-    .main-header,
-    .top-header{
+    .header,
+    .top-header,
+    .page-header{
+        width:100% !important;
+        max-width:100% !important;
 
-        padding:12px 7px;
+        box-sizing:border-box !important;
+
+        overflow:hidden !important;
     }
 
 
-    header h1,
-    .main-header h1,
-    .top-header h1{
+    /* ==========================================
+       NAVBAR
+    ========================================== */
 
-        font-size:19px;
+    nav,
+    .navbar,
+    .navbar-container{
+        width:100% !important;
+        max-width:100% !important;
+
+        box-sizing:border-box !important;
     }
 
 
-    header h2,
-    .main-header h2,
-    .top-header h2{
+    /* ==========================================
+       SEARCH
+    ========================================== */
 
-        font-size:15px;
+    .search-container,
+    .search-navigation{
+        width:100% !important;
+        max-width:100% !important;
+
+        box-sizing:border-box !important;
     }
 
 
-    header .date-time,
-    .main-header .date-time,
-    .top-header .date-time{
+    #searchBox{
+        width:100% !important;
+        max-width:100% !important;
 
-        font-size:12px;
-
-        gap:5px;
+        box-sizing:border-box !important;
     }
 
 
-    .container-fluid,
-    .board-container{
-
-        padding:8px 5px;
-    }
-
-
-    #searchBox,
-    #searchInput,
-    .search-box{
-
-        height:44px;
-
-        min-height:44px;
-
-        font-size:15px;
-
-        padding:6px 10px;
-    }
-
+    /* ==========================================
+       CONTROL BUTTONS
+    ========================================== */
 
     .controls,
-    .control-section,
-    .board-controls{
+    .button-container,
+    .action-buttons{
+        width:100% !important;
+        max-width:100% !important;
 
-        gap:5px;
+        box-sizing:border-box !important;
     }
 
 
     .controls button,
-    .control-section button,
-    .board-controls button,
-    button{
+    .button-container button,
+    .action-buttons button{
+        width:100% !important;
+        max-width:100% !important;
 
-        min-height:40px;
-
-        padding:6px 4px;
-
-        font-size:12px;
+        box-sizing:border-box !important;
     }
 
 
-    .shop-title,
-    .shop-header{
+    /* ==========================================
+       COUNTERS
+    ========================================== */
 
-        min-height:42px;
-
-        padding:7px 10px;
-
-        font-size:16px;
-    }
-
-
-    .board-table thead th{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-
-        height:43px;
-
-        min-height:43px;
-
-        max-height:43px;
-
-        font-size:12px;
-    }
-
-
-    .board-table tbody td{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-
-        height:80px !important;
-
-        min-height:80px !important;
-
-        max-height:80px !important;
-    }
-
-
-    .board-table tbody td:first-child{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-
-        font-size:13px;
-    }
-
-
-    .coach-no,
-    .coach-number{
-
-        font-size:15px;
-    }
-
-
-    .coach-type{
-
-        font-size:9px;
-    }
-
-
-    .coach-status{
-
-        font-size:8px;
-
-        min-width:25px;
-
-        padding:2px 3px;
-    }
-
-
+    .counter-container,
     .counters,
-    .counter-section{
+    .stats-container{
+        width:100% !important;
+        max-width:100% !important;
 
-        gap:4px;
-
-        font-size:11px;
+        box-sizing:border-box !important;
     }
 
 
-    #totalCoach,
-    #occupiedCoach,
-    #freeCoach{
+    /* ==========================================
+       BOARD
+    ========================================== */
 
-        height:26px;
+    .board-wrapper{
+        width:100% !important;
+        max-width:100% !important;
 
-        font-size:12px;
+        margin:0 !important;
+        padding:0 !important;
+
+        box-sizing:border-box !important;
+
+        overflow-x:auto !important;
     }
 
 
-    #coachPopup{
+    .board-container{
+        width:100% !important;
+        max-width:100% !important;
 
-        width:calc(100vw - 16px);
-
-        max-height:82vh;
-    }
-
-}
-
-
-/* =====================================================
-   VERY SMALL MOBILE
-   360px AND BELOW
-===================================================== */
-
-@media (max-width:360px){
-
-    header h1,
-    .main-header h1,
-    .top-header h1{
-
-        font-size:17px;
-    }
-
-
-    header h2,
-    .main-header h2,
-    .top-header h2{
-
-        font-size:14px;
-    }
-
-
-    .controls,
-    .control-section,
-    .board-controls{
-
-        grid-template-columns:
-            repeat(2, minmax(0,1fr));
-    }
-
-
-    .controls button,
-    .control-section button,
-    .board-controls button,
-    button{
-
-        font-size:11px;
-
-        min-height:38px;
-    }
-
-
-    .shop-title,
-    .shop-header{
-
-        font-size:15px;
-    }
-
-
-    .board-table thead th{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-
-        font-size:11px;
-    }
-
-
-    .board-table tbody td{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-
-        height:80px !important;
-
-        min-height:80px !important;
-
-        max-height:80px !important;
-    }
-
-
-    .board-table tbody td:first-child{
-
-        width:80px !important;
-
-        min-width:80px !important;
-
-        max-width:80px !important;
-    }
-
-
-    .coach-no,
-    .coach-number{
-
-        font-size:14px;
-    }
-
-
-    .coach-type{
-
-        font-size:8px;
-    }
-
-
-    .coach-status{
-
-        font-size:8px;
+        box-sizing:border-box !important;
     }
 
 }
-
-
-/* =====================================================
-   END MOBILE.CSS VERSION 7.0
-===================================================== */
