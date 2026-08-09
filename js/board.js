@@ -15,8 +15,7 @@ import {
     ref,
     get,
     push,
-    onValue,
-    update
+    onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 import {
@@ -26,7 +25,8 @@ import {
 import {
     firebaseSaveCoach,
     firebaseUpdateCoach,
-    firebaseDeleteCoach
+    firebaseDeleteCoach,
+    updateCoachPosition
 } from "./firebase-board.js";
 
 import {
@@ -1402,70 +1402,15 @@ async function dropCoach(event) {
     };
 
 
-    const updates = {};
-
-
-    updates[
-        `coachBoard/${toLine}/${toPos}`
-    ] = {
-
-        ...fromCoach,
-
-        line:
-            toLine,
-
-        position:
-            toPos
-
-    };
-
-
-    if (toCoach) {
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = {
-
-            ...toCoach,
-
-            line:
-                fromLine,
-
-            position:
-                fromPos
-
-        };
-
-    } else {
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = null;
-
-    }
-
-
     try {
 
-        await update(
-            ref(database),
-            updates
+        await updateCoachPosition(
+            fromLine,
+            fromPos,
+            toLine,
+            toPos
         );
 
-
-        await writeHistory(
-            "MOVE",
-            fromCoach,
-            {
-
-                fromLine,
-                fromPos,
-
-                toLine,
-                toPos
-
-            }
-        );
 
 
         console.log(
@@ -1554,3 +1499,374 @@ function enableMobileDrag() {
         );
 
        
+
+
+/* =====================================================
+   DATABASE ERROR DISPLAY
+===================================================== */
+
+function showDatabaseError(error) {
+
+    const statusEl = document.getElementById("databaseStatus");
+    const footerEl = document.getElementById("footerDatabase");
+
+    console.error("Firebase database error:", error);
+
+    if (statusEl) {
+        statusEl.textContent = "â Database Error";
+        statusEl.classList.remove("text-success");
+        statusEl.classList.add("text-danger");
+        statusEl.title = error?.message || "Firebase database error";
+    }
+
+    if (footerEl) {
+        footerEl.textContent = "Firebase: Error";
+    }
+}
+
+/* =====================================================
+   STATUS COLOUR ENGINE
+===================================================== */
+
+function applyStatusColours() {
+
+    const statusMap = {
+        PO: "status-po",
+        S: "status-s",
+        LM: "status-lm",
+        MED: "status-med",
+        RL: "status-rl",
+        R1: "status-r1",
+        RS: "status-rs",
+        L: "status-l",
+        HVY: "status-hvy"
+    };
+
+    document.querySelectorAll(".coach-table td").forEach(cell => {
+        Object.values(statusMap).forEach(cls => cell.classList.remove(cls));
+
+        const status = String(cell.dataset.status || "")
+            .trim()
+            .toUpperCase();
+
+        if (statusMap[status]) {
+            cell.classList.add(statusMap[status]);
+        }
+    });
+}
+
+
+/* =====================================================
+   BOARD COUNTERS
+   Total = all physical board cells
+   Occupied = cells containing coaches
+   Free = empty board cells
+===================================================== */
+
+function updateCounters() {
+
+    const cells = Array.from(
+        document.querySelectorAll(".coach-table td")
+    );
+
+    const total = cells.length;
+    const occupied = cells.filter(
+        cell => !!cell.dataset.coach
+    ).length;
+
+    const free = Math.max(0, total - occupied);
+
+    const totalEl = document.getElementById("totalCoach");
+    const occupiedEl = document.getElementById("occupiedCoach");
+    const freeEl = document.getElementById("freeCoach");
+
+    if (totalEl) totalEl.textContent = total;
+    if (occupiedEl) occupiedEl.textContent = occupied;
+    if (freeEl) freeEl.textContent = free;
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+function initializeSearch() {
+
+    const input = document.getElementById("searchBox");
+    const result = document.getElementById("searchResult");
+
+    if (!input || !result) return;
+
+    input.addEventListener("input", () => {
+
+        const keyword = input.value.trim().toLowerCase();
+
+        document.querySelectorAll(".coach-table td.search-match")
+            .forEach(cell => cell.classList.remove("search-match"));
+
+        if (!keyword) {
+            result.innerHTML = "";
+            return;
+        }
+
+        const matches = [];
+
+        Object.keys(boardData || {}).forEach(line => {
+
+            Object.keys(boardData[line] || {}).forEach(position => {
+
+                const coach = boardData[line][position];
+                if (!coach) return;
+
+                const shop = coach.shop || getShop(line);
+
+                const haystack = [
+                    coach.coachNo,
+                    coach.coachType,
+                    coach.status,
+                    shop,
+                    line,
+                    position
+                ].map(value =>
+                    String(value ?? "").toLowerCase()
+                );
+
+                if (haystack.some(value => value.includes(keyword))) {
+
+                    const cell = document.getElementById(
+                        `${line}_${position}`
+                    );
+
+                    if (cell) cell.classList.add("search-match");
+
+                    matches.push({
+                        cell,
+                        coach,
+                        shop,
+                        line,
+                        position
+                    });
+                }
+            });
+        });
+
+        if (!matches.length) {
+            result.innerHTML = `<div class="alert alert-warning mt-2 mb-0">No coach found.</div>`;
+            return;
+        }
+
+        result.innerHTML = `
+            <div class="search-results-list mt-2">
+                ${matches.slice(0, 25).map((item, index) => `
+                    <button type="button"
+                            class="search-result-item"
+                            data-index="${index}">
+                        <strong>${escapeHTML(item.coach.coachNo || "-")}</strong>
+                        <span>${escapeHTML(item.shop)} Â· ${escapeHTML(item.line)} Â· ${escapeHTML(item.position)}</span>
+                        <small>${escapeHTML(item.coach.coachType || "")} ${escapeHTML(item.coach.status || "")}</small>
+                    </button>
+                `).join("")}
+            </div>
+        `;
+
+        result.querySelectorAll(".search-result-item").forEach(button => {
+            button.addEventListener("click", () => {
+
+                const item = matches[Number(button.dataset.index)];
+                if (!item?.cell) return;
+
+                currentCell = item.cell;
+
+                document.querySelectorAll(".coach-table td.search-match")
+                    .forEach(cell => cell.classList.remove("search-match"));
+
+                item.cell.classList.add("search-match");
+
+                item.cell.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                    inline: "center"
+                });
+
+                openModal(item.cell);
+            });
+        });
+    });
+}
+
+
+/* =====================================================
+   KEYBOARD SHORTCUTS
+===================================================== */
+
+function initializeKeyboard() {
+
+    document.addEventListener("keydown", event => {
+
+        if (event.key === "Escape" && coachModal) {
+            coachModal.hide();
+        }
+
+        if (
+            (event.ctrlKey || event.metaKey) &&
+            event.key.toLowerCase() === "r"
+        ) {
+            event.preventDefault();
+            refreshBoard();
+        }
+    });
+}
+
+
+/* =====================================================
+   FIREBASE CONNECTION STATUS
+===================================================== */
+
+function initializeFirebaseStatus() {
+
+    const statusEl = document.getElementById("databaseStatus");
+    const footerEl = document.getElementById("footerDatabase");
+
+    if (!statusEl && !footerEl) return;
+
+    const connectedRef = ref(database, ".info/connected");
+
+    onValue(
+        connectedRef,
+        snapshot => {
+
+            const connected = snapshot.val() === true;
+
+            const text = connected ? "â Connected" : "â Offline";
+
+            if (statusEl) {
+                statusEl.textContent = text;
+                statusEl.classList.toggle("text-success", connected);
+                statusEl.classList.toggle("text-danger", !connected);
+            }
+
+            if (footerEl) {
+                footerEl.textContent = connected
+                    ? "Firebase: Connected"
+                    : "Firebase: Offline";
+            }
+        },
+        error => {
+
+            console.error("Firebase status error:", error);
+
+            if (statusEl) {
+                statusEl.textContent = "â Offline";
+                statusEl.classList.remove("text-success");
+                statusEl.classList.add("text-danger");
+            }
+        }
+    );
+}
+
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+async function toggleFullscreen() {
+
+    try {
+
+        if (!document.fullscreenElement) {
+
+            const element = document.documentElement;
+
+            if (element.requestFullscreen) {
+                await element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            }
+
+        } else if (document.exitFullscreen) {
+
+            await document.exitFullscreen();
+        }
+
+    } catch (error) {
+
+        console.error("Fullscreen error:", error);
+
+    }
+}
+
+
+/* =====================================================
+   CSV / EXCEL EXPORT
+===================================================== */
+
+function exportCSV() {
+
+    const rows = [[
+        "Coach No",
+        "Coach Type",
+        "Shop",
+        "Line",
+        "Position",
+        "Status",
+        "Updated"
+    ]];
+
+    Object.keys(boardData || {}).forEach(line => {
+
+        Object.keys(boardData[line] || {}).forEach(position => {
+
+            const coach = boardData[line][position];
+            if (!coach) return;
+
+            rows.push([
+                coach.coachNo || "",
+                coach.coachType || "",
+                coach.shop || getShop(line),
+                line,
+                position,
+                coach.status || "",
+                coach.updatedAt || ""
+            ]);
+        });
+    });
+
+    const csv = rows.map(row =>
+        row.map(value => {
+            const text = String(value ?? "");
+            return `"${text.replace(/"/g, '""')}"`;
+        }).join(",")
+    ).join("\r\n");
+
+    const blob = new Blob(
+        ["\uFEFF" + csv],
+        { type: "text/csv;charset=utf-8" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `MR-Coach-Board-${new Date().toISOString().slice(0,10)}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+
+/* =====================================================
+   SAFETY: PREVENT UNHANDLED BOARD ERRORS
+===================================================== */
+
+window.addEventListener("error", event => {
+    if (event?.message) {
+        console.error("Board runtime error:", event.message);
+    }
+});
+
+window.addEventListener("unhandledrejection", event => {
+    console.error("Board promise error:", event.reason);
+});
