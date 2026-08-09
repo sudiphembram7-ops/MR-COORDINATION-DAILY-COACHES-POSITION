@@ -223,15 +223,29 @@ function updateClock() {
 
 
 /* =====================================================
-   LOAD BOARD
+
+   LOAD BOARD - FIREBASE LIVE LISTENER
+
 ===================================================== */
 
 function loadBoard() {
 
+    const boardRef = ref(
+
+        database,
+
+        "coachBoard"
+
+    );
+
+    // Prevent duplicate listener
+
     if (boardListenerStarted) {
 
         console.log(
+
             "Firebase board listener already active"
+
         );
 
         return;
@@ -240,93 +254,247 @@ function loadBoard() {
 
     boardListenerStarted = true;
 
-    const boardRef =
-        ref(
-            database,
-            "coachBoard"
-        );
+    boardUnsubscribe = onValue(
 
-    boardUnsubscribe =
-        onValue(
+        boardRef,
 
-            boardRef,
+        (snapshot) => {
 
-            (snapshot) => {
+            boardData =
 
-                boardData =
-                    snapshot.exists()
-                        ? snapshot.val()
-                        : {};
+                snapshot.exists()
 
-                console.log(
-                    "BOARD DATA UPDATED",
-                    boardData
-                );
+                    ? snapshot.val()
 
-                drawBoard();
+                    : {};
 
-                updateLastUpdate();
+            console.log(
 
-            },
+                "LIVE BOARD DATA UPDATED",
 
-            (error) => {
+                boardData
 
-                console.error(
-                    "Firebase Sync Error:",
-                    error
-                );
+            );
 
-                showDatabaseError(
-                    error
-                );
+            drawBoard();
 
-            }
+            updateLastUpdate();
 
-        );
+        },
+
+        (error) => {
+
+            console.error(
+
+                "Firebase Sync Error:",
+
+                error
+
+            );
+
+            showDatabaseError(error);
+
+        }
+
+    );
 
 }
 
-
 /* =====================================================
-   MANUAL REFRESH
+
+   MANUAL REFRESH - FORCE FIREBASE READ
+
 ===================================================== */
 
 async function refreshBoard() {
 
+    const refreshBtn =
+
+        document.getElementById(
+
+            "refreshBtn"
+
+        );
+
+    if (refreshBtn) {
+
+        refreshBtn.disabled = true;
+
+        refreshBtn.innerHTML =
+
+            "⏳ Refreshing...";
+
+    }
+
     try {
 
-        const snapshot =
-            await get(
-                ref(
-                    database,
-                    "coachBoard"
-                )
+        console.log(
+
+            "================================="
+
+        );
+
+        console.log(
+
+            "MANUAL REFRESH STARTED"
+
+        );
+
+        console.log(
+
+            "================================="
+
+        );
+
+        // Force fresh Firebase read
+
+        const boardRef =
+
+            ref(
+
+                database,
+
+                "coachBoard"
+
             );
 
-        boardData =
+        const snapshot =
+
+            await get(
+
+                boardRef
+
+            );
+
+        if (
+
             snapshot.exists()
-                ? snapshot.val()
-                : {};
+
+        ) {
+
+            boardData =
+
+                snapshot.val();
+
+        } else {
+
+            boardData = {};
+
+        }
+
+        console.log(
+
+            "MANUAL REFRESH DATA:",
+
+            boardData
+
+        );
+
+        // Redraw board
 
         drawBoard();
 
+        // Update time
+
         updateLastUpdate();
 
+        // Update footer time also
+
+        updateFooterTime();
+
         console.log(
-            "Board refreshed successfully"
+
+            "BOARD REFRESH SUCCESS"
+
         );
+
+        // Small visual confirmation
+
+        if (refreshBtn) {
+
+            refreshBtn.innerHTML =
+
+                "✓ Refreshed";
+
+            setTimeout(
+
+                () => {
+
+                    refreshBtn.innerHTML =
+
+                        "🔄 Refresh";
+
+                },
+
+                1000
+
+            );
+
+        }
 
     } catch (error) {
 
         console.error(
-            "Refresh Error:",
+
+            "================================="
+
+        );
+
+        console.error(
+
+            "REFRESH ERROR:",
+
             error
+
+        );
+
+        console.error(
+
+            "================================="
+
         );
 
         alert(
-            "Refresh Failed: " +
+
+            "Refresh Failed\n\n" +
+
             error.message
+
         );
+
+        if (refreshBtn) {
+
+            refreshBtn.innerHTML =
+
+                "❌ Failed";
+
+        }
+
+        setTimeout(
+
+            () => {
+
+                if (refreshBtn) {
+
+                    refreshBtn.innerHTML =
+
+                        "🔄 Refresh";
+
+                }
+
+            },
+
+            1500
+
+        );
+
+    } finally {
+
+        if (refreshBtn) {
+
+            refreshBtn.disabled = false;
+
+        }
 
     }
 
