@@ -1,8 +1,8 @@
 /* =====================================================
    MR CO-ORDINATION BOARD
    PRODUCTION BOARD.JS
-   VERSION 7.0
-   FINAL STABLE + MOBILE
+   VERSION 7.1
+   FINAL STABLE + MOBILE + SEARCH
 ===================================================== */
 
 
@@ -28,7 +28,8 @@ import {
 import {
     firebaseSaveCoach,
     firebaseUpdateCoach,
-    firebaseDeleteCoach
+    firebaseDeleteCoach,
+    updateCoachPosition
 } from "./firebase-board.js";
 
 
@@ -48,6 +49,7 @@ let adminLoggedIn = false;
 let authChecked = false;
 
 let boardListenerStarted = false;
+let boardEventsInitialized = false;
 
 let searchResults = [];
 let currentSearchIndex = 0;
@@ -56,6 +58,7 @@ let popupTimer = null;
 
 let touchTimer = null;
 let touchDragCell = null;
+let touchStartCell = null;
 
 const LONG_PRESS_DELAY = 350;
 
@@ -71,9 +74,6 @@ function $(id) {
 
 /* =====================================================
    TABLE CELL SELECTOR
-   Supports both:
-   .board-table
-   .coach-table
 ===================================================== */
 
 function getBoardCells() {
@@ -91,7 +91,7 @@ function getBoardCells() {
 
 console.log("========================================");
 console.log("MR CO-ORDINATION BOARD");
-console.log("PRODUCTION BOARD.JS VERSION 7.0");
+console.log("PRODUCTION BOARD.JS VERSION 7.1");
 console.log("========================================");
 
 
@@ -128,6 +128,7 @@ function checkAdmin() {
         return false;
     }
 
+
     if (!adminLoggedIn) {
 
         alert(
@@ -136,6 +137,7 @@ function checkAdmin() {
 
         return false;
     }
+
 
     return true;
 }
@@ -166,7 +168,9 @@ function initializeBoard() {
        BOOTSTRAP MODAL
     ========================================= */
 
-    const modalElement = $("coachModal");
+    const modalElement =
+        $("coachModal");
+
 
     if (
         modalElement &&
@@ -180,10 +184,6 @@ function initializeBoard() {
             );
     }
 
-
-    /* =========================================
-       INITIALIZE
-    ========================================= */
 
     startClock();
 
@@ -202,6 +202,7 @@ function initializeBoard() {
     initializeModal();
 
     initializeTVMode();
+
 
     console.log(
         "Board Initialization Complete"
@@ -226,24 +227,35 @@ function startClock() {
 
 function updateClock() {
 
-    const now = new Date();
+    const now =
+        new Date();
 
-    const date = $("liveDate");
-    const time = $("liveTime");
+
+    const date =
+        $("liveDate");
+
+
+    const time =
+        $("liveTime");
+
 
     if (date) {
 
         date.textContent =
-            now.toLocaleDateString("en-IN");
-
+            now.toLocaleDateString(
+                "en-IN"
+            );
     }
+
 
     if (time) {
 
         time.textContent =
-            now.toLocaleTimeString("en-IN");
-
+            now.toLocaleTimeString(
+                "en-IN"
+            );
     }
+
 }
 
 
@@ -257,13 +269,16 @@ function loadBoard() {
         return;
     }
 
+
     boardListenerStarted = true;
+
 
     const boardRef =
         ref(
             database,
             "coachBoard"
         );
+
 
     onValue(
 
@@ -276,6 +291,7 @@ function loadBoard() {
                     ? snapshot.val()
                     : {};
 
+
             if (
                 !boardData ||
                 typeof boardData !== "object"
@@ -284,10 +300,12 @@ function loadBoard() {
                 boardData = {};
             }
 
+
             console.log(
                 "Firebase Realtime Update",
                 boardData
             );
+
 
             drawBoard();
 
@@ -295,8 +313,10 @@ function loadBoard() {
 
             updateCounters();
 
+
             const searchBox =
                 $("searchBox");
+
 
             if (
                 searchBox &&
@@ -329,13 +349,18 @@ function updateLastUpdate() {
 
     const now =
         new Date()
-            .toLocaleTimeString("en-IN");
+            .toLocaleTimeString(
+                "en-IN"
+            );
+
 
     const top =
         $("lastUpdate");
 
+
     const footer =
         $("lastUpdateTime");
+
 
     if (top) {
 
@@ -343,58 +368,66 @@ function updateLastUpdate() {
             "Updated : " + now;
     }
 
+
     if (footer) {
 
         footer.textContent =
             now;
     }
+
 }
 
 
 /* =====================================================
    GET SHOP
+   LINE IS MASTER
 ===================================================== */
 
 function getShop(line) {
+
+    line =
+        String(line ?? "")
+            .trim()
+            .toUpperCase();
+
 
     if (!line) {
         return "";
     }
 
-    line =
-        String(line)
-            .trim()
-            .toUpperCase();
-
-
-    /* SCR FIRST */
 
     if (line.startsWith("SCR")) {
+
         return "MR SCR SHOP";
     }
 
 
     if (line.startsWith("N")) {
+
         return "N SHOP";
     }
 
 
     if (line.startsWith("M")) {
+
         return "M SHOP";
     }
 
 
     if (line.startsWith("F")) {
+
         return "CR SHOP";
     }
 
 
     if (line.startsWith("J")) {
+
         return "J SHOP";
     }
 
 
     if (line.startsWith("L")) {
+
         return "LIFTING BAY";
     }
 
@@ -420,14 +453,18 @@ function getCellParts(cell) {
         };
     }
 
+
     const parts =
         cell.id.split("_");
+
 
     const line =
         parts.shift() || "";
 
+
     const position =
         parts.join("_");
+
 
     return {
         line,
@@ -446,10 +483,13 @@ function isBoardCell(cell) {
         return false;
     }
 
+
     const {
         line,
         position
-    } = getCellParts(cell);
+    } =
+        getCellParts(cell);
+
 
     return !!(
         line &&
@@ -465,11 +505,26 @@ function isBoardCell(cell) {
 function escapeHTML(value) {
 
     return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
 
@@ -493,30 +548,44 @@ function drawBoard() {
             return;
         }
 
+
         const {
             line,
             position
-        } = getCellParts(cell);
+        } =
+            getCellParts(cell);
+
 
         cell.innerHTML =
             `<div class="coach-card"></div>`;
 
+
         cell.dataset.shop =
             getShop(line);
+
 
         cell.dataset.line =
             line;
 
+
         cell.dataset.position =
             position;
 
-        cell.dataset.coach = "";
 
-        cell.dataset.type = "";
+        cell.dataset.coach =
+            "";
 
-        cell.dataset.status = "";
+
+        cell.dataset.type =
+            "";
+
+
+        cell.dataset.status =
+            "";
+
 
         cell.classList.remove(
+
             "status-po",
             "status-s",
             "status-lm",
@@ -527,7 +596,11 @@ function drawBoard() {
             "status-wip",
             "status-hold",
             "status-rs",
-            "status-hvy"
+            "status-hvy",
+            "search-highlight",
+            "dragging",
+            "table-info"
+
         );
 
     });
@@ -557,6 +630,7 @@ function drawBoard() {
             const coach =
                 boardData[line][position];
 
+
             if (!coach) {
                 continue;
             }
@@ -566,6 +640,7 @@ function drawBoard() {
                 document.getElementById(
                     `${line}_${position}`
                 );
+
 
             if (!cell) {
 
@@ -587,7 +662,9 @@ function drawBoard() {
             if (!card) {
 
                 card =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 card.className =
                     "coach-card";
@@ -626,24 +703,28 @@ function drawBoard() {
 
 
             /* =================================
-               DATA
+               DATASET
             ================================= */
 
             cell.dataset.shop =
-                coach.shop ||
                 getShop(line);
+
 
             cell.dataset.line =
                 line;
 
+
             cell.dataset.position =
                 position;
+
 
             cell.dataset.coach =
                 coach.coachNo || "";
 
+
             cell.dataset.type =
                 coach.coachType || "";
+
 
             cell.dataset.status =
                 coach.status || "";
@@ -656,6 +737,27 @@ function drawBoard() {
     applyStatusColours();
 
     updateCounters();
+
+
+    /* =========================================
+       EVENTS ONLY ONCE
+    ========================================= */
+
+    if (!boardEventsInitialized) {
+
+        initializeCellEvents();
+
+        boardEventsInitialized = true;
+    }
+
+}
+
+
+/* =====================================================
+   CELL EVENTS
+===================================================== */
+
+function initializeCellEvents() {
 
     initializeCellClick();
 
@@ -679,25 +781,32 @@ function initializeCellClick() {
                 return;
             }
 
-            cell.onclick = function(e) {
 
-                if (
-                    cell.dataset.touchMoved === "true"
-                ) {
+            cell.onclick =
+                function () {
 
-                    cell.dataset.touchMoved =
-                        "false";
+                    if (
+                        cell.dataset.touchMoved ===
+                        "true"
+                    ) {
 
-                    return;
-                }
+                        cell.dataset.touchMoved =
+                            "false";
 
-                currentCell = this;
+                        return;
+                    }
 
-                openModal(this);
 
-            };
+                    currentCell =
+                        this;
+
+
+                    openModal(this);
+
+                };
 
         });
+
 }
 
 
@@ -711,26 +820,33 @@ function openModal(cell) {
         return;
     }
 
+
     const {
         line,
         position
-    } = getCellParts(cell);
+    } =
+        getCellParts(cell);
 
 
     const modalShop =
         $("modalShop");
 
+
     const modalLine =
         $("modalLine");
+
 
     const modalPosition =
         $("modalPosition");
 
+
     const modalCoachNo =
         $("modalCoachNo");
 
+
     const modalCoachType =
         $("modalCoachType");
+
 
     const modalStatus =
         $("modalStatus");
@@ -739,7 +855,6 @@ function openModal(cell) {
     if (modalShop) {
 
         modalShop.value =
-            cell.dataset.shop ||
             getShop(line);
     }
 
@@ -784,6 +899,7 @@ function openModal(cell) {
         coachModal.show();
 
     }
+
 }
 
 
@@ -793,25 +909,38 @@ function openModal(cell) {
 
 function getModalData() {
 
+    const line =
+        $("modalLine")
+            ?.value
+            ?.trim() || "";
+
+
     return {
 
         shop:
-            $("modalShop")?.value?.trim() || "",
+            getShop(line),
 
-        line:
-            $("modalLine")?.value?.trim() || "",
+        line,
 
         position:
-            $("modalPosition")?.value?.trim() || "",
+            $("modalPosition")
+                ?.value
+                ?.trim() || "",
 
         coachNo:
-            $("modalCoachNo")?.value?.trim() || "",
+            $("modalCoachNo")
+                ?.value
+                ?.trim() || "",
 
         coachType:
-            $("modalCoachType")?.value?.trim() || "",
+            $("modalCoachType")
+                ?.value
+                ?.trim() || "",
 
         status:
-            $("modalStatus")?.value?.trim() || "",
+            $("modalStatus")
+                ?.value
+                ?.trim() || "",
 
         updatedAt:
             new Date().toISOString()
@@ -832,6 +961,7 @@ function duplicateCoach(
     if (!coachNo) {
         return false;
     }
+
 
     const searchNo =
         String(coachNo)
@@ -855,6 +985,7 @@ function duplicateCoach(
             const coach =
                 boardData[line][position];
 
+
             if (!coach) {
                 continue;
             }
@@ -875,6 +1006,7 @@ function duplicateCoach(
                 const existingCellId =
                     `${line}_${position}`;
 
+
                 if (
                     !ignoreCell ||
                     existingCellId !==
@@ -883,9 +1015,13 @@ function duplicateCoach(
 
                     return true;
                 }
+
             }
+
         }
+
     }
+
 
     return false;
 }
@@ -1075,6 +1211,7 @@ async function saveCoach() {
         );
 
     }
+
 }
 
 
@@ -1145,6 +1282,7 @@ async function updateCoach() {
         );
 
     }
+
 }
 
 
@@ -1224,6 +1362,7 @@ async function deleteCoach() {
         );
 
     }
+
 }
 
 
@@ -1268,6 +1407,7 @@ function enableDragDrop() {
                 dragEnd;
 
         });
+
 }
 
 
@@ -1307,11 +1447,14 @@ function dragStart(e) {
         e.dataTransfer.effectAllowed =
             "move";
 
+
         e.dataTransfer.setData(
             "text/plain",
             this.id
         );
+
     }
+
 }
 
 
@@ -1323,11 +1466,13 @@ function dragOver(e) {
 
     e.preventDefault();
 
+
     if (e.dataTransfer) {
 
         e.dataTransfer.dropEffect =
             "move";
     }
+
 }
 
 
@@ -1339,9 +1484,17 @@ function dragEnter(e) {
 
     e.preventDefault();
 
-    this.classList.add(
-        "table-info"
-    );
+
+    if (
+        dragCell &&
+        dragCell !== this
+    ) {
+
+        this.classList.add(
+            "table-info"
+        );
+    }
+
 }
 
 
@@ -1354,6 +1507,7 @@ function dragLeave() {
     this.classList.remove(
         "table-info"
     );
+
 }
 
 
@@ -1367,6 +1521,7 @@ function dragEnd() {
         "dragging"
     );
 
+
     getBoardCells()
         .forEach((cell) => {
 
@@ -1375,11 +1530,13 @@ function dragEnd() {
             );
 
         });
+
 }
 
 
 /* =====================================================
    MOVE COACH
+   FIREBASE-BOARD VERSION
 ===================================================== */
 
 async function moveCoach(
@@ -1389,9 +1546,15 @@ async function moveCoach(
 
     if (
         !fromCell ||
-        !toCell
+        !toCell ||
+        fromCell === toCell
     ) {
 
+        return;
+    }
+
+
+    if (!checkAdmin()) {
         return;
     }
 
@@ -1434,6 +1597,11 @@ async function moveCoach(
 
 
     if (!fromCoach) {
+
+        console.warn(
+            "Source coach not found"
+        );
+
         return;
     }
 
@@ -1449,9 +1617,11 @@ async function moveCoach(
     lastMove = {
 
         fromLine,
+
         fromPos,
 
         toLine,
+
         toPos,
 
         fromCoach:
@@ -1469,87 +1639,25 @@ async function moveCoach(
     };
 
 
-    const timestamp =
-        new Date()
-            .toISOString();
-
-
-    const updates = {};
-
-
-    /* =========================================
-       TARGET
-    ========================================= */
-
-    updates[
-        `coachBoard/${toLine}/${toPos}`
-    ] = {
-
-        ...fromCoach,
-
-        line:
-            toLine,
-
-        position:
-            toPos,
-
-        shop:
-            fromCoach.shop ||
-            getShop(toLine),
-
-        updatedAt:
-            timestamp
-
-    };
-
-
-    /* =========================================
-       SOURCE
-    ========================================= */
-
-    if (toCoach) {
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = {
-
-            ...toCoach,
-
-            line:
-                fromLine,
-
-            position:
-                fromPos,
-
-            shop:
-                toCoach.shop ||
-                getShop(fromLine),
-
-            updatedAt:
-                timestamp
-
-        };
-
-    }
-    else {
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = null;
-
-    }
-
-
     try {
 
-        await update(
-            ref(database),
-            updates
+        await updateCoachPosition(
+
+            fromLine,
+
+            fromPos,
+
+            toLine,
+
+            toPos
+
         );
+
 
         console.log(
             "Coach Movement Successful"
         );
+
 
     }
     catch (error) {
@@ -1560,6 +1668,9 @@ async function moveCoach(
         );
 
 
+        lastMove = null;
+
+
         alert(
             "Movement Failed\n\n" +
             (
@@ -1568,10 +1679,8 @@ async function moveCoach(
             )
         );
 
-
-        lastMove = null;
-
     }
+
 }
 
 
@@ -1583,30 +1692,13 @@ async function dropCoach(e) {
 
     e.preventDefault();
 
+
     this.classList.remove(
         "table-info"
     );
 
 
     if (!dragCell) {
-        return;
-    }
-
-
-    if (
-        dragCell === this
-    ) {
-
-        dragCell = null;
-
-        return;
-    }
-
-
-    if (!checkAdmin()) {
-
-        dragCell = null;
-
         return;
     }
 
@@ -1618,10 +1710,24 @@ async function dropCoach(e) {
     dragCell = null;
 
 
+    if (
+        source === this
+    ) {
+
+        return;
+    }
+
+
+    if (!checkAdmin()) {
+        return;
+    }
+
+
     await moveCoach(
         source,
         this
     );
+
 }
 
 
@@ -1675,6 +1781,7 @@ function initializeTouchDrag() {
             );
 
         });
+
 }
 
 
@@ -1684,7 +1791,21 @@ function initializeTouchDrag() {
 
 function handleTouchStart(e) {
 
-    const cell = this;
+    const cell =
+        this;
+
+
+    touchStartCell =
+        cell;
+
+
+    touchDragCell =
+        null;
+
+
+    clearTimeout(
+        touchTimer
+    );
 
 
     if (!cell.dataset.coach) {
@@ -1692,12 +1813,13 @@ function handleTouchStart(e) {
     }
 
 
-    if (!authChecked || !adminLoggedIn) {
+    if (
+        !authChecked ||
+        !adminLoggedIn
+    ) {
+
         return;
     }
-
-
-    touchDragCell = null;
 
 
     touchTimer =
@@ -1706,9 +1828,15 @@ function handleTouchStart(e) {
             touchDragCell =
                 cell;
 
+
+            cell.dataset.touchMoved =
+                "false";
+
+
             cell.classList.add(
                 "dragging"
             );
+
 
             if (
                 navigator.vibrate
@@ -1716,6 +1844,7 @@ function handleTouchStart(e) {
 
                 navigator.vibrate(50);
             }
+
 
         }, LONG_PRESS_DELAY);
 
@@ -1794,6 +1923,10 @@ async function handleTouchEnd(e) {
 
 
     if (!source) {
+
+        touchStartCell =
+            null;
+
         return;
     }
 
@@ -1890,6 +2023,9 @@ function handleTouchCancel() {
 
 
     touchDragCell = null;
+
+    touchStartCell = null;
+
 }
 
 
@@ -1963,7 +2099,11 @@ document.addEventListener(
 
 
             alert(
-                "Undo Failed"
+                "Undo Failed\n\n" +
+                (
+                    error?.message ||
+                    "Firebase Error"
+                )
             );
 
         }
@@ -2011,6 +2151,7 @@ function initializeSearch() {
             ) {
 
                 e.preventDefault();
+
 
                 if (
                     searchResults.length
@@ -2080,9 +2221,13 @@ function searchCoach(
         const result =
             $("searchResult");
 
+
         if (result) {
-            result.textContent = "";
+
+            result.textContent =
+                "";
         }
+
 
         return;
     }
@@ -2098,7 +2243,8 @@ function searchCoach(
 
 
         for (
-            const position in boardData[line]
+            const position in
+            boardData[line]
         ) {
 
             const coach =
@@ -2122,17 +2268,21 @@ function searchCoach(
 
 
             const shop =
-                coach.shop ||
                 getShop(line);
 
 
             const searchText = [
 
                 coach.coachNo || "",
+
                 coach.coachType || "",
+
                 coach.status || "",
+
                 shop || "",
+
                 line || "",
+
                 position || ""
 
             ]
@@ -2149,9 +2299,13 @@ function searchCoach(
                 searchResults.push({
 
                     cell,
+
                     coach,
+
                     shop,
+
                     line,
+
                     position
 
                 });
@@ -2175,11 +2329,13 @@ function searchCoach(
 
         }
 
+
         return;
     }
 
 
     showCurrentSearchResult();
+
 }
 
 
@@ -2192,6 +2348,7 @@ function showCurrentSearchResult() {
     if (
         !searchResults.length
     ) {
+
         return;
     }
 
@@ -2206,6 +2363,7 @@ function showCurrentSearchResult() {
         !item ||
         !item.cell
     ) {
+
         return;
     }
 
@@ -2213,12 +2371,17 @@ function showCurrentSearchResult() {
     showCoachDetails(
 
         item.cell,
+
         item.coach,
+
         item.shop,
+
         item.line,
+
         item.position
 
     );
+
 }
 
 
@@ -2273,12 +2436,15 @@ function showCoachDetails(
                 "div"
             );
 
+
         popup.id =
             "coachPopup";
+
 
         document.body.appendChild(
             popup
         );
+
     }
 
 
@@ -2387,35 +2553,35 @@ function showCoachDetails(
             totalResults > 1
                 ? `
 
-                    <div class="search-navigation">
+                <div class="search-navigation">
 
-                        <button
-                            type="button"
-                            id="previousSearchBtn">
+                    <button
+                        type="button"
+                        id="previousSearchBtn">
 
-                            ◀ Previous
+                        ◀ Previous
 
-                        </button>
-
-
-                        <span>
-
-                            ${resultNumber}
-                            /
-                            ${totalResults}
-
-                        </span>
+                    </button>
 
 
-                        <button
-                            type="button"
-                            id="nextSearchBtn">
+                    <span>
 
-                            Next ▶
+                        ${resultNumber}
+                        /
+                        ${totalResults}
 
-                        </button>
+                    </span>
 
-                    </div>
+
+                    <button
+                        type="button"
+                        id="nextSearchBtn">
+
+                        Next ▶
+
+                    </button>
+
+                </div>
 
                 `
                 : ""
@@ -2471,6 +2637,7 @@ function showCoachDetails(
             },
             15000
         );
+
 }
 
 
@@ -2483,6 +2650,7 @@ function nextSearchResult() {
     if (
         searchResults.length <= 1
     ) {
+
         return;
     }
 
@@ -2500,6 +2668,7 @@ function nextSearchResult() {
 
 
     showCurrentSearchResult();
+
 }
 
 
@@ -2512,6 +2681,7 @@ function previousSearchResult() {
     if (
         searchResults.length <= 1
     ) {
+
         return;
     }
 
@@ -2529,6 +2699,7 @@ function previousSearchResult() {
 
 
     showCurrentSearchResult();
+
 }
 
 
@@ -2543,7 +2714,9 @@ function clearSearch() {
 
 
     if (searchBox) {
-        searchBox.value = "";
+
+        searchBox.value =
+            "";
     }
 
 
@@ -2562,8 +2735,11 @@ function clearSearch() {
 
 
     if (result) {
-        result.textContent = "";
+
+        result.textContent =
+            "";
     }
+
 }
 
 
@@ -2581,6 +2757,7 @@ function clearSearchHighlight() {
             );
 
         });
+
 }
 
 
@@ -2604,6 +2781,7 @@ function hidePopup() {
     clearTimeout(
         popupTimer
     );
+
 }
 
 
@@ -2611,7 +2789,9 @@ function hidePopup() {
    SEARCH MESSAGE
 ===================================================== */
 
-function showSearchMessage(message) {
+function showSearchMessage(
+    message
+) {
 
     const result =
         $("searchResult");
@@ -2632,11 +2812,16 @@ function showSearchMessage(message) {
 
 
     window.searchMessageTimer =
-        setTimeout(() => {
+        setTimeout(
+            () => {
 
-            result.textContent = "";
+                result.textContent =
+                    "";
 
-        }, 2500);
+            },
+            2500
+        );
+
 }
 
 
@@ -2675,109 +2860,54 @@ function applyStatusColours() {
                     .toUpperCase();
 
 
-            switch (status) {
+            const statusClass = {
 
-                case "PO":
+                PO:
+                    "status-po",
 
-                    td.classList.add(
-                        "status-po"
-                    );
+                S:
+                    "status-s",
 
-                    break;
+                LM:
+                    "status-lm",
 
+                MED:
+                    "status-med",
 
-                case "S":
+                RL:
+                    "status-rl",
 
-                    td.classList.add(
-                        "status-s"
-                    );
+                R1:
+                    "status-r1",
 
-                    break;
+                L:
+                    "status-l",
 
+                WIP:
+                    "status-wip",
 
-                case "LM":
+                HOLD:
+                    "status-hold",
 
-                    td.classList.add(
-                        "status-lm"
-                    );
+                RS:
+                    "status-rs",
 
-                    break;
+                HVY:
+                    "status-hvy"
 
-
-                case "MED":
-
-                    td.classList.add(
-                        "status-med"
-                    );
-
-                    break;
-
-
-                case "RL":
-
-                    td.classList.add(
-                        "status-rl"
-                    );
-
-                    break;
+            }[status];
 
 
-                case "R1":
+            if (statusClass) {
 
-                    td.classList.add(
-                        "status-r1"
-                    );
-
-                    break;
-
-
-                case "L":
-
-                    td.classList.add(
-                        "status-l"
-                    );
-
-                    break;
-
-
-                case "WIP":
-
-                    td.classList.add(
-                        "status-wip"
-                    );
-
-                    break;
-
-
-                case "HOLD":
-
-                    td.classList.add(
-                        "status-hold"
-                    );
-
-                    break;
-
-
-                case "RS":
-
-                    td.classList.add(
-                        "status-rs"
-                    );
-
-                    break;
-
-
-                case "HVY":
-
-                    td.classList.add(
-                        "status-hvy"
-                    );
-
-                    break;
+                td.classList.add(
+                    statusClass
+                );
 
             }
 
         });
+
 }
 
 
@@ -2788,7 +2918,9 @@ function applyStatusColours() {
 function updateCounters() {
 
     let total = 0;
+
     let occupied = 0;
+
     let free = 0;
 
 
@@ -2851,6 +2983,7 @@ function updateCounters() {
         freeCoach.textContent =
             free;
     }
+
 }
 
 
@@ -2964,6 +3097,7 @@ function exportCSV() {
         );
 
     }, 1000);
+
 }
 
 
@@ -2987,6 +3121,7 @@ async function toggleFullscreen() {
                 await document
                     .documentElement
                     .requestFullscreen();
+
             }
 
         }
@@ -2998,6 +3133,7 @@ async function toggleFullscreen() {
 
                 await document
                     .exitFullscreen();
+
             }
 
         }
@@ -3011,6 +3147,7 @@ async function toggleFullscreen() {
         );
 
     }
+
 }
 
 
@@ -3032,6 +3169,7 @@ function initializeKeyboard() {
             ) {
 
                 e.preventDefault();
+
 
                 $("searchBox")
                     ?.focus();
@@ -3064,6 +3202,7 @@ function initializeKeyboard() {
 
         }
     );
+
 }
 
 
@@ -3155,6 +3294,7 @@ function initializeDatabaseStatus() {
         }
 
     );
+
 }
 
 
@@ -3186,6 +3326,7 @@ function initializeNetworkStatus() {
 
         }
     );
+
 }
 
 
@@ -3211,32 +3352,42 @@ function initializeModal() {
             const coachNo =
                 $("modalCoachNo");
 
+
             const coachType =
                 $("modalCoachType");
+
 
             const status =
                 $("modalStatus");
 
 
             if (coachNo) {
-                coachNo.value = "";
+
+                coachNo.value =
+                    "";
             }
 
 
             if (coachType) {
-                coachType.value = "";
+
+                coachType.value =
+                    "";
             }
 
 
             if (status) {
-                status.value = "";
+
+                status.value =
+                    "";
             }
 
 
-            currentCell = null;
+            currentCell =
+                null;
 
         }
     );
+
 }
 
 
@@ -3309,11 +3460,14 @@ setInterval(() => {
 window.nextSearchResult =
     nextSearchResult;
 
+
 window.previousSearchResult =
     previousSearchResult;
 
+
 window.searchCoach =
     searchCoach;
+
 
 window.clearSearch =
     clearSearch;
@@ -3331,21 +3485,30 @@ window.board = {
 
     },
 
+
     drawBoard,
+
 
     loadBoard,
 
+
     updateCounters,
+
 
     applyStatusColours,
 
+
     searchCoach,
+
 
     nextSearchResult,
 
+
     previousSearchResult,
 
+
     clearSearch,
+
 
     moveCoach
 
