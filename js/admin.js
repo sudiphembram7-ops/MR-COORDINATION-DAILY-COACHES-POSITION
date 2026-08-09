@@ -102,7 +102,7 @@ function setupAuthProtection() {
             if (loginStatus) {
 
                 loginStatus.innerHTML =
-                    '<span class="text-danger">● Not Logged In</span>';
+                    '<span class="text-danger">â Not Logged In</span>';
 
             }
 
@@ -138,7 +138,7 @@ function setupAuthProtection() {
         if (loginStatus) {
 
             loginStatus.innerHTML =
-                '<span class="text-success">● Admin Logged In</span>';
+                '<span class="text-success">â Admin Logged In</span>';
 
         }
 
@@ -191,7 +191,7 @@ function setupDatabaseStatus() {
                 if (databaseStatus) {
 
                     databaseStatus.innerHTML =
-                        '<span class="text-success">● Connected</span>';
+                        '<span class="text-success">â Connected</span>';
 
                 }
 
@@ -199,7 +199,7 @@ function setupDatabaseStatus() {
                 if (footerDatabase) {
 
                     footerDatabase.innerHTML =
-                        '<span class="text-success">● Connected</span>';
+                        '<span class="text-success">â Connected</span>';
 
                 }
 
@@ -208,7 +208,7 @@ function setupDatabaseStatus() {
                 if (databaseStatus) {
 
                     databaseStatus.innerHTML =
-                        '<span class="text-danger">● Offline</span>';
+                        '<span class="text-danger">â Offline</span>';
 
                 }
 
@@ -216,7 +216,7 @@ function setupDatabaseStatus() {
                 if (footerDatabase) {
 
                     footerDatabase.innerHTML =
-                        '<span class="text-danger">● Offline</span>';
+                        '<span class="text-danger">â Offline</span>';
 
                 }
 
