@@ -1,381 +1,950 @@
-/* ==========================================
-   RESPONSIVE STYLE
-========================================== */
+/* =====================================================
+   MR CO-ORDINATION BOARD
+   PRODUCTION STYLE.CSS
+   VERSION 5.0
+===================================================== */
+
+/* =====================================================
+   ROOT
+===================================================== */
+
+:root{
+
+    --primary:#0d6efd;
+    --primary-dark:#0b5ed7;
+
+    --success:#198754;
+    --danger:#dc3545;
+    --warning:#ffc107;
+    --info:#0dcaf0;
+
+    --border:#adb5bd;
+    --light:#f8f9fa;
+    --dark:#212529;
+
+    --header-height:70px;
+
+}
+
+
+/* =====================================================
+   GLOBAL
+===================================================== */
 
 *{
-    margin:0;
-    padding:0;
+
     box-sizing:border-box;
+
 }
 
 html{
-    scroll-behavior:smooth;
+
+    margin:0;
+    padding:0;
+
+    width:100%;
+    min-height:100%;
+
 }
 
 body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f5f5f5;
-    overflow-x:hidden;
-    font-size:16px;
-}
 
-.container,
-.container-fluid{
+    margin:0;
+    padding:0;
+
     width:100%;
-    max-width:1920px;
-    margin:auto;
-    padding:12px;
+    min-height:100vh;
+
+    background:#f4f6f9;
+
+    color:#212529;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    overflow-x:auto;
+
 }
 
-/* Header */
 
-.main-header{
-    text-align:center;
-    background:#0d6efd;
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header{
+
+    width:100%;
+
+    background:#0b3d91;
+
     color:#fff;
-    padding:15px;
+
+    padding:12px 15px;
+
+    text-align:center;
+
+    box-shadow:
+        0 2px 6px
+        rgba(0,0,0,.20);
+
 }
 
-.main-header h1{
-    font-size:clamp(24px,4vw,48px);
+.header h1{
+
+    margin:0;
+
+    font-size:clamp(
+        20px,
+        3vw,
+        32px
+    );
+
+    font-weight:800;
+
+    letter-spacing:.5px;
+
+}
+
+.header h2{
+
+    margin:4px 0 0;
+
+    font-size:clamp(
+        14px,
+        2vw,
+        20px
+    );
+
     font-weight:700;
+
 }
 
-.main-header h2{
-    font-size:clamp(18px,2.5vw,28px);
-}
 
-.main-header .header-info{
+/* =====================================================
+   DATE / TIME
+===================================================== */
+
+.live-info{
+
     display:flex;
+
     justify-content:center;
+
+    align-items:center;
+
     flex-wrap:wrap;
-    gap:20px;
-    margin-top:10px;
-    font-size:clamp(14px,2vw,20px);
+
+    gap:12px;
+
+    margin-top:8px;
+
+    font-size:14px;
+
 }
 
-/* Navbar */
+.live-info span{
 
-.navbar-brand{
-    font-size:clamp(20px,3vw,36px);
+    white-space:nowrap;
+
 }
 
-/* Control Panel */
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.navbar{
+
+    width:100%;
+
+    background:#212529;
+
+}
+
+.navbar .nav-link{
+
+    color:#fff;
+
+    font-weight:600;
+
+}
+
+.navbar .nav-link:hover{
+
+    color:#ffc107;
+
+}
+
+
+/* =====================================================
+   MAIN CONTAINER
+===================================================== */
+
+.container-fluid{
+
+    width:100%;
+
+}
+
+
+/* =====================================================
+   CONTROL PANEL
+===================================================== */
 
 .control-panel{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-    margin-bottom:15px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    padding:10px;
+
+    background:#fff;
+
+    border-bottom:1px solid #ddd;
+
 }
 
-.control-panel input{
-    grid-column:1/-1;
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+#searchBox{
+
+    width:min(
+        100%,
+        380px
+    );
+
+    min-height:42px;
+
+    border:2px solid #ced4da;
+
+    border-radius:8px;
+
+    padding:8px 12px;
+
+    font-size:16px;
+
+    outline:none;
+
+    transition:.2s;
+
+}
+
+#searchBox:focus{
+
+    border-color:var(--primary);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(13,110,253,.15);
+
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+button{
+
+    font-family:inherit;
+
 }
 
 .control-panel button{
-    width:100%;
-    min-height:48px;
+
+    min-height:40px;
+
+    border-radius:7px;
+
+    font-weight:600;
+
 }
 
-/* Counter */
 
-.counter-box{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
+/* =====================================================
+   COUNTERS
+===================================================== */
+
+.counter-container{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:stretch;
+
+    flex-wrap:wrap;
+
     gap:10px;
-    margin-bottom:15px;
+
+    padding:10px;
+
 }
 
 .counter-card{
+
+    min-width:120px;
+
+    padding:10px 15px;
+
     background:#fff;
-    border-radius:10px;
-    padding:15px;
+
+    border:1px solid #ddd;
+
+    border-radius:8px;
+
     text-align:center;
-    font-weight:bold;
-}
 
-/* Shop */
-
-.shop-title{
-    background:#ffc107;
-    text-align:center;
-    padding:10px;
-    font-size:clamp(24px,3vw,40px);
-    font-weight:bold;
-    border-radius:10px;
-    margin:20px 0 10px;
-}
-
-/* Table */
-
-.table-responsive{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-.shop-table{
-    min-width:900px;
-    table-layout:fixed;
-}
-
-.shop-table th{
-    background:#212529;
-    color:#fff;
-    position:sticky;
-    top:0;
-    z-index:5;
-}
-
-.shop-table th,
-.shop-table td{
-    width:100px;
-    height:100px;
-    border:1px solid #ccc;
-    text-align:center;
-    vertical-align:middle;
-    padding:8px;
-    word-break:break-word;
-}
-
-/* History */
-
-#historyTable{
-    min-width:1100px;
-}
-
-#historyTable th,
-#historyTable td{
-    white-space:nowrap;
-    text-align:center;
-}
-
-#historyTable thead th{
-    position:sticky;
-    top:0;
-    z-index:10;
-}
-
-/* Buttons */
-
-.btn{
-    min-height:48px;
-}
-
-/* ==========================
-   Tablet
-========================== */
-
-@media (max-width:992px){
-
-.control-panel{
-    grid-template-columns:repeat(2,1fr);
-}
-
-.counter-box{
-    grid-template-columns:repeat(2,1fr);
-}
-
-.shop-table th,
-.shop-table td{
-    width:90px;
-    height:90px;
-    font-size:14px;
-}
+    box-shadow:
+        0 2px 5px
+        rgba(0,0,0,.08);
 
 }
 
-/* ==========================
-   Mobile
-========================== */
+.counter-card .number{
 
-@media (max-width:768px){
+    display:block;
 
-.container,
-.container-fluid{
-    padding:8px;
+    font-size:24px;
+
+    font-weight:800;
+
 }
 
-.control-panel{
-    grid-template-columns:repeat(2,1fr);
-}
+.counter-card .label{
 
-.counter-box{
-    grid-template-columns:1fr;
-}
+    display:block;
 
-.shop-title{
-    font-size:20px;
-}
-
-.shop-table{
-    min-width:850px;
-}
-
-.shop-table th,
-.shop-table td{
-    width:80px;
-    height:80px;
     font-size:13px;
-    padding:4px;
-}
 
-.btn{
-    width:100%;
-}
-
-.card-header h3{
-    font-size:28px;
-}
+    font-weight:600;
 
 }
 
-/* ==========================
-   Small Mobile
-========================== */
 
-@media (max-width:480px){
-
-.main-header h1{
-    font-size:26px;
-}
-
-.main-header h2{
-    font-size:18px;
-}
-
-.main-header .header-info{
-    flex-direction:column;
-    gap:5px;
-}
-
-.shop-table{
-    min-width:800px;
-}
-
-.shop-table th,
-.shop-table td{
-    width:75px;
-    height:75px;
-    font-size:12px;
-}
-
-}
 /* =====================================================
-   PART - 5C
-   SEARCH HIGHLIGHT + POPUP
+   BOARD WRAPPER
+===================================================== */
+
+.board-wrapper{
+
+    width:100%;
+
+    overflow-x:auto;
+
+    overflow-y:visible;
+
+    padding:10px;
+
+}
+
+
+/* =====================================================
+   COACH TABLE
+===================================================== */
+
+.coach-table{
+
+    border-collapse:collapse;
+
+    border-spacing:0;
+
+    margin:0 auto;
+
+    background:#fff;
+
+    table-layout:fixed;
+
+}
+
+
+/* =====================================================
+   TABLE CELLS
+===================================================== */
+
+.coach-table th,
+.coach-table td{
+
+    border:1px solid var(--border);
+
+}
+
+.coach-table td{
+
+    width:100px;
+
+    min-width:100px;
+
+    height:100px;
+
+    min-height:100px;
+
+    padding:0;
+
+    position:relative;
+
+    vertical-align:middle;
+
+    text-align:center;
+
+    background:#fff;
+
+    overflow:hidden;
+
+    transition:
+        transform .15s,
+        box-shadow .15s;
+
+}
+
+
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
+.coach-table th{
+
+    height:42px;
+
+    padding:6px;
+
+    background:#343a40;
+
+    color:#fff;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    text-align:center;
+
+    white-space:nowrap;
+
+}
+
+
+/* =====================================================
+   LINE / POSITION LABEL
+===================================================== */
+
+.line-title{
+
+    font-weight:800;
+
+    white-space:nowrap;
+
+}
+
+
+/* =====================================================
+   COACH CARD
+===================================================== */
+
+.coach-card{
+
+    width:100%;
+
+    height:100%;
+
+    min-height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:3px;
+
+    padding:5px;
+
+    text-align:center;
+
+    overflow:hidden;
+
+}
+
+
+/* =====================================================
+   COACH NUMBER
+===================================================== */
+
+.coach-no{
+
+    width:100%;
+
+    font-size:20px;
+
+    line-height:1.1;
+
+    font-weight:900;
+
+    color:#000;
+
+    word-break:break-word;
+
+    overflow-wrap:anywhere;
+
+}
+
+
+/* =====================================================
+   COACH TYPE
+===================================================== */
+
+.coach-type{
+
+    width:100%;
+
+    font-size:12px;
+
+    line-height:1.1;
+
+    font-weight:700;
+
+    color:#333;
+
+    word-break:break-word;
+
+}
+
+
+/* =====================================================
+   COACH STATUS
+===================================================== */
+
+.coach-status{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-width:34px;
+
+    min-height:22px;
+
+    padding:2px 7px;
+
+    border-radius:5px;
+
+    background:rgba(255,255,255,.75);
+
+    color:#000;
+
+    font-size:12px;
+
+    font-weight:900;
+
+    border:1px solid
+        rgba(0,0,0,.15);
+
+}
+
+
+/* =====================================================
+   EMPTY CELL
+===================================================== */
+
+.coach-table td:not(:has(.coach-no)){
+
+    cursor:pointer;
+
+}
+
+
+/* =====================================================
+   STATUS COLOURS
+===================================================== */
+
+/*
+   PO
+*/
+
+.status-po{
+
+    background:#198754 !important;
+
+    color:#fff !important;
+
+}
+
+
+/*
+   S
+*/
+
+.status-s{
+
+    background:#ffc107 !important;
+
+    color:#000 !important;
+
+}
+
+
+/*
+   LM
+*/
+
+.status-lm{
+
+    background:#ffca2c !important;
+
+    color:#000 !important;
+
+}
+
+
+/*
+   MED
+*/
+
+.status-med{
+
+    background:#dc3545 !important;
+
+    color:#fff !important;
+
+}
+
+
+/*
+   RL
+*/
+
+.status-rl{
+
+    background:#0d6efd !important;
+
+    color:#fff !important;
+
+}
+
+
+/*
+   R1
+*/
+
+.status-r1{
+
+    background:#6f42c1 !important;
+
+    color:#fff !important;
+
+}
+
+
+/*
+   RS
+*/
+
+.status-rs{
+
+    background:#0dcaf0 !important;
+
+    color:#000 !important;
+
+}
+
+
+/*
+   L
+*/
+
+.status-l{
+
+    background:#fd7e14 !important;
+
+    color:#fff !important;
+
+}
+
+
+/*
+   HVY
+*/
+
+.status-hvy{
+
+    background:#343a40 !important;
+
+    color:#fff !important;
+
+}
+
+
+/* =====================================================
+   STATUS CARD TEXT
+===================================================== */
+
+.status-po .coach-no,
+.status-po .coach-type,
+.status-po .coach-status,
+
+.status-med .coach-no,
+.status-med .coach-type,
+.status-med .coach-status,
+
+.status-rl .coach-no,
+.status-rl .coach-type,
+.status-rl .coach-status,
+
+.status-r1 .coach-no,
+.status-r1 .coach-type,
+.status-r1 .coach-status,
+
+.status-l .coach-no,
+.status-l .coach-type,
+.status-l .coach-status,
+
+.status-hvy .coach-no,
+.status-hvy .coach-type,
+.status-hvy .coach-status{
+
+    color:#fff;
+
+}
+
+
+/* =====================================================
+   HOVER
+===================================================== */
+
+.coach-table td:hover{
+
+    transform:scale(1.02);
+
+    z-index:5;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.25);
+
+}
+
+
+/* =====================================================
+   DRAG
+===================================================== */
+
+.coach-table td[draggable="true"]{
+
+    cursor:grab;
+
+}
+
+.coach-table td[draggable="true"]:active{
+
+    cursor:grabbing;
+
+}
+
+
+/* =====================================================
+   DRAG TARGET
+===================================================== */
+
+.table-info{
+
+    outline:
+        4px dashed
+        #0d6efd !important;
+
+    outline-offset:-4px;
+
+}
+
+
+/* =====================================================
+   SEARCH HIGHLIGHT
 ===================================================== */
 
 .search-highlight{
 
-    outline:4px solid #ff0000 !important;
-
-    animation:coachBlink .8s infinite;
-
     position:relative;
 
-    z-index:5;
+    z-index:20;
+
+    outline:
+        4px solid
+        #ff0000 !important;
+
+    outline-offset:-4px;
+
+    box-shadow:
+        0 0 0 5px
+        rgba(255,0,0,.25),
+        0 0 20px
+        rgba(255,0,0,.75) !important;
+
+    animation:
+        searchPulse
+        1s ease-in-out
+        infinite alternate;
 
 }
 
-@keyframes coachBlink{
 
-    0%{
+/* =====================================================
+   SEARCH ANIMATION
+===================================================== */
 
-        background:#fff176;
+@keyframes searchPulse{
+
+    from{
+
+        transform:scale(1);
 
     }
 
-    50%{
+    to{
 
-        background:#ffeb3b;
-
-    }
-
-    100%{
-
-        background:#fff176;
+        transform:scale(1.04);
 
     }
 
 }
 
-/* ==========================
-   POPUP
-========================== */
+
+/* =====================================================
+   SEARCH RESULT MESSAGE
+===================================================== */
+
+#searchResult{
+
+    min-height:24px;
+
+    padding:4px 10px;
+
+    text-align:center;
+
+    font-size:14px;
+
+    font-weight:700;
+
+}
+
+
+/* =====================================================
+   COACH POPUP
+===================================================== */
 
 #coachPopup{
 
     position:fixed;
 
-    top:80px;
+    top:50%;
 
-    right:20px;
+    left:50%;
 
-    width:360px;
+    transform:
+        translate(-50%,-50%);
 
-    max-width:95vw;
+    width:min(
+        95vw,
+        420px
+    );
 
-    background:#ffffff;
+    max-height:85vh;
 
-    border:3px solid #0d6efd;
+    overflow:auto;
 
-    border-radius:12px;
+    z-index:99999;
 
-    box-shadow:0 8px 25px rgba(0,0,0,.30);
+    background:#fff;
 
-    z-index:999999;
+    border:1px solid #aaa;
 
-    display:none;
+    border-radius:10px;
 
-    overflow:hidden;
-
-    font-size:14px;
+    box-shadow:
+        0 10px 40px
+        rgba(0,0,0,.35);
 
 }
+
+
+/* =====================================================
+   POPUP HEADER
+===================================================== */
 
 .popup-header{
 
     display:flex;
 
-    justify-content:space-between;
-
     align-items:center;
 
-    padding:12px;
+    justify-content:space-between;
+
+    gap:10px;
+
+    padding:12px 14px;
 
     background:#0d6efd;
 
     color:#fff;
 
-    font-weight:bold;
+    font-size:17px;
+
+    font-weight:800;
 
 }
 
-.popup-header button{
+
+/* =====================================================
+   POPUP CLOSE
+===================================================== */
+
+#closeCoachPopup{
+
+    width:32px;
+
+    height:32px;
 
     border:none;
+
+    border-radius:6px;
+
+    background:#fff;
+
+    color:#000;
+
+    font-size:18px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+}
+
+#closeCoachPopup:hover{
 
     background:#dc3545;
 
     color:#fff;
 
-    width:30px;
-
-    height:30px;
-
-    border-radius:50%;
-
-    cursor:pointer;
-
-    font-size:16px;
-
 }
+
+
+/* =====================================================
+   POPUP TABLE
+===================================================== */
 
 .popup-table{
 
@@ -387,36 +956,575 @@ table{
 
 .popup-table td{
 
-    border:1px solid #ddd;
+    padding:9px 10px;
+
+    border-bottom:1px solid #ddd;
+
+    font-size:14px;
+
+    vertical-align:top;
+
+}
+
+.popup-table td:first-child{
+
+    width:40%;
+
+    background:#f1f3f5;
+
+}
+
+
+/* =====================================================
+   SEARCH NAVIGATION
+===================================================== */
+
+.search-navigation{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    padding:10px;
+
+    background:#f1f3f5;
+
+    border-top:1px solid #ddd;
+
+}
+
+.search-navigation button{
+
+    border:none;
+
+    background:#0d6efd;
+
+    color:#fff;
+
+    padding:7px 12px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+.search-navigation button:hover{
+
+    background:#0b5ed7;
+
+}
+
+.search-navigation span{
+
+    font-weight:bold;
+
+    white-space:nowrap;
+
+}
+
+
+/* =====================================================
+   DATABASE STATUS
+===================================================== */
+
+#databaseStatus,
+#footerDatabase{
+
+    font-weight:700;
+
+    white-space:nowrap;
+
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer{
+
+    width:100%;
+
+    margin-top:15px;
+
+    padding:12px;
+
+    background:#212529;
+
+    color:#fff;
+
+    text-align:center;
+
+    font-size:13px;
+
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.modal-content{
+
+    border-radius:10px;
+
+    border:none;
+
+    box-shadow:
+        0 10px 40px
+        rgba(0,0,0,.25);
+
+}
+
+.modal-header{
+
+    background:#0d6efd;
+
+    color:#fff;
+
+}
+
+.modal-title{
+
+    font-weight:800;
+
+}
+
+
+/* =====================================================
+   MODAL FORM
+===================================================== */
+
+#coachModal input,
+#coachModal select{
+
+    min-height:42px;
+
+    border:1px solid #adb5bd;
+
+    border-radius:6px;
+
+}
+
+#coachModal input:focus,
+#coachModal select:focus{
+
+    border-color:#0d6efd;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(13,110,253,.12);
+
+}
+
+
+/* =====================================================
+   LEGEND
+===================================================== */
+
+.status-legend{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:8px;
 
     padding:8px;
 
 }
 
-.popup-table tr:nth-child(even){
+.status-legend .badge{
 
-    background:#f8f9fa;
+    font-size:12px;
+
+    padding:6px 9px;
 
 }
 
-/* ==========================
-   MOBILE
-========================== */
 
-@media(max-width:768px){
+/* =====================================================
+   PRINT
+===================================================== */
 
-    #coachPopup{
+@media print{
 
-        top:65px;
+    body{
 
-        left:10px;
+        background:#fff;
 
-        right:10px;
+    }
 
-        width:auto;
+    .no-print,
+    .navbar,
+    .control-panel,
+    .counter-container,
+    .footer{
 
-        max-width:none;
+        display:none !important;
+
+    }
+
+    .board-wrapper{
+
+        padding:0;
+
+        overflow:visible;
+
+    }
+
+    .coach-table{
+
+        width:100%;
+
+    }
+
+    .coach-table td{
+
+        transform:none !important;
+
+        box-shadow:none !important;
 
     }
 
 }
+
+
+/* =====================================================
+   TV MODE
+===================================================== */
+
+.tv-mode .coach-table td{
+
+    width:120px;
+
+    min-width:120px;
+
+    height:120px;
+
+    min-height:120px;
+
+}
+
+.tv-mode .coach-no{
+
+    font-size:25px;
+
+}
+
+.tv-mode .coach-type{
+
+    font-size:14px;
+
+}
+
+.tv-mode .coach-status{
+
+    font-size:14px;
+
+}
+
+
+/* =====================================================
+   LARGE DESKTOP
+===================================================== */
+
+@media (min-width:1400px){
+
+    .coach-table td{
+
+        width:110px;
+
+        min-width:110px;
+
+        height:110px;
+
+        min-height:110px;
+
+    }
+
+    .coach-no{
+
+        font-size:21px;
+
+    }
+
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width:991px){
+
+    .coach-table td{
+
+        width:90px;
+
+        min-width:90px;
+
+        height:90px;
+
+        min-height:90px;
+
+    }
+
+    .coach-no{
+
+        font-size:17px;
+
+    }
+
+    .coach-type{
+
+        font-size:11px;
+
+    }
+
+    .coach-status{
+
+        font-size:11px;
+
+    }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width:576px){
+
+    body{
+
+        font-size:14px;
+
+    }
+
+    .header{
+
+        padding:9px 6px;
+
+    }
+
+    .header h1{
+
+        font-size:19px;
+
+    }
+
+    .header h2{
+
+        font-size:13px;
+
+    }
+
+    .live-info{
+
+        font-size:12px;
+
+        gap:7px;
+
+    }
+
+    .control-panel{
+
+        padding:8px 5px;
+
+    }
+
+    #searchBox{
+
+        width:100%;
+
+        min-height:42px;
+
+    }
+
+    .board-wrapper{
+
+        padding:5px;
+
+    }
+
+    .coach-table td{
+
+        width:80px;
+
+        min-width:80px;
+
+        height:80px;
+
+        min-height:80px;
+
+    }
+
+    .coach-table th{
+
+        font-size:11px;
+
+        padding:4px;
+
+    }
+
+    .coach-no{
+
+        font-size:15px;
+
+    }
+
+    .coach-type{
+
+        font-size:9px;
+
+    }
+
+    .coach-status{
+
+        min-width:28px;
+
+        min-height:18px;
+
+        padding:1px 4px;
+
+        font-size:9px;
+
+    }
+
+    .counter-card{
+
+        min-width:95px;
+
+        padding:7px 8px;
+
+    }
+
+    .counter-card .number{
+
+        font-size:20px;
+
+    }
+
+    .counter-card .label{
+
+        font-size:11px;
+
+    }
+
+    #coachPopup{
+
+        width:94vw;
+
+        max-height:80vh;
+
+    }
+
+    .popup-table td{
+
+        padding:8px;
+
+        font-size:13px;
+
+    }
+
+    .search-navigation{
+
+        padding:8px;
+
+    }
+
+    .search-navigation button{
+
+        padding:6px 9px;
+
+        font-size:12px;
+
+    }
+
+}
+
+
+/* =====================================================
+   EXTRA SMALL MOBILE
+===================================================== */
+
+@media (max-width:380px){
+
+    .coach-table td{
+
+        width:72px;
+
+        min-width:72px;
+
+        height:72px;
+
+        min-height:72px;
+
+    }
+
+    .coach-no{
+
+        font-size:13px;
+
+    }
+
+    .coach-type{
+
+        font-size:8px;
+
+    }
+
+    .coach-status{
+
+        font-size:8px;
+
+    }
+
+}
+
+
+/* =====================================================
+   ACCESSIBILITY
+===================================================== */
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible{
+
+    outline:3px solid
+        rgba(13,110,253,.35);
+
+    outline-offset:2px;
+
+}
+
+
+/* =====================================================
+   HIDE BOOTSTRAP FOCUS OUTLINE ISSUE
+===================================================== */
+
+.btn:focus{
+
+    box-shadow:
+        0 0 0 .2rem
+        rgba(13,110,253,.25);
+
+}
+
+
+/* =====================================================
+   END
+===================================================== */
