@@ -1,36 +1,53 @@
 /* =====================================================
    MR CO-ORDINATION DAILY COACHES POSITION
    PRODUCTION STYLE.CSS
-   VERSION 6.0
-   DESKTOP + BASE
+   VERSION 7.0
+   DESKTOP + BASE DESIGN
 ===================================================== */
 
 
 /* =====================================================
-   RESET
+   GLOBAL RESET
 ===================================================== */
 
 *{
     box-sizing:border-box;
 }
 
-html,
-body{
-    margin:0;
-    padding:0;
+html{
     width:100%;
     min-height:100%;
-}
-
-html{
+    margin:0;
+    padding:0;
     scroll-behavior:smooth;
 }
 
 body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#ffffff;
+    width:100%;
+    min-height:100vh;
+
+    margin:0;
+    padding:0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:#f4f7fb;
     color:#212529;
+
     overflow-x:hidden;
+}
+
+
+/* =====================================================
+   SELECTION
+===================================================== */
+
+::selection{
+    background:#0d6efd;
+    color:#fff;
 }
 
 
@@ -41,41 +58,131 @@ body{
 header,
 .main-header,
 .top-header{
+
     width:100%;
+
     margin:0;
-    padding:22px 15px;
-    background:#0d6efd;
-    color:#ffffff;
+    padding:28px 20px 30px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0d6efd 0%,
+            #1769e0 55%,
+            #084298 100%
+        );
+
+    color:#fff;
+
     text-align:center;
+
+    box-shadow:
+        0 4px 15px rgba(0,0,0,.15);
+
+    position:relative;
+
+    z-index:10;
 }
+
+
+/* Header top shine */
+
+header::after,
+.main-header::after,
+.top-header::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    height:4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffc107,
+            #fff,
+            #ffc107
+        );
+}
+
+
+/* =====================================================
+   MAIN TITLE
+===================================================== */
 
 header h1,
 .main-header h1,
 .top-header h1{
+
     margin:0;
+
     font-size:42px;
-    font-weight:600;
-    line-height:1.2;
+
+    font-weight:700;
+
+    line-height:1.15;
+
+    letter-spacing:.5px;
+
+    text-shadow:
+        0 2px 5px rgba(0,0,0,.18);
 }
+
 
 header h2,
 .main-header h2,
 .top-header h2{
-    margin:10px 0 0;
-    font-size:32px;
+
+    margin:14px 0 0;
+
+    font-size:30px;
+
     font-weight:500;
+
+    line-height:1.2;
+
+    letter-spacing:.5px;
 }
 
+
+/* =====================================================
+   DATE / TIME
+===================================================== */
+
 header .date-time,
-.main-header .date-time,
-.top-header .date-time{
-    margin-top:15px;
+.main-header .date-time{
+
+    width:100%;
+
+    margin-top:20px;
+
     display:flex;
-    justify-content:center;
+
     align-items:center;
-    gap:40px;
-    font-size:22px;
-    font-weight:600;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:15px 45px;
+
+    font-size:20px;
+
+    font-weight:500;
+
+    line-height:1.3;
+}
+
+
+header .date-time > *,
+.main-header .date-time > *{
+
+    white-space:nowrap;
 }
 
 
@@ -84,18 +191,80 @@ header .date-time,
 ===================================================== */
 
 .navbar{
+
     width:100%;
-    min-height:65px;
-    background:#212529 !important;
+
+    min-height:68px;
+
+    padding:8px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            #212529,
+            #343a40
+        ) !important;
+
+    box-shadow:
+        0 3px 10px rgba(0,0,0,.12);
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
 }
+
 
 .navbar-brand{
-    font-size:24px;
-    font-weight:600;
+
+    font-size:25px !important;
+
+    font-weight:700;
+
+    color:#fff !important;
+
+    letter-spacing:.3px;
 }
 
+
 .navbar a{
-    color:#ffffff !important;
+
+    color:#fff;
+}
+
+
+.navbar-nav{
+
+    gap:5px;
+}
+
+
+.navbar-nav .nav-link{
+
+    padding:10px 14px !important;
+
+    border-radius:8px;
+
+    font-size:17px;
+
+    transition:
+        background .2s ease,
+        transform .2s ease;
+}
+
+
+.navbar-nav .nav-link:hover{
+
+    background:rgba(255,255,255,.12);
+
+    transform:translateY(-1px);
+}
+
+
+.navbar-toggler{
+
+    border-color:rgba(255,255,255,.3) !important;
 }
 
 
@@ -105,129 +274,169 @@ header .date-time,
 
 .container-fluid,
 .board-container{
+
     width:100%;
+
     max-width:100%;
+
     margin:0;
-    padding:18px 20px;
+
+    padding:24px 30px 40px;
 }
 
 
 /* =====================================================
-   SEARCH
+   SEARCH SECTION
 ===================================================== */
 
 .search-container,
 .search-section{
+
     width:100%;
-    margin:10px 0 12px;
+
+    margin:0 0 18px;
 }
+
 
 #searchBox,
 #searchInput,
 .search-box{
+
     display:block;
+
     width:100%;
-    min-height:55px;
 
-    padding:10px 18px;
+    min-height:58px;
 
-    border:2px solid #999;
-    border-radius:10px;
+    padding:12px 20px;
 
-    background:#ffffff;
+    border:2px solid #c5cad0;
+
+    border-radius:14px;
+
+    background:#fff;
+
     color:#212529;
 
     font-size:21px;
 
+    font-weight:500;
+
     outline:none;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,.06);
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
 }
+
+
+#searchBox:hover,
+#searchInput:hover,
+.search-box:hover{
+
+    border-color:#9ca3af;
+}
+
 
 #searchBox:focus,
 #searchInput:focus,
 .search-box:focus{
+
     border-color:#0d6efd;
-    box-shadow:0 0 0 3px rgba(13,110,253,.15);
+
+    box-shadow:
+        0 0 0 4px rgba(13,110,253,.12),
+        0 4px 12px rgba(0,0,0,.08);
 }
+
 
 #searchBox::placeholder,
 #searchInput::placeholder,
 .search-box::placeholder{
-    color:#888;
-    opacity:.85;
+
+    color:#8a8f95;
+
+    opacity:1;
 }
 
 
 /* =====================================================
-   SEARCH RESULT
-===================================================== */
-
-#searchResult,
-.search-result{
-    width:100%;
-    min-height:0;
-    margin:5px 0 10px;
-    padding:5px 10px;
-
-    font-size:17px;
-    font-weight:600;
-
-    color:#212529;
-}
-
-
-/* =====================================================
-   CONTROL AREA
+   CONTROLS
 ===================================================== */
 
 .controls,
 .control-section,
 .board-controls{
+
     width:100%;
 
     display:flex;
+
     align-items:center;
+
     flex-wrap:wrap;
 
-    gap:8px;
+    gap:10px;
 
-    margin:8px 0 18px;
+    margin:0 0 20px;
 }
 
-
-/* =====================================================
-   BUTTONS
-===================================================== */
 
 .controls button,
 .control-section button,
 .board-controls button{
-    min-height:48px;
 
-    padding:8px 18px;
+    min-height:50px;
+
+    padding:10px 20px;
 
     border:0;
-    border-radius:8px;
+
+    border-radius:10px;
 
     font-size:18px;
+
     font-weight:600;
+
+    color:#fff;
 
     cursor:pointer;
 
+    box-shadow:
+        0 3px 8px rgba(0,0,0,.12);
+
     transition:
         transform .15s ease,
-        opacity .15s ease;
+        box-shadow .15s ease,
+        filter .15s ease;
 }
+
 
 .controls button:hover,
 .control-section button:hover,
 .board-controls button:hover{
-    opacity:.9;
+
+    filter:brightness(.95);
+
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,.16);
 }
+
 
 .controls button:active,
 .control-section button:active,
 .board-controls button:active{
+
     transform:scale(.97);
+
+    box-shadow:
+        0 2px 5px rgba(0,0,0,.12);
 }
 
 
@@ -237,26 +446,49 @@ header .date-time,
 
 #excelBtn,
 .excel-btn{
-    background:#198754;
-    color:#ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #198754,
+            #157347
+        );
 }
+
 
 #pdfBtn,
 .pdf-btn{
-    background:#dc3545;
-    color:#ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #dc3545,
+            #b02a37
+        );
 }
+
 
 #refreshBtn,
 .refresh-btn{
-    background:#0d6efd;
-    color:#ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0d6efd,
+            #0a58ca
+        );
 }
+
 
 #fullscreenBtn,
 .fullscreen-btn{
-    background:#212529;
-    color:#ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #343a40,
+            #212529
+        );
 }
 
 
@@ -267,38 +499,61 @@ header .date-time,
 .database-status,
 #databaseStatus,
 #dbStatus{
+
+    min-height:46px;
+
     display:inline-flex;
 
     align-items:center;
+
     justify-content:center;
 
-    gap:6px;
+    gap:8px;
 
-    min-height:40px;
+    padding:7px 14px;
 
-    padding:5px 10px;
+    border-radius:10px;
+
+    background:#fff;
+
+    border:1px solid #dee2e6;
 
     font-size:18px;
-    font-weight:600;
+
+    font-weight:700;
 
     white-space:nowrap;
+
+    box-shadow:
+        0 2px 7px rgba(0,0,0,.06);
 }
+
 
 .database-status .status-dot,
 .status-dot{
+
     display:inline-block;
 
-    width:15px;
-    height:15px;
+    width:13px;
+
+    height:13px;
 
     border-radius:50%;
 
     background:#dc3545;
+
+    box-shadow:
+        0 0 0 3px rgba(220,53,69,.12);
 }
+
 
 .database-status.connected .status-dot,
 .connected .status-dot{
+
     background:#198754;
+
+    box-shadow:
+        0 0 0 3px rgba(25,135,84,.12);
 }
 
 
@@ -308,31 +563,53 @@ header .date-time,
 
 .counters,
 .counter-section{
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    gap:15px;
 
     margin-left:auto;
 
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:12px;
+
     font-size:18px;
+
     font-weight:600;
 
     white-space:nowrap;
 }
 
+
 #totalCoach,
 #occupiedCoach,
 #freeCoach{
-    display:inline-block;
 
-    min-width:28px;
+    display:inline-flex;
 
-    text-align:center;
+    min-width:42px;
 
-    font-weight:700;
+    min-height:36px;
+
+    padding:4px 8px;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:8px;
+
+    background:#fff;
+
+    border:1px solid #dee2e6;
+
+    font-size:18px;
+
+    font-weight:800;
+
+    box-shadow:
+        0 2px 5px rgba(0,0,0,.06);
 }
 
 
@@ -341,10 +618,14 @@ header .date-time,
 ===================================================== */
 
 hr{
-    margin:20px 0;
+
+    width:100%;
+
+    margin:25px 0;
 
     border:0;
-    border-top:2px solid #cccccc;
+
+    border-top:2px solid #d6d9dc;
 
     opacity:1;
 }
@@ -356,80 +637,119 @@ hr{
 
 .shop-section,
 .shop-container{
+
     width:100%;
-    margin:20px 0 25px;
+
+    margin:28px 0 35px;
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:0;
+
+    box-shadow:
+        0 3px 14px rgba(0,0,0,.07);
+
+    overflow:hidden;
 }
+
+
+/* =====================================================
+   SHOP HEADER
+===================================================== */
 
 .shop-title,
 .shop-header{
+
     width:100%;
 
-    min-height:70px;
+    min-height:68px;
 
     display:flex;
+
     align-items:center;
+
     justify-content:center;
 
-    padding:12px 15px;
+    padding:12px 18px;
 
-    border-radius:20px 20px 0 0;
+    background:
+        linear-gradient(
+            135deg,
+            #ffc107,
+            #ffca2c
+        );
 
-    background:#ffc107;
     color:#212529;
 
     text-align:center;
 
-    font-size:28px;
-    font-weight:700;
+    font-size:27px;
+
+    font-weight:800;
+
+    line-height:1.2;
+
+    letter-spacing:.3px;
+
+    border-radius:18px 18px 0 0;
+
+    box-shadow:
+        inset 0 -2px 0 rgba(0,0,0,.08);
 }
 
 
 /* =====================================================
    BOARD WRAPPER
-
-   IMPORTANT:
-   JS uses .coach-table
 ===================================================== */
 
 .board-wrapper,
 .table-wrapper{
+
     width:100%;
 
+    max-width:100%;
+
+    margin:0;
+
+    padding:0;
+
     overflow-x:auto;
+
     overflow-y:hidden;
 
     -webkit-overflow-scrolling:touch;
 
-    margin:0;
-    padding:0;
-
-    scrollbar-width:thin;
+    background:#fff;
 }
 
 
 /* =====================================================
-   ALL BOARD TABLES
-
-   Supports both:
-   .coach-table
-   .board-table
+   BOARD TABLE
+   Both selectors supported
 ===================================================== */
 
-.coach-table,
+table.board-table,
 .board-table,
 table.coach-table,
-table.board-table{
+.coach-table{
+
+    width:max-content;
+
+    min-width:100%;
+
+    margin:0;
+
+    padding:0;
 
     border-collapse:collapse;
+
     border-spacing:0;
 
     table-layout:fixed;
 
-    width:max-content;
-    min-width:100%;
-
-    margin:0;
-    padding:0;
+    background:#fff;
 }
 
 
@@ -437,31 +757,45 @@ table.board-table{
    TABLE HEADER
 ===================================================== */
 
-.coach-table thead th,
-.board-table thead th{
+.board-table thead th,
+.coach-table thead th{
 
     width:100px;
+
     min-width:100px;
+
     max-width:100px;
 
-    height:60px;
+    height:68px;
 
-    padding:0 4px;
+    min-height:68px;
 
-    border:3px solid #495057;
+    max-height:68px;
 
-    background:#212529;
-    color:#ffffff;
+    padding:4px;
+
+    border:2px solid #495057;
+
+    background:
+        linear-gradient(
+            135deg,
+            #343a40,
+            #212529
+        );
+
+    color:#fff;
 
     text-align:center;
+
     vertical-align:middle;
 
-    font-size:18px;
-    font-weight:700;
+    font-size:19px;
+
+    font-weight:800;
 
     line-height:1.1;
 
-    white-space:nowrap;
+    white-space:normal;
 
     overflow:hidden;
 }
@@ -471,110 +805,123 @@ table.board-table{
    FIRST HEADER / POSITION
 ===================================================== */
 
-.coach-table thead th:first-child,
-.board-table thead th:first-child{
+.board-table thead th:first-child,
+.coach-table thead th:first-child{
 
     width:100px;
+
     min-width:100px;
+
     max-width:100px;
 }
 
 
 /* =====================================================
    BOARD CELLS
-
-   EXACT 100 × 100 DESKTOP
 ===================================================== */
 
-.coach-table tbody td,
-.board-table tbody td{
+.board-table tbody td,
+.coach-table tbody td{
 
-    width:100px !important;
-    min-width:100px !important;
-    max-width:100px !important;
+    width:100px;
 
-    height:100px !important;
-    min-height:100px !important;
-    max-height:100px !important;
+    min-width:100px;
 
-    padding:0 !important;
+    max-width:100px;
 
-    border:3px solid #dee2e6;
+    height:100px;
 
-    background:#ffffff;
+    min-height:100px;
+
+    max-height:100px;
+
+    padding:0;
+
+    border:2px solid #d8dde3;
+
+    background:#fff;
+
     color:#212529;
 
     text-align:center;
+
     vertical-align:middle;
 
-    font-size:17px;
+    font-size:18px;
+
+    line-height:1.1;
 
     overflow:hidden;
 
     position:relative;
+
+    transition:
+        box-shadow .15s ease,
+        transform .15s ease;
 }
 
 
 /* =====================================================
-   POSITION COLUMN
-
-   IMPORTANT:
-   This is the first TD of each row.
+   POSITION CELLS
 ===================================================== */
 
-.coach-table tbody td:first-child,
-.board-table tbody td:first-child{
+.board-table tbody td:first-child,
+.coach-table tbody td:first-child{
 
-    width:100px !important;
-    min-width:100px !important;
-    max-width:100px !important;
+    width:100px;
 
-    height:100px !important;
+    min-width:100px;
 
-    background:#f8f9fa;
+    max-width:100px;
+
+    background:#f1f3f5;
+
     color:#212529;
 
     font-size:18px;
-    font-weight:700;
 
-    text-align:center;
-    vertical-align:middle;
+    font-weight:800;
+
+    white-space:nowrap;
+}
+
+
+/* =====================================================
+   EMPTY CELL
+===================================================== */
+
+.board-table tbody td:empty,
+.coach-table tbody td:empty{
+
+    background:#fff;
 }
 
 
 /* =====================================================
    COACH CARD
-
-   board.js creates:
-   <div class="coach-card">
 ===================================================== */
 
 .coach-card{
 
     width:100%;
+
     height:100%;
 
-    min-width:0;
-    min-height:0;
+    min-height:100%;
 
     display:flex;
 
     flex-direction:column;
 
     align-items:center;
+
     justify-content:center;
 
-    gap:2px;
-
-    padding:4px;
+    padding:5px 3px;
 
     text-align:center;
 
     overflow:hidden;
-
-    cursor:pointer;
-
-    user-select:none;
 }
 
 
@@ -582,18 +929,23 @@ table.board-table{
    COACH NUMBER
 ===================================================== */
 
-.coach-no{
+.coach-no,
+.coach-number{
 
     width:100%;
 
-    font-size:22px;
-    font-weight:800;
+    display:block;
+
+    font-size:19px;
+
+    font-weight:900;
 
     line-height:1.05;
 
     white-space:nowrap;
 
     overflow:hidden;
+
     text-overflow:ellipsis;
 }
 
@@ -606,7 +958,12 @@ table.board-table{
 
     width:100%;
 
-    font-size:15px;
+    margin-top:4px;
+
+    display:block;
+
+    font-size:12px;
+
     font-weight:700;
 
     line-height:1.05;
@@ -614,6 +971,7 @@ table.board-table{
     white-space:nowrap;
 
     overflow:hidden;
+
     text-overflow:ellipsis;
 }
 
@@ -624,125 +982,160 @@ table.board-table{
 
 .coach-status{
 
-    width:100%;
+    margin-top:4px;
 
-    font-size:15px;
-    font-weight:800;
+    display:block;
 
-    line-height:1.05;
+    font-size:12px;
+
+    font-weight:900;
+
+    line-height:1;
 
     white-space:nowrap;
-
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-
-/* =====================================================
-   OLD CLASS SUPPORT
-===================================================== */
-
-.board-table td .coach,
-.board-table td .coach-number,
-.coach-table td .coach,
-.coach-table td .coach-number,
-.coach-number{
-
-    width:100%;
-    height:100%;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-
-    font-weight:700;
-
-    overflow:hidden;
 }
 
 
 /* =====================================================
    STATUS COLORS
-
-   Supports JS classes:
-   status-po
-   status-s
-   status-lm
-   status-med
-   status-rl
-   status-r1
-   status-rs
-   status-l
-   status-hvy
 ===================================================== */
 
-.status-po,
-.status-PO{
+.status-PO,
+.status-po{
+
     background:#198754 !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
 }
 
-.status-s,
-.status-S{
+
+.status-S,
+.status-s{
+
     background:#20c997 !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
 }
 
-.status-lm,
-.status-LM{
+
+.status-LM,
+.status-lm{
+
     background:#ffc107 !important;
+
     color:#212529 !important;
 }
 
-.status-med,
-.status-MED{
+
+.status-MED,
+.status-med{
+
     background:#dc3545 !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
 }
 
-.status-rl,
-.status-RL{
+
+.status-RL,
+.status-rl{
+
     background:#0d6efd !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
 }
 
-.status-r1,
-.status-R1{
+
+.status-R1,
+.status-r1{
+
     background:#6f42c1 !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
 }
 
-.status-rs,
-.status-RS{
+
+.status-RS,
+.status-rs{
+
     background:#6610f2 !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
 }
 
-.status-l,
-.status-L{
+
+.status-L,
+.status-l{
+
     background:#fd7e14 !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
 }
 
-.status-hvy,
-.status-HVY{
-    background:#343a40 !important;
-    color:#ffffff !important;
-}
 
-.status-wip,
-.status-WIP{
+.status-WIP,
+.status-wip{
+
     background:#0dcaf0 !important;
+
     color:#212529 !important;
 }
 
-.status-hold,
-.status-HOLD{
+
+.status-HOLD,
+.status-hold{
+
     background:#6c757d !important;
-    color:#ffffff !important;
+
+    color:#fff !important;
+}
+
+
+.status-HVY,
+.status-hvy{
+
+    background:#343a40 !important;
+
+    color:#fff !important;
+}
+
+
+/* =====================================================
+   STATUS HOVER
+===================================================== */
+
+.coach-table tbody td:hover,
+.board-table tbody td:hover{
+
+    box-shadow:
+        inset 0 0 0 3px rgba(13,110,253,.25);
+
+    z-index:5;
+}
+
+
+/* =====================================================
+   DRAGGING
+===================================================== */
+
+.coach-table td.dragging,
+.board-table td.dragging{
+
+    opacity:.55;
+
+    outline:4px dashed #0d6efd;
+
+    outline-offset:-4px;
+}
+
+
+.coach-table td.table-info,
+.board-table td.table-info{
+
+    outline:4px solid #0d6efd;
+
+    outline-offset:-4px;
+
+    background:#dbeafe !important;
 }
 
 
@@ -758,45 +1151,73 @@ table.board-table{
 
     position:relative;
 
-    z-index:20;
+    z-index:50;
 
     box-shadow:
-        0 0 0 4px rgba(255,193,7,.35),
-        0 0 15px rgba(255,193,7,.8);
+        0 0 0 5px rgba(255,193,7,.18),
+        inset 0 0 0 2px #fff;
 }
 
 
 /* =====================================================
-   SEARCH POPUP
+   SEARCH RESULT
+===================================================== */
+
+#searchResult,
+.search-result{
+
+    width:100%;
+
+    margin:8px 0 14px;
+
+    padding:8px 12px;
+
+    min-height:20px;
+
+    color:#495057;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    text-align:center;
+}
+
+
+/* =====================================================
+   COACH POPUP
 ===================================================== */
 
 #coachPopup{
 
     position:fixed;
 
-    top:50%;
-    left:50%;
+    right:22px;
 
-    transform:translate(-50%,-50%);
+    bottom:22px;
 
-    width:min(430px,92vw);
+    width:390px;
 
-    max-height:85vh;
+    max-width:calc(100vw - 40px);
+
+    max-height:75vh;
 
     overflow:auto;
 
-    z-index:99999;
+    display:none;
 
-    background:#ffffff;
+    background:#fff;
 
-    border:2px solid #0d6efd;
+    color:#212529;
 
-    border-radius:14px;
+    border:1px solid #dee2e6;
+
+    border-radius:16px;
 
     box-shadow:
-        0 10px 35px rgba(0,0,0,.35);
+        0 12px 35px rgba(0,0,0,.25);
 
-    padding:0;
+    z-index:99999;
 }
 
 
@@ -806,35 +1227,50 @@ table.board-table{
 
 .popup-header{
 
+    min-height:54px;
+
+    padding:10px 14px;
+
     display:flex;
 
     align-items:center;
+
     justify-content:space-between;
 
-    padding:12px 15px;
+    background:
+        linear-gradient(
+            135deg,
+            #0d6efd,
+            #084298
+        );
 
-    background:#0d6efd;
-    color:#ffffff;
+    color:#fff;
 
-    font-size:19px;
-    font-weight:700;
+    font-size:17px;
+
+    font-weight:800;
 }
+
 
 .popup-header button{
 
-    width:34px;
-    height:34px;
+    width:36px;
+
+    height:36px;
+
+    min-height:36px;
 
     padding:0;
 
     border:0;
+
     border-radius:50%;
 
-    background:#ffffff;
-    color:#212529;
+    background:rgba(255,255,255,.15);
 
-    font-size:18px;
-    font-weight:700;
+    color:#fff;
+
+    font-size:17px;
 
     cursor:pointer;
 }
@@ -850,19 +1286,19 @@ table.board-table{
 
     border-collapse:collapse;
 
-    table-layout:fixed;
+    font-size:15px;
 }
+
 
 .popup-table td{
 
     padding:9px 10px;
 
-    border-bottom:1px solid #dee2e6;
+    border-bottom:1px solid #e9ecef;
 
-    font-size:16px;
-
-    word-break:break-word;
+    vertical-align:middle;
 }
+
 
 .popup-table td:first-child{
 
@@ -880,9 +1316,12 @@ table.board-table{
 
 .search-navigation{
 
+    width:100%;
+
     display:flex;
 
     align-items:center;
+
     justify-content:space-between;
 
     gap:10px;
@@ -894,27 +1333,33 @@ table.board-table{
     border-top:1px solid #ddd;
 }
 
+
 .search-navigation button{
 
     min-height:42px;
 
-    padding:8px 14px;
+    padding:8px 15px;
 
     border:0;
+
     border-radius:8px;
 
     background:#0d6efd;
-    color:#ffffff;
+
+    color:#fff;
 
     font-size:15px;
-    font-weight:700;
+
+    font-weight:600;
 
     cursor:pointer;
 }
 
+
 .search-navigation span{
 
-    font-size:16px;
+    font-size:15px;
+
     font-weight:700;
 
     white-space:nowrap;
@@ -928,21 +1373,54 @@ table.board-table{
 .modal-content{
 
     border:0;
-    border-radius:15px;
+
+    border-radius:16px;
 
     overflow:hidden;
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.25);
 }
+
 
 .modal-header{
 
-    background:#0d6efd;
-    color:#ffffff;
+    padding:15px 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0d6efd,
+            #084298
+        );
+
+    color:#fff;
+
+    border:0;
 }
+
 
 .modal-title{
 
+    font-size:20px;
+
+    font-weight:800;
+}
+
+
+.modal-body{
+
+    padding:20px;
+}
+
+
+.modal-body label{
+
+    margin-bottom:5px;
+
     font-weight:700;
 }
+
 
 .modal-body input,
 .modal-body select{
@@ -951,39 +1429,33 @@ table.board-table{
 
     min-height:45px;
 
+    padding:8px 10px;
+
+    border:1px solid #ced4da;
+
+    border-radius:8px;
+
     font-size:17px;
+
+    outline:none;
 }
 
 
-/* =====================================================
-   DRAG & DROP
-===================================================== */
+.modal-body input:focus,
+.modal-body select:focus{
 
-.coach-table td,
-.board-table td{
+    border-color:#0d6efd;
 
-    transition:
-        background .15s ease,
-        box-shadow .15s ease,
-        opacity .15s ease;
+    box-shadow:
+        0 0 0 3px rgba(13,110,253,.12);
 }
 
-.coach-table td.dragging,
-.board-table td.dragging{
 
-    opacity:.45;
+.modal-footer{
 
-    outline:3px dashed #0d6efd;
-}
+    padding:12px 18px;
 
-.coach-table td.table-info,
-.board-table td.table-info{
-
-    outline:4px solid #0d6efd !important;
-
-    outline-offset:-4px;
-
-    background:#cfe2ff !important;
+    border-top:1px solid #e9ecef;
 }
 
 
@@ -994,27 +1466,34 @@ table.board-table{
 .board-wrapper::-webkit-scrollbar,
 .table-wrapper::-webkit-scrollbar{
 
-    height:10px;
+    width:8px;
+
+    height:9px;
 }
+
 
 .board-wrapper::-webkit-scrollbar-track,
 .table-wrapper::-webkit-scrollbar-track{
 
-    background:#eeeeee;
-}
-
-.board-wrapper::-webkit-scrollbar-thumb,
-.table-wrapper::-webkit-scrollbar-thumb{
-
-    background:#777;
+    background:#edf0f2;
 
     border-radius:10px;
 }
 
+
+.board-wrapper::-webkit-scrollbar-thumb,
+.table-wrapper::-webkit-scrollbar-thumb{
+
+    background:#8a8f94;
+
+    border-radius:10px;
+}
+
+
 .board-wrapper::-webkit-scrollbar-thumb:hover,
 .table-wrapper::-webkit-scrollbar-thumb:hover{
 
-    background:#555;
+    background:#5c636a;
 }
 
 
@@ -1027,9 +1506,10 @@ body.fullscreen-mode{
     overflow:hidden;
 }
 
+
 body.fullscreen-mode .board-wrapper{
 
-    height:calc(100vh - 180px);
+    height:calc(100vh - 190px);
 
     overflow:auto;
 }
@@ -1039,27 +1519,79 @@ body.fullscreen-mode .board-wrapper{
    TV MODE
 ===================================================== */
 
-body.tv-mode .coach-table tbody td,
-body.tv-mode .board-table tbody td{
+body.tv-mode header h1{
+
+    font-size:52px;
+}
+
+
+body.tv-mode header h2{
+
+    font-size:38px;
+}
+
+
+body.tv-mode .board-table tbody td,
+body.tv-mode .coach-table tbody td{
 
     width:110px !important;
+
     min-width:110px !important;
+
     max-width:110px !important;
 
     height:110px !important;
+
     min-height:110px !important;
+
     max-height:110px !important;
 }
 
-body.tv-mode .coach-no{
 
-    font-size:25px;
-}
+/* =====================================================
+   DESKTOP
+===================================================== */
 
-body.tv-mode .coach-type,
-body.tv-mode .coach-status{
+@media (min-width:769px){
 
-    font-size:17px;
+    .board-table thead th,
+    .coach-table thead th{
+
+        width:100px !important;
+
+        min-width:100px !important;
+
+        max-width:100px !important;
+    }
+
+
+    .board-table tbody td,
+    .coach-table tbody td{
+
+        width:100px !important;
+
+        min-width:100px !important;
+
+        max-width:100px !important;
+
+        height:100px !important;
+
+        min-height:100px !important;
+
+        max-height:100px !important;
+    }
+
+
+    .board-table tbody td:first-child,
+    .coach-table tbody td:first-child{
+
+        width:100px !important;
+
+        min-width:100px !important;
+
+        max-width:100px !important;
+    }
+
 }
 
 
@@ -1072,17 +1604,21 @@ body.tv-mode .coach-status{
     html,
     body{
 
-        width:100%;
-        height:auto;
+        background:#fff !important;
 
-        background:#ffffff;
+        color:#000 !important;
     }
 
+
+    header,
+    .main-header,
+    .top-header,
     .navbar,
     .controls,
     .control-section,
     .board-controls,
     .search-container,
+    .search-section,
     #searchBox,
     #searchInput,
     #coachPopup{
@@ -1090,50 +1626,49 @@ body.tv-mode .coach-status{
         display:none !important;
     }
 
+
+    .container-fluid,
+    .board-container{
+
+        padding:0 !important;
+
+        margin:0 !important;
+    }
+
+
     .board-wrapper,
     .table-wrapper{
 
         overflow:visible !important;
     }
 
+
     .coach-table,
     .board-table{
 
         width:100% !important;
-        min-width:0 !important;
+
+        min-width:100% !important;
+    }
+
+
+    .shop-section,
+    .shop-container{
+
+        box-shadow:none !important;
+
+        margin:0 !important;
+    }
+
+
+    .shop-title,
+    .shop-header{
+
+        border-radius:0 !important;
     }
 }
 
 
 /* =====================================================
-   DESKTOP
-===================================================== */
-
-@media (min-width:769px){
-
-    .coach-table tbody td,
-    .board-table tbody td{
-
-        width:100px !important;
-        min-width:100px !important;
-        max-width:100px !important;
-
-        height:100px !important;
-        min-height:100px !important;
-        max-height:100px !important;
-    }
-
-    .coach-table thead th,
-    .board-table thead th{
-
-        width:100px !important;
-        min-width:100px !important;
-        max-width:100px !important;
-    }
-
-}
-
-
-/* =====================================================
-   END
+   END PRODUCTION STYLE.CSS
 ===================================================== */
