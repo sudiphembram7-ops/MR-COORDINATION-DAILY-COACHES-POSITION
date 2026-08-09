@@ -753,27 +753,48 @@ function escapeHTML(value) {
 
 }
 
-
 /* =====================================================
-   LAST UPDATE
+
+   UPDATE LAST UPDATE TIME
+
 ===================================================== */
 
 function updateLastUpdate() {
 
-    const last =
-        document.getElementById(
-            "lastUpdate"
-        );
+    const now =
 
-    if (!last) return;
+        new Date();
 
-    last.textContent =
+    const text =
+
         "Updated : " +
-        new Date().toLocaleTimeString(
+
+        now.toLocaleTimeString(
+
             "en-IN"
+
         );
+
+    const last =
+
+        document.getElementById(
+
+            "lastUpdate"
+
+        );
+
+    if (last) {
+
+        last.textContent =
+
+            text;
+
+    }
+
+    updateFooterTime();
 
 }
+
 
 
 /* =====================================================
