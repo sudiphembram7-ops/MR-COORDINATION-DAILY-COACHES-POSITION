@@ -1,9 +1,9 @@
 /* =====================================================
    MR CO-ORDINATION DAILY COACHES POSITION
    PRODUCTION STYLE.CSS
-   VERSION 7.0
-   RECTANGULAR PROFESSIONAL LAYOUT
+   VERSION 8.0 FINAL
    DESKTOP + MOBILE BASE
+   MATCHED WITH BOARD.HTML
 ===================================================== */
 
 
@@ -26,6 +26,9 @@ html{
 body{
     width:100%;
     min-height:100vh;
+
+    margin:0;
+    padding:0;
 
     font-family:
         Arial,
@@ -63,6 +66,8 @@ header,
     text-align:center;
 
     border-bottom:4px solid #06357a;
+
+    overflow:hidden;
 }
 
 header h1,
@@ -89,6 +94,26 @@ header h2,
     font-size:clamp(18px,2.2vw,30px);
 
     font-weight:500;
+}
+
+header h3{
+
+    margin:0;
+
+    font-size:clamp(24px,3vw,42px);
+
+    font-weight:500;
+
+    line-height:1.2;
+}
+
+header h5{
+
+    margin:8px 0 0;
+
+    font-size:clamp(18px,2.2vw,30px);
+
+    font-weight:400;
 }
 
 header .date-time,
@@ -129,6 +154,13 @@ header .date-time,
         0 2px 8px rgba(0,0,0,.15);
 }
 
+.navbar .container-fluid{
+
+    width:100%;
+
+    max-width:100%;
+}
+
 .navbar-brand{
 
     font-size:21px;
@@ -148,6 +180,11 @@ header .date-time,
 .navbar a:hover{
 
     color:#ffc107 !important;
+}
+
+.navbar-toggler{
+
+    border-color:#495057;
 }
 
 
@@ -185,6 +222,8 @@ header .date-time,
 #searchBox,
 #searchInput,
 .search-box{
+
+    display:block;
 
     width:100%;
 
@@ -227,6 +266,8 @@ header .date-time,
 .search-box::placeholder{
 
     color:#8b949e;
+
+    opacity:1;
 }
 
 
@@ -306,33 +347,33 @@ button{
 #excelBtn,
 .excel-btn{
 
-    background:#198754;
+    background:#198754 !important;
 
-    color:#ffffff;
+    color:#ffffff !important;
 }
 
 #pdfBtn,
 .pdf-btn{
 
-    background:#dc3545;
+    background:#dc3545 !important;
 
-    color:#ffffff;
+    color:#ffffff !important;
 }
 
 #refreshBtn,
 .refresh-btn{
 
-    background:#0d6efd;
+    background:#0d6efd !important;
 
-    color:#ffffff;
+    color:#ffffff !important;
 }
 
 #fullscreenBtn,
 .fullscreen-btn{
 
-    background:#212529;
+    background:#212529 !important;
 
-    color:#ffffff;
+    color:#ffffff !important;
 }
 
 
@@ -362,6 +403,8 @@ button{
 
     background:#ffffff;
 
+    color:#212529;
+
     font-size:15px;
 
     font-weight:600;
@@ -378,6 +421,7 @@ button{
     display:inline-block;
 
     width:12px;
+
     height:12px;
 
     border-radius:50%;
@@ -399,17 +443,17 @@ button{
 .counters,
 .counter-section{
 
-    display:flex;
+    display:inline-flex;
 
     align-items:center;
 
     justify-content:center;
 
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
 
-    gap:10px;
+    gap:8px;
 
-    margin-left:auto;
+    margin-left:10px;
 
     font-size:15px;
 
@@ -424,15 +468,17 @@ button{
 
     display:inline-flex;
 
-    min-width:30px;
+    min-width:42px;
 
-    height:30px;
+    width:auto;
+
+    height:38px;
 
     align-items:center;
 
     justify-content:center;
 
-    padding:0 7px;
+    padding:0 9px;
 
     border-radius:6px;
 
@@ -440,7 +486,11 @@ button{
 
     border:1px solid #dee2e6;
 
+    color:#212529;
+
     font-weight:700;
+
+    line-height:1;
 }
 
 
@@ -449,6 +499,8 @@ button{
 ===================================================== */
 
 hr{
+
+    width:100%;
 
     margin:15px 0;
 
@@ -461,20 +513,27 @@ hr{
 
 
 /* =====================================================
-   SHOP SECTION
+   SHOP CARD
 ===================================================== */
 
+.shop-card,
 .shop-section,
 .shop-container{
 
     width:100%;
 
+    max-width:100%;
+
     margin:18px 0 24px;
+
+    padding:0;
+
+    overflow:hidden;
 }
 
 
 /* =====================================================
-   SHOP HEADER
+   SHOP TITLE
 ===================================================== */
 
 .shop-title,
@@ -491,6 +550,8 @@ hr{
     justify-content:flex-start;
 
     padding:10px 20px;
+
+    margin:0;
 
     border-radius:8px 8px 0 0;
 
@@ -509,6 +570,8 @@ hr{
 
     font-weight:700;
 
+    line-height:1.1;
+
     border-bottom:3px solid #d39e00;
 
     box-shadow:
@@ -517,13 +580,57 @@ hr{
 
 
 /* =====================================================
-   BOARD WRAPPER
+   SHOP COLOR OVERRIDES
 ===================================================== */
 
+.shop-title.bg-warning{
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffc107,
+            #ffca2c
+        ) !important;
+
+    color:#212529 !important;
+}
+
+.shop-title.bg-info{
+
+    background:
+        linear-gradient(
+            90deg,
+            #0dcaf0,
+            #31d2f2
+        ) !important;
+
+    color:#ffffff !important;
+}
+
+.shop-title.bg-success{
+
+    background:
+        linear-gradient(
+            90deg,
+            #198754,
+            #20a05a
+        ) !important;
+
+    color:#ffffff !important;
+}
+
+
+/* =====================================================
+   TABLE RESPONSIVE WRAPPER
+===================================================== */
+
+.table-responsive,
 .board-wrapper,
 .table-wrapper{
 
     width:100%;
+
+    max-width:100%;
 
     overflow-x:auto;
 
@@ -549,10 +656,14 @@ hr{
 
 
 /* =====================================================
-   BOARD TABLE
+   COACH TABLE
+   IMPORTANT:
+   HTML USES .coach-table
 ===================================================== */
 
+table.coach-table,
 table.board-table,
+.coach-table,
 .board-table{
 
     border-collapse:collapse;
@@ -565,9 +676,13 @@ table.board-table,
 
     min-width:100%;
 
+    max-width:none;
+
     margin:0;
 
     padding:0;
+
+    background:#ffffff;
 }
 
 
@@ -575,6 +690,9 @@ table.board-table,
    TABLE HEADER
 ===================================================== */
 
+table.coach-table thead th,
+table.board-table thead th,
+.coach-table thead th,
 .board-table thead th{
 
     width:100px;
@@ -584,6 +702,8 @@ table.board-table,
     max-width:100px;
 
     height:58px;
+
+    min-height:58px;
 
     padding:4px;
 
@@ -610,9 +730,12 @@ table.board-table,
 
 
 /* =====================================================
-   FIRST HEADER
+   FIRST HEADER / POSITION
 ===================================================== */
 
+table.coach-table thead th:first-child,
+table.board-table thead th:first-child,
+.coach-table thead th:first-child,
 .board-table thead th:first-child{
 
     width:100px;
@@ -626,9 +749,14 @@ table.board-table,
 
 
 /* =====================================================
-   BOARD CELLS
+   TABLE BODY CELLS
 ===================================================== */
 
+table.coach-table tbody td,
+table.coach-table tbody th,
+table.board-table tbody td,
+table.board-table tbody th,
+.coach-table tbody td,
 .board-table tbody td{
 
     width:100px;
@@ -667,7 +795,9 @@ table.board-table,
    POSITION CELLS
 ===================================================== */
 
-.board-table tbody td:first-child{
+table.coach-table tbody th,
+table.board-table tbody th,
+.coach-table tbody th{
 
     width:100px;
 
@@ -684,6 +814,12 @@ table.board-table,
     font-weight:700;
 
     border-right:3px solid #6c757d;
+
+    text-align:center;
+
+    vertical-align:middle;
+
+    white-space:nowrap;
 }
 
 
@@ -697,6 +833,8 @@ table.board-table,
 
     height:100%;
 
+    min-height:100%;
+
     display:flex;
 
     flex-direction:column;
@@ -708,6 +846,8 @@ table.board-table,
     gap:2px;
 
     padding:5px;
+
+    margin:0;
 
     overflow:hidden;
 
@@ -723,6 +863,8 @@ table.board-table,
 .coach-number{
 
     width:100%;
+
+    max-width:100%;
 
     font-size:20px;
 
@@ -745,6 +887,8 @@ table.board-table,
 .coach-type{
 
     width:100%;
+
+    max-width:100%;
 
     font-size:13px;
 
@@ -829,9 +973,9 @@ table.board-table,
 .status-R1,
 .status-r1{
 
-    background:#6f42c1 !important;
+    background:#0dcaf0 !important;
 
-    color:#ffffff !important;
+    color:#212529 !important;
 }
 
 .status-RS,
@@ -845,7 +989,7 @@ table.board-table,
 .status-L,
 .status-l{
 
-    background:#fd7e14 !important;
+    background:#6c757d !important;
 
     color:#ffffff !important;
 }
@@ -1065,6 +1209,45 @@ table.board-table,
 
 
 /* =====================================================
+   STATUS LEGEND
+===================================================== */
+
+.card{
+
+    width:100%;
+
+    max-width:100%;
+
+    overflow:hidden;
+}
+
+.card .card-header{
+
+    font-size:20px;
+
+    font-weight:500;
+}
+
+.card .card-body{
+
+    display:flex;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:7px;
+}
+
+.card .badge{
+
+    font-size:15px;
+
+    padding:6px 10px;
+}
+
+
+/* =====================================================
    MODAL
 ===================================================== */
 
@@ -1109,18 +1292,21 @@ table.board-table,
    SCROLLBAR
 ===================================================== */
 
+.table-responsive::-webkit-scrollbar,
 .board-wrapper::-webkit-scrollbar,
 .table-wrapper::-webkit-scrollbar{
 
     height:9px;
 }
 
+.table-responsive::-webkit-scrollbar-track,
 .board-wrapper::-webkit-scrollbar-track,
 .table-wrapper::-webkit-scrollbar-track{
 
     background:#e9ecef;
 }
 
+.table-responsive::-webkit-scrollbar-thumb,
 .board-wrapper::-webkit-scrollbar-thumb,
 .table-wrapper::-webkit-scrollbar-thumb{
 
@@ -1129,6 +1315,7 @@ table.board-table,
     border-radius:8px;
 }
 
+.table-responsive::-webkit-scrollbar-thumb:hover,
 .board-wrapper::-webkit-scrollbar-thumb:hover,
 .table-wrapper::-webkit-scrollbar-thumb:hover{
 
@@ -1145,9 +1332,8 @@ body.fullscreen-mode{
     overflow:hidden;
 }
 
-body.fullscreen-mode .board-wrapper{
-
-    height:calc(100vh - 190px);
+body.fullscreen-mode .board-wrapper,
+body.fullscreen-mode .table-responsive{
 
     overflow:auto;
 }
@@ -1157,6 +1343,8 @@ body.fullscreen-mode .board-wrapper{
    TV MODE
 ===================================================== */
 
+body.tv-mode table.coach-table tbody td,
+body.tv-mode .coach-table tbody td,
 body.tv-mode .board-table tbody td{
 
     width:110px !important;
@@ -1172,6 +1360,8 @@ body.tv-mode .board-table tbody td{
     max-height:110px !important;
 }
 
+body.tv-mode table.coach-table thead th,
+body.tv-mode .coach-table thead th,
 body.tv-mode .board-table thead th{
 
     width:110px !important;
@@ -1188,9 +1378,14 @@ body.tv-mode .board-table thead th{
 
 @media print{
 
+    html,
     body{
 
+        width:100%;
+
         background:#ffffff;
+
+        overflow:visible !important;
     }
 
     .navbar,
@@ -1205,18 +1400,23 @@ body.tv-mode .board-table thead th{
         display:none !important;
     }
 
-    .board-wrapper{
+    .table-responsive,
+    .board-wrapper,
+    .table-wrapper{
 
-        overflow:visible;
+        overflow:visible !important;
 
-        border:0;
+        border:0 !important;
 
-        box-shadow:none;
+        box-shadow:none !important;
     }
 
-    .board-table{
+    table.coach-table,
+    table.board-table{
 
-        width:100%;
+        width:100% !important;
+
+        min-width:0 !important;
     }
 }
 
@@ -1227,7 +1427,27 @@ body.tv-mode .board-table thead th{
 
 @media (min-width:769px){
 
-    .board-table tbody td{
+    .container-fluid.mt-3{
+
+        width:100%;
+
+        max-width:100%;
+    }
+
+    table.coach-table thead th,
+    table.board-table thead th{
+
+        width:100px !important;
+
+        min-width:100px !important;
+
+        max-width:100px !important;
+    }
+
+    table.coach-table tbody td,
+    table.coach-table tbody th,
+    table.board-table tbody td,
+    table.board-table tbody th{
 
         width:100px !important;
 
@@ -1240,15 +1460,6 @@ body.tv-mode .board-table thead th{
         min-height:100px !important;
 
         max-height:100px !important;
-    }
-
-    .board-table thead th{
-
-        width:100px !important;
-
-        min-width:100px !important;
-
-        max-width:100px !important;
     }
 
 }
@@ -1292,5 +1503,5 @@ select:focus-visible{
 
 
 /* =====================================================
-   END VERSION 7.0
+   END STYLE.CSS V8.0
 ===================================================== */
