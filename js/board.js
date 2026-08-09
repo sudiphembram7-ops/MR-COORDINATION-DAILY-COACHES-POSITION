@@ -795,7 +795,27 @@ function updateLastUpdate() {
 
 }
 
+/* =====================================================
+   FOOTER UPDATE TIME
+===================================================== */
 
+function updateFooterTime() {
+
+    const footerTime =
+        document.getElementById(
+            "lastUpdateTime"
+        );
+
+    if (!footerTime) {
+        return;
+    }
+
+    footerTime.textContent =
+        new Date().toLocaleTimeString(
+            "en-IN"
+        );
+
+}
 
 /* =====================================================
    CELL CLICK
