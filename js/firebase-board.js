@@ -1880,7 +1880,7 @@ console.log(
 );
 
 console.log(
-    "LINE → SHOP AUTO MAPPING : READY"
+    "LINE â SHOP AUTO MAPPING : READY"
 );
 
 console.log(
