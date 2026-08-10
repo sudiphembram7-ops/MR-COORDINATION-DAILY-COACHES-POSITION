@@ -23,9 +23,18 @@ import {
 ===================================================== */
 
 const BOARD_PATH = "coachBoard";
+
 const HISTORY_PATH = "history";
+
 const AUDIT_PATH = "auditLog";
+
 const BACKUP_PATH = "backups";
+
+/*
+ * Coaches removed from the active board
+ * by PULL OUT are stored here.
+ */
+const PULLED_OUT_PATH = "pulledOutCoaches";
 
 
 /* =====================================================
@@ -654,7 +663,241 @@ export async function firebaseDeleteCoach(
     return true;
 
 }
+/* =====================================================
+   PULL OUT COACH
+   -----------------------------------------------------
+   PULL OUT:
+   1. Reads coach from current board position
+   2. Saves complete coach record into
+      pulledOutCoaches
+   3. Removes coach from active coachBoard
+   4. Writes HISTORY
+   5. Writes AUDIT LOG
 
+   IMPORTANT:
+   PULL OUT is NOT the same as DELETE.
+   The coach is preserved in pulledOutCoaches.
+===================================================== */
+
+export async function firebasePullOutCoach(
+    line,
+    position
+) {
+
+    line = clean(line);
+
+    position = clean(position);
+
+
+    /* =================================================
+       VALIDATION
+    ================================================= */
+
+    if (!line || !position) {
+
+        throw new Error(
+            "Line and Position are required"
+        );
+
+    }
+
+
+    /* =================================================
+       CURRENT COACH REFERENCE
+    ================================================= */
+
+    const coachRef =
+        ref(
+            database,
+            `${BOARD_PATH}/${line}/${position}`
+        );
+
+
+    /* =================================================
+       READ CURRENT COACH
+    ================================================= */
+
+    const snapshot =
+        await get(
+            coachRef
+        );
+
+
+    if (!snapshot.exists()) {
+
+        throw new Error(
+            "No coach found at this position"
+        );
+
+    }
+
+
+    const oldCoach =
+        snapshot.val();
+
+
+    /* =================================================
+       NORMALIZE COACH
+    ================================================= */
+
+    const coach =
+        normalizeCoach(
+            oldCoach,
+            line,
+            position,
+            oldCoach
+        );
+
+
+    validateCoach(
+        coach
+    );
+
+
+    /* =================================================
+       PULLED OUT RECORD
+    ================================================= */
+
+    const pulledOutCoach = {
+
+        ...coach,
+
+        originalLine:
+            line,
+
+        originalPosition:
+            position,
+
+        pulledOutAt:
+            nowISO(),
+
+        action:
+            "PULL_OUT"
+
+    };
+
+
+    /* =================================================
+       CREATE NEW PULL OUT RECORD
+    ================================================= */
+
+    const pulledOutRef =
+        push(
+            ref(
+                database,
+                PULLED_OUT_PATH
+            )
+        );
+
+
+    const pulledOutId =
+        pulledOutRef.key;
+
+
+    if (!pulledOutId) {
+
+        throw new Error(
+            "Unable to create Pull Out record"
+        );
+
+    }
+
+
+    /* =================================================
+       ATOMIC DATABASE UPDATE
+    =================================================
+       Save pulled-out record
+       AND
+       remove active board position
+    ================================================= */
+
+    const updates = {};
+
+
+    updates[
+        `${PULLED_OUT_PATH}/${pulledOutId}`
+    ] =
+        pulledOutCoach;
+
+
+    updates[
+        `${BOARD_PATH}/${line}/${position}`
+    ] =
+        null;
+
+
+    await update(
+        ref(database),
+        updates
+    );
+
+
+    /* =================================================
+       HISTORY
+    ================================================= */
+
+    await writeHistory(
+        "PULL_OUT",
+        coach
+    );
+
+
+    /* =================================================
+       AUDIT LOG
+    ================================================= */
+
+    await writeAudit(
+        "PULL_OUT",
+        coach
+    );
+
+
+    /* =================================================
+       SUCCESS LOG
+    ================================================= */
+
+    console.log(
+        "======================================"
+    );
+
+    console.log(
+        "PULL OUT SUCCESS"
+    );
+
+    console.log(
+        "Coach:",
+        coach.coachNo
+    );
+
+    console.log(
+        "From:",
+        `${line}/${position}`
+    );
+
+    console.log(
+        "Pulled Out ID:",
+        pulledOutId
+    );
+
+    console.log(
+        "======================================"
+    );
+
+
+    return {
+
+        success:
+            true,
+
+        pulledOutId,
+
+        coach:
+
+            pulledOutCoach
+
+    };
+
+}
 
 /* =====================================================
    MOVE / SWAP COACH
