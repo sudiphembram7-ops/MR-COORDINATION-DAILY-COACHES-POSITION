@@ -1,45 +1,55 @@
-/* =====================================================
+/* =========================================================
    MR CO-ORDINATION BOARD
    FIREBASE BOARD CONTROL
    VERSION 8.1 FINAL
-   -----------------------------------------------------
+
    FILE:
    firebase-board.js
 
-   PURPOSE:
+   RESPONSIBILITY
+   ---------------------------------------------------------
    Firebase Realtime Database ONLY
 
-   MATCHES:
-   board.js VERSION 8.1 FINAL
+   board.js
+      = UI / Modal / Board / Drag Drop / Search
+
+   firebase-board.js
+      = Firebase Database Operations
 
    FEATURES
-   -----------------------------------------------------
-   Save Coach
-   Update Coach
-   Update Position
-   Move / Swap
-   Delete Coach
-   Pull Out Coach
-   Return Coach To Board
-   Return To Same Cell
-   Return To Different Cell
-   Search Coach
-   Get All Coaches
-   Realtime Board Listener
-   Database Connection Listener
-   Pulled Out Listener
-   Backup
-   Restore
-   Clear Board
-===================================================== */
+   ---------------------------------------------------------
+   SAVE COACH
+   UPDATE COACH
+   MOVE COACH
+   SWAP COACH
+   UPDATE STATUS
+   DELETE COACH
+   PULL OUT
+   RETURN TO BOARD
+   SEARCH
+   REALTIME BOARD
+   DATABASE STATUS
+   BACKUP
+   RESTORE
+   CLEAR BOARD
+   HISTORY
+========================================================= */
 
 
-/* =====================================================
-   FIREBASE IMPORT
-===================================================== */
+/* =========================================================
+   FIREBASE CONFIG
+========================================================= */
 
 import {
+    database
+} from "./firebase-config.js";
 
+
+/* =========================================================
+   FIREBASE DATABASE FUNCTIONS
+========================================================= */
+
+import {
     ref,
     get,
     set,
@@ -48,21 +58,25 @@ import {
     push,
     onValue,
     runTransaction
-
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
+/* =========================================================
+   FIREBASE AUTH
+========================================================= */
+
 import {
-
-    database,
-    auth
-
-} from "./firebase-config.js";
+    getAuth
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 
-/* =====================================================
-   ROOT REFERENCES
-===================================================== */
+const auth =
+    getAuth();
+
+
+/* =========================================================
+   DATABASE PATHS
+========================================================= */
 
 const BOARD_PATH =
     "coachBoard";
@@ -76,13 +90,13 @@ const HISTORY_PATH =
 const BACKUP_PATH =
     "boardBackups";
 
-const CONNECTED_PATH =
+const CONNECTION_PATH =
     ".info/connected";
 
 
-/* =====================================================
-   HELPERS
-===================================================== */
+/* =========================================================
+   UTILITY
+========================================================= */
 
 function clean(value) {
 
@@ -101,29 +115,106 @@ function upper(value) {
 }
 
 
-function now() {
+/* =========================================================
+   CURRENT USER
+========================================================= */
 
-    return Date.now();
+function getCurrentUser() {
+
+    try {
+
+        return (
+            auth.currentUser?.email ||
+            "Admin"
+        );
+
+    }
+    catch (error) {
+
+        return "Admin";
+
+    }
 
 }
 
 
-function currentUser() {
+/* =========================================================
+   SHOP DETECTION
+========================================================= */
 
-    return (
-        auth?.currentUser?.email ||
-        "Admin"
-    );
+function getShopFromLine(line) {
+
+    const value =
+        upper(line);
+
+
+    if (
+        value.startsWith("SCR")
+    ) {
+
+        return "MR SCR SHOP";
+
+    }
+
+
+    if (
+        value.startsWith("N")
+    ) {
+
+        return "N SHOP";
+
+    }
+
+
+    if (
+        value.startsWith("M")
+    ) {
+
+        return "M SHOP";
+
+    }
+
+
+    if (
+        value.startsWith("F")
+    ) {
+
+        return "CR SHOP";
+
+    }
+
+
+    if (
+        value.startsWith("J")
+    ) {
+
+        return "J SHOP";
+
+    }
+
+
+    if (
+        value.startsWith("L")
+    ) {
+
+        return "LIFTING BAY";
+
+    }
+
+
+    return "";
 
 }
 
 
-/* =====================================================
+/* =========================================================
    NORMALIZE COACH
-===================================================== */
+========================================================= */
 
 function normalizeCoach(
-    coach = {}
+    coach = {},
+    line = "",
+    position = ""
 ) {
 
     return {
@@ -146,39 +237,50 @@ function normalizeCoach(
         shop:
             clean(
                 coach.shop
+            ) ||
+            getShopFromLine(
+                line
             ),
 
         line:
             clean(
                 coach.line
+            ) ||
+            clean(
+                line
             ),
 
         position:
             clean(
                 coach.position
+            ) ||
+            clean(
+                position
             ),
 
+        createdAt:
+            coach.createdAt ||
+            Date.now(),
+
         updatedAt:
-            coach.updatedAt ||
-            now(),
+            Date.now(),
 
         updatedBy:
             coach.updatedBy ||
-            currentUser()
+            getCurrentUser()
 
     };
 
 }
 
 
-/* =====================================================
+/* =========================================================
    HISTORY
-===================================================== */
+========================================================= */
 
 export async function writeHistory(
     action,
-    coach = {},
-    extra = {}
+    coach = {}
 ) {
 
     try {
@@ -190,8 +292,7 @@ export async function writeHistory(
             );
 
 
-        await push(
-            historyRef,
+        const historyItem =
             {
 
                 action:
@@ -228,21 +329,25 @@ export async function writeHistory(
                     ),
 
                 user:
-                    currentUser(),
+                    getCurrentUser(),
 
                 time:
-                    now(),
+                    Date.now()
 
-                ...extra
+            };
 
-            }
+
+        await push(
+            historyRef,
+            historyItem
         );
+
 
     }
     catch (error) {
 
         console.error(
-            "History error:",
+            "HISTORY ERROR:",
             error
         );
 
@@ -251,119 +356,105 @@ export async function writeHistory(
 }
 
 
-/* =====================================================
-   SAVE COACH
-   -----------------------------------------------------
-   Used by Admin / Coach Form
-===================================================== */
+/* =========================================================
+   GET BOARD
+========================================================= */
 
-export async function saveCoach(
-    coach
-) {
+export async function getBoard() {
 
-    if (!coach) {
-
-        throw new Error(
-            "Coach data missing."
-        );
-
-    }
-
-
-    const line =
-        clean(
-            coach.line
+    const boardRef =
+        ref(
+            database,
+            BOARD_PATH
         );
 
 
-    const position =
-        clean(
-            coach.position
+    const snapshot =
+        await get(
+            boardRef
         );
 
 
     if (
-        !line ||
-        !position
+        !snapshot.exists()
     ) {
 
-        throw new Error(
-            "Line and position are required."
-        );
+        return {};
 
     }
 
 
-    const coachData =
-        normalizeCoach(
-            coach
-        );
-
-
-    coachData.line =
-        line;
-
-    coachData.position =
-        position;
-
-
-    const coachRef =
-        ref(
-            database,
-            `${BOARD_PATH}/${line}/${position}`
-        );
-
-
-    const existing =
-        await get(
-            coachRef
-        );
-
-
-    if (existing.exists()) {
-
-        throw new Error(
-            "This cell already contains a coach."
-        );
-
-    }
-
-
-    await set(
-        coachRef,
-        coachData
+    return (
+        snapshot.val() ||
+        {}
     );
-
-
-    await writeHistory(
-        "SAVE",
-        coachData
-    );
-
-
-    return coachData;
 
 }
 
 
-/* =====================================================
-   FIREBASE SAVE ALIAS
-===================================================== */
+/* =========================================================
+   REALTIME BOARD LISTENER
+========================================================= */
 
-export async function firebaseSaveCoach(
-    coach
+export function listenBoard(
+    callback
 ) {
 
-    return await saveCoach(
-        coach
+    if (
+        typeof callback !==
+        "function"
+    ) {
+
+        console.error(
+            "listenBoard: callback required"
+        );
+
+        return () => {};
+
+    }
+
+
+    const boardRef =
+        ref(
+            database,
+            BOARD_PATH
+        );
+
+
+    return onValue(
+        boardRef,
+        snapshot => {
+
+            const data =
+                snapshot.exists()
+                    ? snapshot.val()
+                    : {};
+
+
+            callback(
+                data
+            );
+
+        },
+        error => {
+
+            console.error(
+                "BOARD LISTENER ERROR:",
+                error
+            );
+
+
+            callback({});
+
+        }
     );
 
 }
 
 
-/* =====================================================
+/* =========================================================
    GET SINGLE COACH
-===================================================== */
+========================================================= */
 
 export async function getCoach(
     line,
@@ -400,40 +491,47 @@ export async function getCoach(
         );
 
 
-    if (!snapshot.exists()) {
+    if (
+        !snapshot.exists()
+    ) {
 
         return null;
 
     }
 
 
-    return {
-
-        ...snapshot.val(),
-
-        line,
-        position
-
-    };
+    return snapshot.val();
 
 }
 
 
-/* =====================================================
-   UPDATE COACH
-===================================================== */
+/* =========================================================
+   SAVE COACH
+========================================================= */
 
-export async function updateCoach(
-    line,
-    position,
+export async function saveCoach(
     coach
 ) {
 
-    line =
-        clean(line);
+    if (!coach) {
 
-    position =
-        clean(position);
+        throw new Error(
+            "Coach data is required."
+        );
+
+    }
+
+
+    const line =
+        clean(
+            coach.line
+        );
+
+
+    const position =
+        clean(
+            coach.position
+        );
 
 
     if (
@@ -442,16 +540,111 @@ export async function updateCoach(
     ) {
 
         throw new Error(
-            "Line and position are required."
+            "Line and Position are required."
         );
 
     }
 
 
+    const coachNo =
+        clean(
+            coach.coachNo
+        );
+
+
+    if (!coachNo) {
+
+        throw new Error(
+            "Coach Number is required."
+        );
+
+    }
+
+
+    const existing =
+        await getCoach(
+            line,
+            position
+        );
+
+
+    if (existing) {
+
+        throw new Error(
+            "This cell already contains a coach. Use Update."
+        );
+
+    }
+
+
+    const normalized =
+        normalizeCoach(
+            coach,
+            line,
+            position
+        );
+
+
+    const coachRef =
+        ref(
+            database,
+            `${BOARD_PATH}/${line}/${position}`
+        );
+
+
+    await set(
+        coachRef,
+        normalized
+    );
+
+
+    await writeHistory(
+        "SAVE",
+        normalized
+    );
+
+
+    return normalized;
+
+}
+
+
+/* =========================================================
+   UPDATE COACH
+========================================================= */
+
+export async function updateCoach(
+    coach
+) {
+
     if (!coach) {
 
         throw new Error(
-            "Coach data missing."
+            "Coach data is required."
+        );
+
+    }
+
+
+    const line =
+        clean(
+            coach.line
+        );
+
+
+    const position =
+        clean(
+            coach.position
+        );
+
+
+    if (
+        !line ||
+        !position
+    ) {
+
+        throw new Error(
+            "Line and Position are required."
         );
 
     }
@@ -470,10 +663,12 @@ export async function updateCoach(
         );
 
 
-    if (!snapshot.exists()) {
+    if (
+        !snapshot.exists()
+    ) {
 
         throw new Error(
-            "Coach not found."
+            "Coach not found in this cell."
         );
 
     }
@@ -484,25 +679,17 @@ export async function updateCoach(
 
 
     const updatedCoach =
-        {
-
-            ...oldCoach,
-
-            ...normalizeCoach(
-                coach
-            ),
-
+        normalizeCoach(
+            {
+                ...oldCoach,
+                ...coach,
+                createdAt:
+                    oldCoach.createdAt ||
+                    Date.now()
+            },
             line,
-
-            position,
-
-            updatedAt:
-                now(),
-
-            updatedBy:
-                currentUser()
-
-        };
+            position
+        );
 
 
     await update(
@@ -522,132 +709,17 @@ export async function updateCoach(
 }
 
 
-/* =====================================================
-   FIREBASE UPDATE ALIAS
-===================================================== */
-
-export async function firebaseUpdateCoach(
-    line,
-    position,
-    coach
-) {
-
-    return await updateCoach(
-        line,
-        position,
-        coach
-    );
-
-}
-
-
-/* =====================================================
-   UPDATE COACH STATUS
-===================================================== */
-
-export async function updateCoachStatus(
-    line,
-    position,
-    status
-) {
-
-    line =
-        clean(line);
-
-    position =
-        clean(position);
-
-    status =
-        upper(status);
-
-
-    if (
-        !line ||
-        !position
-    ) {
-
-        throw new Error(
-            "Invalid cell."
-        );
-
-    }
-
-
-    const coachRef =
-        ref(
-            database,
-            `${BOARD_PATH}/${line}/${position}`
-        );
-
-
-    const snapshot =
-        await get(
-            coachRef
-        );
-
-
-    if (!snapshot.exists()) {
-
-        throw new Error(
-            "Coach not found."
-        );
-
-    }
-
-
-    const coach =
-        snapshot.val();
-
-
-    await update(
-        coachRef,
-        {
-
-            status,
-
-            updatedAt:
-                now(),
-
-            updatedBy:
-                currentUser()
-
-        }
-    );
-
-
-    await writeHistory(
-        "STATUS_UPDATE",
-        {
-
-            ...coach,
-
-            status,
-
-            line,
-
-            position
-
-        }
-    );
-
-
-    return true;
-
-}
-
-
-/* =====================================================
+/* =========================================================
    UPDATE COACH POSITION
-   -----------------------------------------------------
-   SAME CELL:
-   nothing
+   ---------------------------------------------------------
+   Supports:
 
-   EMPTY TARGET:
-   move
+   1. Empty -> Move
+   2. Occupied -> Swap
+   3. Same cell -> Nothing
 
-   OCCUPIED TARGET:
-   swap
-===================================================== */
+   Atomic transaction style
+========================================================= */
 
 export async function updateCoachPosition(
     fromLine,
@@ -677,7 +749,7 @@ export async function updateCoachPosition(
     ) {
 
         throw new Error(
-            "Invalid source or destination cell."
+            "Invalid source or destination."
         );
 
     }
@@ -693,206 +765,213 @@ export async function updateCoachPosition(
     }
 
 
-    const sourceRef =
+    const boardRef =
         ref(
             database,
-            `${BOARD_PATH}/${fromLine}/${fromPosition}`
+            BOARD_PATH
         );
 
 
-    const targetRef =
-        ref(
-            database,
-            `${BOARD_PATH}/${toLine}/${toPosition}`
-        );
+    const result =
+        await runTransaction(
+            boardRef,
+            currentData => {
+
+                const data =
+                    currentData || {};
 
 
-    const sourceSnapshot =
-        await get(
-            sourceRef
-        );
+                const sourceCoach =
+                    data?.[fromLine]?.[fromPosition] ||
+                    null;
 
 
-    if (!sourceSnapshot.exists()) {
+                if (!sourceCoach) {
 
-        throw new Error(
-            "Source coach not found."
-        );
+                    return;
 
-    }
+                }
 
 
-    const sourceCoach =
-        sourceSnapshot.val();
+                const targetCoach =
+                    data?.[toLine]?.[toPosition] ||
+                    null;
 
 
-    const targetSnapshot =
-        await get(
-            targetRef
-        );
+                /* -------------------------------------
+                   SOURCE -> TARGET
+                ------------------------------------- */
+
+                if (!data[toLine]) {
+
+                    data[toLine] = {};
+
+                }
 
 
-    const targetCoach =
-        targetSnapshot.exists()
-            ? targetSnapshot.val()
-            : null;
+                data[toLine][toPosition] =
+                    {
+
+                        ...sourceCoach,
+
+                        line:
+                            toLine,
+
+                        position:
+                            toPosition,
+
+                        shop:
+                            sourceCoach.shop ||
+                            getShopFromLine(
+                                toLine
+                            ),
+
+                        updatedAt:
+                            Date.now(),
+
+                        updatedBy:
+                            getCurrentUser()
+
+                    };
 
 
-    /* -----------------------------------------
-       MOVE TO EMPTY CELL
-    ----------------------------------------- */
+                /* -------------------------------------
+                   TARGET -> SOURCE
+                   SWAP
+                ------------------------------------- */
 
-    if (!targetCoach) {
+                if (targetCoach) {
 
-        const movedCoach =
-            {
+                    if (!data[fromLine]) {
 
-                ...sourceCoach,
+                        data[fromLine] = {};
 
-                line:
-                    toLine,
-
-                position:
-                    toPosition,
-
-                updatedAt:
-                    now(),
-
-                updatedBy:
-                    currentUser()
-
-            };
+                    }
 
 
-        const updates = {};
+                    data[fromLine][fromPosition] =
+                        {
+
+                            ...targetCoach,
+
+                            line:
+                                fromLine,
+
+                            position:
+                                fromPosition,
+
+                            shop:
+                                targetCoach.shop ||
+                                getShopFromLine(
+                                    fromLine
+                                ),
+
+                            updatedAt:
+                                Date.now(),
+
+                            updatedBy:
+                                getCurrentUser()
+
+                        };
+
+                }
+                else {
+
+                    if (
+                        data[fromLine]
+                    ) {
+
+                        delete data[
+                            fromLine
+                        ][
+                            fromPosition
+                        ];
+
+                    }
+
+                }
 
 
-        updates[
-            `${BOARD_PATH}/${fromLine}/${fromPosition}`
-        ] =
-            null;
+                /* -------------------------------------
+                   CLEAN EMPTY LINE
+                ------------------------------------- */
+
+                if (
+                    data[fromLine] &&
+                    Object.keys(
+                        data[fromLine]
+                    ).length === 0
+                ) {
+
+                    delete data[
+                        fromLine
+                    ];
+
+                }
 
 
-        updates[
-            `${BOARD_PATH}/${toLine}/${toPosition}`
-        ] =
-            movedCoach;
-
-
-        await update(
-            ref(
-                database
-            ),
-            updates
-        );
-
-
-        await writeHistory(
-            "MOVE",
-            movedCoach,
-            {
-
-                fromLine,
-
-                fromPosition,
-
-                toLine,
-
-                toPosition
+                return data;
 
             }
         );
 
 
-        return true;
+    if (
+        !result.committed
+    ) {
+
+        throw new Error(
+            "Move / Swap failed."
+        );
 
     }
 
 
-    /* -----------------------------------------
-       SWAP TWO COACHES
-    ----------------------------------------- */
-
-    const newSourceCoach =
-        {
-
-            ...targetCoach,
-
-            line:
-                fromLine,
-
-            position:
-                fromPosition,
-
-            updatedAt:
-                now(),
-
-            updatedBy:
-                currentUser()
-
-        };
+    const movedCoach =
+        result.snapshot
+            .val()?.[
+                toLine
+            ]?.[
+                toPosition
+            ];
 
 
-    const newTargetCoach =
-        {
+    if (movedCoach) {
 
-            ...sourceCoach,
+        await writeHistory(
+            "MOVE",
+            movedCoach
+        );
 
-            line:
-                toLine,
-
-            position:
-                toPosition,
-
-            updatedAt:
-                now(),
-
-            updatedBy:
-                currentUser()
-
-        };
+    }
 
 
-    const updates = {};
+    if (
+        movedCoach &&
+        clean(
+            movedCoach.coachNo
+        )
+    ) {
 
+        if (
+            fromLine !== toLine ||
+            fromPosition !== toPosition
+        ) {
 
-    updates[
-        `${BOARD_PATH}/${fromLine}/${fromPosition}`
-    ] =
-        newSourceCoach;
-
-
-    updates[
-        `${BOARD_PATH}/${toLine}/${toPosition}`
-    ] =
-        newTargetCoach;
-
-
-    await update(
-        ref(database),
-        updates
-    );
-
-
-    await writeHistory(
-        "SWAP",
-        newTargetCoach,
-        {
-
-            fromLine,
-
-            fromPosition,
-
-            toLine,
-
-            toPosition,
-
-            swappedWith:
-                newSourceCoach.coachNo ||
-                ""
+            await writeHistory(
+                targetCoachExists(
+                    result.snapshot.val(),
+                    fromLine,
+                    fromPosition
+                )
+                    ? "SWAP"
+                    : "MOVE",
+                movedCoach
+            );
 
         }
-    );
+
+    }
 
 
     return true;
@@ -900,13 +979,31 @@ export async function updateCoachPosition(
 }
 
 
-/* =====================================================
-   DELETE COACH
-===================================================== */
+/* =========================================================
+   HELPER
+========================================================= */
 
-export async function firebaseDeleteCoach(
+function targetCoachExists(
+    data,
     line,
     position
+) {
+
+    return !!(
+        data?.[line]?.[position]
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE COACH STATUS
+========================================================= */
+
+export async function updateCoachStatus(
+    line,
+    position,
+    status
 ) {
 
     line =
@@ -914,6 +1011,21 @@ export async function firebaseDeleteCoach(
 
     position =
         clean(position);
+
+    status =
+        upper(status);
+
+
+    if (
+        !line ||
+        !position
+    ) {
+
+        throw new Error(
+            "Invalid line or position."
+        );
+
+    }
 
 
     const coachRef =
@@ -929,7 +1041,106 @@ export async function firebaseDeleteCoach(
         );
 
 
-    if (!snapshot.exists()) {
+    if (
+        !snapshot.exists()
+    ) {
+
+        throw new Error(
+            "Coach not found."
+        );
+
+    }
+
+
+    const coach =
+        snapshot.val();
+
+
+    await update(
+        coachRef,
+        {
+
+            status:
+                status,
+
+            updatedAt:
+                Date.now(),
+
+            updatedBy:
+                getCurrentUser()
+
+        }
+    );
+
+
+    await writeHistory(
+        "STATUS UPDATE",
+        {
+
+            ...coach,
+
+            line:
+                line,
+
+            position:
+                position,
+
+            status:
+                status
+
+        }
+    );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   DELETE COACH
+========================================================= */
+
+export async function firebaseDeleteCoach(
+    line,
+    position
+) {
+
+    line =
+        clean(line);
+
+    position =
+        clean(position);
+
+
+    if (
+        !line ||
+        !position
+    ) {
+
+        throw new Error(
+            "Invalid line or position."
+        );
+
+    }
+
+
+    const coachRef =
+        ref(
+            database,
+            `${BOARD_PATH}/${line}/${position}`
+        );
+
+
+    const snapshot =
+        await get(
+            coachRef
+        );
+
+
+    if (
+        !snapshot.exists()
+    ) {
 
         throw new Error(
             "Coach not found."
@@ -953,9 +1164,11 @@ export async function firebaseDeleteCoach(
 
             ...coach,
 
-            line,
+            line:
+                line,
 
-            position
+            position:
+                position
 
         }
     );
@@ -966,9 +1179,9 @@ export async function firebaseDeleteCoach(
 }
 
 
-/* =====================================================
+/* =========================================================
    PULL OUT COACH
-===================================================== */
+========================================================= */
 
 export async function firebasePullOutCoach(
     line,
@@ -982,7 +1195,19 @@ export async function firebasePullOutCoach(
         clean(position);
 
 
-    const coachRef =
+    if (
+        !line ||
+        !position
+    ) {
+
+        throw new Error(
+            "Invalid line or position."
+        );
+
+    }
+
+
+    const boardRef =
         ref(
             database,
             `${BOARD_PATH}/${line}/${position}`
@@ -991,14 +1216,16 @@ export async function firebasePullOutCoach(
 
     const snapshot =
         await get(
-            coachRef
+            boardRef
         );
 
 
-    if (!snapshot.exists()) {
+    if (
+        !snapshot.exists()
+    ) {
 
         throw new Error(
-            "Coach not found."
+            "No coach found in this cell."
         );
 
     }
@@ -1008,16 +1235,20 @@ export async function firebasePullOutCoach(
         snapshot.val();
 
 
-    const pulledOutRef =
-        push(
-            ref(
-                database,
-                PULLED_OUT_PATH
-            )
+    const pulledRef =
+        ref(
+            database,
+            PULLED_OUT_PATH
         );
 
 
-    const pulledOutCoach =
+    const newRef =
+        push(
+            pulledRef
+        );
+
+
+    const pulledCoach =
         {
 
             ...coach,
@@ -1029,60 +1260,60 @@ export async function firebasePullOutCoach(
                 position,
 
             pulledOutAt:
-                now(),
+                Date.now(),
 
             pulledOutBy:
-                currentUser(),
+                getCurrentUser(),
 
-            pulledOut:
-                true
+            currentState:
+                "PULLED_OUT"
 
         };
 
 
-    const updates = {};
+    await set(
+        newRef,
+        pulledCoach
+    );
 
 
-    updates[
-        `${PULLED_OUT_PATH}/${pulledOutRef.key}`
-    ] =
-        pulledOutCoach;
-
-
-    updates[
-        `${BOARD_PATH}/${line}/${position}`
-    ] =
-        null;
-
-
-    await update(
-        ref(database),
-        updates
+    await remove(
+        boardRef
     );
 
 
     await writeHistory(
-        "PULL_OUT",
-        pulledOutCoach
+        "PULL OUT",
+        {
+
+            ...coach,
+
+            line:
+                line,
+
+            position:
+                position
+
+        }
     );
 
 
     return {
 
-        key:
-            pulledOutRef.key,
+        id:
+            newRef.key,
 
         coach:
-            pulledOutCoach
+            pulledCoach
 
     };
 
 }
 
 
-/* =====================================================
+/* =========================================================
    GET PULLED OUT COACHES
-===================================================== */
+========================================================= */
 
 export async function getPulledOutCoaches() {
 
@@ -1099,7 +1330,9 @@ export async function getPulledOutCoaches() {
         );
 
 
-    if (!snapshot.exists()) {
+    if (
+        !snapshot.exists()
+    ) {
 
         return [];
 
@@ -1114,19 +1347,16 @@ export async function getPulledOutCoaches() {
         data
     )
     .map(
-        ([key, coach]) => ({
+        ([id, coach]) => ({
 
-            key,
+            id,
 
             ...coach
 
         })
     )
     .sort(
-        (
-            a,
-            b
-        ) =>
+        (a, b) =>
             (
                 b.pulledOutAt ||
                 0
@@ -1140,55 +1370,20 @@ export async function getPulledOutCoaches() {
 }
 
 
-/* =====================================================
-   RETURN PULLED OUT COACH
-   -----------------------------------------------------
-   Can return:
-   1. Same original cell
-   2. Any other cell
-===================================================== */
+/* =========================================================
+   REALTIME PULLED OUT LISTENER
+========================================================= */
 
-export async function firebaseReturnCoachToBoard(
-    pulledOutKey,
-    toLine,
-    toPosition
+export function listenPulledOutCoaches(
+    callback
 ) {
 
-    pulledOutKey =
-        clean(
-            pulledOutKey
-        );
-
-    toLine =
-        clean(
-            toLine
-        );
-
-    toPosition =
-        clean(
-            toPosition
-        );
-
-
     if (
-        !pulledOutKey
+        typeof callback !==
+        "function"
     ) {
 
-        throw new Error(
-            "Pulled-out coach key missing."
-        );
-
-    }
-
-
-    if (
-        !toLine ||
-        !toPosition
-    ) {
-
-        throw new Error(
-            "Return destination is required."
-        );
+        return () => {};
 
     }
 
@@ -1196,7 +1391,150 @@ export async function firebaseReturnCoachToBoard(
     const pulledRef =
         ref(
             database,
-            `${PULLED_OUT_PATH}/${pulledOutKey}`
+            PULLED_OUT_PATH
+        );
+
+
+    return onValue(
+        pulledRef,
+        snapshot => {
+
+            if (
+                !snapshot.exists()
+            ) {
+
+                callback([]);
+
+                return;
+
+            }
+
+
+            const data =
+                snapshot.val();
+
+
+            const result =
+                Object.entries(
+                    data
+                )
+                .map(
+                    ([id, coach]) => ({
+
+                        id,
+
+                        ...coach
+
+                    })
+                )
+                .sort(
+                    (a, b) =>
+                        (
+                            b.pulledOutAt ||
+                            0
+                        ) -
+                        (
+                            a.pulledOutAt ||
+                            0
+                        )
+                );
+
+
+            callback(
+                result
+            );
+
+        },
+        error => {
+
+            console.error(
+                "PULLED OUT LISTENER ERROR:",
+                error
+            );
+
+
+            callback([]);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RETURN PULLED OUT COACH TO BOARD
+   ---------------------------------------------------------
+   IMPORTANT:
+
+   Coach can return to:
+
+   SAME CELL
+   OR
+   ANY OTHER CELL
+
+   Function accepts:
+
+   id
+   targetLine
+   targetPosition
+
+   Example:
+
+   firebaseReturnCoachToBoard(
+       id,
+       "N3",
+       "H1"
+   );
+
+========================================================= */
+
+export async function firebaseReturnCoachToBoard(
+    id,
+    targetLine,
+    targetPosition
+) {
+
+    id =
+        clean(id);
+
+    targetLine =
+        clean(targetLine);
+
+    targetPosition =
+        clean(targetPosition);
+
+
+    if (
+        !id
+    ) {
+
+        throw new Error(
+            "Pulled-out coach ID is required."
+        );
+
+    }
+
+
+    if (
+        !targetLine ||
+        !targetPosition
+    ) {
+
+        throw new Error(
+            "Return Line and Position are required."
+        );
+
+    }
+
+
+    /* -----------------------------------------
+       GET PULLED OUT COACH
+    ----------------------------------------- */
+
+    const pulledRef =
+        ref(
+            database,
+            `${PULLED_OUT_PATH}/${id}`
         );
 
 
@@ -1221,10 +1559,14 @@ export async function firebaseReturnCoachToBoard(
         pulledSnapshot.val();
 
 
+    /* -----------------------------------------
+       CHECK TARGET CELL
+    ----------------------------------------- */
+
     const targetRef =
         ref(
             database,
-            `${BOARD_PATH}/${toLine}/${toPosition}`
+            `${BOARD_PATH}/${targetLine}/${targetPosition}`
         );
 
 
@@ -1234,21 +1576,20 @@ export async function firebaseReturnCoachToBoard(
         );
 
 
-    /* -----------------------------------------
-       TARGET OCCUPIED
-       DO NOT OVERWRITE
-    ----------------------------------------- */
-
     if (
         targetSnapshot.exists()
     ) {
 
         throw new Error(
-            "Destination cell already contains a coach."
+            "Target cell is already occupied."
         );
 
     }
 
+
+    /* -----------------------------------------
+       CREATE RETURN COACH
+    ----------------------------------------- */
 
     const returnedCoach =
         {
@@ -1256,63 +1597,62 @@ export async function firebaseReturnCoachToBoard(
             ...coach,
 
             line:
-                toLine,
+                targetLine,
 
             position:
-                toPosition,
+                targetPosition,
+
+            shop:
+                coach.shop ||
+                getShopFromLine(
+                    targetLine
+                ),
 
             returnedAt:
-                now(),
+                Date.now(),
 
             returnedBy:
-                currentUser(),
+                getCurrentUser(),
 
-            pulledOut:
-                false
+            currentState:
+                "ON_BOARD"
 
         };
 
 
-    delete returnedCoach
-        .originalLine;
+    /* Remove pull-out specific fields */
 
-    delete returnedCoach
-        .originalPosition;
+    delete returnedCoach.originalLine;
 
-
-    const updates = {};
+    delete returnedCoach.originalPosition;
 
 
-    updates[
-        `${BOARD_PATH}/${toLine}/${toPosition}`
-    ] =
-        returnedCoach;
+    /* -----------------------------------------
+       SAVE TO BOARD
+    ----------------------------------------- */
 
-
-    updates[
-        `${PULLED_OUT_PATH}/${pulledOutKey}`
-    ] =
-        null;
-
-
-    await update(
-        ref(database),
-        updates
+    await set(
+        targetRef,
+        returnedCoach
     );
 
 
+    /* -----------------------------------------
+       REMOVE FROM PULLED OUT
+    ----------------------------------------- */
+
+    await remove(
+        pulledRef
+    );
+
+
+    /* -----------------------------------------
+       HISTORY
+    ----------------------------------------- */
+
     await writeHistory(
-        "RETURN",
-        returnedCoach,
-        {
-
-            pulledOutKey,
-
-            toLine,
-
-            toPosition
-
-        }
+        "RETURN TO BOARD",
+        returnedCoach
     );
 
 
@@ -1321,34 +1661,34 @@ export async function firebaseReturnCoachToBoard(
 }
 
 
-/* =====================================================
-   RETURN BY COACH NUMBER
-===================================================== */
+/* =========================================================
+   RETURN BY ORIGINAL CELL
+   ---------------------------------------------------------
+   Convenience function.
 
-export async function returnCoachByNumber(
-    coachNo,
-    toLine,
-    toPosition
+   If UI wants automatic original location return.
+========================================================= */
+
+export async function returnPulledOutToOriginal(
+    id
 ) {
 
-    coachNo =
-        clean(coachNo);
-
-
-    const coaches =
-        await getPulledOutCoaches();
-
-
-    const coach =
-        coaches.find(
-            item =>
-                clean(
-                    item.coachNo
-                ) === coachNo
+    const pulledRef =
+        ref(
+            database,
+            `${PULLED_OUT_PATH}/${id}`
         );
 
 
-    if (!coach) {
+    const snapshot =
+        await get(
+            pulledRef
+        );
+
+
+    if (
+        !snapshot.exists()
+    ) {
 
         throw new Error(
             "Pulled-out coach not found."
@@ -1357,194 +1697,46 @@ export async function returnCoachByNumber(
     }
 
 
-    return await firebaseReturnCoachToBoard(
-        coach.key,
-        toLine,
-        toPosition
-    );
-
-}
+    const coach =
+        snapshot.val();
 
 
-/* =====================================================
-   LISTEN PULLED OUT COACHES
-===================================================== */
-
-export function listenPulledOutCoaches(
-    callback
-) {
-
-    const pulledRef =
-        ref(
-            database,
-            PULLED_OUT_PATH
+    const line =
+        clean(
+            coach.originalLine
         );
 
 
-    return onValue(
-        pulledRef,
-        snapshot => {
-
-            const data =
-                snapshot.exists()
-                    ? snapshot.val()
-                    : {};
-
-
-            const list =
-                Object.entries(
-                    data
-                )
-                .map(
-                    ([key, coach]) => ({
-
-                        key,
-
-                        ...coach
-
-                    })
-                )
-                .sort(
-                    (
-                        a,
-                        b
-                    ) =>
-                        (
-                            b.pulledOutAt ||
-                            0
-                        ) -
-                        (
-                            a.pulledOutAt ||
-                            0
-                        )
-                );
-
-
-            callback(
-                list
-            );
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   GET BOARD
-===================================================== */
-
-export async function getBoard() {
-
-    const boardRef =
-        ref(
-            database,
-            BOARD_PATH
+    const position =
+        clean(
+            coach.originalPosition
         );
 
 
-    const snapshot =
-        await get(
-            boardRef
+    if (
+        !line ||
+        !position
+    ) {
+
+        throw new Error(
+            "Original board position not available."
         );
-
-
-    if (!snapshot.exists()) {
-
-        return {};
 
     }
 
 
-    return snapshot.val();
-
-}
-
-
-/* =====================================================
-   GET ALL COACHES
-===================================================== */
-
-export async function getAllCoaches() {
-
-    const board =
-        await getBoard();
-
-
-    const result = [];
-
-
-    Object.entries(
-        board || {}
-    )
-    .forEach(
-        (
-            [
-                line,
-                positions
-            ]
-        ) => {
-
-            if (
-                !positions ||
-                typeof positions !==
-                    "object"
-            ) {
-
-                return;
-
-            }
-
-
-            Object.entries(
-                positions
-            )
-            .forEach(
-                (
-                    [
-                        position,
-                        coach
-                    ]
-                ) => {
-
-                    if (!coach) {
-                        return;
-                    }
-
-
-                    result.push({
-
-                        ...coach,
-
-                        line:
-                            coach.line ||
-                            line,
-
-                        position:
-                            coach.position ||
-                            position,
-
-                        shop:
-                            coach.shop ||
-                            ""
-
-                    });
-
-                }
-            );
-
-        }
+    return firebaseReturnCoachToBoard(
+        id,
+        line,
+        position
     );
 
-
-    return result;
-
 }
 
 
-/* =====================================================
+/* =========================================================
    SEARCH COACH
-===================================================== */
+========================================================= */
 
 export async function searchCoach(
     keyword
@@ -1561,115 +1753,238 @@ export async function searchCoach(
     }
 
 
-    const coaches =
-        await getAllCoaches();
+    const board =
+        await getBoard();
 
 
-    return coaches.filter(
-        coach => {
-
-            const values = [
-
-                coach.coachNo,
-
-                coach.coachType,
-
-                coach.status,
-
-                coach.shop,
-
-                coach.line,
-
-                coach.position
-
-            ];
+    const results = [];
 
 
-            return values.some(
-                value =>
-                    upper(value)
-                        .includes(keyword)
+    Object.entries(
+        board || {}
+    )
+    .forEach(
+        ([line, positions]) => {
+
+            if (
+                !positions ||
+                typeof positions !==
+                "object"
+            ) {
+
+                return;
+
+            }
+
+
+            Object.entries(
+                positions
+            )
+            .forEach(
+                ([position, coach]) => {
+
+                    if (!coach) {
+                        return;
+                    }
+
+
+                    const text =
+                        [
+
+                            coach.coachNo,
+
+                            coach.coachType,
+
+                            coach.status,
+
+                            coach.shop,
+
+                            line,
+
+                            position
+
+                        ]
+                        .map(
+                            value =>
+                                upper(value)
+                        )
+                        .join(" ");
+
+
+                    if (
+                        text.includes(
+                            keyword
+                        )
+                    ) {
+
+                        results.push(
+
+                            {
+
+                                ...coach,
+
+                                line:
+                                    coach.line ||
+                                    line,
+
+                                position:
+                                    coach.position ||
+                                    position,
+
+                                shop:
+                                    coach.shop ||
+                                    getShopFromLine(
+                                        line
+                                    )
+
+                            }
+
+                        );
+
+                    }
+
+                }
             );
 
         }
     );
 
+
+    return results;
+
 }
 
 
-/* =====================================================
-   REALTIME BOARD LISTENER
-===================================================== */
+/* =========================================================
+   GET ALL COACHES
+========================================================= */
 
-export function listenBoard(
-    callback
-) {
+export async function getAllCoaches() {
 
-    const boardRef =
-        ref(
-            database,
-            BOARD_PATH
-        );
+    const board =
+        await getBoard();
 
 
-    return onValue(
-        boardRef,
-        snapshot => {
+    const result = [];
 
-            callback(
-                snapshot.exists()
-                    ? snapshot.val()
-                    : {}
+
+    Object.entries(
+        board || {}
+    )
+    .forEach(
+        ([line, positions]) => {
+
+            if (
+                !positions ||
+                typeof positions !==
+                "object"
+            ) {
+
+                return;
+
+            }
+
+
+            Object.entries(
+                positions
+            )
+            .forEach(
+                ([position, coach]) => {
+
+                    if (!coach) {
+                        return;
+                    }
+
+
+                    result.push(
+
+                        {
+
+                            ...coach,
+
+                            line:
+                                coach.line ||
+                                line,
+
+                            position:
+                                coach.position ||
+                                position,
+
+                            shop:
+                                coach.shop ||
+                                getShopFromLine(
+                                    line
+                                )
+
+                        }
+
+                    );
+
+                }
             );
-
-        },
-        error => {
-
-            console.error(
-                "Board listener error:",
-                error
-            );
-
-            callback({});
 
         }
     );
 
+
+    return result;
+
 }
 
 
-/* =====================================================
+/* =========================================================
    DATABASE CONNECTION STATUS
-===================================================== */
+========================================================= */
 
 export function listenDatabaseStatus(
     callback
 ) {
 
-    const connectedRef =
+    if (
+        typeof callback !==
+        "function"
+    ) {
+
+        return () => {};
+
+    }
+
+
+    const connectionRef =
         ref(
             database,
-            CONNECTED_PATH
+            CONNECTION_PATH
         );
 
 
     return onValue(
-        connectedRef,
+        connectionRef,
         snapshot => {
 
             callback(
                 snapshot.val() === true
             );
 
+        },
+        error => {
+
+            console.error(
+                "DATABASE STATUS ERROR:",
+                error
+            );
+
+
+            callback(false);
+
         }
     );
 
 }
 
 
-/* =====================================================
+/* =========================================================
    BACKUP BOARD
-===================================================== */
+========================================================= */
 
 export async function backupBoard() {
 
@@ -1686,20 +2001,22 @@ export async function backupBoard() {
         );
 
 
-    const backupData = {
+    const backupData =
+        {
 
-        backupId:
-            backupRef.key,
+            backupId:
+                backupRef.key,
 
-        board,
+            board:
+                board,
 
-        createdAt:
-            now(),
+            createdAt:
+                Date.now(),
 
-        createdBy:
-            currentUser()
+            createdBy:
+                getCurrentUser()
 
-    };
+        };
 
 
     await set(
@@ -1708,35 +2025,146 @@ export async function backupBoard() {
     );
 
 
-    await writeHistory(
-        "BACKUP",
-        {},
-        {
-
-            backupId:
-                backupRef.key
-
-        }
-    );
-
-
     return backupData;
 
 }
 
 
-/* =====================================================
+/* =========================================================
+   GET BACKUPS
+========================================================= */
+
+export async function getBackups() {
+
+    const backupRef =
+        ref(
+            database,
+            BACKUP_PATH
+        );
+
+
+    const snapshot =
+        await get(
+            backupRef
+        );
+
+
+    if (
+        !snapshot.exists()
+    ) {
+
+        return [];
+
+    }
+
+
+    const data =
+        snapshot.val();
+
+
+    return Object.entries(
+        data
+    )
+    .map(
+        ([id, backup]) => ({
+
+            id,
+
+            ...backup
+
+        })
+    )
+    .sort(
+        (a, b) =>
+            (
+                b.createdAt ||
+                0
+            ) -
+            (
+                a.createdAt ||
+                0
+            )
+    );
+
+}
+
+
+/* =========================================================
    RESTORE BOARD
-===================================================== */
+========================================================= */
 
 export async function restoreBoard(
+    backup
+) {
+
+    if (!backup) {
+
+        throw new Error(
+            "Backup data required."
+        );
+
+    }
+
+
+    const board =
+        backup.board ||
+        backup;
+
+
+    const boardRef =
+        ref(
+            database,
+            BOARD_PATH
+        );
+
+
+    await set(
+        boardRef,
+        board
+    );
+
+
+    await writeHistory(
+        "RESTORE BOARD",
+        {
+
+            coachNo:
+                "FULL BOARD",
+
+            coachType:
+                "",
+
+            status:
+                "",
+
+            shop:
+                "",
+
+            line:
+                "",
+
+            position:
+                ""
+
+        }
+    );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   RESTORE BACKUP BY ID
+========================================================= */
+
+export async function restoreBackupById(
     backupId
 ) {
 
     backupId =
-        clean(
-            backupId
-        );
+        clean(backupId);
 
 
     if (!backupId) {
@@ -1761,7 +2189,9 @@ export async function restoreBoard(
         );
 
 
-    if (!snapshot.exists()) {
+    if (
+        !snapshot.exists()
+    ) {
 
         throw new Error(
             "Backup not found."
@@ -1774,34 +2204,16 @@ export async function restoreBoard(
         snapshot.val();
 
 
-    await set(
-        ref(
-            database,
-            BOARD_PATH
-        ),
-        backup.board || {}
+    return restoreBoard(
+        backup
     );
-
-
-    await writeHistory(
-        "RESTORE",
-        {},
-        {
-
-            backupId
-
-        }
-    );
-
-
-    return true;
 
 }
 
 
-/* =====================================================
+/* =========================================================
    CLEAR BOARD
-===================================================== */
+========================================================= */
 
 export async function clearBoard() {
 
@@ -1809,39 +2221,42 @@ export async function clearBoard() {
         await getBoard();
 
 
-    await remove(
+    await backupBoard();
+
+
+    const boardRef =
         ref(
             database,
             BOARD_PATH
-        )
+        );
+
+
+    await remove(
+        boardRef
     );
 
 
     await writeHistory(
-        "CLEAR_BOARD",
-        {},
+        "CLEAR BOARD",
         {
 
-            coachCount:
-                Object.values(
-                    board || {}
-                ).reduce(
-                    (
-                        total,
-                        positions
-                    ) =>
-                        total +
-                        (
-                            positions &&
-                            typeof positions ===
-                                "object"
-                                ? Object.keys(
-                                    positions
-                                ).length
-                                : 0
-                        ),
-                    0
-                )
+            coachNo:
+                "FULL BOARD",
+
+            coachType:
+                "",
+
+            status:
+                "",
+
+            shop:
+                "",
+
+            line:
+                "",
+
+            position:
+                ""
 
         }
     );
@@ -1852,21 +2267,59 @@ export async function clearBoard() {
 }
 
 
-/* =====================================================
-   DEFAULT EXPORT
-===================================================== */
+/* =========================================================
+   SAVE COACH FROM MODAL
+   ---------------------------------------------------------
+   Optional compatibility helper
+========================================================= */
+
+export async function firebaseSaveCoach(
+    coach
+) {
+
+    return saveCoach(
+        coach
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE COACH FROM MODAL
+========================================================= */
+
+export async function firebaseUpdateCoach(
+    coach
+) {
+
+    return updateCoach(
+        coach
+    );
+
+}
+
+
+/* =========================================================
+   EXPORT DEFAULT OBJECT
+   ---------------------------------------------------------
+   Optional compatibility
+========================================================= */
 
 export default {
 
-    saveCoach,
+    getBoard,
 
-    firebaseSaveCoach,
+    listenBoard,
+
+    getCoach,
+
+    saveCoach,
 
     updateCoach,
 
-    firebaseUpdateCoach,
+    firebaseSaveCoach,
 
-    getCoach,
+    firebaseUpdateCoach,
 
     updateCoachPosition,
 
@@ -1878,35 +2331,49 @@ export default {
 
     firebaseReturnCoachToBoard,
 
-    returnCoachByNumber,
+    returnPulledOutToOriginal,
 
     getPulledOutCoaches,
 
     listenPulledOutCoaches,
 
-    getBoard,
-
-    getAllCoaches,
-
     searchCoach,
 
-    listenBoard,
+    getAllCoaches,
 
     listenDatabaseStatus,
 
     backupBoard,
 
+    getBackups,
+
     restoreBoard,
 
-    clearBoard
+    restoreBackupById,
+
+    clearBoard,
+
+    writeHistory
 
 };
 
 
-/* =====================================================
+/* =========================================================
    READY
-===================================================== */
+========================================================= */
 
 console.log(
-    "firebase-board.js VERSION 8.1 FINAL LOADED"
+    "=========================================="
+);
+
+console.log(
+    "firebase-board.js VERSION 8.1 FINAL"
+);
+
+console.log(
+    "Firebase Board Control Loaded"
+);
+
+console.log(
+    "=========================================="
 );
