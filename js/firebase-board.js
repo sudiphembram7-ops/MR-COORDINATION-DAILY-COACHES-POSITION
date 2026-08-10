@@ -1,8 +1,10 @@
 /* =====================================================
    MR CO-ORDINATION BOARD
    FIREBASE BOARD CONTROL
-   VERSION 8.0
-   COMPLETE PRODUCTION VERSION
+   VERSION 8.1 FINAL
+   -----------------------------------------------------
+   COPY-PASTE READY
+   -----------------------------------------------------
 
    FEATURES
    -----------------------------------------------------
@@ -21,16 +23,27 @@
    BACKUP
    RESTORE
    CLEAR BOARD
-   REALTIME LISTENER
+   REALTIME BOARD LISTENER
+   PULLED OUT LISTENER
    DATABASE CONNECTION STATUS
 
-   FIREBASE DATABASE STRUCTURE
+   IMPORTANT
+   -----------------------------------------------------
+   Coach Number Only is NOT modified here.
+   Leading zero is preserved:
+   03125
+   04108
+   06112
+   07135
+
+   DATABASE STRUCTURE
 
    coachBoard
    history
    auditLog
    backups
    pulledOutCoaches
+
 ===================================================== */
 
 
@@ -55,7 +68,7 @@ import {
 
 
 /* =====================================================
-   DATABASE PATHS
+   PATHS
 ===================================================== */
 
 const BOARD_PATH =
@@ -79,11 +92,11 @@ const PULLED_OUT_PATH =
 ===================================================== */
 
 export const FIREBASE_BOARD_VERSION =
-    "8.0";
+    "8.1";
 
 
 /* =====================================================
-   UTILITY
+   BASIC HELPERS
 ===================================================== */
 
 function clean(value) {
@@ -97,8 +110,9 @@ function clean(value) {
 
 function upper(value) {
 
-    return clean(value)
-        .toUpperCase();
+    return clean(
+        value
+    ).toUpperCase();
 
 }
 
@@ -113,11 +127,15 @@ function nowISO() {
 
 function clone(data) {
 
-    if (!data) {
+    if (
+        data === null ||
+        data === undefined
+    ) {
 
-        return null;
+        return data;
 
     }
+
 
     try {
 
@@ -129,7 +147,9 @@ function clone(data) {
     catch {
 
         return JSON.parse(
-            JSON.stringify(data)
+            JSON.stringify(
+                data
+            )
         );
 
     }
@@ -139,21 +159,27 @@ function clone(data) {
 
 /* =====================================================
    SHOP DETECTION
+   -----------------------------------------------------
    LINE IS MASTER
 ===================================================== */
 
-export function getShopFromLine(line) {
+export function getShopFromLine(
+    line
+) {
 
     line =
         upper(line);
 
 
-    /* ---------------------------------------------
-       SCR MUST COME BEFORE S
-    --------------------------------------------- */
+    /*
+     * IMPORTANT:
+     * SCR MUST COME BEFORE S
+     */
 
     if (
-        line.startsWith("SCR")
+        line.startsWith(
+            "SCR"
+        )
     ) {
 
         return "MR SCR SHOP";
@@ -162,7 +188,9 @@ export function getShopFromLine(line) {
 
 
     if (
-        line.startsWith("N")
+        line.startsWith(
+            "N"
+        )
     ) {
 
         return "N SHOP";
@@ -171,7 +199,9 @@ export function getShopFromLine(line) {
 
 
     if (
-        line.startsWith("M")
+        line.startsWith(
+            "M"
+        )
     ) {
 
         return "M SHOP";
@@ -180,7 +210,9 @@ export function getShopFromLine(line) {
 
 
     if (
-        line.startsWith("F")
+        line.startsWith(
+            "F"
+        )
     ) {
 
         return "CR SHOP";
@@ -189,7 +221,9 @@ export function getShopFromLine(line) {
 
 
     if (
-        line.startsWith("J")
+        line.startsWith(
+            "J"
+        )
     ) {
 
         return "J SHOP";
@@ -198,7 +232,9 @@ export function getShopFromLine(line) {
 
 
     if (
-        line.startsWith("L")
+        line.startsWith(
+            "L"
+        )
     ) {
 
         return "LIFTING BAY";
@@ -249,6 +285,11 @@ function normalizeCoach(
 
         position,
 
+        /*
+         * String conversion preserves
+         * leading zeroes.
+         */
+
         coachNo:
             clean(
                 coach?.coachNo ??
@@ -293,7 +334,9 @@ function validateCoach(
 
 
     if (
-        !clean(coach.line)
+        !clean(
+            coach.line
+        )
     ) {
 
         throw new Error(
@@ -304,7 +347,9 @@ function validateCoach(
 
 
     if (
-        !clean(coach.position)
+        !clean(
+            coach.position
+        )
     ) {
 
         throw new Error(
@@ -315,7 +360,9 @@ function validateCoach(
 
 
     if (
-        !clean(coach.coachNo)
+        !clean(
+            coach.coachNo
+        )
     ) {
 
         throw new Error(
@@ -326,7 +373,9 @@ function validateCoach(
 
 
     if (
-        !clean(coach.coachType)
+        !clean(
+            coach.coachType
+        )
     ) {
 
         throw new Error(
@@ -337,7 +386,9 @@ function validateCoach(
 
 
     if (
-        !clean(coach.status)
+        !clean(
+            coach.status
+        )
     ) {
 
         throw new Error(
@@ -422,12 +473,16 @@ export async function getCoach(
     }
 
 
+    const coachRef =
+        ref(
+            database,
+            `${BOARD_PATH}/${line}/${position}`
+        );
+
+
     const snapshot =
         await get(
-            ref(
-                database,
-                `${BOARD_PATH}/${line}/${position}`
-            )
+            coachRef
         );
 
 
@@ -482,9 +537,9 @@ export async function firebaseSaveCoach(
     );
 
 
-    /* ---------------------------------------------
-       DUPLICATE CHECK
-    --------------------------------------------- */
+    /*
+     * DUPLICATE CHECK
+     */
 
     const duplicate =
         await isDuplicateCoach(
@@ -508,9 +563,9 @@ export async function firebaseSaveCoach(
         );
 
 
-    /* ---------------------------------------------
-       POSITION CHECK
-    --------------------------------------------- */
+    /*
+     * POSITION CHECK
+     */
 
     const existing =
         await get(
@@ -529,9 +584,9 @@ export async function firebaseSaveCoach(
     }
 
 
-    /* ---------------------------------------------
-       SAVE
-    --------------------------------------------- */
+    /*
+     * SAVE
+     */
 
     await set(
         coachRef,
@@ -539,9 +594,9 @@ export async function firebaseSaveCoach(
     );
 
 
-    /* ---------------------------------------------
-       HISTORY
-    --------------------------------------------- */
+    /*
+     * HISTORY
+     */
 
     await writeHistory(
         "SAVE",
@@ -549,9 +604,9 @@ export async function firebaseSaveCoach(
     );
 
 
-    /* ---------------------------------------------
-       AUDIT
-    --------------------------------------------- */
+    /*
+     * AUDIT
+     */
 
     await writeAudit(
         "SAVE",
@@ -635,6 +690,11 @@ export async function firebaseUpdateCoach(
             oldCoach?.coachNo
         );
 
+
+    /*
+     * Duplicate check excluding
+     * current position.
+     */
 
     const duplicate =
         await isDuplicateCoach(
@@ -903,9 +963,9 @@ export async function firebasePullOutCoach(
     }
 
 
-    /* ---------------------------------------------
-       ATOMIC UPDATE
-    --------------------------------------------- */
+    /*
+     * ATOMIC UPDATE
+     */
 
     const updates = {};
 
@@ -973,13 +1033,19 @@ export async function firebaseReturnCoachToBoard(
 ) {
 
     pulledOutId =
-        clean(pulledOutId);
+        clean(
+            pulledOutId
+        );
 
     targetLine =
-        clean(targetLine);
+        clean(
+            targetLine
+        );
 
     targetPosition =
-        clean(targetPosition);
+        clean(
+            targetPosition
+        );
 
 
     if (
@@ -1005,9 +1071,9 @@ export async function firebaseReturnCoachToBoard(
     }
 
 
-    /* ---------------------------------------------
-       GET PULLED OUT COACH
-    --------------------------------------------- */
+    /*
+     * GET PULLED OUT COACH
+     */
 
     const pulledOutRef =
         ref(
@@ -1054,9 +1120,9 @@ export async function firebaseReturnCoachToBoard(
     }
 
 
-    /* ---------------------------------------------
-       TARGET CELL CHECK
-    --------------------------------------------- */
+    /*
+     * TARGET CELL CHECK
+     */
 
     const targetRef =
         ref(
@@ -1082,9 +1148,9 @@ export async function firebaseReturnCoachToBoard(
     }
 
 
-    /* ---------------------------------------------
-       DUPLICATE CHECK
-    --------------------------------------------- */
+    /*
+     * DUPLICATE CHECK
+     */
 
     const duplicate =
         await isDuplicateCoach(
@@ -1101,13 +1167,13 @@ export async function firebaseReturnCoachToBoard(
     }
 
 
-    /* ---------------------------------------------
-       RESTORE
-    --------------------------------------------- */
-
     const returnedAt =
         nowISO();
 
+
+    /*
+     * RESTORED COACH
+     */
 
     const restoredCoach = {
 
@@ -1123,17 +1189,14 @@ export async function firebaseReturnCoachToBoard(
             targetPosition,
 
         coachNo:
-
             coachNo,
 
         coachType:
-
             clean(
                 pulledOut?.coachType
             ),
 
         status:
-
             clean(
                 pulledOut?.status
             ),
@@ -1164,9 +1227,9 @@ export async function firebaseReturnCoachToBoard(
     );
 
 
-    /* ---------------------------------------------
-       ATOMIC RETURN
-    --------------------------------------------- */
+    /*
+     * ATOMIC RETURN
+     */
 
     const updates = {};
 
@@ -1204,8 +1267,10 @@ export async function firebaseReturnCoachToBoard(
 
 
     console.log(
-        "RETURN TO BOARD SUCCESS:",
-        restoredCoach.coachNo
+        "RETURN SUCCESS:",
+        restoredCoach.coachNo,
+        "->",
+        `${targetLine}/${targetPosition}`
     );
 
 
@@ -1312,7 +1377,7 @@ export async function getPulledOutCoaches() {
 
 
 /* =====================================================
-   GET PULLED OUT COACH BY ID
+   GET ONE PULLED OUT COACH
 ===================================================== */
 
 export async function getPulledOutCoach(
@@ -1320,7 +1385,9 @@ export async function getPulledOutCoach(
 ) {
 
     pulledOutId =
-        clean(pulledOutId);
+        clean(
+            pulledOutId
+        );
 
 
     if (
@@ -1373,16 +1440,24 @@ export async function updateCoachPosition(
 ) {
 
     fromLine =
-        clean(fromLine);
+        clean(
+            fromLine
+        );
 
     fromPos =
-        clean(fromPos);
+        clean(
+            fromPos
+        );
 
     toLine =
-        clean(toLine);
+        clean(
+            toLine
+        );
 
     toPos =
-        clean(toPos);
+        clean(
+            toPos
+        );
 
 
     if (
@@ -1437,9 +1512,13 @@ export async function updateCoachPosition(
     ] =
         await Promise.all([
 
-            get(fromRef),
+            get(
+                fromRef
+            ),
 
-            get(toRef)
+            get(
+                toRef
+            )
 
         ]);
 
@@ -1468,6 +1547,10 @@ export async function updateCoachPosition(
     const timestamp =
         nowISO();
 
+
+    /*
+     * MOVE SOURCE TO TARGET
+     */
 
     const movedCoach = {
 
@@ -1499,7 +1582,13 @@ export async function updateCoachPosition(
         movedCoach;
 
 
-    if (toCoach) {
+    /*
+     * SWAP
+     */
+
+    if (
+        toCoach
+    ) {
 
         const swappedCoach = {
 
@@ -1527,9 +1616,13 @@ export async function updateCoachPosition(
         ] =
             swappedCoach;
 
-
     }
     else {
+
+        /*
+         * Normal MOVE:
+         * Empty source after move.
+         */
 
         updates[
             `${BOARD_PATH}/${fromLine}/${fromPos}`
@@ -1539,16 +1632,26 @@ export async function updateCoachPosition(
     }
 
 
+    /*
+     * ATOMIC DATABASE UPDATE
+     */
+
     await update(
         ref(database),
         updates
     );
 
 
+    /*
+     * HISTORY
+     */
+
     await writeMoveHistory({
 
         action:
-            "MOVE",
+            toCoach
+                ? "SWAP"
+                : "MOVE",
 
         coach:
             {
@@ -1584,15 +1687,23 @@ export async function updateCoachPosition(
     });
 
 
+    /*
+     * AUDIT
+     */
+
     await writeAudit(
-        "MOVE",
+        toCoach
+            ? "SWAP"
+            : "MOVE",
         movedCoach,
         fromCoach
     );
 
 
     console.log(
-        "MOVE SUCCESS:",
+        toCoach
+            ? "SWAP SUCCESS"
+            : "MOVE SUCCESS",
         {
             from:
                 `${fromLine}/${fromPos}`,
@@ -1644,7 +1755,7 @@ export async function moveCoach(
 
 
 /* =====================================================
-   UPDATE STATUS ONLY
+   UPDATE STATUS
 ===================================================== */
 
 export async function updateCoachStatus(
@@ -1654,13 +1765,19 @@ export async function updateCoachStatus(
 ) {
 
     line =
-        clean(line);
+        clean(
+            line
+        );
 
     position =
-        clean(position);
+        clean(
+            position
+        );
 
     status =
-        clean(status);
+        clean(
+            status
+        );
 
 
     if (
@@ -1769,7 +1886,9 @@ export async function searchCoach(
 ) {
 
     keyword =
-        clean(keyword)
+        clean(
+            keyword
+        )
             .toLowerCase();
 
 
@@ -1829,11 +1948,14 @@ export async function searchCoach(
 
             const searchable = [
 
-                coach.coachNo || "",
+                coach.coachNo ||
+                    "",
 
-                coach.coachType || "",
+                coach.coachType ||
+                    "",
 
-                coach.status || "",
+                coach.status ||
+                    "",
 
                 shop,
 
@@ -1957,13 +2079,16 @@ export async function isDuplicateCoach(
 ) {
 
     coachNo =
-        upper(coachNo);
+        upper(
+            coachNo
+        );
 
 
     excludeLine =
         clean(
             excludeLine
         );
+
 
     excludePosition =
         clean(
@@ -2016,6 +2141,10 @@ export async function isDuplicateCoach(
                 excludePosition;
 
 
+            /*
+             * Same record = NOT duplicate.
+             */
+
             return !samePosition;
 
         }
@@ -2037,7 +2166,9 @@ async function writeHistory(
     const historyData = {
 
         action:
-            clean(action),
+            clean(
+                action
+            ),
 
         shop:
             coach?.line
@@ -2047,19 +2178,24 @@ async function writeHistory(
                 : "",
 
         line:
-            coach?.line || "",
+            coach?.line ||
+            "",
 
         position:
-            coach?.position || "",
+            coach?.position ||
+            "",
 
         coachNo:
-            coach?.coachNo || "",
+            coach?.coachNo ||
+            "",
 
         coachType:
-            coach?.coachType || "",
+            coach?.coachType ||
+            "",
 
         status:
-            coach?.status || "",
+            coach?.status ||
+            "",
 
         time:
             nowISO()
@@ -2124,7 +2260,9 @@ async function writeMoveHistory(
     const historyData = {
 
         action:
-            "MOVE",
+            data.swappedCoach
+                ? "SWAP"
+                : "MOVE",
 
         shop:
             data.fromLine
@@ -2199,7 +2337,9 @@ async function writeAudit(
     const auditData = {
 
         action:
-            clean(action),
+            clean(
+                action
+            ),
 
         coachNo:
             coach?.coachNo ||
@@ -2265,7 +2405,7 @@ async function writeAudit(
 
 
 /* =====================================================
-   DATABASE STATUS LISTENER
+   DATABASE CONNECTION STATUS
 ===================================================== */
 
 export function listenDatabaseStatus(
@@ -2304,6 +2444,17 @@ export function listenDatabaseStatus(
                 "Database Status Error:",
                 error
             );
+
+            if (
+                typeof callback ===
+                "function"
+            ) {
+
+                callback(
+                    false
+                );
+
+            }
 
         }
 
@@ -2478,15 +2629,14 @@ export async function backupBoard() {
     const backup = {
 
         board:
-
-            clone(board),
+            clone(
+                board
+            ),
 
         createdAt:
-
             nowISO(),
 
         version:
-
             FIREBASE_BOARD_VERSION
 
     };
@@ -2514,6 +2664,147 @@ export async function backupBoard() {
 
         backupId:
             backupRef.key
+
+    };
+
+}
+
+
+/* =====================================================
+   GET BACKUPS
+===================================================== */
+
+export async function getBackups() {
+
+    const snapshot =
+        await get(
+            ref(
+                database,
+                BACKUP_PATH
+            )
+        );
+
+
+    if (
+        !snapshot.exists()
+    ) {
+
+        return [];
+
+    }
+
+
+    const data =
+        snapshot.val();
+
+
+    if (
+        !data ||
+        typeof data !==
+        "object"
+    ) {
+
+        return [];
+
+    }
+
+
+    const backups = [];
+
+
+    for (
+        const id in data
+    ) {
+
+        if (
+            !data[id]
+        ) {
+
+            continue;
+
+        }
+
+
+        backups.push({
+
+            ...data[id],
+
+            backupId:
+                id
+
+        });
+
+    }
+
+
+    backups.sort(
+        (a, b) => {
+
+            return String(
+                b.createdAt ||
+                ""
+            ).localeCompare(
+                String(
+                    a.createdAt ||
+                    ""
+                )
+            );
+
+        }
+    );
+
+
+    return backups;
+
+}
+
+
+/* =====================================================
+   GET SINGLE BACKUP
+===================================================== */
+
+export async function getBackup(
+    backupId
+) {
+
+    backupId =
+        clean(
+            backupId
+        );
+
+
+    if (
+        !backupId
+    ) {
+
+        return null;
+
+    }
+
+
+    const snapshot =
+        await get(
+            ref(
+                database,
+                `${BACKUP_PATH}/${backupId}`
+            )
+        );
+
+
+    if (
+        !snapshot.exists()
+    ) {
+
+        return null;
+
+    }
+
+
+    return {
+
+        ...snapshot.val(),
+
+        backupId
 
     };
 
@@ -2559,6 +2850,27 @@ export async function restoreBoard(
     }
 
 
+    /*
+     * Automatic safety backup before restore.
+     */
+
+    try {
+
+        await backupBoard();
+
+    }
+    catch (
+        backupError
+    ) {
+
+        console.warn(
+            "Pre-restore backup failed:",
+            backupError
+        );
+
+    }
+
+
     await set(
         ref(
             database,
@@ -2566,6 +2878,10 @@ export async function restoreBoard(
         ),
         board
     );
+
+
+    const timestamp =
+        nowISO();
 
 
     await push(
@@ -2579,7 +2895,7 @@ export async function restoreBoard(
                 "RESTORE_BOARD",
 
             time:
-                nowISO()
+                timestamp
 
         }
     );
@@ -2595,8 +2911,7 @@ export async function restoreBoard(
             action:
                 "RESTORE_BOARD",
 
-            timestamp:
-                nowISO()
+            timestamp
 
         }
     );
@@ -2629,12 +2944,37 @@ export async function exportBoard() {
 
 export async function clearBoard() {
 
+    /*
+     * Safety backup before clear.
+     */
+
+    try {
+
+        await backupBoard();
+
+    }
+    catch (
+        backupError
+    ) {
+
+        console.warn(
+            "Pre-clear backup failed:",
+            backupError
+        );
+
+    }
+
+
     await remove(
         ref(
             database,
             BOARD_PATH
         )
     );
+
+
+    const timestamp =
+        nowISO();
 
 
     await push(
@@ -2648,7 +2988,7 @@ export async function clearBoard() {
                 "CLEAR_BOARD",
 
             time:
-                nowISO()
+                timestamp
 
         }
     );
@@ -2664,8 +3004,7 @@ export async function clearBoard() {
             action:
                 "CLEAR_BOARD",
 
-            timestamp:
-                nowISO()
+            timestamp
 
         }
     );
@@ -2701,7 +3040,11 @@ export function getDatabaseStatus() {
                 false;
 
 
-            const unsubscribe =
+            let unsubscribe =
+                null;
+
+
+            unsubscribe =
                 onValue(
 
                     connectedRef,
@@ -2727,7 +3070,14 @@ export function getDatabaseStatus() {
                         );
 
 
-                        unsubscribe();
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
+
+                            unsubscribe();
+
+                        }
 
                     },
 
@@ -2750,7 +3100,15 @@ export function getDatabaseStatus() {
                             false
                         );
 
-                        unsubscribe();
+
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
+
+                            unsubscribe();
+
+                        }
 
                     }
 
@@ -2758,6 +3116,183 @@ export function getDatabaseStatus() {
 
         }
     );
+
+}
+
+
+/* =====================================================
+   GET BOARD STATISTICS
+===================================================== */
+
+export async function getBoardStatistics() {
+
+    const board =
+        await getBoard();
+
+
+    let total =
+        0;
+
+    let occupied =
+        0;
+
+
+    for (
+        const line in board
+    ) {
+
+        if (
+            !board[line] ||
+            typeof board[line] !==
+            "object"
+        ) {
+
+            continue;
+
+        }
+
+
+        for (
+            const position in board[line]
+        ) {
+
+            total++;
+
+
+            if (
+                board[line][position]
+            ) {
+
+                occupied++;
+
+            }
+
+        }
+
+    }
+
+
+    return {
+
+        total,
+
+        occupied,
+
+        free:
+            Math.max(
+                total - occupied,
+                0
+            )
+
+    };
+
+}
+
+
+/* =====================================================
+   DELETE PULLED OUT RECORD
+===================================================== */
+
+export async function deletePulledOutCoach(
+    pulledOutId
+) {
+
+    pulledOutId =
+        clean(
+            pulledOutId
+        );
+
+
+    if (
+        !pulledOutId
+    ) {
+
+        throw new Error(
+            "Pull Out ID is required"
+        );
+
+    }
+
+
+    const coach =
+        await getPulledOutCoach(
+            pulledOutId
+        );
+
+
+    if (
+        !coach
+    ) {
+
+        throw new Error(
+            "Pulled Out Coach not found"
+        );
+
+    }
+
+
+    await remove(
+        ref(
+            database,
+            `${PULLED_OUT_PATH}/${pulledOutId}`
+        )
+    );
+
+
+    const timestamp =
+        nowISO();
+
+
+    await push(
+        ref(
+            database,
+            HISTORY_PATH
+        ),
+        {
+
+            action:
+                "DELETE_PULLED_OUT",
+
+            coachNo:
+                coach.coachNo ||
+                "",
+
+            originalLine:
+                coach.originalLine ||
+                "",
+
+            originalPosition:
+                coach.originalPosition ||
+                "",
+
+            time:
+                timestamp
+
+        }
+    );
+
+
+    await push(
+        ref(
+            database,
+            AUDIT_PATH
+        ),
+        {
+
+            action:
+                "DELETE_PULLED_OUT",
+
+            coachNo:
+                coach.coachNo ||
+                "",
+
+            timestamp
+
+        }
+    );
+
+
+    return true;
 
 }
 
@@ -2779,7 +3314,7 @@ console.log(
 );
 
 console.log(
-    "PRODUCTION VERSION 8.0"
+    "VERSION 8.1 FINAL"
 );
 
 console.log(
@@ -2811,7 +3346,11 @@ console.log(
 );
 
 console.log(
-    "MOVE / SWAP : READY"
+    "MOVE : READY"
+);
+
+console.log(
+    "SWAP : READY"
 );
 
 console.log(
@@ -2831,7 +3370,7 @@ console.log(
 );
 
 console.log(
-    "AUDIT : READY"
+    "AUDIT LOG : READY"
 );
 
 console.log(
@@ -2847,7 +3386,11 @@ console.log(
 );
 
 console.log(
-    "PULL OUT LISTENER : READY"
+    "PULLED OUT LIST : READY"
+);
+
+console.log(
+    "PULLED OUT LISTENER : READY"
 );
 
 console.log(
@@ -2856,6 +3399,10 @@ console.log(
 
 console.log(
     "DATABASE STATUS : READY"
+);
+
+console.log(
+    "BOARD STATISTICS : READY"
 );
 
 console.log(
