@@ -1,8 +1,14 @@
-/* =====================================================
+/* =========================================================
    MR CO-ORDINATION BOARD
    VERSION 8.1 FINAL
-   MOBILE + DESKTOP
-===================================================== */
+   ALL TABLE CELLS EQUAL SIZE
+   DESKTOP + MOBILE
+========================================================= */
+
+
+/* =========================================================
+   GLOBAL
+========================================================= */
 
 * {
     box-sizing: border-box;
@@ -14,350 +20,576 @@ body {
     padding: 0;
     width: 100%;
     min-height: 100%;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f3f5f7;
-    color: #111;
-}
 
-body {
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #f3f5f7;
+
     overflow-x: hidden;
 }
 
-/* =====================================================
+
+/* =========================================================
    BOARD
-===================================================== */
+========================================================= */
 
 #board {
     width: 100%;
 }
 
-/* =====================================================
+
+/* =========================================================
    SHOP SECTION
-===================================================== */
+========================================================= */
 
 .shop-section {
     width: 100%;
+
     margin: 0 0 45px 0;
+
     overflow: hidden;
 }
 
-/* Shop title */
+
+/* =========================================================
+   SHOP TITLE
+========================================================= */
 
 .shop-title {
+
     width: 100%;
+
     min-height: 90px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
-    padding: 15px;
+    padding: 12px;
 
     font-size: 44px;
+
     font-weight: 500;
 
-    color: #fff;
+    color: #ffffff;
 
     text-align: center;
 
     white-space: nowrap;
 }
 
-/* =====================================================
+
+/* =========================================================
    SHOP COLOURS
-===================================================== */
+========================================================= */
 
 .shop-title.scr {
+
     background: #f6c644;
-    color: #111;
+
+    color: #111111;
 }
 
 .shop-title.cr {
+
     background: #55bddc;
+
+    color: #ffffff;
 }
 
 .shop-title.j {
+
     background: #3d8b5b;
+
+    color: #ffffff;
 }
 
 .shop-title.n {
+
     background: #4b8fc5;
+
+    color: #ffffff;
 }
 
 .shop-title.m {
+
     background: #8e5aa8;
+
+    color: #ffffff;
 }
 
 .shop-title.lifting {
-    background: #777;
+
+    background: #777777;
+
+    color: #ffffff;
 }
 
-/* =====================================================
-   TABLE WRAPPER
-===================================================== */
+
+/* =========================================================
+   TABLE SCROLL CONTAINER
+========================================================= */
 
 .board-table-wrapper {
+
     width: 100%;
+
     overflow-x: auto;
     overflow-y: hidden;
 
     -webkit-overflow-scrolling: touch;
 
-    background: #fff;
+    background: #ffffff;
 }
 
-/* =====================================================
+
+/* =========================================================
    TABLE
-===================================================== */
+========================================================= */
 
 .board-table {
+
     border-collapse: collapse;
+
     border-spacing: 0;
 
+    table-layout: fixed;
+
+    /*
+       IMPORTANT:
+       Every column gets EXACTLY same width.
+    */
+
     width: max-content;
+
     min-width: 100%;
 
-    table-layout: fixed;
 }
 
-/* =====================================================
-   HEADER
-===================================================== */
 
-.board-table th {
-    height: 72px;
+/* =========================================================
+   ALL TABLE CELLS
+   EXACT SAME WIDTH
+========================================================= */
 
-    min-width: 100px;
-    width: 100px;
-
-    padding: 8px 6px;
-
-    background: #202428;
-    color: #fff;
-
-    border: 2px solid #4a4f54;
-
-    font-size: 25px;
-    font-weight: 700;
-
-    text-align: center;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-}
-
-/* First POSITION column */
-
-.board-table th:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 20;
-
-    min-width: 120px;
-    width: 120px;
-}
-
-/* =====================================================
-   BODY CELL
-===================================================== */
-
+.board-table th,
 .board-table td {
-    min-width: 100px;
-    width: 100px;
 
-    height: 105px;
+    /*
+       ALL CELLS SAME WIDTH
+    */
 
-    padding: 6px;
+    width: 110px;
 
-    border: 2px solid #dce0e3;
+    min-width: 110px;
 
-    background: #fff;
+    max-width: 110px;
+
+
+    /*
+       ALL BODY CELLS SAME HEIGHT
+    */
+
+    padding: 5px;
 
     text-align: center;
 
     vertical-align: middle;
 
     overflow: hidden;
+
 }
 
-/* =====================================================
-   POSITION CELL
-===================================================== */
 
-.board-table td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 10;
+/* =========================================================
+   HEADER CELLS
+========================================================= */
 
-    min-width: 120px;
-    width: 120px;
+.board-table th {
 
-    background: #fff;
+    height: 70px;
 
-    font-size: 25px;
-    font-weight: 700;
-}
+    min-height: 70px;
+    max-height: 70px;
 
-/* =====================================================
-   COACH CELL
-===================================================== */
+    background: #202428;
 
-.coach-cell {
-    cursor: pointer;
+    color: #ffffff;
 
-    user-select: none;
-    -webkit-user-select: none;
+    border: 2px solid #4a4f54;
 
-    overflow: hidden;
-}
+    font-size: 24px;
 
-/* =====================================================
-   COACH NUMBER
-===================================================== */
-
-.coach-number {
-    display: block;
-
-    width: 100%;
-
-    font-size: 22px;
-    font-weight: 700;
-
-    line-height: 1.15;
-
-    color: #111;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* =====================================================
-   COACH TYPE
-===================================================== */
-
-.coach-type {
-    display: block;
-
-    width: 100%;
-
-    margin-top: 4px;
-
-    font-size: 15px;
     font-weight: 700;
 
     line-height: 1.1;
 
-    color: #111;
+    text-align: center;
+
+    vertical-align: middle;
 
     white-space: nowrap;
 
     overflow: hidden;
+
+}
+
+
+/* =========================================================
+   BODY CELLS
+========================================================= */
+
+.board-table td {
+
+    height: 110px;
+
+    min-height: 110px;
+    max-height: 110px;
+
+    background: #ffffff;
+
+    border: 2px solid #dce0e3;
+
+    font-size: 20px;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+}
+
+
+/* =========================================================
+   POSITION COLUMN
+   SAME SIZE AS ALL OTHER CELLS
+========================================================= */
+
+.board-table th:first-child,
+.board-table td:first-child {
+
+    width: 110px;
+
+    min-width: 110px;
+
+    max-width: 110px;
+
+}
+
+
+/* =========================================================
+   STICKY POSITION COLUMN
+   ======================================================== */
+
+.board-table th:first-child {
+
+    position: sticky;
+
+    left: 0;
+
+    z-index: 30;
+
+    background: #202428;
+}
+
+
+.board-table td:first-child {
+
+    position: sticky;
+
+    left: 0;
+
+    z-index: 20;
+
+    background: #ffffff;
+
+    font-size: 24px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   COACH CELL
+========================================================= */
+
+.coach-cell {
+
+    width: 110px;
+
+    min-width: 110px;
+
+    max-width: 110px;
+
+    height: 110px;
+
+    min-height: 110px;
+    max-height: 110px;
+
+    padding: 5px;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    -webkit-user-select: none;
+
+    touch-action: manipulation;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   COACH NUMBER
+========================================================= */
+
+.coach-number {
+
+    display: block;
+
+    width: 100%;
+
+    max-width: 100%;
+
+    margin: 0;
+
+    padding: 0;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    line-height: 1.15;
+
+    color: #111111;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
-/* =====================================================
+
+/* =========================================================
+   COACH TYPE
+========================================================= */
+
+.coach-type {
+
+    display: block;
+
+    width: 100%;
+
+    max-width: 100%;
+
+    margin-top: 4px;
+
+    padding: 0;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    line-height: 1.1;
+
+    color: #111111;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
    STATUS
-===================================================== */
+========================================================= */
 
 .coach-status {
+
     display: inline-flex;
 
     align-items: center;
+
     justify-content: center;
 
-    min-width: 50px;
-    height: 32px;
+    min-width: 48px;
 
-    margin-top: 7px;
+    height: 30px;
 
-    padding: 3px 10px;
+    margin-top: 6px;
+
+    padding: 3px 9px;
 
     border-radius: 9px;
 
-    font-size: 18px;
+    font-size: 17px;
+
     font-weight: 700;
 
     line-height: 1;
 
+    text-align: center;
+
     white-space: nowrap;
 }
 
-/* =====================================================
+
+/* =========================================================
    STATUS COLOURS
-===================================================== */
+========================================================= */
 
 .status-PO {
+
     background: #4f9665;
-    color: #fff;
+
+    color: #ffffff;
 }
+
 
 .status-S {
+
     background: #4f9665;
-    color: #fff;
+
+    color: #ffffff;
 }
+
 
 .status-LM {
+
     background: #f4bf35;
-    color: #111;
+
+    color: #111111;
 }
+
 
 .status-MED {
+
     background: #d94b4b;
-    color: #fff;
+
+    color: #ffffff;
 }
+
 
 .status-RL {
+
     background: #356fe8;
-    color: #fff;
+
+    color: #ffffff;
 }
+
 
 .status-R1 {
+
     background: #5ab6d8;
-    color: #111;
+
+    color: #111111;
 }
+
 
 .status-L {
+
     background: #646a70;
-    color: #fff;
+
+    color: #ffffff;
 }
+
 
 .status-HVY {
+
     background: #7d4f9e;
-    color: #fff;
+
+    color: #ffffff;
 }
+
 
 .status-RS {
+
     background: #ed8b35;
-    color: #fff;
+
+    color: #ffffff;
 }
+
 
 .status-empty {
+
     background: #646464;
-    color: #fff;
+
+    color: #ffffff;
 }
 
-/* =====================================================
+
+/* =========================================================
    EMPTY CELL
-===================================================== */
+========================================================= */
 
 .empty-cell {
-    background: #fff;
+
+    width: 110px;
+
+    min-width: 110px;
+
+    max-width: 110px;
+
+    height: 110px;
+
+    min-height: 110px;
+    max-height: 110px;
+
+    background: #ffffff;
 }
 
-/* =====================================================
+
+/* =========================================================
+   DATABASE STATUS
+========================================================= */
+
+.database-status {
+
+    padding: 10px 20px;
+
+    font-size: 18px;
+
+    font-weight: 600;
+}
+
+
+.database-connected {
+
+    color: #3d8b5b;
+}
+
+
+.database-disconnected {
+
+    color: #d94b4b;
+}
+
+
+/* =========================================================
    MOBILE
-===================================================== */
+========================================================= */
 
 @media (max-width: 768px) {
 
     .shop-section {
+
         margin-bottom: 35px;
     }
 
+
     .shop-title {
+
         min-height: 72px;
 
         font-size: 34px;
@@ -365,142 +597,252 @@ body {
         padding: 10px;
     }
 
+
     .board-table-wrapper {
+
         width: 100%;
+
         overflow-x: auto;
+
+        overflow-y: hidden;
     }
 
+
     .board-table {
+
         width: max-content;
+
         min-width: max-content;
     }
 
-    .board-table th {
-        min-width: 100px;
+
+    /*
+       MOBILE:
+       ALL CELLS STILL EXACTLY SAME SIZE
+    */
+
+    .board-table th,
+    .board-table td {
+
         width: 100px;
 
-        height: 62px;
+        min-width: 100px;
+
+        max-width: 100px;
+    }
+
+
+    .board-table th {
+
+        height: 64px;
+
+        min-height: 64px;
+        max-height: 64px;
 
         font-size: 20px;
-
-        padding: 5px;
     }
 
-    .board-table th:first-child {
-        min-width: 120px;
-        width: 120px;
-    }
 
     .board-table td {
-        min-width: 100px;
+
+        height: 105px;
+
+        min-height: 105px;
+        max-height: 105px;
+    }
+
+
+    .board-table th:first-child,
+    .board-table td:first-child {
+
         width: 100px;
 
-        height: 108px;
+        min-width: 100px;
 
-        padding: 5px;
+        max-width: 100px;
     }
+
+
+    .coach-cell {
+
+        width: 100px;
+
+        min-width: 100px;
+
+        max-width: 100px;
+
+        height: 105px;
+
+        min-height: 105px;
+        max-height: 105px;
+    }
+
+
+    .empty-cell {
+
+        width: 100px;
+
+        min-width: 100px;
+
+        max-width: 100px;
+
+        height: 105px;
+
+        min-height: 105px;
+        max-height: 105px;
+    }
+
 
     .board-table td:first-child {
-        min-width: 120px;
-        width: 120px;
 
-        font-size: 22px;
+        font-size: 21px;
     }
+
 
     .coach-number {
-        font-size: 20px;
+
+        font-size: 18px;
     }
+
 
     .coach-type {
-        font-size: 14px;
+
+        font-size: 13px;
     }
+
 
     .coach-status {
-        min-width: 48px;
-        height: 30px;
 
-        font-size: 17px;
+        min-width: 45px;
 
-        padding: 3px 8px;
+        height: 29px;
+
+        font-size: 15px;
+
+        padding: 3px 7px;
     }
+
 }
 
-/* =====================================================
+
+/* =========================================================
    SMALL MOBILE
-===================================================== */
+========================================================= */
 
 @media (max-width: 480px) {
 
     .shop-title {
+
         min-height: 65px;
 
         font-size: 30px;
     }
 
-    .board-table th {
-        min-width: 92px;
+
+    /*
+       EXACT SAME WIDTH
+       FOR POSITION + ALL COLUMNS
+    */
+
+    .board-table th,
+    .board-table td {
+
         width: 92px;
+
+        min-width: 92px;
+
+        max-width: 92px;
+    }
+
+
+    .board-table th {
+
+        height: 62px;
+
+        min-height: 62px;
+        max-height: 62px;
 
         font-size: 18px;
     }
 
-    .board-table th:first-child {
-        min-width: 105px;
-        width: 105px;
-    }
 
     .board-table td {
-        min-width: 92px;
-        width: 92px;
 
         height: 105px;
+
+        min-height: 105px;
+        max-height: 105px;
     }
+
+
+    .board-table th:first-child,
+    .board-table td:first-child {
+
+        width: 92px;
+
+        min-width: 92px;
+
+        max-width: 92px;
+    }
+
+
+    .coach-cell {
+
+        width: 92px;
+
+        min-width: 92px;
+
+        max-width: 92px;
+
+        height: 105px;
+
+        min-height: 105px;
+        max-height: 105px;
+    }
+
+
+    .empty-cell {
+
+        width: 92px;
+
+        min-width: 92px;
+
+        max-width: 92px;
+
+        height: 105px;
+
+        min-height: 105px;
+        max-height: 105px;
+    }
+
 
     .board-table td:first-child {
-        min-width: 105px;
-        width: 105px;
+
+        font-size: 20px;
     }
+
 
     .coach-number {
-        font-size: 18px;
+
+        font-size: 17px;
     }
+
 
     .coach-type {
-        font-size: 13px;
+
+        font-size: 12px;
     }
+
 
     .coach-status {
-        min-width: 44px;
 
-        height: 28px;
+        min-width: 42px;
 
-        font-size: 15px;
+        height: 27px;
+
+        font-size: 14px;
+
+        padding: 3px 6px;
     }
-}
 
-/* =====================================================
-   TOUCH
-===================================================== */
-
-.coach-cell {
-    touch-action: manipulation;
-}
-
-/* =====================================================
-   CONNECTION STATUS
-===================================================== */
-
-.database-status {
-    padding: 12px 20px;
-
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.database-connected {
-    color: #3d8b5b;
-}
-
-.database-disconnected {
-    color: #d94b4b;
 }
