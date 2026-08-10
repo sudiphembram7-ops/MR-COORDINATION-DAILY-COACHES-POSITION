@@ -16,26 +16,27 @@
 import {
     ref,
     get,
+    set,
+    update,
+    remove,
     push,
-    onValue
+    onValue,
+    runTransaction
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    database,
+    auth
+} from "./firebase-config.js";
 
 import {
     firebaseSaveCoach,
     firebaseUpdateCoach,
     firebaseDeleteCoach,
     firebasePullOutCoach,
+    firebaseReturnCoachToBoard,
     updateCoachPosition
 } from "./firebase-board.js";
-
-import {
-    database,
-    auth
-} from "./firebase-config.js";
 
 
 /* =====================================================
@@ -90,7 +91,616 @@ onAuthStateChanged(auth, (user) => {
 
 });
 
+/* =====================================================
+   PULL OUT COACH
+   -----------------------------------------------------
+   ACTIVE BOARD
+       coachBoard/LINE/POSITION
 
+   PULL OUT RECORD
+       pulledOutCoaches/PUSH_ID
+
+   Coach is removed from active board but preserved.
+===================================================== */
+
+export async function firebasePullOutCoach(
+    line,
+    position
+) {
+
+    if (!line || !position) {
+
+        throw new Error(
+            "Line and Position are required"
+        );
+
+    }
+
+    const coachRef =
+        ref(
+            database,
+            `coachBoard/${line}/${position}`
+        );
+
+    /*
+     * Read current coach
+     */
+
+    const snapshot =
+        await get(
+            coachRef
+        );
+
+    if (!snapshot.exists()) {
+
+        throw new Error(
+            "No coach found at this position"
+        );
+
+    }
+
+    const coach =
+        snapshot.val();
+
+
+    /*
+     * Generate Pull Out ID
+     */
+
+    const pullOutRef =
+        push(
+            ref(
+                database,
+                "pulledOutCoaches"
+            )
+        );
+
+    const pullOutId =
+        pullOutRef.key;
+
+
+    if (!pullOutId) {
+
+        throw new Error(
+            "Unable to create Pull Out ID"
+        );
+
+    }
+
+
+    /*
+     * Preserve original location
+     */
+
+    const pulledRecord = {
+
+        ...coach,
+
+        coachNo:
+            coach.coachNo ??
+            coach.coachNumber ??
+            coach.number ??
+            "",
+
+        coachType:
+            coach.coachType ??
+            coach.type ??
+            "",
+
+        originalShop:
+            coach.shop ||
+            "",
+
+        originalLine:
+            line,
+
+        originalPosition:
+            position,
+
+        pullOutLine:
+            line,
+
+        pullOutPosition:
+            position,
+
+        pulledOutAt:
+            new Date().toISOString(),
+
+        pulledOutBy:
+            auth.currentUser?.email ||
+            "Admin",
+
+        status:
+            coach.status ||
+            "L",
+
+        active:
+            false
+
+    };
+
+
+    /*
+     * Atomic multi-location update
+     *
+     * 1. Save Pull Out record
+     * 2. Remove from active board
+     */
+
+    const updates = {};
+
+    updates[
+        `pulledOutCoaches/${pullOutId}`
+    ] =
+        pulledRecord;
+
+    updates[
+        `coachBoard/${line}/${position}`
+    ] =
+        null;
+
+
+    await update(
+        ref(database),
+        updates
+    );
+
+
+    /*
+     * Audit history
+     */
+
+    const historyRef =
+        push(
+            ref(
+                database,
+                "history"
+            )
+        );
+
+    await set(
+        historyRef,
+        {
+
+            action:
+                "PULL_OUT",
+
+            coachNo:
+                pulledRecord.coachNo,
+
+            coachType:
+                pulledRecord.coachType,
+
+            shop:
+                pulledRecord.shop ||
+                pulledRecord.originalShop ||
+                "",
+
+            line:
+                line,
+
+            position:
+                position,
+
+            pulledOutId:
+                pullOutId,
+
+            user:
+                auth.currentUser?.email ||
+                "Admin",
+
+            timestamp:
+                new Date().toISOString()
+
+        }
+    );
+
+
+    console.log(
+        "PULL OUT SUCCESS",
+        pulledRecord
+    );
+
+
+    return {
+
+        success:
+            true,
+
+        pullOutId,
+
+        coach:
+            pulledRecord
+
+    };
+
+}
+
+
+/* =====================================================
+   FIND PULLED OUT COACH
+===================================================== */
+
+export async function findPulledOutCoach(
+    coachNo
+) {
+
+    if (!coachNo) {
+
+        return null;
+
+    }
+
+
+    const snapshot =
+        await get(
+            ref(
+                database,
+                "pulledOutCoaches"
+            )
+        );
+
+
+    if (
+        !snapshot.exists()
+    ) {
+
+        return null;
+
+    }
+
+
+    const data =
+        snapshot.val();
+
+
+    const searchNo =
+        String(
+            coachNo
+        )
+            .trim()
+            .toUpperCase();
+
+
+    let found =
+        null;
+
+
+    Object.keys(
+        data || {}
+    ).forEach(
+        (key) => {
+
+            if (found) {
+                return;
+            }
+
+
+            const record =
+                data[key];
+
+
+            if (!record) {
+                return;
+            }
+
+
+            const recordNo =
+                String(
+
+                    record.coachNo ??
+                    record.coachNumber ??
+                    record.number ??
+                    ""
+
+                )
+                    .trim()
+                    .toUpperCase();
+
+
+            if (
+                recordNo ===
+                searchNo
+            ) {
+
+                found = {
+
+                    id:
+                        key,
+
+                    ...record
+
+                };
+
+            }
+
+        }
+    );
+
+
+    return found;
+
+}
+
+
+/* =====================================================
+   RETURN COACH TO BOARD
+   -----------------------------------------------------
+   pulledOutCoaches/PUSH_ID
+             ↓
+   coachBoard/LINE/POSITION
+
+   Then Pull Out record is removed.
+===================================================== */
+
+export async function firebaseReturnCoachToBoard(
+    coachNo,
+    returnLine = "",
+    returnPosition = ""
+) {
+
+    if (!coachNo) {
+
+        throw new Error(
+            "Coach Number is required"
+        );
+
+    }
+
+
+    /*
+     * Find Pull Out record
+     */
+
+    const record =
+        await findPulledOutCoach(
+            coachNo
+        );
+
+
+    if (!record) {
+
+        throw new Error(
+            `Coach ${coachNo} was not found in Pull Out records`
+        );
+
+    }
+
+
+    /*
+     * Determine destination
+     *
+     * If user selected a board cell,
+     * use that location.
+     *
+     * Otherwise restore original location.
+     */
+
+    const line =
+        returnLine ||
+        record.originalLine ||
+        record.pullOutLine ||
+        record.line ||
+        "";
+
+
+    const position =
+        returnPosition ||
+        record.originalPosition ||
+        record.pullOutPosition ||
+        record.position ||
+        "";
+
+
+    if (!line || !position) {
+
+        throw new Error(
+            "Return Line / Position not available"
+        );
+
+    }
+
+
+    /*
+     * Check destination
+     */
+
+    const destinationRef =
+        ref(
+            database,
+            `coachBoard/${line}/${position}`
+        );
+
+
+    const destinationSnapshot =
+        await get(
+            destinationRef
+        );
+
+
+    if (
+        destinationSnapshot.exists()
+    ) {
+
+        throw new Error(
+            `Destination ${line}/${position} is already occupied`
+        );
+
+    }
+
+
+    /*
+     * Rebuild active coach object
+     */
+
+    const coach = {
+
+        ...record,
+
+        shop:
+            record.shop ||
+            record.originalShop ||
+            "",
+
+        line:
+            line,
+
+        position:
+            position,
+
+        coachNo:
+            record.coachNo ??
+            record.coachNumber ??
+            record.number ??
+            "",
+
+        coachType:
+            record.coachType ??
+            record.type ??
+            "",
+
+        status:
+            record.status ||
+            "L",
+
+        updatedAt:
+            new Date().toISOString(),
+
+        returnedAt:
+            new Date().toISOString(),
+
+        returnedBy:
+            auth.currentUser?.email ||
+            "Admin"
+
+    };
+
+
+    /*
+     * Remove Pull Out-only fields
+     */
+
+    delete coach.originalLine;
+    delete coach.originalPosition;
+    delete coach.pullOutLine;
+    delete coach.pullOutPosition;
+    delete coach.active;
+
+
+    /*
+     * Atomic return
+     *
+     * 1. Restore coach on board
+     * 2. Remove Pull Out record
+     */
+
+    const updates = {};
+
+
+    updates[
+        `coachBoard/${line}/${position}`
+    ] =
+        coach;
+
+
+    updates[
+        `pulledOutCoaches/${record.id}`
+    ] =
+        null;
+
+
+    await update(
+        ref(database),
+        updates
+    );
+
+
+    /*
+     * History
+     */
+
+    const historyRef =
+        push(
+            ref(
+                database,
+                "history"
+            )
+        );
+
+
+    await set(
+        historyRef,
+        {
+
+            action:
+                "RETURN_TO_BOARD",
+
+            coachNo:
+                coach.coachNo,
+
+            coachType:
+                coach.coachType,
+
+            shop:
+                coach.shop,
+
+            line:
+                line,
+
+            position:
+                position,
+
+            pullOutId:
+                record.id,
+
+            originalLine:
+                record.originalLine ||
+                record.pullOutLine ||
+                "",
+
+            originalPosition:
+                record.originalPosition ||
+                record.pullOutPosition ||
+                "",
+
+            user:
+                auth.currentUser?.email ||
+                "Admin",
+
+            timestamp:
+                new Date().toISOString()
+
+        }
+    );
+
+
+    console.log(
+        "RETURN TO BOARD SUCCESS",
+        {
+            coachNo,
+            line,
+            position
+        }
+    );
+
+
+    return {
+
+        success:
+            true,
+
+        coach,
+
+        pullOutId:
+            record.id,
+
+        line,
+
+        position
+
+    };
+
+}
 /* =====================================================
    ADMIN CHECK
 ===================================================== */
@@ -1858,6 +2468,249 @@ async function pullOutCoach() {
 
             button.textContent =
                 "PULL OUT";
+
+        }
+
+    }
+
+}
+/* =====================================================
+   RETURN COACH TO BOARD
+===================================================== */
+
+async function returnCoachToBoard() {
+
+    /*
+     * ADMIN CHECK
+     */
+
+    if (
+        !checkAdmin()
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * GET MODAL DATA
+     */
+
+    const coachNo =
+        document.getElementById(
+            "modalCoachNo"
+        )?.value
+            ?.trim() || "";
+
+
+    const line =
+        document.getElementById(
+            "modalLine"
+        )?.value
+            ?.trim() || "";
+
+
+    const position =
+        document.getElementById(
+            "modalPosition"
+        )?.value
+            ?.trim() || "";
+
+
+    /*
+     * VALIDATION
+     */
+
+    if (!coachNo) {
+
+        alert(
+            "Coach Number Required"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * CONFIRM
+     */
+
+    const confirmed =
+        confirm(
+
+            "RETURN COACH TO BOARD\n\n" +
+
+            "Coach No : " +
+            coachNo +
+            "\n" +
+
+            "Return Position : " +
+            line +
+            " / " +
+            position +
+            "\n\n" +
+
+            "Return this coach to the active board?"
+
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    /*
+     * BUTTON
+     */
+
+    const button =
+        document.getElementById(
+            "returnToBoardBtn"
+        );
+
+
+    if (button) {
+
+        button.disabled =
+            true;
+
+        button.textContent =
+            "RETURNING...";
+
+    }
+
+
+    try {
+
+        /*
+         * Firebase return
+         */
+
+        const result =
+            await firebaseReturnCoachToBoard(
+
+                coachNo,
+
+                line,
+
+                position
+
+            );
+
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            throw new Error(
+                result?.message ||
+                "Return failed"
+            );
+
+        }
+
+
+        /*
+         * Clear current cell
+         */
+
+        if (
+            currentCell
+        ) {
+
+            currentCell.innerHTML =
+                "";
+
+            currentCell.dataset.coach =
+                "";
+
+            currentCell.dataset.type =
+                "";
+
+            currentCell.dataset.status =
+                "";
+
+            currentCell.draggable =
+                false;
+
+        }
+
+
+        /*
+         * Close modal
+         */
+
+        if (
+            coachModal
+        ) {
+
+            coachModal.hide();
+
+        }
+
+
+        /*
+         * Clear current cell reference
+         */
+
+        currentCell =
+            null;
+
+
+        /*
+         * SUCCESS
+         */
+
+        alert(
+
+            "Coach " +
+            coachNo +
+            " returned to board successfully.\n\n" +
+
+            "Position: " +
+            result.line +
+            " / " +
+            result.position
+
+        );
+
+
+        console.log(
+            "RETURN SUCCESS:",
+            result
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "RETURN TO BOARD ERROR:",
+            error
+        );
+
+
+        alert(
+
+            "Return To Board Failed:\n\n" +
+            error.message
+
+        );
+
+    } finally {
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "↩ RETURN TO BOARD";
 
         }
 
