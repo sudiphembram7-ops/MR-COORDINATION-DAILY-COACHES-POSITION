@@ -1175,49 +1175,64 @@ function duplicateCoach(
 function initializeButtons() {
 
     document
-        .getElementById(
-            "saveCoachBtn"
-        )
+        .getElementById("saveCoachBtn")
         ?.addEventListener(
             "click",
             saveCoach
         );
 
-
     document
-        .getElementById(
-            "updateCoachBtn"
-        )
+        .getElementById("updateCoachBtn")
         ?.addEventListener(
             "click",
             updateCoach
         );
 
-
     document
-        .getElementById(
-            "deleteCoachBtn"
-        )
+        .getElementById("deleteCoachBtn")
         ?.addEventListener(
             "click",
             deleteCoach
         );
 
 
-    document
-        .getElementById(
+    /* =====================================================
+       REFRESH BUTTON
+    ===================================================== */
+
+    const refreshBtn =
+        document.getElementById(
             "refreshBtn"
-        )
-        ?.addEventListener(
-            "click",
-            refreshBoard
         );
 
+    if (refreshBtn) {
+
+        refreshBtn.addEventListener(
+            "click",
+            (event) => {
+
+                event.preventDefault();
+
+                console.log(
+                    "REFRESH BUTTON CLICKED"
+                );
+
+                refreshBoard();
+
+            }
+        );
+
+    } else {
+
+        console.error(
+            "ERROR: refreshBtn not found"
+        );
+
+    }
+
 
     document
-        .getElementById(
-            "pdfBtn"
-        )
+        .getElementById("pdfBtn")
         ?.addEventListener(
             "click",
             () => {
@@ -1229,9 +1244,7 @@ function initializeButtons() {
 
 
     document
-        .getElementById(
-            "excelBtn"
-        )
+        .getElementById("excelBtn")
         ?.addEventListener(
             "click",
             exportCSV
@@ -1239,9 +1252,7 @@ function initializeButtons() {
 
 
     document
-        .getElementById(
-            "fullscreenBtn"
-        )
+        .getElementById("fullscreenBtn")
         ?.addEventListener(
             "click",
             toggleFullscreen
