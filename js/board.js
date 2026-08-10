@@ -518,42 +518,98 @@ function drawBoard() {
     --------------------------------------------- */
 
     cells.forEach(
-        (cell) => {
+    (cell) => {
 
-            cell.innerHTML = "";
+        /*
+         * IMPORTANT:
+         * Every cell must keep its LINE + POSITION,
+         * including EMPTY cells.
+         */
 
-            cell.dataset.shop = "";
-            cell.dataset.line = "";
-            cell.dataset.position = "";
-            cell.dataset.coach = "";
-            cell.dataset.type = "";
-            cell.dataset.status = "";
+        let cellLine =
+            cell.dataset.line || "";
 
-            cell.draggable = false;
+        let cellPosition =
+            cell.dataset.position || "";
 
-            cell.classList.remove(
 
-                "status-po",
-                "status-s",
-                "status-lm",
-                "status-med",
-                "status-rl",
-                "status-r1",
-                "status-rs",
-                "status-l",
-                "status-hvy",
+        /*
+         * If data attributes are missing,
+         * get them from HTML id.
+         *
+         * Example:
+         * N2_H1
+         * N3_H2
+         * SCR12_3
+         */
 
-                "table-info",
-                "search-match",
+        if (
+            (!cellLine || !cellPosition) &&
+            cell.id
+        ) {
 
-                "mobile-drag-source",
-                "mobile-drag-target"
+            const parts =
+                cell.id.split("_");
 
-            );
+            cellLine =
+                parts.shift() || "";
+
+            cellPosition =
+                parts.join("_") || "";
 
         }
-    );
 
+
+        cell.innerHTML = "";
+
+
+        /*
+         * Keep location information
+         * even when the cell is EMPTY.
+         */
+
+        cell.dataset.shop =
+            getShop(cellLine);
+
+        cell.dataset.line =
+            cellLine;
+
+        cell.dataset.position =
+            cellPosition;
+
+        cell.dataset.coach = "";
+
+        cell.dataset.type = "";
+
+        cell.dataset.status = "";
+
+
+        cell.draggable = false;
+
+
+        cell.classList.remove(
+
+            "status-po",
+            "status-s",
+            "status-lm",
+            "status-med",
+            "status-rl",
+            "status-r1",
+            "status-rs",
+            "status-l",
+            "status-hvy",
+
+            "table-info",
+            "search-match",
+
+            "mobile-drag-source",
+            "mobile-drag-target"
+
+        );
+
+    }
+);
+            
 
     /* ---------------------------------------------
        DRAW FIREBASE DATA
