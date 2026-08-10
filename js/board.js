@@ -1864,7 +1864,16 @@ document
         "click",
         pullOutCoach
     );
+/* =====================================================
+   RETURN TO BOARD BUTTON
+===================================================== */
 
+document
+    .getElementById("returnToBoardBtn")
+    ?.addEventListener(
+        "click",
+        returnCoachToBoard
+    );
     document
         .getElementById("deleteCoachBtn")
         ?.addEventListener(
