@@ -1,38 +1,217 @@
 /* =====================================================
    MR CO-ORDINATION BOARD
-   COACH DISPLAY FIX - VERSION 8.1
+   STYLE
+   VERSION 8.1 FINAL
 ===================================================== */
 
-/* Board horizontal scrolling on mobile */
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+
+html {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+
+    margin: 0;
+
+    padding: 0;
+
+    width: 100%;
+
+    min-height: 100vh;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        #f3f5f7;
+
+    color:
+        #111;
+
+}
+
+
+/* =====================================================
+   BOARD WRAPPER
+===================================================== */
+
 .board-wrapper,
 .table-wrapper,
-#boardContainer {
+#boardContainer,
+#board {
+
     width: 100%;
+
+    max-width: 100%;
+
     overflow-x: auto;
+
+    overflow-y: visible;
+
     -webkit-overflow-scrolling: touch;
+
 }
 
 
 /* =====================================================
-   BOARD TABLE
+   TABLE
 ===================================================== */
+
+table {
+
+    border-collapse: collapse;
+
+    border-spacing: 0;
+
+}
+
 
 .board-table {
+
     width: max-content;
+
     min-width: 100%;
-    border-collapse: collapse;
+
     table-layout: fixed;
+
 }
 
 
 /* =====================================================
-   POSITION COLUMN
+   BOARD TABLE HEADER
 ===================================================== */
 
-.board-table th:first-child,
-.board-table td:first-child {
-    min-width: 120px;
+.board-table th {
+
+    height: 70px;
+
+    min-width: 105px;
+
+    padding: 8px;
+
+    background:
+        #202428;
+
+    color:
+        #fff;
+
+    border:
+        2px solid #555;
+
+    text-align:
+        center;
+
+    vertical-align:
+        middle;
+
+    font-size:
+        20px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* =====================================================
+   FIRST POSITION HEADER
+===================================================== */
+
+.board-table th:first-child {
+
     width: 120px;
+
+    min-width: 120px;
+
+}
+
+
+/* =====================================================
+   POSITION CELLS
+===================================================== */
+
+.board-table td:first-child {
+
+    width: 120px;
+
+    min-width: 120px;
+
+    height: 78px;
+
+    padding: 5px;
+
+    background:
+        #ffffff;
+
+    border:
+        2px solid #d9dde0;
+
+    text-align:
+        center;
+
+    vertical-align:
+        middle;
+
+    font-size:
+        20px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* =====================================================
+   COACH CELLS
+===================================================== */
+
+.board-table td:not(:first-child) {
+
+    width: 110px;
+
+    min-width: 110px;
+
+    height: 78px;
+
+    padding: 4px;
+
+    background:
+        #ffffff;
+
+    border:
+        2px solid #d9dde0;
+
+    text-align:
+        center;
+
+    vertical-align:
+        middle;
+
+    overflow:
+        visible;
+
+    white-space:
+        normal;
+
 }
 
 
@@ -40,23 +219,30 @@
    COACH CELL
 ===================================================== */
 
-.board-table td:not(:first-child) {
+.board-cell {
 
-    min-width: 110px;
+    position:
+        relative;
 
-    width: 110px;
+    cursor:
+        pointer;
 
-    height: 75px;
+    user-select:
+        none;
 
-    padding: 4px;
+    -webkit-user-select:
+        none;
 
-    text-align: center;
+    touch-action:
+        manipulation;
 
-    vertical-align: middle;
+}
 
-    overflow: visible;
 
-    white-space: normal;
+.board-cell.has-coach {
+
+    background:
+        #ffffff;
 
 }
 
@@ -67,23 +253,41 @@
 
 .coach-number {
 
-    display: block;
+    display:
+        block;
 
-    width: 100%;
+    width:
+        100%;
 
-    font-size: 17px;
+    margin:
+        0;
 
-    font-weight: 800;
+    padding:
+        0;
 
-    line-height: 1.15;
+    font-size:
+        17px;
 
-    text-align: center;
+    font-weight:
+        900;
 
-    white-space: nowrap;
+    line-height:
+        1.15;
 
-    overflow: visible;
+    text-align:
+        center;
 
-    text-overflow: clip;
+    color:
+        #111;
+
+    white-space:
+        nowrap;
+
+    overflow:
+        visible;
+
+    text-overflow:
+        clip;
 
 }
 
@@ -94,52 +298,77 @@
 
 .coach-type {
 
-    display: block;
+    display:
+        block;
 
-    width: 100%;
+    width:
+        100%;
 
-    margin-top: 3px;
+    margin-top:
+        3px;
 
-    font-size: 12px;
+    font-size:
+        12px;
 
-    font-weight: 700;
+    font-weight:
+        700;
 
-    line-height: 1.1;
+    line-height:
+        1.1;
 
-    text-align: center;
+    text-align:
+        center;
 
-    white-space: nowrap;
+    color:
+        #333;
 
-    overflow: visible;
+    white-space:
+        nowrap;
 
-    text-overflow: clip;
+    overflow:
+        visible;
+
+    text-overflow:
+        clip;
 
 }
 
 
 /* =====================================================
-   COACH STATUS
+   STATUS BADGE
 ===================================================== */
 
 .coach-status {
 
-    display: inline-block;
+    display:
+        inline-block;
 
-    margin-top: 3px;
+    margin-top:
+        4px;
 
-    padding: 2px 7px;
+    padding:
+        3px 8px;
 
-    border-radius: 5px;
+    border-radius:
+        6px;
 
-    font-size: 11px;
+    font-size:
+        11px;
 
-    font-weight: 900;
+    font-weight:
+        900;
 
-    line-height: 1.1;
+    line-height:
+        1;
 
-    text-align: center;
+    min-width:
+        28px;
 
-    white-space: nowrap;
+    text-align:
+        center;
+
+    white-space:
+        nowrap;
 
 }
 
@@ -149,53 +378,391 @@
 ===================================================== */
 
 .status-po {
-    background: #3f8f5b;
-    color: #fff;
+
+    background:
+        #3f8f5b;
+
+    color:
+        #ffffff;
+
 }
+
 
 .status-s {
-    background: #3f8f5b;
-    color: #fff;
+
+    background:
+        #3f8f5b;
+
+    color:
+        #ffffff;
+
 }
+
 
 .status-lm {
-    background: #f5bd32;
-    color: #111;
+
+    background:
+        #f5bd32;
+
+    color:
+        #111111;
+
 }
+
 
 .status-med {
-    background: #d64545;
-    color: #fff;
+
+    background:
+        #d64545;
+
+    color:
+        #ffffff;
+
 }
+
 
 .status-rl {
-    background: #3167df;
-    color: #fff;
+
+    background:
+        #3167df;
+
+    color:
+        #ffffff;
+
 }
+
 
 .status-r1 {
-    background: #55b9dc;
-    color: #111;
+
+    background:
+        #55b9dc;
+
+    color:
+        #111111;
+
 }
+
 
 .status-rs {
-    background: #777f88;
-    color: #fff;
+
+    background:
+        #777f88;
+
+    color:
+        #ffffff;
+
 }
+
 
 .status-l {
-    background: #777f88;
-    color: #fff;
+
+    background:
+        #777f88;
+
+    color:
+        #ffffff;
+
 }
+
 
 .status-hvy {
-    background: #333;
-    color: #fff;
+
+    background:
+        #333333;
+
+    color:
+        #ffffff;
+
 }
 
+
 .status-default {
-    background: #555;
-    color: #fff;
+
+    background:
+        #555555;
+
+    color:
+        #ffffff;
+
+}
+
+
+/* =====================================================
+   SELECTED CELL
+   MOBILE MOVE
+===================================================== */
+
+.board-cell.selected-cell {
+
+    outline:
+        4px solid #1976d2;
+
+    outline-offset:
+        -4px;
+
+    background:
+        #eaf3ff;
+
+}
+
+
+/* =====================================================
+   DRAGGING
+===================================================== */
+
+.board-cell.dragging {
+
+    opacity:
+        0.45;
+
+}
+
+
+.board-cell.drag-over {
+
+    outline:
+        4px dashed #1976d2;
+
+    outline-offset:
+        -4px;
+
+    background:
+        #eaf3ff;
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.board-cell.search-match {
+
+    outline:
+        4px solid #ff9800;
+
+    outline-offset:
+        -4px;
+
+    background:
+        #fff8df;
+
+}
+
+
+.board-cell.search-hidden {
+
+    opacity:
+        0.25;
+
+}
+
+
+/* =====================================================
+   DATABASE STATUS
+===================================================== */
+
+.database-status,
+#databaseStatus {
+
+    font-size:
+        16px;
+
+    font-weight:
+        600;
+
+}
+
+
+.database-status.online,
+#databaseStatus.online {
+
+    color:
+        #3f9b62;
+
+}
+
+
+.database-status.offline,
+#databaseStatus.offline {
+
+    color:
+        #d64545;
+
+}
+
+
+/* =====================================================
+   SEARCH BAR
+===================================================== */
+
+#searchInput,
+#searchBar,
+.search-input {
+
+    width:
+        100%;
+
+    max-width:
+        500px;
+
+    height:
+        44px;
+
+    padding:
+        8px 14px;
+
+    border:
+        1px solid #bbb;
+
+    border-radius:
+        8px;
+
+    font-size:
+        16px;
+
+    outline:
+        none;
+
+}
+
+
+#searchInput:focus,
+#searchBar:focus,
+.search-input:focus {
+
+    border-color:
+        #1976d2;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(
+            25,
+            118,
+            210,
+            0.15
+        );
+
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+.board-message {
+
+    position:
+        fixed;
+
+    left:
+        50%;
+
+    bottom:
+        25px;
+
+    transform:
+        translateX(-50%);
+
+    z-index:
+        99999;
+
+    padding:
+        12px 20px;
+
+    border-radius:
+        8px;
+
+    color:
+        #ffffff;
+
+    background:
+        #333;
+
+    font-size:
+        15px;
+
+    font-weight:
+        700;
+
+    box-shadow:
+        0 4px 15px
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+
+}
+
+
+.board-message.success {
+
+    background:
+        #3f8f5b;
+
+}
+
+
+.board-message.error {
+
+    background:
+        #d64545;
+
+}
+
+
+.board-message.info {
+
+    background:
+        #1976d2;
+
+}
+
+
+.board-message.hide {
+
+    opacity:
+        0;
+
+    transform:
+        translate(
+            -50%,
+            20px
+        );
+
+}
+
+
+/* =====================================================
+   SHOP HEADER SUPPORT
+===================================================== */
+
+.shop-header {
+
+    width:
+        100%;
+
+    padding:
+        18px;
+
+    color:
+        #ffffff;
+
+    text-align:
+        center;
+
+    font-size:
+        36px;
+
+    font-weight:
+        400;
+
 }
 
 
@@ -203,48 +770,131 @@
    MOBILE
 ===================================================== */
 
-@media (max-width: 600px) {
+@media (
+    max-width: 600px
+) {
 
-    .board-table th:first-child,
+    .board-wrapper,
+    .table-wrapper,
+    #boardContainer,
+    #board {
+
+        overflow-x:
+            auto;
+
+        overflow-y:
+            visible;
+
+    }
+
+
+    .board-table {
+
+        width:
+            max-content;
+
+        min-width:
+            max-content;
+
+    }
+
+
+    .board-table th {
+
+        min-width:
+            105px;
+
+        width:
+            105px;
+
+        height:
+            60px;
+
+        padding:
+            5px;
+
+        font-size:
+            18px;
+
+    }
+
+
+    .board-table th:first-child {
+
+        min-width:
+            120px;
+
+        width:
+            120px;
+
+    }
+
+
     .board-table td:first-child {
 
-        min-width: 120px;
+        min-width:
+            120px;
 
-        width: 120px;
+        width:
+            120px;
+
+        height:
+            78px;
+
+        font-size:
+            19px;
 
     }
 
 
     .board-table td:not(:first-child) {
 
-        min-width: 105px;
+        min-width:
+            105px;
 
-        width: 105px;
+        width:
+            105px;
 
-        height: 78px;
+        height:
+            78px;
+
+        padding:
+            4px;
 
     }
 
 
     .coach-number {
 
-        font-size: 16px;
+        font-size:
+            16px;
 
     }
 
 
     .coach-type {
 
-        font-size: 11px;
+        font-size:
+            11px;
 
     }
 
 
     .coach-status {
 
-        font-size: 10px;
+        font-size:
+            10px;
 
-        padding: 2px 6px;
+        padding:
+            3px 6px;
+
+    }
+
+
+    .shop-header {
+
+        font-size:
+            30px;
 
     }
 
@@ -255,19 +905,246 @@
    VERY SMALL MOBILE
 ===================================================== */
 
-@media (max-width: 400px) {
+@media (
+    max-width: 400px
+) {
 
-    .board-table td:not(:first-child) {
+    .board-table th {
 
-        min-width: 100px;
+        min-width:
+            100px;
 
-        width: 100px;
+        width:
+            100px;
+
+        font-size:
+            16px;
 
     }
 
+
+    .board-table td:not(:first-child) {
+
+        min-width:
+            100px;
+
+        width:
+            100px;
+
+    }
+
+
+    .board-table th:first-child,
+    .board-table td:first-child {
+
+        min-width:
+            115px;
+
+        width:
+            115px;
+
+    }
+
+
     .coach-number {
 
-        font-size: 15px;
+        font-size:
+            15px;
+
+    }
+
+
+    .coach-type {
+
+        font-size:
+            10px;
+
+    }
+
+
+    .coach-status {
+
+        font-size:
+            9px;
+
+    }
+
+}
+
+
+/* =====================================================
+   PRINT
+   A4 LANDSCAPE
+===================================================== */
+
+@page {
+
+    size:
+        A4 landscape;
+
+    margin:
+        5mm;
+
+}
+
+
+@media print {
+
+    html,
+    body {
+
+        width:
+            100%;
+
+        min-width:
+            0;
+
+        background:
+            #ffffff;
+
+    }
+
+
+    body {
+
+        overflow:
+            visible !important;
+
+    }
+
+
+    .board-wrapper,
+    .table-wrapper,
+    #boardContainer,
+    #board {
+
+        width:
+            100% !important;
+
+        overflow:
+            visible !important;
+
+    }
+
+
+    .board-table {
+
+        width:
+            100% !important;
+
+        min-width:
+            0 !important;
+
+        table-layout:
+            fixed;
+
+    }
+
+
+    .board-table th {
+
+        height:
+            22px;
+
+        padding:
+            2px;
+
+        font-size:
+            9px;
+
+    }
+
+
+    .board-table th:first-child {
+
+        width:
+            55px;
+
+        min-width:
+            55px;
+
+    }
+
+
+    .board-table td:first-child {
+
+        width:
+            55px;
+
+        min-width:
+            55px;
+
+        height:
+            25px;
+
+        padding:
+            2px;
+
+        font-size:
+            9px;
+
+    }
+
+
+    .board-table td:not(:first-child) {
+
+        width:
+            auto;
+
+        min-width:
+            0;
+
+        height:
+            25px;
+
+        padding:
+            1px;
+
+    }
+
+
+    /* PRINT ONLY COACH NUMBER */
+
+    .coach-number {
+
+        display:
+            block !important;
+
+        font-size:
+            9px;
+
+        font-weight:
+            900;
+
+        line-height:
+            1;
+
+    }
+
+
+    .coach-type,
+    .coach-status {
+
+        display:
+            none !important;
+
+    }
+
+
+    .board-cell.selected-cell,
+    .board-cell.search-match,
+    .board-cell.drag-over {
+
+        outline:
+            none !important;
+
+    }
+
+
+    .board-message {
+
+        display:
+            none !important;
 
     }
 
