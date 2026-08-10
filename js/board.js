@@ -1740,7 +1740,9 @@ async function writeHistory(
 
 
 /* =====================================================
-   DESKTOP DRAG & DROP
+   DESKTOP DRAG & DROP V8.2
+   FILLED → EMPTY
+   FILLED → FILLED
 ===================================================== */
 
 function enableDragDrop() {
@@ -1754,58 +1756,85 @@ function enableDragDrop() {
     cells.forEach(
         (cell) => {
 
+            /*
+             * REMOVE OLD LISTENERS
+             */
+
+            cell.removeEventListener(
+                "dragstart",
+                dragStart
+            );
+
+            cell.removeEventListener(
+                "dragover",
+                dragOver
+            );
+
+            cell.removeEventListener(
+                "dragleave",
+                dragLeave
+            );
+
+            cell.removeEventListener(
+                "drop",
+                dropCoach
+            );
+
+
+            /*
+             * ONLY OCCUPIED CELLS
+             * CAN BE DRAG SOURCE
+             */
+
             cell.draggable =
                 !!cell.dataset.coach;
 
 
-            cell.removeEventListener(
-                "dragstart",
-                dragStart
-            );
-
-
-            cell.removeEventListener(
-                "dragover",
-                dragOver
-            );
-
-
-            cell.removeEventListener(
-                "dragleave",
-                dragLeave
-            );
-
-
-            cell.removeEventListener(
-                "drop",
-                dropCoach
-            );
-
-
-            cell.addEventListener(
-                "dragstart",
-                dragStart
-            );
-
+            /*
+             * EVERY CELL
+             * IS A DROP TARGET
+             */
 
             cell.addEventListener(
                 "dragover",
                 dragOver
             );
 
-
             cell.addEventListener(
                 "dragleave",
                 dragLeave
             );
 
-
             cell.addEventListener(
                 "drop",
                 dropCoach
             );
+
+
+            /*
+             * ONLY FILLED CELLS
+             * GET DRAGSTART
+             */
+
+            if (
+                cell.dataset.coach
+            ) {
+
+                cell.addEventListener(
+                    "dragstart",
+                    dragStart
+                );
+
+            }
 
         }
+    );
+
+
+    console.log(
+        "Desktop Drag & Drop enabled:",
+        cells.length,
+        "cells"
     );
 
 }
@@ -1874,18 +1903,49 @@ function dragStart(event) {
    DRAG OVER
 ===================================================== */
 
+/* =====================================================
+   DRAG OVER V8.2
+===================================================== */
+
 function dragOver(event) {
 
     if (
         !adminLoggedIn
     ) {
-
         return;
-
     }
 
 
+    /*
+     * No active source = no drop
+     */
+
+    if (
+        !dragCell
+    ) {
+        return;
+    }
+
+
+    /*
+     * Source cannot drop on itself
+     */
+
+    if (
+        dragCell === this
+    ) {
+        return;
+    }
+
+
+    /*
+     * VERY IMPORTANT
+     * This makes EMPTY cells valid targets.
+     */
+
     event.preventDefault();
+
+    event.stopPropagation();
 
 
     if (
@@ -1897,6 +1957,35 @@ function dragOver(event) {
 
     }
 
+
+    /*
+     * Remove previous target highlight
+     */
+
+    document
+        .querySelectorAll(
+            ".coach-table td.table-info"
+        )
+        .forEach(
+            (cell) => {
+
+                if (
+                    cell !== this
+                ) {
+
+                    cell.classList.remove(
+                        "table-info"
+                    );
+
+                }
+
+            }
+        );
+
+
+    /*
+     * Highlight current target
+     */
 
     this.classList.add(
         "table-info"
@@ -1922,11 +2011,15 @@ function dragLeave() {
    DROP
 ===================================================== */
 
-async function dropCoach(
-    event
-) {
+/* =====================================================
+   DROP COACH V8.2
+   FILLED → EMPTY / FILLED → FILLED
+===================================================== */
+
+async function dropCoach(event) {
 
     event.preventDefault();
+    event.stopPropagation();
 
 
     this.classList.remove(
@@ -1946,8 +2039,20 @@ async function dropCoach(
     }
 
 
+    /*
+     * SOURCE CHECK
+     */
+
     if (
-        !dragCell ||
+        !dragCell
+    ) {
+
+        return;
+
+    }
+
+
+    if (
         dragCell === this
     ) {
 
@@ -1959,21 +2064,47 @@ async function dropCoach(
     }
 
 
+    /*
+     * SOURCE LOCATION
+     */
+
     const fromLine =
         dragCell.dataset.line;
-
 
     const fromPos =
         dragCell.dataset.position;
 
 
+    /*
+     * TARGET LOCATION
+     *
+     * IMPORTANT:
+     * This now works even when target is EMPTY.
+     */
+
     const toLine =
         this.dataset.line;
-
 
     const toPos =
         this.dataset.position;
 
+
+    console.log(
+        "DROP TARGET:",
+        {
+            fromLine,
+            fromPos,
+            toLine,
+            toPos,
+            targetCoach:
+                this.dataset.coach || "(EMPTY)"
+        }
+    );
+
+
+    /*
+     * LOCATION VALIDATION
+     */
 
     if (
         !fromLine ||
@@ -1982,6 +2113,20 @@ async function dropCoach(
         !toPos
     ) {
 
+        console.error(
+            "Drag Drop Location Missing",
+            {
+                fromLine,
+                fromPos,
+                toLine,
+                toPos,
+                sourceId:
+                    dragCell.id,
+                targetId:
+                    this.id
+            }
+        );
+
         dragCell =
             null;
 
@@ -1989,6 +2134,10 @@ async function dropCoach(
 
     }
 
+
+    /*
+     * GET SOURCE COACH
+     */
 
     const fromCoach =
         boardData[
@@ -1998,7 +2147,15 @@ async function dropCoach(
         ];
 
 
-    if (!fromCoach) {
+    if (
+        !fromCoach
+    ) {
+
+        console.error(
+            "Source coach not found",
+            fromLine,
+            fromPos
+        );
 
         dragCell =
             null;
@@ -2008,6 +2165,12 @@ async function dropCoach(
     }
 
 
+    /*
+     * GET TARGET COACH
+     *
+     * null = EMPTY CELL
+     */
+
     const toCoach =
         boardData[
             toLine
@@ -2015,6 +2178,10 @@ async function dropCoach(
             toPos
         ] || null;
 
+
+    /*
+     * SAVE UNDO INFORMATION
+     */
 
     lastMove = {
 
@@ -2043,7 +2210,47 @@ async function dropCoach(
         dragCell;
 
 
+    const targetCell =
+        this;
+
+
     try {
+
+        console.log(
+            "================================"
+        );
+
+        console.log(
+            "DRAG DROP MOVE"
+        );
+
+        console.log(
+            "FROM:",
+            fromLine,
+            fromPos
+        );
+
+        console.log(
+            "TO:",
+            toLine,
+            toPos
+        );
+
+        console.log(
+            "TARGET:",
+            toCoach
+                ? "FILLED"
+                : "EMPTY"
+        );
+
+        console.log(
+            "================================"
+        );
+
+
+        /*
+         * FIREBASE POSITION UPDATE
+         */
 
         await updateCoachPosition(
 
@@ -2056,43 +2263,74 @@ async function dropCoach(
         );
 
 
+        /*
+         * HISTORY
+         */
+
         await writeHistory(
             "MOVE",
             fromCoach,
             {
 
                 fromLine,
+
                 fromPosition:
                     fromPos,
 
                 toLine,
+
                 toPosition:
-                    toPos
+                    toPos,
+
+                targetWasEmpty:
+                    !toCoach
 
             }
         );
 
 
+        /*
+         * SUCCESS
+         */
+
         console.log(
-            "MOVE SUCCESS",
-            fromLine,
-            fromPos,
-            "=>",
-            toLine,
-            toPos
+            "✅ MOVE SUCCESS"
         );
 
+
+        console.log(
+            `${fromLine}/${fromPos} → ${toLine}/${toPos}`
+        );
+
+
+        /*
+         * VISUAL CLEANUP
+         */
+
+        sourceCell.classList.remove(
+            "mobile-drag-source"
+        );
+
+        targetCell.classList.remove(
+            "table-info"
+        );
+
+
+        /*
+         * Firebase onValue()
+         * will automatically redraw board.
+         */
 
     } catch (error) {
 
         console.error(
-            "Drag & Drop Error:",
+            "❌ Drag & Drop Error:",
             error
         );
 
 
         alert(
-            "Drag & Drop Failed: " +
+            "Drag & Drop Failed:\n\n" +
             error.message
         );
 
@@ -2103,26 +2341,10 @@ async function dropCoach(
     }
 
 
-    if (sourceCell) {
-
-        sourceCell.classList.remove(
-            "mobile-drag-source"
-        );
-
-    }
-
-
-    this.classList.remove(
-        "table-info"
-    );
-
-
     dragCell =
         null;
 
 }
-
-
 /* =====================================================
    DRAG END
 ===================================================== */
