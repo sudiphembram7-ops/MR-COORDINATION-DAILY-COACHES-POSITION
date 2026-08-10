@@ -898,6 +898,398 @@ export async function firebasePullOutCoach(
     };
 
 }
+/* =====================================================
+   RETURN PULLED OUT COACH TO BOARD
+   -----------------------------------------------------
+   RETURN TO BOARD:
+   1. Reads coach from pulledOutCoaches
+   2. Uses originalLine + originalPosition
+   3. Checks position is empty
+   4. Checks duplicate coach number
+   5. Restores coach to coachBoard
+   6. Removes pulledOut record
+   7. Writes HISTORY
+   8. Writes AUDIT
+
+   IMPORTANT:
+   RETURN does NOT create a duplicate coach.
+===================================================== */
+
+export async function firebaseReturnCoachToBoard(
+    pulledOutId
+) {
+
+    pulledOutId =
+        clean(pulledOutId);
+
+
+    /* =================================================
+       VALIDATION
+    ================================================= */
+
+    if (!pulledOutId) {
+
+        throw new Error(
+            "Pull Out ID is required"
+        );
+
+    }
+
+
+    /* =================================================
+       GET PULLED OUT COACH
+    ================================================= */
+
+    const pulledOutRef =
+        ref(
+            database,
+            `${PULLED_OUT_PATH}/${pulledOutId}`
+        );
+
+
+    const snapshot =
+        await get(
+            pulledOutRef
+        );
+
+
+    if (!snapshot.exists()) {
+
+        throw new Error(
+            "Pulled Out Coach not found"
+        );
+
+    }
+
+
+    const pulledOut =
+        snapshot.val();
+
+
+    /* =================================================
+       ORIGINAL POSITION
+    ================================================= */
+
+    const line =
+        clean(
+            pulledOut.originalLine ||
+            pulledOut.line
+        );
+
+
+    const position =
+        clean(
+            pulledOut.originalPosition ||
+            pulledOut.position
+        );
+
+
+    if (!line || !position) {
+
+        throw new Error(
+            "Original Line and Position not found"
+        );
+
+    }
+
+
+    /* =================================================
+       COACH NUMBER
+    ================================================= */
+
+    const coachNo =
+        clean(
+            pulledOut.coachNo
+        );
+
+
+    if (!coachNo) {
+
+        throw new Error(
+            "Coach Number not found"
+        );
+
+    }
+
+
+    /* =================================================
+       CHECK TARGET POSITION
+    ================================================= */
+
+    const boardRef =
+        ref(
+            database,
+            `${BOARD_PATH}/${line}/${position}`
+        );
+
+
+    const boardSnapshot =
+        await get(
+            boardRef
+        );
+
+
+    if (boardSnapshot.exists()) {
+
+        throw new Error(
+            `Position ${line}/${position} is already occupied`
+        );
+
+    }
+
+
+    /* =================================================
+       DUPLICATE COACH NUMBER CHECK
+    ================================================= */
+
+    const duplicate =
+        await isDuplicateCoach(
+            coachNo
+        );
+
+
+    if (duplicate) {
+
+        throw new Error(
+            `Coach Number ${coachNo} already exists on the board`
+        );
+
+    }
+
+
+    /* =================================================
+       CREATE RESTORED COACH
+    ================================================= */
+
+    const restoredCoach = {
+
+        shop:
+            getShopFromLine(
+                line
+            ),
+
+        line,
+
+        position,
+
+        coachNo:
+
+            clean(
+                pulledOut.coachNo
+            ),
+
+        coachType:
+
+            clean(
+                pulledOut.coachType
+            ),
+
+        status:
+
+            clean(
+                pulledOut.status
+            ),
+
+        updatedAt:
+            nowISO(),
+
+        returnedAt:
+            nowISO(),
+
+        returnedFromPullOut:
+            pulledOutId
+
+    };
+
+
+    /* =================================================
+       VALIDATE
+    ================================================= */
+
+    validateCoach(
+        restoredCoach
+    );
+
+
+    /* =================================================
+       ATOMIC RETURN
+       -----------------------------------------------
+       1. Restore to board
+       2. Delete from pulledOutCoaches
+    ================================================= */
+
+    const updates = {};
+
+
+    updates[
+        `${BOARD_PATH}/${line}/${position}`
+    ] =
+        restoredCoach;
+
+
+    updates[
+        `${PULLED_OUT_PATH}/${pulledOutId}`
+    ] =
+        null;
+
+
+    await update(
+        ref(database),
+        updates
+    );
+
+
+    /* =================================================
+       HISTORY
+    ================================================= */
+
+    await writeHistory(
+        "RETURN_TO_BOARD",
+        restoredCoach,
+        pulledOut
+    );
+
+
+    /* =================================================
+       AUDIT
+    ================================================= */
+
+    await writeAudit(
+        "RETURN_TO_BOARD",
+        restoredCoach,
+        pulledOut
+    );
+
+
+    /* =================================================
+       SUCCESS LOG
+    ================================================= */
+
+    console.log(
+        "======================================"
+    );
+
+    console.log(
+        "RETURN TO BOARD SUCCESS"
+    );
+
+    console.log(
+        "Coach:",
+        restoredCoach.coachNo
+    );
+
+    console.log(
+        "Returned To:",
+        `${line}/${position}`
+    );
+
+    console.log(
+        "Pull Out ID:",
+        pulledOutId
+    );
+
+    console.log(
+        "======================================"
+    );
+
+
+    return {
+
+        success:
+            true,
+
+        pulledOutId,
+
+        coach:
+            restoredCoach
+
+    };
+
+}
+
+
+/* =====================================================
+   GET ALL PULLED OUT COACHES
+===================================================== */
+
+export async function getPulledOutCoaches() {
+
+    const snapshot =
+        await get(
+            ref(
+                database,
+                PULLED_OUT_PATH
+            )
+        );
+
+
+    if (!snapshot.exists()) {
+
+        return [];
+
+    }
+
+
+    const data =
+        snapshot.val();
+
+
+    if (
+        !data ||
+        typeof data !== "object"
+    ) {
+
+        return [];
+
+    }
+
+
+    const coaches = [];
+
+
+    for (
+        const id in data
+    ) {
+
+        if (!data[id]) {
+
+            continue;
+
+        }
+
+
+        coaches.push({
+
+            ...data[id],
+
+            pulledOutId:
+                id
+
+        });
+
+    }
+
+
+    /* Newest Pull Out first */
+
+    coaches.sort(
+        (a, b) => {
+
+            return String(
+                b.pulledOutAt || ""
+            ).localeCompare(
+                String(
+                    a.pulledOutAt || ""
+                )
+            );
+
+        }
+    );
+
+
+    return coaches;
+
+}
 
 /* =====================================================
    MOVE / SWAP COACH
