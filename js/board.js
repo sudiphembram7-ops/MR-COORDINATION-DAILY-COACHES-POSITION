@@ -254,7 +254,100 @@ function getShopFromLine(
 
 }
 
+/* =====================================================
+   WRAP TABLE FOR HORIZONTAL SCROLL
+===================================================== */
 
+function prepareTableScroll() {
+
+    const tables =
+        document.querySelectorAll(
+            "table"
+        );
+
+
+    tables.forEach(
+        table => {
+
+            /* Already wrapped */
+
+            if (
+                table.parentElement &&
+                table.parentElement.classList.contains(
+                    "board-table-scroll"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            /* Check board table */
+
+            const firstRow =
+                table.querySelector(
+                    "tr"
+                );
+
+
+            if (!firstRow) {
+                return;
+            }
+
+
+            const firstCell =
+                firstRow.children[0];
+
+
+            if (!firstCell) {
+                return;
+            }
+
+
+            const firstText =
+                upper(
+                    firstCell.textContent
+                );
+
+
+            if (
+                !firstText.includes(
+                    "POSITION"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            /* Create scroll wrapper */
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+
+            wrapper.className =
+                "board-table-scroll";
+
+
+            table.parentNode.insertBefore(
+                wrapper,
+                table
+            );
+
+
+            wrapper.appendChild(
+                table
+            );
+
+        }
+    );
+
+}
 /* =====================================================
    BOARD CELL IDENTIFICATION
 ===================================================== */
