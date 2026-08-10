@@ -1,2499 +1,274 @@
-/* =========================================================
+/* =====================================================
    MR CO-ORDINATION BOARD
-   css/style.css
-   VERSION 8.1 FINAL
-   ---------------------------------------------------------
-   Desktop
-   Mobile
-   Responsive Board
-   Railway Status Colours
-   Search
-   Modal
-   Database Status
-   A4 Landscape Print
-========================================================= */
+   COACH DISPLAY FIX - VERSION 8.1
+===================================================== */
 
-
-/* =========================================================
-   ROOT
-========================================================= */
-
-:root {
-
-    --primary-dark: #212529;
-    --secondary-dark: #343a40;
-
-    --page-bg: #f1f3f5;
-    --white: #ffffff;
-
-    --border: #d9dde1;
-    --border-dark: #555;
-
-    --header-text: #ffffff;
-
-    --cr-shop: #55bfe2;
-    --j-shop: #3f8c5c;
-
-    --success: #3f8c5c;
-    --danger: #dc3545;
-    --warning: #f7c843;
-    --info: #55bfe2;
-    --blue: #3267e8;
-    --gray: #737b84;
-
-    --shadow:
-        0 2px 8px rgba(
-            0,
-            0,
-            0,
-            0.12
-        );
-
-    --radius: 8px;
-
-}
-
-
-/* =========================================================
-   GLOBAL RESET
-========================================================= */
-
-* {
-
-    box-sizing: border-box;
-
-}
-
-
-html {
-
+/* Board horizontal scrolling on mobile */
+.board-wrapper,
+.table-wrapper,
+#boardContainer {
     width: 100%;
-
-    min-height: 100%;
-
-    scroll-behavior: smooth;
-
-}
-
-
-body {
-
-    margin: 0;
-
-    padding: 0;
-
-    width: 100%;
-
-    min-height: 100vh;
-
-    background: var(--page-bg);
-
-    color: #111;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    overflow-x: hidden;
-
-}
-
-
-/* =========================================================
-   IMAGES
-========================================================= */
-
-img {
-
-    max-width: 100%;
-
-    height: auto;
-
-}
-
-
-/* =========================================================
-   BUTTON
-========================================================= */
-
-button {
-
-    font-family: inherit;
-
-    cursor: pointer;
-
-}
-
-
-button:disabled {
-
-    cursor: not-allowed;
-
-    opacity: 0.6;
-
-}
-
-
-/* =========================================================
-   INPUT / SELECT
-========================================================= */
-
-input,
-select,
-textarea {
-
-    font-family: inherit;
-
-    font-size: 16px;
-
-}
-
-
-input:focus,
-select:focus,
-textarea:focus {
-
-    outline: none;
-
-}
-
-
-/* =========================================================
-   MAIN CONTAINER
-========================================================= */
-
-.board-container {
-
-    width: 100%;
-
-    max-width: 1600px;
-
-    margin: 0 auto;
-
-    padding: 15px;
-
-}
-
-
-/* =========================================================
-   TOP HEADER
-========================================================= */
-
-.board-header {
-
-    width: 100%;
-
-    background: var(--primary-dark);
-
-    color: white;
-
-    text-align: center;
-
-    padding: 18px 12px;
-
-    border-radius: 8px 8px 0 0;
-
-}
-
-
-.board-header h1 {
-
-    margin: 0;
-
-    font-size: 28px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.5px;
-
-}
-
-
-.board-header h2 {
-
-    margin: 6px 0 0;
-
-    font-size: 20px;
-
-    font-weight: 500;
-
-}
-
-
-.board-header p {
-
-    margin: 5px 0 0;
-
-    font-size: 14px;
-
-}
-
-
-/* =========================================================
-   CONTROL BAR
-========================================================= */
-
-.control-bar {
-
-    width: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 10px;
-
-    flex-wrap: wrap;
-
-    padding: 12px;
-
-    background: white;
-
-    border-bottom: 1px solid var(--border);
-
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-.search-container {
-
-    flex: 1;
-
-    min-width: 220px;
-
-    position: relative;
-
-}
-
-
-#searchInput,
-#searchBox {
-
-    width: 100%;
-
-    height: 42px;
-
-    padding:
-        8px
-        14px;
-
-    border:
-        1px solid
-        #adb5bd;
-
-    border-radius: 6px;
-
-    background: white;
-
-    color: #111;
-
-}
-
-
-#searchInput::placeholder,
-#searchBox::placeholder {
-
-    color: #777;
-
-}
-
-
-/* =========================================================
-   BUTTON GROUP
-========================================================= */
-
-.button-group {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    flex-wrap: wrap;
-
-}
-
-
-/* =========================================================
-   COMMON BUTTON
-========================================================= */
-
-.btn {
-
-    border: none;
-
-    border-radius: 6px;
-
-    padding:
-        9px
-        14px;
-
-    font-size: 14px;
-
-    font-weight: 600;
-
-    transition:
-        0.15s ease;
-
-}
-
-
-.btn:hover {
-
-    transform: translateY(-1px);
-
-}
-
-
-.btn:active {
-
-    transform: translateY(0);
-
-}
-
-
-/* =========================================================
-   BUTTON COLORS
-========================================================= */
-
-.btn-primary {
-
-    background: #0d6efd;
-
-    color: white;
-
-}
-
-
-.btn-success {
-
-    background: #198754;
-
-    color: white;
-
-}
-
-
-.btn-danger {
-
-    background: #dc3545;
-
-    color: white;
-
-}
-
-
-.btn-warning {
-
-    background: #ffc107;
-
-    color: #111;
-
-}
-
-
-.btn-info {
-
-    background: #0dcaf0;
-
-    color: #111;
-
-}
-
-
-.btn-dark {
-
-    background: #212529;
-
-    color: white;
-
-}
-
-
-.btn-secondary {
-
-    background: #6c757d;
-
-    color: white;
-
-}
-
-
-.btn-light {
-
-    background: #f8f9fa;
-
-    color: #111;
-
-    border:
-        1px solid
-        #ced4da;
-
-}
-
-
-/* =========================================================
-   SHOP SECTION
-========================================================= */
-
-.shop-section {
-
-    width: 100%;
-
-    margin:
-        25px 0;
-
-    background: white;
-
-    border-radius: 0;
-
-    overflow: hidden;
-
-    box-shadow: var(--shadow);
-
-}
-
-
-/* =========================================================
-   SHOP TITLE
-========================================================= */
-
-.shop-title {
-
-    width: 100%;
-
-    min-height: 78px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 15px;
-
-    color: white;
-
-    font-size: 42px;
-
-    font-weight: 400;
-
-    text-align: center;
-
-}
-
-
-.shop-title.cr,
-.shop-title.cr-shop {
-
-    background: var(--cr-shop);
-
-}
-
-
-.shop-title.j,
-.shop-title.j-shop {
-
-    background: var(--j-shop);
-
-}
-
-
-.shop-title.n,
-.shop-title.n-shop {
-
-    background: #4b8fc4;
-
-}
-
-
-.shop-title.m,
-.shop-title.m-shop {
-
-    background: #8b5ca8;
-
-}
-
-
-.shop-title.scr,
-.shop-title.scr-shop {
-
-    background: #e49a32;
-
-}
-
-
-.shop-title.l,
-.shop-title.lifting-bay {
-
-    background: #777;
-
-}
-
-
-/* =========================================================
-   BOARD TABLE WRAPPER
-========================================================= */
-
-.board-table-wrapper {
-
-    width: 100%;
-
     overflow-x: auto;
-
-    overflow-y: hidden;
-
-    -webkit-overflow-scrolling:
-        touch;
-
+    -webkit-overflow-scrolling: touch;
 }
 
 
-/* =========================================================
+/* =====================================================
    BOARD TABLE
-========================================================= */
+===================================================== */
 
 .board-table {
-
-    width: 100%;
-
-    min-width: 700px;
-
-    border-collapse:
-        collapse;
-
-    table-layout:
-        fixed;
-
-    background: white;
-
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
 
-/* =========================================================
-   TABLE HEADER
-========================================================= */
+/* =====================================================
+   POSITION COLUMN
+===================================================== */
 
-.board-table thead th {
-
-    height: 62px;
-
-    padding: 8px 5px;
-
-    background:
-        var(--primary-dark);
-
-    color:
-        white;
-
-    border:
-        2px solid
-        #555;
-
-    font-size:
-        20px;
-
-    font-weight:
-        700;
-
-    text-align:
-        center;
-
-    vertical-align:
-        middle;
-
-    white-space:
-        nowrap;
-
-}
-
-
-/* =========================================================
-   POSITION HEADER
-========================================================= */
-
-.board-table thead th:first-child {
-
+.board-table th:first-child,
+.board-table td:first-child {
+    min-width: 120px;
     width: 120px;
-
 }
 
 
-/* =========================================================
-   TABLE BODY
-========================================================= */
-
-.board-table tbody td {
-
-    height: 78px;
-
-    padding: 5px;
-
-    border:
-        2px solid
-        var(--border);
-
-    background:
-        white;
-
-    text-align:
-        center;
-
-    vertical-align:
-        middle;
-
-    font-size:
-        18px;
-
-    font-weight:
-        600;
-
-}
-
-
-/* =========================================================
-   POSITION CELL
-========================================================= */
-
-.board-table tbody td:first-child {
-
-    background:
-        #f8f9fa;
-
-    font-size:
-        20px;
-
-    font-weight:
-        700;
-
-    color:
-        #111;
-
-}
-
-
-/* =========================================================
-   EMPTY CELL
-========================================================= */
-
-.board-cell {
-
-    position:
-        relative;
-
-    min-height:
-        70px;
-
-    cursor:
-        pointer;
-
-    user-select:
-        none;
-
-    -webkit-user-select:
-        none;
-
-    transition:
-        background
-        0.15s ease,
-        transform
-        0.1s ease;
-
-}
-
-
-.board-cell:hover {
-
-    background:
-        #eef7ff;
-
-}
-
-
-.board-cell.empty {
-
-    background:
-        #ffffff;
-
-}
-
-
-/* =========================================================
+/* =====================================================
    COACH CELL
-========================================================= */
+===================================================== */
 
-.board-cell.occupied {
+.board-table td:not(:first-child) {
 
-    background:
-        #ffffff;
+    min-width: 110px;
+
+    width: 110px;
+
+    height: 75px;
+
+    padding: 4px;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    overflow: visible;
+
+    white-space: normal;
 
 }
 
 
-/* =========================================================
+/* =====================================================
    COACH NUMBER
-========================================================= */
+===================================================== */
 
 .coach-number {
 
-    display:
-        block;
+    display: block;
 
-    font-size:
-        20px;
+    width: 100%;
 
-    font-weight:
-        700;
+    font-size: 17px;
 
-    line-height:
-        1.2;
+    font-weight: 800;
 
-    color:
-        #111;
+    line-height: 1.15;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    overflow: visible;
+
+    text-overflow: clip;
 
 }
 
+
+/* =====================================================
+   COACH TYPE
+===================================================== */
 
 .coach-type {
 
-    display:
-        block;
+    display: block;
 
-    margin-top:
-        3px;
+    width: 100%;
 
-    font-size:
-        13px;
+    margin-top: 3px;
 
-    color:
-        #555;
+    font-size: 12px;
+
+    font-weight: 700;
+
+    line-height: 1.1;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    overflow: visible;
+
+    text-overflow: clip;
 
 }
 
+
+/* =====================================================
+   COACH STATUS
+===================================================== */
 
 .coach-status {
 
-    display:
-        inline-block;
+    display: inline-block;
 
-    margin-top:
-        4px;
+    margin-top: 3px;
 
-    padding:
-        3px 8px;
+    padding: 2px 7px;
 
-    border-radius:
-        12px;
+    border-radius: 5px;
 
-    font-size:
-        11px;
+    font-size: 11px;
 
-    font-weight:
-        700;
+    font-weight: 900;
 
-}
+    line-height: 1.1;
 
+    text-align: center;
 
-/* =========================================================
-   DRAGGING
-========================================================= */
-
-.dragging {
-
-    opacity:
-        0.45;
+    white-space: nowrap;
 
 }
 
 
-.drag-over {
+/* =====================================================
+   STATUS COLOURS
+===================================================== */
 
-    background:
-        #dbeafe !important;
+.status-po {
+    background: #3f8f5b;
+    color: #fff;
+}
 
-    outline:
-        3px dashed
-        #0d6efd;
+.status-s {
+    background: #3f8f5b;
+    color: #fff;
+}
 
-    outline-offset:
-        -3px;
+.status-lm {
+    background: #f5bd32;
+    color: #111;
+}
 
+.status-med {
+    background: #d64545;
+    color: #fff;
+}
+
+.status-rl {
+    background: #3167df;
+    color: #fff;
+}
+
+.status-r1 {
+    background: #55b9dc;
+    color: #111;
+}
+
+.status-rs {
+    background: #777f88;
+    color: #fff;
+}
+
+.status-l {
+    background: #777f88;
+    color: #fff;
+}
+
+.status-hvy {
+    background: #333;
+    color: #fff;
+}
+
+.status-default {
+    background: #555;
+    color: #fff;
 }
 
 
-/* =========================================================
-   RAILWAY STATUS
-========================================================= */
-
-.status-PO {
-
-    background:
-        #3f8c5c !important;
-
-    color:
-        white !important;
-
-}
-
-
-.status-S {
-
-    background:
-        #3f8c5c !important;
-
-    color:
-        white !important;
-
-}
-
-
-.status-LM {
-
-    background:
-        #f7c843 !important;
-
-    color:
-        #111 !important;
-
-}
-
-
-.status-MED {
-
-    background:
-        #d9434f !important;
-
-    color:
-        white !important;
-
-}
-
-
-.status-RL {
-
-    background:
-        #3267e8 !important;
-
-    color:
-        white !important;
-
-}
-
-
-.status-R1 {
-
-    background:
-        #55bfe2 !important;
-
-    color:
-        #111 !important;
-
-}
-
-
-.status-L {
-
-    background:
-        #737b84 !important;
-
-    color:
-        white !important;
-
-}
-
-
-.status-HVY {
-
-    background:
-        #212529 !important;
-
-    color:
-        white !important;
-
-}
-
-
-.status-RS {
-
-    background:
-        #7952b3 !important;
-
-    color:
-        white !important;
-
-}
-
-
-/* =========================================================
-   CELL STATUS BACKGROUND
-========================================================= */
-
-.board-cell[data-status="PO"] {
-
-    background:
-        rgba(63, 140, 92, 0.12);
-
-}
-
-
-.board-cell[data-status="S"] {
-
-    background:
-        rgba(63, 140, 92, 0.12);
-
-}
-
-
-.board-cell[data-status="LM"] {
-
-    background:
-        rgba(247, 200, 67, 0.18);
-
-}
-
-
-.board-cell[data-status="MED"] {
-
-    background:
-        rgba(217, 67, 79, 0.12);
-
-}
-
-
-.board-cell[data-status="RL"] {
-
-    background:
-        rgba(50, 103, 232, 0.12);
-
-}
-
-
-.board-cell[data-status="R1"] {
-
-    background:
-        rgba(85, 191, 226, 0.15);
-
-}
-
-
-.board-cell[data-status="L"] {
-
-    background:
-        rgba(115, 123, 132, 0.12);
-
-}
-
-
-/* =========================================================
-   STATUS LEGEND
-========================================================= */
-
-.status-legend {
-
-    width: 100%;
-
-    margin:
-        25px 0;
-
-    background:
-        white;
-
-    border:
-        1px solid
-        #ced4da;
-
-    border-radius:
-        10px;
-
-    overflow:
-        hidden;
-
-    box-shadow:
-        var(--shadow);
-
-}
-
-
-.status-legend-title {
-
-    background:
-        var(--primary-dark);
-
-    color:
-        white;
-
-    padding:
-        15px 20px;
-
-    font-size:
-        24px;
-
-}
-
-
-.status-legend-body {
-
-    display:
-        flex;
-
-    flex-wrap:
-        wrap;
-
-    align-items:
-        center;
-
-    gap:
-        8px;
-
-    padding:
-        22px;
-
-}
-
-
-/* =========================================================
-   LEGEND BADGE
-========================================================= */
-
-.status-badge {
-
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    min-width:
-        52px;
-
-    padding:
-        7px 12px;
-
-    border-radius:
-        9px;
-
-    font-size:
-        16px;
-
-    font-weight:
-        700;
-
-}
-
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.board-footer {
-
-    width: 100%;
-
-    margin-top:
-        30px;
-
-    padding:
-        32px 15px;
-
-    background:
-        var(--primary-dark);
-
-    color:
-        white;
-
-    text-align:
-        center;
-
-}
-
-
-.board-footer .footer-title {
-
-    font-size:
-        22px;
-
-    font-weight:
-        700;
-
-}
-
-
-.board-footer .footer-subtitle {
-
-    margin-top:
-        5px;
-
-    font-size:
-        18px;
-
-}
-
-
-.board-footer .last-update {
-
-    margin-top:
-        8px;
-
-    font-size:
-        16px;
-
-}
-
-
-.database-status {
-
-    margin-top:
-        12px;
-
-    font-size:
-        17px;
-
-}
-
-
-.database-status.connected {
-
-    color:
-        #3f8c5c;
-
-}
-
-
-.database-status.disconnected {
-
-    color:
-        #dc3545;
-
-}
-
-
-.database-dot {
-
-    display:
-        inline-block;
-
-    width:
-        9px;
-
-    height:
-        9px;
-
-    margin-right:
-        5px;
-
-    border-radius:
-        50%;
-
-    background:
-        currentColor;
-
-}
-
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-.modal-overlay {
-
-    position:
-        fixed;
-
-    inset:
-        0;
-
-    z-index:
-        9999;
-
-    display:
-        none;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    padding:
-        15px;
-
-    background:
-        rgba(
-            0,
-            0,
-            0,
-            0.65
-        );
-
-}
-
-
-.modal-overlay.show {
-
-    display:
-        flex;
-
-}
-
-
-.modal {
-
-    width:
-        100%;
-
-    max-width:
-        520px;
-
-    max-height:
-        90vh;
-
-    overflow-y:
-        auto;
-
-    background:
-        white;
-
-    border-radius:
-        10px;
-
-    box-shadow:
-        0 10px 40px
-        rgba(
-            0,
-            0,
-            0,
-            0.3
-        );
-
-}
-
-
-.modal-header {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    padding:
-        15px 20px;
-
-    background:
-        var(--primary-dark);
-
-    color:
-        white;
-
-}
-
-
-.modal-header h3 {
-
-    margin:
-        0;
-
-    font-size:
-        20px;
-
-}
-
-
-.modal-close {
-
-    border:
-        none;
-
-    background:
-        transparent;
-
-    color:
-        white;
-
-    font-size:
-        28px;
-
-    line-height:
-        1;
-
-}
-
-
-.modal-body {
-
-    padding:
-        20px;
-
-}
-
-
-.modal-footer {
-
-    display:
-        flex;
-
-    justify-content:
-        flex-end;
-
-    gap:
-        8px;
-
-    padding:
-        15px 20px;
-
-    border-top:
-        1px solid
-        #ddd;
-
-}
-
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.form-group {
-
-    margin-bottom:
-        15px;
-
-}
-
-
-.form-group label {
-
-    display:
-        block;
-
-    margin-bottom:
-        6px;
-
-    font-size:
-        14px;
-
-    font-weight:
-        700;
-
-}
-
-
-.form-control {
-
-    width:
-        100%;
-
-    min-height:
-        42px;
-
-    padding:
-        8px 12px;
-
-    border:
-        1px solid
-        #adb5bd;
-
-    border-radius:
-        6px;
-
-    background:
-        white;
-
-}
-
-
-.form-control:focus {
-
-    border-color:
-        #0d6efd;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(
-            13,
-            110,
-            253,
-            0.15
-        );
-
-}
-
-
-/* =========================================================
-   SEARCH RESULTS
-========================================================= */
-
-.search-results {
-
-    position:
-        absolute;
-
-    left:
-        0;
-
-    right:
-        0;
-
-    top:
-        calc(100% + 4px);
-
-    z-index:
-        5000;
-
-    max-height:
-        350px;
-
-    overflow-y:
-        auto;
-
-    background:
-        white;
-
-    border:
-        1px solid
-        #ced4da;
-
-    border-radius:
-        6px;
-
-    box-shadow:
-        0 5px 15px
-        rgba(
-            0,
-            0,
-            0,
-            0.15
-        );
-
-}
-
-
-.search-result-item {
-
-    padding:
-        10px 12px;
-
-    border-bottom:
-        1px solid
-        #eee;
-
-    cursor:
-        pointer;
-
-}
-
-
-.search-result-item:last-child {
-
-    border-bottom:
-        none;
-
-}
-
-
-.search-result-item:hover {
-
-    background:
-        #f1f5f9;
-
-}
-
-
-/* =========================================================
-   PULL OUT PANEL
-========================================================= */
-
-.pulled-out-panel {
-
-    width:
-        100%;
-
-    margin:
-        20px 0;
-
-    background:
-        white;
-
-    border:
-        1px solid
-        #ced4da;
-
-    border-radius:
-        8px;
-
-    overflow:
-        hidden;
-
-}
-
-
-.pulled-out-header {
-
-    padding:
-        12px 15px;
-
-    background:
-        var(--primary-dark);
-
-    color:
-        white;
-
-    font-weight:
-        700;
-
-}
-
-
-.pulled-out-list {
-
-    max-height:
-        400px;
-
-    overflow-y:
-        auto;
-
-}
-
-
-.pulled-out-item {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    gap:
-        10px;
-
-    padding:
-        10px 15px;
-
-    border-bottom:
-        1px solid
-        #eee;
-
-}
-
-
-.pulled-out-item:last-child {
-
-    border-bottom:
-        none;
-
-}
-
-
-/* =========================================================
-   ALERT / MESSAGE
-========================================================= */
-
-.alert {
-
-    width:
-        100%;
-
-    padding:
-        12px 15px;
-
-    margin:
-        10px 0;
-
-    border-radius:
-        6px;
-
-    font-size:
-        14px;
-
-}
-
-
-.alert-success {
-
-    background:
-        #d1e7dd;
-
-    color:
-        #0f5132;
-
-}
-
-
-.alert-danger {
-
-    background:
-        #f8d7da;
-
-    color:
-        #842029;
-
-}
-
-
-.alert-warning {
-
-    background:
-        #fff3cd;
-
-    color:
-        #664d03;
-
-}
-
-
-.alert-info {
-
-    background:
-        #cff4fc;
-
-    color:
-        #055160;
-
-}
-
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.loading {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    min-height:
-        120px;
-
-    font-size:
-        18px;
-
-    color:
-        #666;
-
-}
-
-
-.spinner {
-
-    width:
-        30px;
-
-    height:
-        30px;
-
-    margin-right:
-        10px;
-
-    border:
-        4px solid
-        #ddd;
-
-    border-top-color:
-        #0d6efd;
-
-    border-radius:
-        50%;
-
-    animation:
-        spin 0.8s
-        linear
-        infinite;
-
-}
-
-
-@keyframes spin {
-
-    to {
-
-        transform:
-            rotate(360deg);
-
-    }
-
-}
-
-
-/* =========================================================
+/* =====================================================
    MOBILE
-========================================================= */
+===================================================== */
 
-@media (
-    max-width: 768px
-) {
+@media (max-width: 600px) {
 
-    .board-container {
+    .board-table th:first-child,
+    .board-table td:first-child {
 
-        padding:
-            0;
+        min-width: 120px;
 
-    }
-
-
-    .board-header {
-
-        border-radius:
-            0;
-
-        padding:
-            15px 8px;
+        width: 120px;
 
     }
 
 
-    .board-header h1 {
+    .board-table td:not(:first-child) {
 
-        font-size:
-            22px;
+        min-width: 105px;
 
-    }
+        width: 105px;
 
-
-    .board-header h2 {
-
-        font-size:
-            17px;
-
-    }
-
-
-    .control-bar {
-
-        padding:
-            10px;
-
-        align-items:
-            stretch;
-
-    }
-
-
-    .search-container {
-
-        min-width:
-            100%;
-
-    }
-
-
-    .button-group {
-
-        width:
-            100%;
-
-        justify-content:
-            center;
-
-    }
-
-
-    .button-group .btn {
-
-        flex:
-            1 1 auto;
-
-        min-width:
-            80px;
-
-    }
-
-
-    .shop-section {
-
-        margin:
-            20px 0;
-
-        border-radius:
-            0;
-
-        box-shadow:
-            none;
-
-    }
-
-
-    .shop-title {
-
-        min-height:
-            64px;
-
-        font-size:
-            32px;
-
-    }
-
-
-    .board-table {
-
-        min-width:
-            700px;
-
-    }
-
-
-    .board-table thead th {
-
-        height:
-            55px;
-
-        font-size:
-            17px;
-
-        padding:
-            5px 3px;
-
-    }
-
-
-    .board-table tbody td {
-
-        height:
-            72px;
-
-        font-size:
-            16px;
-
-    }
-
-
-    .board-table thead th:first-child {
-
-        width:
-            90px;
+        height: 78px;
 
     }
 
 
     .coach-number {
 
-        font-size:
-            17px;
+        font-size: 16px;
 
     }
 
 
     .coach-type {
 
-        font-size:
-            11px;
-
-    }
-
-
-    .status-legend {
-
-        margin:
-            20px 0;
-
-        border-radius:
-            8px;
-
-    }
-
-
-    .status-legend-title {
-
-        font-size:
-            20px;
-
-    }
-
-
-    .status-legend-body {
-
-        padding:
-            16px;
-
-    }
-
-
-    .status-badge {
-
-        min-width:
-            45px;
-
-        padding:
-            6px 9px;
-
-        font-size:
-            14px;
-
-    }
-
-
-    .board-footer {
-
-        padding:
-            25px 10px;
-
-    }
-
-
-    .board-footer .footer-title {
-
-        font-size:
-            19px;
-
-    }
-
-
-    .board-footer .footer-subtitle {
-
-        font-size:
-            16px;
-
-    }
-
-
-    .database-status {
-
-        font-size:
-            15px;
-
-    }
-
-}
-
-
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
-
-@media (
-    max-width: 480px
-) {
-
-    .shop-title {
-
-        font-size:
-            28px;
-
-    }
-
-
-    .board-table {
-
-        min-width:
-            650px;
-
-    }
-
-
-    .board-table thead th {
-
-        font-size:
-            15px;
-
-    }
-
-
-    .board-table tbody td {
-
-        height:
-            65px;
-
-    }
-
-
-    .coach-number {
-
-        font-size:
-            15px;
-
-    }
-
-
-    .status-legend-body {
-
-        gap:
-            6px;
-
-    }
-
-
-    .status-badge {
-
-        min-width:
-            42px;
-
-        font-size:
-            13px;
-
-    }
-
-}
-
-
-/* =========================================================
-   PRINT - A4 LANDSCAPE
-========================================================= */
-
-@media print {
-
-    @page {
-
-        size:
-            A4 landscape;
-
-        margin:
-            6mm;
-
-    }
-
-
-    html,
-    body {
-
-        width:
-            100%;
-
-        background:
-            white !important;
-
-        color:
-            black !important;
-
-    }
-
-
-    body {
-
-        margin:
-            0;
-
-        padding:
-            0;
-
-    }
-
-
-    .no-print,
-    .control-bar,
-    button,
-    .button-group,
-    .search-container,
-    .modal-overlay,
-    .pulled-out-panel {
-
-        display:
-            none !important;
-
-    }
-
-
-    .board-container {
-
-        width:
-            100%;
-
-        max-width:
-            none;
-
-        padding:
-            0;
-
-        margin:
-            0;
-
-    }
-
-
-    .board-header {
-
-        display:
-            block;
-
-        padding:
-            6px;
-
-        border-radius:
-            0;
-
-        background:
-            white !important;
-
-        color:
-            black !important;
-
-        border-bottom:
-            2px solid
-            black;
-
-    }
-
-
-    .board-header h1 {
-
-        font-size:
-            18px;
-
-    }
-
-
-    .board-header h2 {
-
-        font-size:
-            14px;
-
-    }
-
-
-    .board-header p {
-
-        font-size:
-            10px;
-
-    }
-
-
-    .shop-section {
-
-        margin:
-            5px 0 8px;
-
-        box-shadow:
-            none;
-
-        break-inside:
-            avoid;
-
-        page-break-inside:
-            avoid;
-
-    }
-
-
-    .shop-title {
-
-        min-height:
-            32px;
-
-        padding:
-            5px;
-
-        font-size:
-            20px;
-
-        color:
-            black !important;
-
-        background:
-            white !important;
-
-        border:
-            1px solid
-            black;
-
-    }
-
-
-    .board-table-wrapper {
-
-        overflow:
-            visible;
-
-    }
-
-
-    .board-table {
-
-        width:
-            100%;
-
-        min-width:
-            0;
-
-        table-layout:
-            fixed;
-
-        border-collapse:
-            collapse;
-
-    }
-
-
-    .board-table thead th {
-
-        height:
-            28px;
-
-        padding:
-            2px;
-
-        background:
-            #eeeeee !important;
-
-        color:
-            black !important;
-
-        border:
-            1px solid
-            black;
-
-        font-size:
-            10px;
-
-    }
-
-
-    .board-table tbody td {
-
-        height:
-            32px;
-
-        padding:
-            2px;
-
-        background:
-            white !important;
-
-        color:
-            black !important;
-
-        border:
-            1px solid
-            black;
-
-        font-size:
-            10px;
-
-    }
-
-
-    .board-table thead th:first-child {
-
-        width:
-            70px;
-
-    }
-
-
-    .coach-number {
-
-        font-size:
-            11px;
-
-        font-weight:
-            700;
-
-    }
-
-
-    .coach-type {
-
-        display:
-            none !important;
+        font-size: 11px;
 
     }
 
 
     .coach-status {
 
-        display:
-            none !important;
+        font-size: 10px;
 
-    }
-
-
-    .status-legend {
-
-        margin:
-            5px 0;
-
-        border:
-            1px solid
-            black;
-
-        box-shadow:
-            none;
-
-        break-inside:
-            avoid;
-
-    }
-
-
-    .status-legend-title {
-
-        padding:
-            4px 8px;
-
-        background:
-            white !important;
-
-        color:
-            black !important;
-
-        border-bottom:
-            1px solid
-            black;
-
-        font-size:
-            11px;
-
-    }
-
-
-    .status-legend-body {
-
-        padding:
-            5px 8px;
-
-        gap:
-            4px;
-
-    }
-
-
-    .status-badge {
-
-        min-width:
-            30px;
-
-        padding:
-            2px 5px;
-
-        border:
-            1px solid
-            black;
-
-        color:
-            black !important;
-
-        background:
-            white !important;
-
-        font-size:
-            8px;
-
-    }
-
-
-    .board-footer {
-
-        margin-top:
-            5px;
-
-        padding:
-            5px;
-
-        background:
-            white !important;
-
-        color:
-            black !important;
-
-        border-top:
-            1px solid
-            black;
-
-    }
-
-
-    .board-footer .footer-title {
-
-        font-size:
-            10px;
-
-    }
-
-
-    .board-footer .footer-subtitle,
-    .board-footer .last-update,
-    .database-status {
-
-        font-size:
-            8px;
+        padding: 2px 6px;
 
     }
 
 }
 
 
-/* =========================================================
-   PRINT - COACH NUMBER ONLY
-========================================================= */
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
 
-@media print {
+@media (max-width: 400px) {
 
-    /*
-       Print-এ Coach Number থাকবে।
-       Coach Type / Status hide থাকবে।
-    */
+    .board-table td:not(:first-child) {
+
+        min-width: 100px;
+
+        width: 100px;
+
+    }
 
     .coach-number {
 
-        display:
-            block !important;
+        font-size: 15px;
 
     }
 
 }
-
-
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
-
-.board-cell:focus {
-
-    outline:
-        3px solid
-        #0d6efd;
-
-    outline-offset:
-        -3px;
-
-}
-
-
-/* =========================================================
-   TOUCH DEVICE
-========================================================= */
-
-@media (
-    pointer: coarse
-) {
-
-    .board-cell {
-
-        -webkit-tap-highlight-color:
-            transparent;
-
-    }
-
-
-    .btn {
-
-        min-height:
-            42px;
-
-    }
-
-}
-
-
-/* =========================================================
-   END OF STYLE.CSS
-========================================================= */
