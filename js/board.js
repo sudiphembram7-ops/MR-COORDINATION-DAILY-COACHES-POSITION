@@ -1244,6 +1244,16 @@ function initializeButtons() {
             "click",
             updateCoach
         );
+        /* =====================================================
+   PULL OUT BUTTON
+===================================================== */
+
+document
+    .getElementById("pullOutCoachBtn")
+    ?.addEventListener(
+        "click",
+        pullOutCoach
+    );
 
     document
         .getElementById("deleteCoachBtn")
@@ -1525,7 +1535,335 @@ async function updateCoach() {
 
 }
 
+/* =====================================================
+   PULL OUT COACH
+   -----------------------------------------------------
+   Removes coach from active board but DOES NOT DELETE
+   the coach permanently.
 
+   Firebase:
+       coachBoard/LINE/POSITION
+              ↓
+       removed
+
+   Saved into:
+       pulledOutCoaches/PUSH_ID
+===================================================== */
+
+async function pullOutCoach() {
+
+    /* =================================================
+       ADMIN CHECK
+    ================================================= */
+
+    if (
+        !checkAdmin()
+    ) {
+
+        return;
+
+    }
+
+
+    /* =================================================
+       GET MODAL DATA
+    ================================================= */
+
+    const line =
+        document.getElementById(
+            "modalLine"
+        )?.value?.trim() || "";
+
+
+    const position =
+        document.getElementById(
+            "modalPosition"
+        )?.value?.trim() || "";
+
+
+    const coachNo =
+        document.getElementById(
+            "modalCoachNo"
+        )?.value?.trim() || "";
+
+
+    const coachType =
+        document.getElementById(
+            "modalCoachType"
+        )?.value?.trim() || "";
+
+
+    const status =
+        document.getElementById(
+            "modalStatus"
+        )?.value?.trim() || "";
+
+
+    const shop =
+        document.getElementById(
+            "modalShop"
+        )?.value?.trim() ||
+        getShop(line);
+
+
+    /* =================================================
+       VALIDATION
+    ================================================= */
+
+    if (
+        !line ||
+        !position
+    ) {
+
+        alert(
+            "Line / Position Missing"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !coachNo
+    ) {
+
+        alert(
+            "Coach Number Missing"
+        );
+
+        return;
+
+    }
+
+
+    /* =================================================
+       CONFIRMATION
+    ================================================= */
+
+    const confirmed =
+        confirm(
+            "PULL OUT COACH\n\n" +
+
+            "Coach No : " +
+            coachNo +
+            "\n" +
+
+            "Shop : " +
+            shop +
+            "\n" +
+
+            "Line : " +
+            line +
+            "\n" +
+
+            "Position : " +
+            position +
+            "\n\n" +
+
+            "The coach will be removed from the " +
+            "active board but preserved in Pull Out records.\n\n" +
+
+            "Do you want to continue?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    /* =================================================
+       BUTTON
+    ================================================= */
+
+    const button =
+        document.getElementById(
+            "pullOutCoachBtn"
+        );
+
+
+    if (button) {
+
+        button.disabled =
+            true;
+
+        button.textContent =
+            "PULLING OUT...";
+
+    }
+
+
+    try {
+
+        /* =============================================
+           FIREBASE PULL OUT
+        ============================================= */
+
+        const result =
+            await firebasePullOutCoach(
+                line,
+                position
+            );
+
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            throw new Error(
+                result?.message ||
+                "Pull Out failed"
+            );
+
+        }
+
+
+        /* =============================================
+           HISTORY
+           
+           IMPORTANT:
+           firebasePullOutCoach() already writes
+           HISTORY + AUDIT.
+
+           Therefore DO NOT call writeHistory()
+           again here.
+        ============================================= */
+
+
+        /* =============================================
+           CLEAR CURRENT CELL
+        ============================================= */
+
+        if (
+            currentCell
+        ) {
+
+            currentCell.innerHTML =
+                "";
+
+            currentCell.dataset.coach =
+                "";
+
+            currentCell.dataset.type =
+                "";
+
+            currentCell.dataset.status =
+                "";
+
+            currentCell.draggable =
+                false;
+
+
+            currentCell.classList.remove(
+
+                "status-po",
+                "status-s",
+                "status-lm",
+                "status-med",
+                "status-rl",
+                "status-r1",
+                "status-rs",
+                "status-l",
+                "status-hvy",
+
+                "table-info",
+                "search-match",
+
+                "mobile-drag-source",
+                "mobile-drag-target"
+
+            );
+
+        }
+
+
+        /* =============================================
+           CLEAR CURRENT CELL
+        ============================================= */
+
+        currentCell =
+            null;
+
+
+        /* =============================================
+           HIDE MODAL
+        ============================================= */
+
+        if (
+            coachModal
+        ) {
+
+            coachModal.hide();
+
+        }
+
+
+        /* =============================================
+           SUCCESS MESSAGE
+        ============================================= */
+
+        alert(
+            "Coach " +
+            coachNo +
+            " pulled out successfully."
+        );
+
+
+        console.log(
+            "PULL OUT COMPLETED:",
+            {
+                coachNo,
+                line,
+                position
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "================================="
+        );
+
+        console.error(
+            "PULL OUT ERROR:",
+            error
+        );
+
+        console.error(
+            "================================="
+        );
+
+
+        alert(
+            "Pull Out Failed:\n\n" +
+            error.message
+        );
+
+
+    } finally {
+
+        /* =============================================
+           RESTORE BUTTON
+        ============================================= */
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "PULL OUT";
+
+        }
+
+    }
+
+}
 /* =====================================================
    DELETE COACH
 ===================================================== */
