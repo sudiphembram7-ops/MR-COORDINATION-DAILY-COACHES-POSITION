@@ -28,6 +28,7 @@ import {
     firebaseSaveCoach,
     firebaseUpdateCoach,
     firebaseDeleteCoach,
+    firebasePullOutCoach,
     updateCoachPosition
 } from "./firebase-board.js";
 
