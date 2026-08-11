@@ -1,28 +1,29 @@
 /* =========================================================
-   MR CO-ORDINATION DAILY COACHES POSITION
+   MR CO-ORDINATION BOARD
    BOARD.JS
-   VERSION 9 FINAL
+   VERSION 9.0 FINAL
 
+   FEATURES
    ---------------------------------------------------------
-   RESPONSIBILITY
-   ---------------------------------------------------------
-   UI
-   MODAL
-   BOARD RENDER
+   REALTIME BOARD
+   SAVE
+   UPDATE
+   DELETE
+   PULL OUT
+   RETURN
+   MOVE
+   SWAP
+   STATUS
    SEARCH
-   DRAG & DROP
-   MOBILE LONG PRESS
-   STATUS COLOUR
-   COUNTERS
    REFRESH
-   FULLSCREEN
+   DATABASE STATUS
+   COUNTERS
    EXCEL
-   PRINT / PDF
-   UNDO
-
-   FIREBASE OPERATIONS
-   ---------------------------------------------------------
-   firebase-board.js
+   PDF
+   FULL SCREEN
+   PRINT
+   LIVE DATE/TIME
+   MOBILE LONG PRESS DRAG
 ========================================================= */
 
 
@@ -31,6 +32,7 @@
 ========================================================= */
 
 import {
+
     listenBoard,
     getBoard,
     saveCoach,
@@ -41,9 +43,10 @@ import {
     firebasePullOutCoach,
     firebaseReturnCoachToBoard,
     returnPulledOutToOriginal,
+    listenDatabaseStatus,
     searchCoach,
-    getAllCoaches,
-    listenDatabaseStatus
+    getAllCoaches
+
 } from "./firebase-board.js";
 
 
@@ -57,3283 +60,72 @@ let currentCell = null;
 
 let currentCoach = null;
 
-let currentMode = "SAVE";
-
-let unsubscribeBoard = null;
-
-let unsubscribeDatabase = null;
-
-let searchTimer = null;
+let currentPulledCoach = null;
 
 let draggedCell = null;
+
+let realtimeUnsubscribe = null;
+
+let bootstrapModal = null;
 
 let longPressTimer = null;
 
 let longPressTriggered = false;
 
-let lastBoardUpdate = 0;
-
-let undoStack = [];
-
-let isRendering = false;
-
 
 /* =========================================================
-   DOM READY
+   BASIC HELPERS
 ========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+function $(id) {
 
-        console.log(
-            "BOARD.JS VERSION 9 LOADED"
-        );
-
-        initializeBoard();
-
-    }
-);
-
-
-/* =========================================================
-   INITIALIZE BOARD
-========================================================= */
-
-async function initializeBoard() {
-
-    try {
-
-        bindButtons();
-
-        bindSearch();
-
-        bindBoardCells();
-
-        bindModalButtons();
-
-        startClock();
-
-        startFirebaseBoardListener();
-
-        startDatabaseStatusListener();
-
-        await loadInitialBoard();
-
-        updateCounters();
-
-        console.log(
-            "BOARD INITIALIZATION COMPLETE"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "BOARD INITIALIZATION ERROR:",
-            error
-        );
-
-        showMessage(
-            "Board initialization failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   INITIAL BOARD LOAD
-========================================================= */
-
-async function loadInitialBoard() {
-
-    try {
-
-        const data =
-            await getBoard();
-
-        boardData =
-            data || {};
-
-        renderBoard();
-
-    }
-    catch (error) {
-
-        console.error(
-            "INITIAL BOARD LOAD ERROR:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   FIREBASE REALTIME LISTENER
-========================================================= */
-
-function startFirebaseBoardListener() {
-
-    if (unsubscribeBoard) {
-
-        unsubscribeBoard();
-
-    }
-
-
-    unsubscribeBoard =
-        listenBoard(
-            data => {
-
-                boardData =
-                    data || {};
-
-                lastBoardUpdate =
-                    Date.now();
-
-                renderBoard();
-
-                updateCounters();
-
-                updateLastUpdate();
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   DATABASE STATUS LISTENER
-========================================================= */
-
-function startDatabaseStatusListener() {
-
-    if (unsubscribeDatabase) {
-
-        unsubscribeDatabase();
-
-    }
-
-
-    unsubscribeDatabase =
-        listenDatabaseStatus(
-            connected => {
-
-                updateDatabaseStatus(
-                    connected
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   DATABASE STATUS UI
-========================================================= */
-
-function updateDatabaseStatus(
-    connected
-) {
-
-    const status =
-        document.getElementById(
-            "databaseStatus"
-        );
-
-    const footer =
-        document.getElementById(
-            "footerDatabase"
-        );
-
-
-    if (connected) {
-
-        if (status) {
-
-            status.textContent =
-                " ● Connected";
-
-            status.className =
-                "text-success fw-bold";
-
-        }
-
-
-        if (footer) {
-
-            footer.textContent =
-                "● Connected";
-
-            footer.className =
-                "text-success";
-
-        }
-
-    }
-    else {
-
-        if (status) {
-
-            status.textContent =
-                " ● Offline";
-
-            status.className =
-                "text-danger fw-bold";
-
-        }
-
-
-        if (footer) {
-
-            footer.textContent =
-                "● Offline";
-
-            footer.className =
-                "text-danger";
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   BOARD CELL DETECTION
-========================================================= */
-
-function getBoardCells() {
-
-    return Array.from(
-        document.querySelectorAll(
-            "td[id]"
-        )
-    )
-    .filter(
-        cell =>
-            /^[A-Za-z0-9]+_[A-Za-z0-9]+$/
-                .test(cell.id)
-        );
-
-}
-
-
-/* =========================================================
-   BIND BOARD CELLS
-========================================================= */
-
-function bindBoardCells() {
-
-    const cells =
-        getBoardCells();
-
-
-    cells.forEach(
-        cell => {
-
-            cell.dataset.boardCell =
-                "true";
-
-
-            cell.setAttribute(
-                "draggable",
-                "true"
-            );
-
-
-            cell.addEventListener(
-                "click",
-                handleCellClick
-            );
-
-
-            cell.addEventListener(
-                "dragstart",
-                handleDragStart
-            );
-
-
-            cell.addEventListener(
-                "dragover",
-                handleDragOver
-            );
-
-
-            cell.addEventListener(
-                "drop",
-                handleDrop
-            );
-
-
-            cell.addEventListener(
-                "dragend",
-                handleDragEnd
-            );
-
-
-            /* Mobile long press */
-
-            cell.addEventListener(
-                "touchstart",
-                handleTouchStart,
-                {
-                    passive: true
-                }
-            );
-
-
-            cell.addEventListener(
-                "touchend",
-                handleTouchEnd,
-                {
-                    passive: true
-                }
-            );
-
-
-            cell.addEventListener(
-                "touchmove",
-                handleTouchMove,
-                {
-                    passive: true
-                }
-            );
-
-        }
+    return document.getElementById(
+        id
     );
 
 }
 
 
-/* =========================================================
-   PARSE CELL ID
-   ---------------------------------------------------------
-   Example:
-
-   N2_H1
-   SCR12_D1
-   M3_C
-========================================================= */
-
-function parseCellId(
-    cellId
-) {
-
-    const index =
-        cellId.lastIndexOf("_");
-
-
-    if (index < 0) {
-
-        return null;
-
-    }
-
-
-    const line =
-        cellId.substring(
-            0,
-            index
-        );
-
-
-    const position =
-        cellId.substring(
-            index + 1
-        );
-
-
-    if (
-        !line ||
-        !position
-    ) {
-
-        return null;
-
-    }
-
-
-    return {
-
-        line,
-        position
-
-    };
-
-}
-
-
-/* =========================================================
-   GET CELL DATA
-========================================================= */
-
-function getCellCoach(
-    cell
-) {
-
-    if (!cell) {
-
-        return null;
-
-    }
-
-
-    const parsed =
-        parseCellId(
-            cell.id
-        );
-
-
-    if (!parsed) {
-
-        return null;
-
-    }
-
-
-    return (
-        boardData?.[
-            parsed.line
-        ]?.[
-            parsed.position
-        ] ||
-        null
-    );
-
-}
-
-
-/* =========================================================
-   CELL CLICK
-========================================================= */
-
-function handleCellClick(
-    event
-) {
-
-    if (longPressTriggered) {
-
-        longPressTriggered =
-            false;
-
-        return;
-
-    }
-
-
-    const cell =
-        event.currentTarget;
-
-
-    openCoachModal(
-        cell
-    );
-
-}
-
-
-/* =========================================================
-   OPEN COACH MODAL
-========================================================= */
-
-function openCoachModal(
-    cell
-) {
-
-    if (!cell) {
-
-        return;
-
-    }
-
-
-    currentCell =
-        cell;
-
-
-    currentCoach =
-        getCellCoach(
-            cell
-        );
-
-
-    const parsed =
-        parseCellId(
-            cell.id
-        );
-
-
-    if (!parsed) {
-
-        return;
-
-    }
-
-
-    const shop =
-        getShopFromLine(
-            parsed.line
-        );
-
-
-    setValue(
-        "modalShop",
-        shop
-    );
-
-
-    setValue(
-        "modalLine",
-        parsed.line
-    );
-
-
-    setValue(
-        "modalPosition",
-        parsed.position
-    );
-
-
-    if (currentCoach) {
-
-        currentMode =
-            "UPDATE";
-
-
-        setValue(
-            "modalCoachNo",
-            currentCoach.coachNo
-        );
-
-
-        setValue(
-            "modalCoachType",
-            currentCoach.coachType
-        );
-
-
-        setValue(
-            "modalStatus",
-            currentCoach.status
-        );
-
-
-        showButton(
-            "saveCoachBtn",
-            false
-        );
-
-
-        showButton(
-            "updateCoachBtn",
-            true
-        );
-
-
-        showButton(
-            "deleteCoachBtn",
-            true
-        );
-
-
-        showButton(
-            "pullOutBtn",
-            true
-        );
-
-
-        showButton(
-            "returnToBoardBtn",
-            false
-        );
-
-    }
-    else {
-
-        currentMode =
-            "SAVE";
-
-
-        setValue(
-            "modalCoachNo",
-            ""
-        );
-
-
-        setValue(
-            "modalCoachType",
-            ""
-        );
-
-
-        setValue(
-            "modalStatus",
-            ""
-        );
-
-
-        showButton(
-            "saveCoachBtn",
-            true
-        );
-
-
-        showButton(
-            "updateCoachBtn",
-            false
-        );
-
-
-        showButton(
-            "deleteCoachBtn",
-            false
-        );
-
-
-        showButton(
-            "pullOutBtn",
-            false
-        );
-
-
-        showButton(
-            "returnToBoardBtn",
-            false
-        );
-
-    }
-
-
-    openBootstrapModal(
-        "coachModal"
-    );
-
-}
-
-
-/* =========================================================
-   BOOTSTRAP MODAL OPEN
-========================================================= */
-
-function openBootstrapModal(
-    id
-) {
-
-    const modalElement =
-        document.getElementById(
-            id
-        );
-
-
-    if (!modalElement) {
-
-        console.error(
-            "Modal not found:",
-            id
-        );
-
-        return;
-
-    }
-
-
-    if (
-        typeof bootstrap !==
-        "undefined"
-    ) {
-
-        const modal =
-            bootstrap.Modal.getOrCreateInstance(
-                modalElement
-            );
-
-        modal.show();
-
-    }
-    else {
-
-        console.error(
-            "Bootstrap JS not loaded."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-function closeCoachModal() {
-
-    const modalElement =
-        document.getElementById(
-            "coachModal"
-        );
-
-
-    if (
-        modalElement &&
-        typeof bootstrap !==
-        "undefined"
-    ) {
-
-        const modal =
-            bootstrap.Modal.getInstance(
-                modalElement
-            );
-
-
-        if (modal) {
-
-            modal.hide();
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   MODAL BUTTON BINDING
-========================================================= */
-
-function bindModalButtons() {
-
-    const save =
-        document.getElementById(
-            "saveCoachBtn"
-        );
-
-    const updateBtn =
-        document.getElementById(
-            "updateCoachBtn"
-        );
-
-    const deleteBtn =
-        document.getElementById(
-            "deleteCoachBtn"
-        );
-
-    const pullOut =
-        document.getElementById(
-            "pullOutBtn"
-        );
-
-    const returnBtn =
-        document.getElementById(
-            "returnToBoardBtn"
-        );
-
-
-    if (save) {
-
-        save.addEventListener(
-            "click",
-            saveCurrentCoach
-        );
-
-    }
-
-
-    if (updateBtn) {
-
-        updateBtn.addEventListener(
-            "click",
-            updateCurrentCoach
-        );
-
-    }
-
-
-    if (deleteBtn) {
-
-        deleteBtn.addEventListener(
-            "click",
-            deleteCurrentCoach
-        );
-
-    }
-
-
-    if (pullOut) {
-
-        pullOut.addEventListener(
-            "click",
-            pullOutCurrentCoach
-        );
-
-    }
-
-
-    if (returnBtn) {
-
-        returnBtn.addEventListener(
-            "click",
-            returnCurrentCoach
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   GET MODAL COACH DATA
-========================================================= */
-
-function getModalCoachData() {
-
-    const line =
-        getValue(
-            "modalLine"
-        );
-
-
-    const position =
-        getValue(
-            "modalPosition"
-        );
-
-
-    const coachNo =
-        getValue(
-            "modalCoachNo"
-        );
-
-
-    const coachType =
-        getValue(
-            "modalCoachType"
-        );
-
-
-    const status =
-        getValue(
-            "modalStatus"
-        );
-
-
-    if (!line) {
-
-        throw new Error(
-            "Line is required."
-        );
-
-    }
-
-
-    if (!position) {
-
-        throw new Error(
-            "Position is required."
-        );
-
-    }
-
-
-    if (!coachNo) {
-
-        throw new Error(
-            "Coach Number is required."
-        );
-
-    }
-
-
-    return {
-
-        coachNo:
-            coachNo,
-
-        coachType:
-            coachType,
-
-        status:
-            status,
-
-        shop:
-            getShopFromLine(
-                line
-            ),
-
-        line:
-            line,
-
-        position:
-            position
-
-    };
-
-}
-
-
-/* =========================================================
-   SAVE CURRENT COACH
-========================================================= */
-
-async function saveCurrentCoach() {
-
-    try {
-
-        const coach =
-            getModalCoachData();
-
-
-        const existing =
-            boardData?.[
-                coach.line
-            ]?.[
-                coach.position
-            ];
-
-
-        if (existing) {
-
-            throw new Error(
-                "This cell is already occupied."
-            );
-
-        }
-
-
-        await saveCoach(
-            coach
-        );
-
-
-        closeCoachModal();
-
-
-        showMessage(
-            "Coach saved successfully.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "SAVE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Coach save failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE CURRENT COACH
-========================================================= */
-
-async function updateCurrentCoach() {
-
-    try {
-
-        const coach =
-            getModalCoachData();
-
-
-        await updateCoach(
-            coach
-        );
-
-
-        closeCoachModal();
-
-
-        showMessage(
-            "Coach updated successfully.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "UPDATE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Coach update failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DELETE CURRENT COACH
-========================================================= */
-
-async function deleteCurrentCoach() {
-
-    if (!currentCell) {
-
-        return;
-
-    }
-
-
-    const parsed =
-        parseCellId(
-            currentCell.id
-        );
-
-
-    if (!parsed) {
-
-        return;
-
-    }
-
-
-    const confirmed =
-        window.confirm(
-            "Delete this coach from the board?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    try {
-
-        await firebaseDeleteCoach(
-            parsed.line,
-            parsed.position
-        );
-
-
-        closeCoachModal();
-
-
-        showMessage(
-            "Coach deleted successfully.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "DELETE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Delete failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PULL OUT CURRENT COACH
-========================================================= */
-
-async function pullOutCurrentCoach() {
-
-    if (!currentCell) {
-
-        return;
-
-    }
-
-
-    const parsed =
-        parseCellId(
-            currentCell.id
-        );
-
-
-    if (!parsed) {
-
-        return;
-
-    }
-
-
-    const confirmed =
-        window.confirm(
-            "Pull out this coach?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    try {
-
-        await firebasePullOutCoach(
-            parsed.line,
-            parsed.position
-        );
-
-
-        closeCoachModal();
-
-
-        showMessage(
-            "Coach pulled out successfully.",
-            "warning"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "PULL OUT ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Pull out failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   RETURN CURRENT COACH
-   ---------------------------------------------------------
-   If no pulled-out ID exists in current modal,
-   return button remains hidden.
-
-   This handler supports future return-modal integration.
-========================================================= */
-
-async function returnCurrentCoach() {
-
-    if (!currentCoach) {
-
-        showMessage(
-            "No pulled-out coach selected.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        if (
-            currentCoach.id
-        ) {
-
-            await returnPulledOutToOriginal(
-                currentCoach.id
-            );
-
-        }
-        else {
-
-            showMessage(
-                "Pulled-out coach ID not available.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-
-        closeCoachModal();
-
-
-        showMessage(
-            "Coach returned to board.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "RETURN ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Return failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DRAG START
-========================================================= */
-
-function handleDragStart(
-    event
-) {
-
-    const cell =
-        event.currentTarget;
-
-
-    const coach =
-        getCellCoach(
-            cell
-        );
-
-
-    if (!coach) {
-
-        event.preventDefault();
-
-        return;
-
-    }
-
-
-    draggedCell =
-        cell;
-
-
-    cell.classList.add(
-        "dragging"
-    );
-
-
-    event.dataTransfer.effectAllowed =
-        "move";
-
-
-    try {
-
-        event.dataTransfer.setData(
-            "text/plain",
-            cell.id
-        );
-
-    }
-    catch (error) {
-
-        console.warn(
-            "Drag data error:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DRAG OVER
-========================================================= */
-
-function handleDragOver(
-    event
-) {
-
-    if (!draggedCell) {
-
-        return;
-
-    }
-
-
-    event.preventDefault();
-
-
-    event.dataTransfer.dropEffect =
-        "move";
-
-
-    event.currentTarget.classList.add(
-        "drag-over"
-    );
-
-}
-
-
-/* =========================================================
-   DROP
-========================================================= */
-
-async function handleDrop(
-    event
-) {
-
-    event.preventDefault();
-
-
-    const targetCell =
-        event.currentTarget;
-
-
-    targetCell.classList.remove(
-        "drag-over"
-    );
-
-
-    if (
-        !draggedCell ||
-        draggedCell === targetCell
-    ) {
-
-        return;
-
-    }
-
-
-    const source =
-        parseCellId(
-            draggedCell.id
-        );
-
-
-    const target =
-        parseCellId(
-            targetCell.id
-        );
-
-
-    if (
-        !source ||
-        !target
-    ) {
-
-        return;
-
-    }
-
-
-    const sourceCoach =
-        getCellCoach(
-            draggedCell
-        );
-
-
-    if (!sourceCoach) {
-
-        return;
-
-    }
-
-
-    const targetCoach =
-        getCellCoach(
-            targetCell
-        );
-
-
-    /* Save state for local undo */
-
-    saveUndoState();
-
-
-    try {
-
-        await updateCoachPosition(
-            source.line,
-            source.position,
-            target.line,
-            target.position
-        );
-
-
-        if (targetCoach) {
-
-            showMessage(
-                "Coach positions swapped.",
-                "success"
-            );
-
-        }
-        else {
-
-            showMessage(
-                "Coach moved successfully.",
-                "success"
-            );
-
-        }
-
-    }
-    catch (error) {
-
-        console.error(
-            "MOVE / SWAP ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Move / Swap failed.",
-            "danger"
-        );
-
-    }
-    finally {
-
-        draggedCell =
-            null;
-
-    }
-
-}
-
-
-/* =========================================================
-   DRAG END
-========================================================= */
-
-function handleDragEnd(
-    event
-) {
-
-    event.currentTarget.classList.remove(
-        "dragging"
-    );
-
-
-    getBoardCells()
-        .forEach(
-            cell => {
-
-                cell.classList.remove(
-                    "drag-over"
-                );
-
-            }
-        );
-
-
-    draggedCell =
-        null;
-
-}
-
-
-/* =========================================================
-   MOBILE LONG PRESS
-========================================================= */
-
-function handleTouchStart(
-    event
-) {
-
-    const cell =
-        event.currentTarget;
-
-
-    const coach =
-        getCellCoach(
-            cell
-        );
-
-
-    if (!coach) {
-
-        return;
-
-    }
-
-
-    longPressTriggered =
-        false;
-
-
-    longPressTimer =
-        setTimeout(
-            () => {
-
-                longPressTriggered =
-                    true;
-
-
-                draggedCell =
-                    cell;
-
-
-                cell.classList.add(
-                    "dragging"
-                );
-
-
-                if (
-                    navigator.vibrate
-                ) {
-
-                    navigator.vibrate(
-                        60
-                    );
-
-                }
-
-
-                showMessage(
-                    "Coach selected. Tap another cell to move/swap.",
-                    "info"
-                );
-
-            },
-            550
-        );
-
-}
-
-
-/* =========================================================
-   MOBILE TOUCH END
-========================================================= */
-
-function handleTouchEnd(
-    event
-) {
-
-    clearTimeout(
-        longPressTimer
-    );
-
-
-    if (
-        !longPressTriggered ||
-        !draggedCell
-    ) {
-
-        return;
-
-    }
-
-
-    const targetCell =
-        event.currentTarget;
-
-
-    if (
-        targetCell === draggedCell
-    ) {
-
-        draggedCell =
-            null;
-
-        return;
-
-    }
-
-
-    moveUsingMobileTouch(
-        draggedCell,
-        targetCell
-    );
-
-}
-
-
-/* =========================================================
-   MOBILE TOUCH MOVE
-========================================================= */
-
-function handleTouchMove() {
-
-    clearTimeout(
-        longPressTimer
-    );
-
-}
-
-
-/* =========================================================
-   MOBILE MOVE / SWAP
-========================================================= */
-
-async function moveUsingMobileTouch(
-    sourceCell,
-    targetCell
-) {
-
-    const source =
-        parseCellId(
-            sourceCell.id
-        );
-
-
-    const target =
-        parseCellId(
-            targetCell.id
-        );
-
-
-    if (
-        !source ||
-        !target
-    ) {
-
-        draggedCell =
-            null;
-
-        return;
-
-    }
-
-
-    const targetCoach =
-        getCellCoach(
-            targetCell
-        );
-
-
-    saveUndoState();
-
-
-    try {
-
-        await updateCoachPosition(
-            source.line,
-            source.position,
-            target.line,
-            target.position
-        );
-
-
-        showMessage(
-            targetCoach
-                ? "Coach positions swapped."
-                : "Coach moved successfully.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "MOBILE MOVE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Mobile move failed.",
-            "danger"
-        );
-
-    }
-    finally {
-
-        sourceCell.classList.remove(
-            "dragging"
-        );
-
-        draggedCell =
-            null;
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER BOARD
-========================================================= */
-
-function renderBoard() {
-
-    if (isRendering) {
-
-        return;
-
-    }
-
-
-    isRendering =
-        true;
-
-
-    try {
-
-        const cells =
-            getBoardCells();
-
-
-        cells.forEach(
-            cell => {
-
-                renderCell(
-                    cell
-                );
-
-            }
-        );
-
-
-        updateCounters();
-
-    }
-    finally {
-
-        isRendering =
-            false;
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER SINGLE CELL
-========================================================= */
-
-function renderCell(
-    cell
-) {
-
-    const parsed =
-        parseCellId(
-            cell.id
-        );
-
-
-    if (!parsed) {
-
-        return;
-
-    }
-
-
-    const coach =
-        boardData?.[
-            parsed.line
-        ]?.[
-            parsed.position
-        ] ||
-        null;
-
-
-    const card =
-        cell.querySelector(
-            ".coach-card"
-        );
-
-
-    if (!card) {
-
-        return;
-
-    }
-
-
-    card.className =
-        "coach-card";
-
-
-    cell.classList.remove(
-        "occupied-cell",
-        "empty-cell"
-    );
-
-
-    if (!coach) {
-
-        cell.classList.add(
-            "empty-cell"
-        );
-
-
-        card.innerHTML =
-            "";
-
-
-        card.removeAttribute(
-            "title"
-        );
-
-
-        return;
-
-    }
-
-
-    cell.classList.add(
-        "occupied-cell"
-    );
-
-
-    const coachNo =
-        escapeHtml(
-            coach.coachNo ||
-            ""
-        );
-
-
-    const coachType =
-        escapeHtml(
-            coach.coachType ||
-            ""
-        );
-
-
-    const status =
-        escapeHtml(
-            coach.status ||
-            ""
-        );
-
-
-    /*
-       Board display:
-       Coach Number is primary.
-    */
-
-    card.innerHTML =
-
-        `<div class="coach-number">${coachNo}</div>` +
-
-        (
-            coachType
-                ? `<div class="coach-type">${coachType}</div>`
-                : ""
-        ) +
-
-        (
-            status
-                ? `<div class="coach-status">${status}</div>`
-                : ""
-        );
-
-
-    card.title =
-        [
-            coach.coachNo,
-            coach.coachType,
-            coach.status
-        ]
-        .filter(Boolean)
-        .join(" | ");
-
-
-    applyStatusColour(
-        card,
-        coach.status
-    );
-
-}
-
-
-/* =========================================================
-   STATUS COLOUR
-========================================================= */
-
-function applyStatusColour(
-    element,
-    status
-) {
-
-    const value =
-        String(
-            status || ""
-        )
-        .trim()
-        .toUpperCase();
-
-
-    element.classList.remove(
-        "status-po",
-        "status-s",
-        "status-lm",
-        "status-med",
-        "status-rl",
-        "status-r1",
-        "status-rs",
-        "status-l",
-        "status-hvy"
-    );
-
-
-    switch (value) {
-
-        case "PO":
-
-            element.classList.add(
-                "status-po"
-            );
-
-            break;
-
-
-        case "S":
-
-            element.classList.add(
-                "status-s"
-            );
-
-            break;
-
-
-        case "LM":
-
-            element.classList.add(
-                "status-lm"
-            );
-
-            break;
-
-
-        case "MED":
-
-            element.classList.add(
-                "status-med"
-            );
-
-            break;
-
-
-        case "RL":
-
-            element.classList.add(
-                "status-rl"
-            );
-
-            break;
-
-
-        case "R1":
-
-            element.classList.add(
-                "status-r1"
-            );
-
-            break;
-
-
-        case "RS":
-
-            element.classList.add(
-                "status-rs"
-            );
-
-            break;
-
-
-        case "L":
-
-            element.classList.add(
-                "status-l"
-            );
-
-            break;
-
-
-        case "HVY":
-
-            element.classList.add(
-                "status-hvy"
-            );
-
-            break;
-
-    }
-
-}
-
-
-/* =========================================================
-   SEARCH BINDING
-========================================================= */
-
-function bindSearch() {
-
-    const input =
-        document.getElementById(
-            "searchBox"
-        );
-
-
-    if (!input) {
-
-        return;
-
-    }
-
-
-    input.addEventListener(
-        "input",
-        () => {
-
-            clearTimeout(
-                searchTimer
-            );
-
-
-            searchTimer =
-                setTimeout(
-                    () => {
-
-                        performSearch(
-                            input.value
-                        );
-
-                    },
-                    180
-                );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   LIVE SEARCH
-========================================================= */
-
-async function performSearch(
-    keyword
-) {
-
-    const value =
-        String(
-            keyword || ""
-        )
-        .trim();
-
-
-    const resultBox =
-        document.getElementById(
-            "searchResult"
-        );
-
-
-    if (!resultBox) {
-
-        return;
-
-    }
-
-
-    if (!value) {
-
-        resultBox.innerHTML =
-            "";
-
-        clearSearchHighlight();
-
-        return;
-
-    }
-
-
-    try {
-
-        const results =
-            await searchCoach(
-                value
-            );
-
-
-        renderSearchResults(
-            results
-        );
-
-        highlightSearchCells(
-            results
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "SEARCH ERROR:",
-            error
-        );
-
-
-        resultBox.innerHTML =
-            `<div class="alert alert-danger">
-                Search failed.
-             </div>`;
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER SEARCH RESULTS
-========================================================= */
-
-function renderSearchResults(
-    results
-) {
-
-    const box =
-        document.getElementById(
-            "searchResult"
-        );
-
-
-    if (!box) {
-
-        return;
-
-    }
-
-
-    if (
-        !results ||
-        results.length === 0
-    ) {
-
-        box.innerHTML =
-            `<div class="alert alert-warning mt-2">
-                No coach found.
-             </div>`;
-
-        return;
-
-    }
-
-
-    box.innerHTML =
-        results
-        .map(
-            coach => {
-
-                const line =
-                    escapeHtml(
-                        coach.line
-                    );
-
-
-                const position =
-                    escapeHtml(
-                        coach.position
-                    );
-
-
-                const coachNo =
-                    escapeHtml(
-                        coach.coachNo
-                    );
-
-
-                const status =
-                    escapeHtml(
-                        coach.status
-                    );
-
-
-                return `
-                    <button
-                        type="button"
-                        class="list-group-item list-group-item-action search-item"
-                        data-line="${line}"
-                        data-position="${position}">
-                        <strong>${coachNo}</strong>
-                        &nbsp; ${line}_${position}
-                        ${status
-                            ? ` — ${status}`
-                            : ""}
-                    </button>
-                `;
-
-            }
-        )
-        .join("");
-
-
-    box
-        .querySelectorAll(
-            ".search-item"
-        )
-        .forEach(
-            item => {
-
-                item.addEventListener(
-                    "click",
-                    () => {
-
-                        const line =
-                            item.dataset.line;
-
-
-                        const position =
-                            item.dataset.position;
-
-
-                        focusBoardCell(
-                            line,
-                            position
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   SEARCH HIGHLIGHT
-========================================================= */
-
-function highlightSearchCells(
-    results
-) {
-
-    clearSearchHighlight();
-
-
-    results.forEach(
-        coach => {
-
-            const id =
-                `${coach.line}_${coach.position}`;
-
-
-            const cell =
-                document.getElementById(
-                    id
-                );
-
-
-            if (cell) {
-
-                cell.classList.add(
-                    "search-highlight"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CLEAR SEARCH HIGHLIGHT
-========================================================= */
-
-function clearSearchHighlight() {
-
-    document
-        .querySelectorAll(
-            ".search-highlight"
-        )
-        .forEach(
-            cell => {
-
-                cell.classList.remove(
-                    "search-highlight"
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   FOCUS BOARD CELL
-========================================================= */
-
-function focusBoardCell(
-    line,
-    position
-) {
-
-    const cell =
-        document.getElementById(
-            `${line}_${position}`
-        );
-
-
-    if (!cell) {
-
-        showMessage(
-            "Board cell not found.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    cell.scrollIntoView(
-        {
-            behavior: "smooth",
-            block: "center",
-            inline: "center"
-        }
-    );
-
-
-    cell.classList.add(
-        "search-highlight"
-    );
-
-
-    setTimeout(
-        () => {
-
-            cell.classList.remove(
-                "search-highlight"
-            );
-
-        },
-        2500
-    );
-
-}
-
-
-/* =========================================================
-   BUTTON BINDING
-========================================================= */
-
-function bindButtons() {
-
-    const refreshBtn =
-        document.getElementById(
-            "refreshBtn"
-        );
-
-
-    const fullscreenBtn =
-        document.getElementById(
-            "fullscreenBtn"
-        );
-
-
-    const excelBtn =
-        document.getElementById(
-            "excelBtn"
-        );
-
-
-    const pdfBtn =
-        document.getElementById(
-            "pdfBtn"
-        );
-
-
-    if (refreshBtn) {
-
-        refreshBtn.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                refreshBoard();
-
-            }
-        );
-
-    }
-
-
-    if (fullscreenBtn) {
-
-        fullscreenBtn.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                toggleFullscreen();
-
-            }
-        );
-
-    }
-
-
-    if (excelBtn) {
-
-        excelBtn.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                exportExcel();
-
-            }
-        );
-
-    }
-
-
-    if (pdfBtn) {
-
-        pdfBtn.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                printBoard();
-
-            }
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   REFRESH BOARD
-========================================================= */
-
-async function refreshBoard() {
-
-    try {
-
-        const button =
-            document.getElementById(
-                "refreshBtn"
-            );
-
-
-        if (button) {
-
-            button.disabled =
-                true;
-
-            button.textContent =
-                "Refreshing...";
-
-        }
-
-
-        const data =
-            await getBoard();
-
-
-        boardData =
-            data || {};
-
-
-        renderBoard();
-
-        updateCounters();
-
-        updateLastUpdate();
-
-
-        showMessage(
-            "Board refreshed.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "REFRESH ERROR:",
-            error
-        );
-
-
-        showMessage(
-            "Refresh failed.",
-            "danger"
-        );
-
-    }
-    finally {
-
-        const button =
-            document.getElementById(
-                "refreshBtn"
-            );
-
-
-        if (button) {
-
-            button.disabled =
-                false;
-
-            button.textContent =
-                "Refresh";
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   COUNTERS
-========================================================= */
-
-function updateCounters() {
-
-    const cells =
-        getBoardCells();
-
-
-    let total =
-        cells.length;
-
-
-    let occupied =
-        0;
-
-
-    cells.forEach(
-        cell => {
-
-            if (
-                getCellCoach(
-                    cell
-                )
-            ) {
-
-                occupied++;
-
-            }
-
-        }
-    );
-
-
-    const free =
-        Math.max(
-            total - occupied,
-            0
-        );
-
-
-    setText(
-        "totalCoach",
-        total
-    );
-
-
-    setText(
-        "occupiedCoach",
-        occupied
-    );
-
-
-    setText(
-        "freeCoach",
-        free
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE LAST UPDATE
-========================================================= */
-
-function updateLastUpdate() {
-
-    const now =
-        new Date(
-            lastBoardUpdate ||
-            Date.now()
-        );
-
-
-    const text =
-        now.toLocaleString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }
-        );
-
-
-    setText(
-        "lastUpdate",
-        text
-    );
-
-
-    setText(
-        "lastUpdateTime",
-        text
-    );
-
-}
-
-
-/* =========================================================
-   LIVE CLOCK
-========================================================= */
-
-function startClock() {
-
-    updateClock();
-
-
-    setInterval(
-        updateClock,
-        1000
-    );
-
-}
-
-
-function updateClock() {
-
-    const now =
-        new Date();
-
-
-    const date =
-        now.toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-            }
-        );
-
-
-    const time =
-        now.toLocaleTimeString(
-            "en-IN",
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }
-        );
-
-
-    setText(
-        "liveDate",
-        date
-    );
-
-
-    setText(
-        "liveTime",
-        time
-    );
-
-}
-
-
-/* =========================================================
-   FULLSCREEN
-========================================================= */
-
-async function toggleFullscreen() {
-
-    try {
-
-        if (!document.fullscreenElement) {
-
-            await document.documentElement.requestFullscreen();
-
-        }
-        else {
-
-            await document.exitFullscreen();
-
-        }
-
-    }
-    catch (error) {
-
-        console.error(
-            "FULLSCREEN ERROR:",
-            error
-        );
-
-
-        showMessage(
-            "Full screen not supported.",
-            "warning"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PRINT / PDF
-========================================================= */
-
-function printBoard() {
-
-    window.print();
-
-}
-
-
-/* =========================================================
-   EXCEL EXPORT
-   ---------------------------------------------------------
-   CSV compatible with Excel.
-========================================================= */
-
-async function exportExcel() {
-
-    try {
-
-        const coaches =
-            await getAllCoaches();
-
-
-        if (
-            !coaches ||
-            coaches.length === 0
-        ) {
-
-            showMessage(
-                "No coach data available.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-
-        const headers = [
-
-            "Coach Number",
-            "Coach Type",
-            "Status",
-            "Shop",
-            "Line",
-            "Position"
-
-        ];
-
-
-        const rows =
-            coaches.map(
-                coach => [
-
-                    coach.coachNo || "",
-                    coach.coachType || "",
-                    coach.status || "",
-                    coach.shop || "",
-                    coach.line || "",
-                    coach.position || ""
-
-                ]
-            );
-
-
-        const csvRows = [
-
-            headers,
-            ...rows
-
-        ];
-
-
-        const csv =
-            csvRows
-            .map(
-                row =>
-                    row
-                    .map(
-                        value =>
-                            `"${String(
-                                value ?? ""
-                            )
-                            .replace(
-                                /"/g,
-                                '""'
-                            )}"`
-                    )
-                    .join(",")
-            )
-            .join("\r\n");
-
-
-        const blob =
-            new Blob(
-                [
-                    "\ufeff" +
-                    csv
-                ],
-                {
-                    type:
-                        "text/csv;charset=utf-8;"
-                }
-            );
-
-
-        const url =
-            URL.createObjectURL(
-                blob
-            );
-
-
-        const link =
-            document.createElement(
-                "a"
-            );
-
-
-        link.href =
-            url;
-
-
-        link.download =
-            `MR_CO_ORDINATION_${getDateFileName()}.csv`;
-
-
-        document.body.appendChild(
-            link
-        );
-
-
-        link.click();
-
-
-        link.remove();
-
-
-        URL.revokeObjectURL(
-            url
-        );
-
-
-        showMessage(
-            "Excel CSV exported successfully.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "EXCEL EXPORT ERROR:",
-            error
-        );
-
-
-        showMessage(
-            "Excel export failed.",
-            "danger"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   UNDO STATE
-   ---------------------------------------------------------
-   Local UI history.
-========================================================= */
-
-function saveUndoState() {
-
-    try {
-
-        undoStack.push(
-            JSON.parse(
-                JSON.stringify(
-                    boardData
-                )
-            )
-        );
-
-
-        if (
-            undoStack.length > 10
-        ) {
-
-            undoStack.shift();
-
-        }
-
-    }
-    catch (error) {
-
-        console.error(
-            "UNDO SAVE ERROR:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   KEYBOARD UNDO
-   ---------------------------------------------------------
-   CTRL + Z
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            (event.ctrlKey ||
-             event.metaKey) &&
-            event.key.toLowerCase() === "z"
-        ) {
-
-            /*
-             * Do not interfere with text input.
-             */
-
-            const tag =
-                event.target?.tagName;
-
-
-            if (
-                tag === "INPUT" ||
-                tag === "TEXTAREA" ||
-                tag === "SELECT"
-            ) {
-
-                return;
-
-            }
-
-
-            event.preventDefault();
-
-            undoLastMove();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   UNDO LAST MOVE
-   ---------------------------------------------------------
-   NOTE:
-   Firebase restore requires a separate server-side
-   operation. This function restores the UI snapshot only
-   if Firebase operation has not yet been integrated into
-   firebase-board.js.
-========================================================= */
-
-async function undoLastMove() {
-
-    if (
-        undoStack.length === 0
-    ) {
-
-        showMessage(
-            "Nothing to undo.",
-            "info"
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * Version 9 keeps the previous state available.
-     * Actual Firebase atomic undo will be provided in
-     * firebase-board.js Version 9.
-     */
-
-    const previous =
-        undoStack.pop();
-
-
-    if (!previous) {
-
-        return;
-
-    }
-
-
-    boardData =
-        previous;
-
-
-    renderBoard();
-
-    updateCounters();
-
-
-    showMessage(
-        "Previous board state restored locally. Firebase undo requires the Version 9 transaction helper.",
-        "info"
-    );
-
-}
-
-
-/* =========================================================
-   SHOP DETECTION
-========================================================= */
-
-function getShopFromLine(
-    line
-) {
-
-    const value =
-        String(
-            line || ""
-        )
-        .trim()
-        .toUpperCase();
-
-
-    if (
-        value.startsWith("SCR")
-    ) {
-
-        return "MR SCR SHOP";
-
-    }
-
-
-    if (
-        value.startsWith("N")
-    ) {
-
-        return "N SHOP";
-
-    }
-
-
-    if (
-        value.startsWith("M")
-    ) {
-
-        return "M SHOP";
-
-    }
-
-
-    if (
-        value.startsWith("F")
-    ) {
-
-        return "CR SHOP";
-
-    }
-
-
-    if (
-        value.startsWith("J")
-    ) {
-
-        return "J SHOP";
-
-    }
-
-
-    if (
-        value.startsWith("L")
-    ) {
-
-        return "LIFTING BAY";
-
-    }
-
-
-    return "";
-
-}
-
-
-/* =========================================================
-   BUTTON VISIBILITY
-========================================================= */
-
-function showButton(
-    id,
-    visible
-) {
-
-    const button =
-        document.getElementById(
-            id
-        );
-
-
-    if (!button) {
-
-        return;
-
-    }
-
-
-    button.style.display =
-        visible
-            ? ""
-            : "none";
-
-}
-
-
-/* =========================================================
-   GET INPUT VALUE
-========================================================= */
-
-function getValue(
-    id
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
+function clean(value) {
 
     return String(
-        element?.value ??
-        ""
-    )
-    .trim();
+        value ?? ""
+    ).trim();
 
 }
 
 
-/* =========================================================
-   SET INPUT VALUE
-========================================================= */
+function upper(value) {
 
-function setValue(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (element) {
-
-        element.value =
-            value ?? "";
-
-    }
+    return clean(value)
+        .toUpperCase();
 
 }
 
 
-/* =========================================================
-   SET TEXT
-========================================================= */
-
-function setText(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (element) {
-
-        element.textContent =
-            value ?? "";
-
-    }
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHtml(
-    value
-) {
+function escapeHTML(value) {
 
     return String(
         value ?? ""
     )
-    .replace(
-        /&/g,
+    .replaceAll(
+        "&",
         "&amp;"
     )
-    .replace(
-        /</g,
+    .replaceAll(
+        "<",
         "&lt;"
     )
-    .replace(
-        />/g,
+    .replaceAll(
+        ">",
         "&gt;"
     )
-    .replace(
-        /"/g,
+    .replaceAll(
+        '"',
         "&quot;"
     )
-    .replace(
-        /'/g,
+    .replaceAll(
+        "'",
         "&#039;"
     );
 
@@ -3341,1995 +133,68 @@ function escapeHtml(
 
 
 /* =========================================================
-   FILE DATE
-========================================================= */
-
-function getDateFileName() {
-
-    const now =
-        new Date();
-
-
-    const year =
-        now.getFullYear();
-
-
-    const month =
-        String(
-            now.getMonth() + 1
-        )
-        .padStart(
-            2,
-            "0"
-        );
-
-
-    const day =
-        String(
-            now.getDate()
-        )
-        .padStart(
-            2,
-            "0"
-        );
-
-
-    return `${year}-${month}-${day}`;
-
-}
-
-
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-function showMessage(
-    message,
-    type = "info"
-) {
-
-    let container =
-        document.getElementById(
-            "boardMessageContainer"
-        );
-
-
-    if (!container) {
-
-        container =
-            document.createElement(
-                "div"
-            );
-
-
-        container.id =
-            "boardMessageContainer";
-
-
-        container.style.position =
-            "fixed";
-
-
-        container.style.top =
-            "20px";
-
-
-        container.style.right =
-            "20px";
-
-
-        container.style.zIndex =
-            "99999";
-
-
-        container.style.maxWidth =
-            "360px";
-
-
-        document.body.appendChild(
-            container
-        );
-
-    }
-
-
-    const alert =
-        document.createElement(
-            "div"
-        );
-
-
-    alert.className =
-        `alert alert-${type} shadow`;
-
-
-    alert.textContent =
-        message;
-
-
-    alert.style.marginBottom =
-        "8px";
-
-
-    container.appendChild(
-        alert
-    );
-
-
-    setTimeout(
-        () => {
-
-            alert.remove();
-
-        },
-        3000
-    );
-
-}
-
-
-/* =========================================================
-   CLEANUP
-========================================================= */
-
-window.addEventListener(
-    "beforeunload",
-    () => {
-
-        if (unsubscribeBoard) {
-
-            unsubscribeBoard();
-
-        }
-
-
-        if (unsubscribeDatabase) {
-
-            unsubscribeDatabase();
-
-        }
-
-
-        clearTimeout(
-            longPressTimer
-        );
-
-    }
-);
-
-
-/* =========================================================
-   GLOBAL DEBUG / COMPATIBILITY
-========================================================= */
-
-window.MRBoard = {
-
-    getBoardData:
-        () => boardData,
-
-    refresh:
-        refreshBoard,
-
-    render:
-        renderBoard,
-
-    search:
-        performSearch,
-
-    print:
-        printBoard,
-
-    exportExcel:
-        exportExcel
-
-};
-
-
-/* =========================================================
-   READY
-========================================================= */
-
-console.log(
-    "=========================================="
-);
-
-console.log(
-    "MR CO-ORDINATION BOARD"
-);
-
-console.log(
-    "BOARD.JS VERSION 9 FINAL"
-);
-
-console.log(
-    "Firebase + Search + Drag Drop + Mobile"
-);
-
-console.log(
-    "=========================================="
-);
-
-/* =========================================================
-   MR CO-ORDINATION BOARD
-   BOARD.JS
-   VERSION 9.0
-   PART 2
-   ---------------------------------------------------------
-   FIREBASE + BOARD RENDERING
-========================================================= */
-
-import {
-    listenBoard,
-    getBoard,
-    saveCoach,
-    updateCoach,
-    updateCoachPosition,
-    updateCoachStatus,
-    firebaseDeleteCoach,
-    firebasePullOutCoach,
-    firebaseReturnCoachToBoard,
-    listenPulledOutCoaches,
-    searchCoach,
-    listenDatabaseStatus
-} from "./firebase-board.js";
-
-
-/* =========================================================
-   GLOBAL STATE
-========================================================= */
-
-let boardData = {};
-
-let currentCell = null;
-
-let currentCoach = null;
-
-let currentPulledOutCoach = null;
-
-let unsubscribeBoard = null;
-
-let unsubscribePulledOut = null;
-
-let unsubscribeDatabase = null;
-
-let isSaving = false;
-
-
-/* =========================================================
-   DOM HELPER
-========================================================= */
-
-function $(id) {
-
-    return document.getElementById(id);
-
-}
-
-
-/* =========================================================
-   TEXT CLEAN
-========================================================= */
-
-function clean(value) {
-
-    return String(
-        value ?? ""
-    ).trim();
-
-}
-
-
-/* =========================================================
-   UPPERCASE
-========================================================= */
-
-function upper(value) {
-
-    return clean(value)
-        .toUpperCase();
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHTML(value) {
-
-    return String(
-        value ?? ""
-    )
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
-
-
-/* =========================================================
-   SHOP DETECTION
+   SHOP
 ========================================================= */
 
 function getShopFromLine(line) {
 
-    line = upper(line);
+    line =
+        upper(line);
 
-    if (line.startsWith("SCR")) {
+
+    if (
+        line.startsWith("SCR")
+    ) {
+
         return "MR SCR SHOP";
+
     }
 
-    if (line.startsWith("N")) {
+
+    if (
+        line.startsWith("N")
+    ) {
+
         return "N SHOP";
+
     }
 
-    if (line.startsWith("M")) {
+
+    if (
+        line.startsWith("M")
+    ) {
+
         return "M SHOP";
+
     }
 
-    if (line.startsWith("F")) {
+
+    if (
+        line.startsWith("F")
+    ) {
+
         return "CR SHOP";
+
     }
 
-    if (line.startsWith("J")) {
+
+    if (
+        line.startsWith("J")
+    ) {
+
         return "J SHOP";
+
     }
 
-    if (line.startsWith("L")) {
+
+    if (
+        line.startsWith("L")
+    ) {
+
         return "LIFTING BAY";
-    }
-
-    return "";
-
-}
-
-
-/* =========================================================
-   STATUS CLASS
-========================================================= */
-
-function getStatusClass(status) {
-
-    status = upper(status);
-
-    switch (status) {
-
-        case "PO":
-            return "status-po";
-
-        case "S":
-            return "status-s";
-
-        case "LM":
-            return "status-lm";
-
-        case "MED":
-            return "status-med";
-
-        case "RL":
-            return "status-rl";
-
-        case "R1":
-            return "status-r1";
-
-        case "RS":
-            return "status-rs";
-
-        case "L":
-            return "status-l";
-
-        case "HVY":
-            return "status-hvy";
-
-        default:
-            return "status-default";
 
     }
 
-}
-
-
-/* =========================================================
-   STATUS COLOUR
-========================================================= */
-
-function applyStatusColour(
-    cell,
-    status
-) {
-
-    if (!cell) {
-        return;
-    }
-
-    cell.classList.remove(
-        "status-po",
-        "status-s",
-        "status-lm",
-        "status-med",
-        "status-rl",
-        "status-r1",
-        "status-rs",
-        "status-l",
-        "status-hvy",
-        "status-default"
-    );
-
-    cell.classList.add(
-        getStatusClass(status)
-    );
-
-}
-
-
-/* =========================================================
-   CREATE EMPTY CELL
-========================================================= */
-
-function clearCell(cell) {
-
-    if (!cell) {
-        return;
-    }
-
-    cell.innerHTML =
-        `<div class="coach-card"></div>`;
-
-    cell.classList.remove(
-        "occupied",
-        "has-coach",
-        "status-po",
-        "status-s",
-        "status-lm",
-        "status-med",
-        "status-rl",
-        "status-r1",
-        "status-rs",
-        "status-l",
-        "status-hvy",
-        "status-default"
-    );
-
-    cell.removeAttribute(
-        "data-coach-no"
-    );
-
-    cell.removeAttribute(
-        "data-status"
-    );
-
-}
-
-
-/* =========================================================
-   RENDER COACH CARD
-========================================================= */
-
-function renderCoachCard(
-    cell,
-    coach
-) {
-
-    if (!cell) {
-        return;
-    }
-
-    if (!coach) {
-
-        clearCell(cell);
-
-        return;
-
-    }
-
-
-    const coachNo =
-        escapeHTML(
-            coach.coachNo
-        );
-
-    const coachType =
-        escapeHTML(
-            coach.coachType
-        );
-
-    const status =
-        upper(
-            coach.status
-        );
-
-
-    cell.innerHTML = `
-
-        <div class="coach-card ${getStatusClass(status)}">
-
-            <div class="coach-number">
-                ${coachNo || "--"}
-            </div>
-
-            ${
-                coachType
-                    ? `
-                    <div class="coach-type">
-                        ${coachType}
-                    </div>
-                    `
-                    : ""
-            }
-
-            ${
-                status
-                    ? `
-                    <div class="coach-status">
-                        ${escapeHTML(status)}
-                    </div>
-                    `
-                    : ""
-            }
-
-        </div>
-
-    `;
-
-
-    cell.classList.add(
-        "occupied",
-        "has-coach"
-    );
-
-
-    cell.dataset.coachNo =
-        clean(
-            coach.coachNo
-        );
-
-    cell.dataset.status =
-        status;
-
-
-    applyStatusColour(
-        cell,
-        status
-    );
-
-}
-
-
-/* =========================================================
-   FIND COACH IN BOARD
-========================================================= */
-
-function getCoachFromBoard(
-    line,
-    position
-) {
-
-    return (
-        boardData?.[
-            line
-        ]?.[
-            position
-        ] || null
-    );
-
-}
-
-
-/* =========================================================
-   RENDER SINGLE CELL
-========================================================= */
-
-function renderCell(
-    line,
-    position
-) {
-
-    const cell =
-        $(
-            `${line}_${position}`
-        );
-
-
-    if (!cell) {
-        return;
-    }
-
-
-    const coach =
-        getCoachFromBoard(
-            line,
-            position
-        );
-
-
-    renderCoachCard(
-        cell,
-        coach
-    );
-
-}
-
-
-/* =========================================================
-   GET ALL HTML BOARD CELLS
-========================================================= */
-
-function getBoardCells() {
-
-    return Array.from(
-        document.querySelectorAll(
-            "td[id]"
-        )
-    )
-    .filter(
-        cell =>
-            /^[A-Za-z0-9]+_[A-Za-z0-9]+$/
-                .test(
-                    cell.id
-                )
-    );
-
-}
-
-
-/* =========================================================
-   RENDER COMPLETE BOARD
-========================================================= */
-
-function renderBoard(
-    data = {}
-) {
-
-    boardData =
-        data || {};
-
-
-    const cells =
-        getBoardCells();
-
-
-    cells.forEach(
-        cell => {
-
-            const parts =
-                cell.id.split("_");
-
-
-            if (
-                parts.length !== 2
-            ) {
-                return;
-            }
-
-
-            const line =
-                parts[0];
-
-            const position =
-                parts[1];
-
-
-            renderCell(
-                line,
-                position
-            );
-
-        }
-    );
-
-
-    updateBoardCounters();
-
-    updateLastUpdate();
-
-}
-
-
-/* =========================================================
-   BOARD LISTENER
-========================================================= */
-
-function startBoardListener() {
-
-    if (
-        typeof unsubscribeBoard ===
-        "function"
-    ) {
-
-        try {
-            unsubscribeBoard();
-        }
-        catch (error) {
-            console.warn(
-                "Old board listener cleanup failed",
-                error
-            );
-        }
-
-    }
-
-
-    unsubscribeBoard =
-        listenBoard(
-            data => {
-
-                console.log(
-                    "FIREBASE BOARD UPDATE",
-                    data
-                );
-
-
-                renderBoard(
-                    data
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   DATABASE STATUS
-========================================================= */
-
-function startDatabaseListener() {
-
-    if (
-        typeof unsubscribeDatabase ===
-        "function"
-    ) {
-
-        try {
-            unsubscribeDatabase();
-        }
-        catch (error) {}
-    }
-
-
-    unsubscribeDatabase =
-        listenDatabaseStatus(
-            connected => {
-
-                updateDatabaseStatus(
-                    connected
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   DATABASE STATUS UI
-========================================================= */
-
-function updateDatabaseStatus(
-    connected
-) {
-
-    const status =
-        $("databaseStatus");
-
-    const footer =
-        $("footerDatabase");
-
-
-    if (status) {
-
-        status.textContent =
-            connected
-                ? " ● Connected"
-                : " ● Offline";
-
-        status.className =
-            connected
-                ? "text-success"
-                : "text-danger";
-
-    }
-
-
-    if (footer) {
-
-        footer.textContent =
-            connected
-                ? "● Connected"
-                : "● Offline";
-
-        footer.className =
-            connected
-                ? "text-success"
-                : "text-danger";
-
-    }
-
-}
-
-
-/* =========================================================
-   BOARD COUNTERS
-========================================================= */
-
-function updateBoardCounters() {
-
-    let total = 0;
-
-    let occupied = 0;
-
-    let free = 0;
-
-
-    const cells =
-        getBoardCells();
-
-
-    cells.forEach(
-        cell => {
-
-            total++;
-
-
-            const parts =
-                cell.id.split("_");
-
-
-            if (
-                parts.length !== 2
-            ) {
-
-                free++;
-
-                return;
-
-            }
-
-
-            const coach =
-                getCoachFromBoard(
-                    parts[0],
-                    parts[1]
-                );
-
-
-            if (coach) {
-                occupied++;
-            }
-            else {
-                free++;
-            }
-
-        }
-    );
-
-
-    const totalElement =
-        $("totalCoach");
-
-    const occupiedElement =
-        $("occupiedCoach");
-
-    const freeElement =
-        $("freeCoach");
-
-
-    if (totalElement) {
-
-        totalElement.textContent =
-            total;
-
-    }
-
-
-    if (occupiedElement) {
-
-        occupiedElement.textContent =
-            occupied;
-
-    }
-
-
-    if (freeElement) {
-
-        freeElement.textContent =
-            free;
-
-    }
-
-}
-
-
-/* =========================================================
-   LAST UPDATE
-========================================================= */
-
-function updateLastUpdate() {
-
-    const now =
-        new Date();
-
-
-    const text =
-        now.toLocaleString(
-            "en-IN",
-            {
-                dateStyle:
-                    "short",
-                timeStyle:
-                    "medium"
-            }
-        );
-
-
-    const element =
-        $("lastUpdateTime");
-
-
-    if (element) {
-
-        element.textContent =
-            text;
-
-    }
-
-}
-
-
-/* =========================================================
-   LIVE DATE / TIME
-========================================================= */
-
-function updateClock() {
-
-    const now =
-        new Date();
-
-
-    const dateElement =
-        $("liveDate");
-
-    const timeElement =
-        $("liveTime");
-
-
-    if (dateElement) {
-
-        dateElement.textContent =
-            now.toLocaleDateString(
-                "en-IN",
-                {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric"
-                }
-            );
-
-    }
-
-
-    if (timeElement) {
-
-        timeElement.textContent =
-            now.toLocaleTimeString(
-                "en-IN",
-                {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit"
-                }
-            );
-
-    }
-
-}
-
-
-/* =========================================================
-   CELL CLICK
-========================================================= */
-
-function handleCellClick(
-    event
-) {
-
-    const cell =
-        event.currentTarget;
-
-
-    if (!cell) {
-        return;
-    }
-
-
-    const parts =
-        cell.id.split("_");
-
-
-    if (
-        parts.length !== 2
-    ) {
-        return;
-    }
-
-
-    const line =
-        parts[0];
-
-    const position =
-        parts[1];
-
-
-    currentCell = {
-
-        line,
-
-        position,
-
-        cell
-
-    };
-
-
-    currentCoach =
-        getCoachFromBoard(
-            line,
-            position
-        );
-
-
-    currentPulledOutCoach =
-        null;
-
-
-    openCoachModal(
-        line,
-        position,
-        currentCoach
-    );
-
-}
-
-
-/* =========================================================
-   OPEN MODAL
-========================================================= */
-
-function openCoachModal(
-    line,
-    position,
-    coach = null
-) {
-
-    const shop =
-        coach?.shop ||
-        getShopFromLine(
-            line
-        );
-
-
-    const shopInput =
-        $("modalShop");
-
-    const lineInput =
-        $("modalLine");
-
-    const positionInput =
-        $("modalPosition");
-
-    const coachNoInput =
-        $("modalCoachNo");
-
-    const typeInput =
-        $("modalCoachType");
-
-    const statusInput =
-        $("modalStatus");
-
-
-    if (shopInput) {
-
-        shopInput.value =
-            shop;
-
-    }
-
-
-    if (lineInput) {
-
-        lineInput.value =
-            line;
-
-    }
-
-
-    if (positionInput) {
-
-        positionInput.value =
-            position;
-
-    }
-
-
-    if (coachNoInput) {
-
-        coachNoInput.value =
-            coach?.coachNo ||
-            "";
-
-    }
-
-
-    if (typeInput) {
-
-        typeInput.value =
-            coach?.coachType ||
-            "";
-
-    }
-
-
-    if (statusInput) {
-
-        statusInput.value =
-            coach?.status ||
-            "";
-
-    }
-
-
-    setModalButtonState(
-        !!coach
-    );
-
-
-    const modalElement =
-        $("coachModal");
-
-
-    if (
-        modalElement &&
-        window.bootstrap
-    ) {
-
-        const modal =
-            bootstrap.Modal.getOrCreateInstance(
-                modalElement
-            );
-
-        modal.show();
-
-    }
-
-}
-
-
-/* =========================================================
-   MODAL BUTTON STATE
-========================================================= */
-
-function setModalButtonState(
-    hasCoach
-) {
-
-    const save =
-        $("saveCoachBtn");
-
-    const update =
-        $("updateCoachBtn");
-
-    const deleteBtn =
-        $("deleteCoachBtn");
-
-    const pull =
-        $("pullOutBtn");
-
-    const returnBtn =
-        $("returnToBoardBtn");
-
-
-    if (save) {
-
-        save.disabled =
-            hasCoach;
-
-    }
-
-
-    if (update) {
-
-        update.disabled =
-            !hasCoach;
-
-    }
-
-
-    if (deleteBtn) {
-
-        deleteBtn.disabled =
-            !hasCoach;
-
-    }
-
-
-    if (pull) {
-
-        pull.disabled =
-            !hasCoach;
-
-    }
-
-
-    if (returnBtn) {
-
-        returnBtn.disabled =
-            true;
-
-    }
-
-}
-
-
-/* =========================================================
-   READ MODAL DATA
-========================================================= */
-
-function getModalCoach() {
-
-    if (!currentCell) {
-
-        throw new Error(
-            "No board cell selected."
-        );
-
-    }
-
-
-    const coachNo =
-        clean(
-            $("modalCoachNo")?.value
-        );
-
-
-    const coachType =
-        clean(
-            $("modalCoachType")?.value
-        );
-
-
-    const status =
-        upper(
-            $("modalStatus")?.value
-        );
-
-
-    if (!coachNo) {
-
-        throw new Error(
-            "Coach Number is required."
-        );
-
-    }
-
-
-    return {
-
-        coachNo,
-
-        coachType,
-
-        status,
-
-        shop:
-            clean(
-                $("modalShop")?.value
-            ),
-
-        line:
-            currentCell.line,
-
-        position:
-            currentCell.position
-
-    };
-
-}
-
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-function closeCoachModal() {
-
-    const modalElement =
-        $("coachModal");
-
-
-    if (
-        modalElement &&
-        window.bootstrap
-    ) {
-
-        const modal =
-            bootstrap.Modal.getInstance(
-                modalElement
-            );
-
-
-        if (modal) {
-
-            modal.hide();
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   SHOW MESSAGE
-========================================================= */
-
-function showMessage(
-    message,
-    type = "success"
-) {
-
-    console.log(
-        `[${type}]`,
-        message
-    );
-
-
-    if (
-        typeof window.showToast ===
-        "function"
-    ) {
-
-        window.showToast(
-            message,
-            type
-        );
-
-        return;
-
-    }
-
-
-    if (type === "error") {
-
-        alert(
-            message
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   SAVE BUTTON
-========================================================= */
-
-async function handleSaveCoach() {
-
-    if (isSaving) {
-        return;
-    }
-
-
-    try {
-
-        isSaving = true;
-
-
-        const coach =
-            getModalCoach();
-
-
-        await saveCoach(
-            coach
-        );
-
-
-        showMessage(
-            "Coach saved successfully.",
-            "success"
-        );
-
-
-        closeCoachModal();
-
-    }
-    catch (error) {
-
-        console.error(
-            "SAVE COACH ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Unable to save coach.",
-            "error"
-        );
-
-    }
-    finally {
-
-        isSaving = false;
-
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE BUTTON
-========================================================= */
-
-async function handleUpdateCoach() {
-
-    if (isSaving) {
-        return;
-    }
-
-
-    try {
-
-        isSaving = true;
-
-
-        const coach =
-            getModalCoach();
-
-
-        await updateCoach(
-            coach
-        );
-
-
-        showMessage(
-            "Coach updated successfully.",
-            "success"
-        );
-
-
-        closeCoachModal();
-
-    }
-    catch (error) {
-
-        console.error(
-            "UPDATE COACH ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Unable to update coach.",
-            "error"
-        );
-
-    }
-    finally {
-
-        isSaving = false;
-
-    }
-
-}
-
-
-/* =========================================================
-   DELETE BUTTON
-========================================================= */
-
-async function handleDeleteCoach() {
-
-    if (!currentCell) {
-        return;
-    }
-
-
-    if (!currentCoach) {
-
-        showMessage(
-            "No coach in this cell.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            `Delete coach ${currentCoach.coachNo}?`
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-
-        await firebaseDeleteCoach(
-            currentCell.line,
-            currentCell.position
-        );
-
-
-        showMessage(
-            "Coach deleted successfully.",
-            "success"
-        );
-
-
-        closeCoachModal();
-
-    }
-    catch (error) {
-
-        console.error(
-            "DELETE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Unable to delete coach.",
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PULL OUT BUTTON
-========================================================= */
-
-async function handlePullOut() {
-
-    if (!currentCell) {
-        return;
-    }
-
-
-    if (!currentCoach) {
-
-        showMessage(
-            "No coach in this cell.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            `Pull out coach ${currentCoach.coachNo}?`
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-
-        await firebasePullOutCoach(
-            currentCell.line,
-            currentCell.position
-        );
-
-
-        showMessage(
-            "Coach pulled out successfully.",
-            "success"
-        );
-
-
-        closeCoachModal();
-
-    }
-    catch (error) {
-
-        console.error(
-            "PULL OUT ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error.message ||
-            "Unable to pull out coach.",
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ATTACH CELL EVENTS
-========================================================= */
-
-function attachCellEvents() {
-
-    const cells =
-        getBoardCells();
-
-
-    cells.forEach(
-        cell => {
-
-            if (
-                cell.dataset.eventsAttached ===
-                "true"
-            ) {
-
-                return;
-
-            }
-
-
-            cell.addEventListener(
-                "click",
-                handleCellClick
-            );
-
-
-            cell.dataset.eventsAttached =
-                "true";
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   REFRESH BOARD
-========================================================= */
-
-async function refreshBoard() {
-
-    try {
-
-        const data =
-            await getBoard();
-
-
-        renderBoard(
-            data
-        );
-
-
-        showMessage(
-            "Board refreshed.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "REFRESH ERROR:",
-            error
-        );
-
-
-        showMessage(
-            "Unable to refresh board.",
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   INITIALIZE PART 2
-========================================================= */
-
-function initBoardPart2() {
-
-    console.log(
-        "BOARD.JS VERSION 9 PART 2 LOADED"
-    );
-
-
-    attachCellEvents();
-
-
-    startBoardListener();
-
-
-    startDatabaseListener();
-
-
-    updateClock();
-
-
-    setInterval(
-        updateClock,
-        1000
-    );
-
-
-    renderBoard(
-        {}
-    );
-
-}
-
-
-/* =========================================================
-   EVENT LISTENERS
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        attachCellEvents();
-
-
-        const saveBtn =
-            $("saveCoachBtn");
-
-        const updateBtn =
-            $("updateCoachBtn");
-
-        const deleteBtn =
-            $("deleteCoachBtn");
-
-        const pullBtn =
-            $("pullOutBtn");
-
-        const refreshBtn =
-            $("refreshBtn");
-
-
-        if (saveBtn) {
-
-            saveBtn.addEventListener(
-                "click",
-                handleSaveCoach
-            );
-
-        }
-
-
-        if (updateBtn) {
-
-            updateBtn.addEventListener(
-                "click",
-                handleUpdateCoach
-            );
-
-        }
-
-
-        if (deleteBtn) {
-
-            deleteBtn.addEventListener(
-                "click",
-                handleDeleteCoach
-            );
-
-        }
-
-
-        if (pullBtn) {
-
-            pullBtn.addEventListener(
-                "click",
-                handlePullOut
-            );
-
-        }
-
-
-        if (refreshBtn) {
-
-            refreshBtn.addEventListener(
-                "click",
-                event => {
-
-                    event.preventDefault();
-
-                    refreshBoard();
-
-                }
-            );
-
-        }
-
-
-        initBoardPart2();
-
-    }
-);
-
-
-/* =========================================================
-   GLOBAL COMPATIBILITY
-========================================================= */
-
-window.refreshBoard =
-    refreshBoard;
-
-
-console.log(
-    "================================================"
-);
-
-console.log(
-    "MR CO-ORDINATION BOARD"
-);
-
-console.log(
-    "BOARD.JS VERSION 9"
-);
-
-console.log(
-    "PART 2 READY"
-);
-
-console.log(
-    "================================================"
-);
-/* =========================================================
-   MR CO-ORDINATION BOARD
-   BOARD.JS
-   VERSION 9.0
-   ---------------------------------------------------------
-   PART 3
-   BOARD RENDERING + FIREBASE REALTIME
-   ---------------------------------------------------------
-========================================================= */
-
-import {
-    listenBoard,
-    getBoard,
-    getCoach,
-    saveCoach,
-    updateCoach,
-    updateCoachPosition,
-    updateCoachStatus,
-    firebaseDeleteCoach,
-    firebasePullOutCoach,
-    firebaseReturnCoachToBoard,
-    returnPulledOutToOriginal,
-    listenDatabaseStatus,
-    searchCoach,
-    getAllCoaches
-} from "./firebase-board.js";
-
-
-/* =========================================================
-   GLOBAL STATE
-========================================================= */
-
-let boardData = {};
-
-let currentCell = null;
-
-let currentCoach = null;
-
-let realtimeUnsubscribe = null;
-
-let draggedCell = null;
-
-let lastBoardUpdate = 0;
-
-
-/* =========================================================
-   DOM HELPER
-========================================================= */
-
-function $(id) {
-
-    return document.getElementById(id);
-
-}
-
-
-/* =========================================================
-   CLEAN VALUE
-========================================================= */
-
-function clean(value) {
-
-    return String(
-        value ?? ""
-    ).trim();
-
-}
-
-
-/* =========================================================
-   UPPERCASE
-========================================================= */
-
-function upper(value) {
-
-    return clean(value)
-        .toUpperCase();
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-   ---------------------------------------------------------
-   Prevents coach data from being inserted as raw HTML
-========================================================= */
-
-function escapeHTML(value) {
-
-    return String(
-        value ?? ""
-    )
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
-
-
-/* =========================================================
-   GET SHOP
-========================================================= */
-
-function getShopFromLine(line) {
-
-    line = upper(line);
-
-    if (line.startsWith("SCR")) {
-        return "MR SCR SHOP";
-    }
-
-    if (line.startsWith("N")) {
-        return "N SHOP";
-    }
-
-    if (line.startsWith("M")) {
-        return "M SHOP";
-    }
-
-    if (line.startsWith("F")) {
-        return "CR SHOP";
-    }
-
-    if (line.startsWith("J")) {
-        return "J SHOP";
-    }
-
-    if (line.startsWith("L")) {
-        return "LIFTING BAY";
-    }
 
     return "";
 
@@ -5345,21 +210,6 @@ function getCell(
     position
 ) {
 
-    line =
-        clean(line);
-
-    position =
-        clean(position);
-
-    if (
-        !line ||
-        !position
-    ) {
-
-        return null;
-
-    }
-
     return $(
         `${line}_${position}`
     );
@@ -5368,10 +218,10 @@ function getCell(
 
 
 /* =========================================================
-   GET COACH FROM BOARD
+   GET COACH
 ========================================================= */
 
-function getCoachFromBoard(
+function getBoardCoach(
     line,
     position
 ) {
@@ -5399,6 +249,7 @@ function getStatusClass(
     status =
         upper(status);
 
+
     switch (status) {
 
         case "PO":
@@ -5426,7 +277,6 @@ function getStatusClass(
             return "status-l";
 
         case "HVY":
-        case "HVY.":
             return "status-hvy";
 
         default:
@@ -5438,23 +288,7 @@ function getStatusClass(
 
 
 /* =========================================================
-   STATUS TEXT
-========================================================= */
-
-function getStatusText(
-    status
-) {
-
-    status =
-        upper(status);
-
-    return status || "--";
-
-}
-
-
-/* =========================================================
-   CREATE EMPTY CELL
+   RENDER EMPTY
 ========================================================= */
 
 function renderEmptyCell(
@@ -5465,27 +299,38 @@ function renderEmptyCell(
         return;
     }
 
+
     cell.innerHTML = `
+
         <div class="coach-card empty-coach">
-            <span class="empty-text">EMPTY</span>
+
+            <span class="empty-text">
+                EMPTY
+            </span>
+
         </div>
+
     `;
+
+
+    cell.dataset.occupied =
+        "false";
+
 
     cell.classList.remove(
         "occupied-cell"
     );
 
+
     cell.classList.add(
         "empty-cell"
     );
-
-    cell.dataset.occupied = "false";
 
 }
 
 
 /* =========================================================
-   CREATE COACH CARD
+   RENDER COACH
 ========================================================= */
 
 function renderCoachCard(
@@ -5508,15 +353,19 @@ function renderCoachCard(
             coach.coachNo
         );
 
+
     const coachType =
         escapeHTML(
             coach.coachType
         );
 
+
     const status =
-        getStatusText(
+        upper(
             coach.status
-        );
+        ) ||
+        "--";
+
 
     const statusClass =
         getStatusClass(
@@ -5527,13 +376,21 @@ function renderCoachCard(
     cell.innerHTML = `
 
         <div
-            class="coach-card occupied-coach ${statusClass}"
+
+            class="
+                coach-card
+                occupied-coach
+                ${statusClass}
+            "
+
             draggable="true"
-            data-coach-no="${coachNo}"
+
         >
 
             <div class="coach-number">
+
                 ${coachNo}
+
             </div>
 
             ${
@@ -5547,7 +404,9 @@ function renderCoachCard(
             }
 
             <div class="coach-status">
+
                 ${escapeHTML(status)}
+
             </div>
 
         </div>
@@ -5555,22 +414,24 @@ function renderCoachCard(
     `;
 
 
+    cell.dataset.occupied =
+        "true";
+
+
     cell.classList.remove(
         "empty-cell"
     );
+
 
     cell.classList.add(
         "occupied-cell"
     );
 
-    cell.dataset.occupied =
-        "true";
-
 }
 
 
 /* =========================================================
-   RENDER SINGLE CELL
+   RENDER CELL
 ========================================================= */
 
 function renderCell(
@@ -5584,13 +445,16 @@ function renderCell(
             position
         );
 
+
     if (!cell) {
+
         return;
+
     }
 
 
     const coach =
-        getCoachFromBoard(
+        getBoardCoach(
             line,
             position
         );
@@ -5613,7 +477,7 @@ function renderCell(
     }
 
 
-    setupCellEvents(
+    attachCellEvents(
         cell,
         line,
         position
@@ -5623,20 +487,7 @@ function renderCell(
 
 
 /* =========================================================
-   GET ALL HTML BOARD CELLS
-========================================================= */
-
-function getBoardCells() {
-
-    return document.querySelectorAll(
-        "td[id]"
-    );
-
-}
-
-
-/* =========================================================
-   RENDER COMPLETE BOARD
+   RENDER BOARD
 ========================================================= */
 
 export function renderBoard(
@@ -5644,11 +495,14 @@ export function renderBoard(
 ) {
 
     boardData =
-        data || {};
+        data ||
+        {};
 
 
     const cells =
-        getBoardCells();
+        document.querySelectorAll(
+            "td[id]"
+        );
 
 
     cells.forEach(
@@ -5660,27 +514,31 @@ export function renderBoard(
                 );
 
 
-            if (!id.includes("_")) {
+            if (
+                !id.includes("_")
+            ) {
 
                 return;
 
             }
 
 
-            const separator =
-                id.lastIndexOf("_");
+            const index =
+                id.lastIndexOf(
+                    "_"
+                );
 
 
             const line =
                 id.substring(
                     0,
-                    separator
+                    index
                 );
 
 
             const position =
                 id.substring(
-                    separator + 1
+                    index + 1
                 );
 
 
@@ -5693,117 +551,55 @@ export function renderBoard(
     );
 
 
-    updateBoardCounters();
-
-
-    lastBoardUpdate =
-        Date.now();
-
-
-    updateLastUpdateTime();
+    updateCounters();
 
 }
 
 
 /* =========================================================
-   APPLY STATUS COLOURS
-   ---------------------------------------------------------
-   Kept separately so existing CSS can also use it.
+   ATTACH CELL EVENTS
 ========================================================= */
 
-export function applyStatusColours() {
-
-    document
-        .querySelectorAll(
-            ".coach-card"
-        )
-        .forEach(
-            card => {
-
-                const status =
-                    card
-                        .querySelector(
-                            ".coach-status"
-                        )
-                        ?.textContent ||
-                    "";
-
-                card.classList.remove(
-
-                    "status-po",
-                    "status-s",
-                    "status-lm",
-                    "status-med",
-                    "status-rl",
-                    "status-r1",
-                    "status-rs",
-                    "status-l",
-                    "status-hvy",
-                    "status-empty"
-
-                );
-
-
-                card.classList.add(
-                    getStatusClass(
-                        status
-                    )
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   CELL EVENT SETUP
-========================================================= */
-
-function setupCellEvents(
-    cell,
+function attachCellEvents(
+    oldCell,
     line,
     position
 ) {
 
-    if (!cell) {
-        return;
-    }
-
-
     /*
-       Remove old handlers by cloning.
-       This prevents duplicate click listeners
-       after Firebase realtime updates.
+       Clone cell to remove old listeners.
     */
 
-    const newCell =
-        cell.cloneNode(
+    const cell =
+        oldCell.cloneNode(
             true
         );
 
 
-    cell.replaceWith(
-        newCell
+    oldCell.replaceWith(
+        cell
     );
 
 
-    const targetCell =
-        newCell;
-
-
-    /* =====================================
+    /* =====================================================
        CLICK
-    ===================================== */
+    ===================================================== */
 
-    targetCell.addEventListener(
+    cell.addEventListener(
         "click",
         event => {
 
-            /*
-               If drag operation is active,
-               don't open modal.
-            */
+            if (
+                longPressTriggered
+            ) {
+
+                longPressTriggered =
+                    false;
+
+                return;
+
+            }
+
 
             if (
                 draggedCell
@@ -5823,16 +619,16 @@ function setupCellEvents(
     );
 
 
-    /* =====================================
-       DRAG START
-    ===================================== */
+    /* =====================================================
+       DESKTOP DRAG START
+    ===================================================== */
 
-    targetCell.addEventListener(
+    cell.addEventListener(
         "dragstart",
         event => {
 
             const coach =
-                getCoachFromBoard(
+                getBoardCoach(
                     line,
                     position
                 );
@@ -5849,115 +645,74 @@ function setupCellEvents(
 
             draggedCell = {
 
-                line:
-                    line,
+                line,
 
-                position:
-                    position
+                position
 
             };
 
 
-            targetCell.classList.add(
+            cell.classList.add(
                 "drag-source"
             );
 
 
-            try {
+            event.dataTransfer.effectAllowed =
+                "move";
 
-                event.dataTransfer.effectAllowed =
-                    "move";
 
-                event.dataTransfer.setData(
-                    "text/plain",
-                    JSON.stringify(
-                        draggedCell
-                    )
-                );
-
-            }
-            catch (error) {
-
-                console.warn(
-                    "Drag data error:",
-                    error
-                );
-
-            }
+            event.dataTransfer.setData(
+                "text/plain",
+                JSON.stringify(
+                    draggedCell
+                )
+            );
 
         }
     );
 
 
-    /* =====================================
+    /* =====================================================
        DRAG END
-    ===================================== */
+    ===================================================== */
 
-    targetCell.addEventListener(
+    cell.addEventListener(
         "dragend",
         () => {
 
-            targetCell.classList.remove(
-                "drag-source"
-            );
-
-            draggedCell =
-                null;
-
-            document
-                .querySelectorAll(
-                    ".drag-over"
-                )
-                .forEach(
-                    item => {
-
-                        item.classList.remove(
-                            "drag-over"
-                        );
-
-                    }
-                );
+            clearDragState();
 
         }
     );
 
 
-    /* =====================================
+    /* =====================================================
        DRAG OVER
-    ===================================== */
+    ===================================================== */
 
-    targetCell.addEventListener(
+    cell.addEventListener(
         "dragover",
         event => {
 
             event.preventDefault();
 
-            targetCell.classList.add(
+            cell.classList.add(
                 "drag-over"
             );
-
-
-            try {
-
-                event.dataTransfer.dropEffect =
-                    "move";
-
-            }
-            catch (error) {}
 
         }
     );
 
 
-    /* =====================================
+    /* =====================================================
        DRAG LEAVE
-    ===================================== */
+    ===================================================== */
 
-    targetCell.addEventListener(
+    cell.addEventListener(
         "dragleave",
         () => {
 
-            targetCell.classList.remove(
+            cell.classList.remove(
                 "drag-over"
             );
 
@@ -5965,17 +720,18 @@ function setupCellEvents(
     );
 
 
-    /* =====================================
+    /* =====================================================
        DROP
-    ===================================== */
+    ===================================================== */
 
-    targetCell.addEventListener(
+    cell.addEventListener(
         "drop",
         async event => {
 
             event.preventDefault();
 
-            targetCell.classList.remove(
+
+            cell.classList.remove(
                 "drag-over"
             );
 
@@ -5984,22 +740,16 @@ function setupCellEvents(
                 draggedCell;
 
 
-            /*
-               Fallback to dataTransfer.
-            */
-
             if (!source) {
 
                 try {
 
-                    const raw =
-                        event.dataTransfer.getData(
-                            "text/plain"
-                        );
-
                     source =
                         JSON.parse(
-                            raw
+                            event.dataTransfer
+                                .getData(
+                                    "text/plain"
+                                )
                         );
 
                 }
@@ -6020,24 +770,14 @@ function setupCellEvents(
             }
 
 
-            const fromLine =
-                clean(
-                    source.line
-                );
-
-            const fromPosition =
-                clean(
-                    source.position
-                );
-
-
             if (
-                fromLine === line &&
-                fromPosition === position
+
+                source.line === line &&
+                source.position === position
+
             ) {
 
-                draggedCell =
-                    null;
+                clearDragState();
 
                 return;
 
@@ -6046,20 +786,48 @@ function setupCellEvents(
 
             try {
 
-                await moveCoach(
-                    fromLine,
-                    fromPosition,
-                    line,
-                    position
-                );
+                const result =
+                    await updateCoachPosition(
+
+                        source.line,
+
+                        source.position,
+
+                        line,
+
+                        position
+
+                    );
+
+
+                if (
+                    result?.action ===
+                    "SWAP"
+                ) {
+
+                    showMessage(
+                        "Coaches swapped successfully.",
+                        "success"
+                    );
+
+                }
+                else {
+
+                    showMessage(
+                        "Coach moved successfully.",
+                        "success"
+                    );
+
+                }
 
             }
             catch (error) {
 
                 console.error(
-                    "DROP ERROR:",
+                    "MOVE ERROR:",
                     error
                 );
+
 
                 showMessage(
                     error.message ||
@@ -6070,9 +838,125 @@ function setupCellEvents(
             }
 
 
-            draggedCell =
-                null;
+            clearDragState();
 
+        }
+    );
+
+
+    /* =====================================================
+       MOBILE LONG PRESS
+    ===================================================== */
+
+    cell.addEventListener(
+        "touchstart",
+        event => {
+
+            if (
+                event.touches.length !==
+                1
+            ) {
+
+                return;
+
+            }
+
+
+            const coach =
+                getBoardCoach(
+                    line,
+                    position
+                );
+
+
+            if (!coach) {
+
+                return;
+
+            }
+
+
+            longPressTriggered =
+                false;
+
+
+            longPressTimer =
+                setTimeout(
+                    () => {
+
+                        longPressTriggered =
+                            true;
+
+
+                        draggedCell = {
+
+                            line,
+
+                            position
+
+                        };
+
+
+                        cell.classList.add(
+                            "drag-source"
+                        );
+
+
+                    },
+                    500
+                );
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    cell.addEventListener(
+        "touchmove",
+        () => {
+
+            if (
+                longPressTimer
+            ) {
+
+                clearTimeout(
+                    longPressTimer
+                );
+
+                longPressTimer =
+                    null;
+
+            }
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    cell.addEventListener(
+        "touchend",
+        () => {
+
+            if (
+                longPressTimer
+            ) {
+
+                clearTimeout(
+                    longPressTimer
+                );
+
+                longPressTimer =
+                    null;
+
+            }
+
+        },
+        {
+            passive: true
         }
     );
 
@@ -6080,117 +964,32 @@ function setupCellEvents(
 
 
 /* =========================================================
-   MOVE / SWAP COACH
+   CLEAR DRAG
 ========================================================= */
 
-async function moveCoach(
-    fromLine,
-    fromPosition,
-    toLine,
-    toPosition
-) {
+function clearDragState() {
 
-    const source =
-        getCoachFromBoard(
-            fromLine,
-            fromPosition
-        );
+    draggedCell =
+        null;
 
 
-    if (!source) {
+    document
+        .querySelectorAll(
+            ".drag-source,.drag-over"
+        )
+        .forEach(
+            element => {
 
-        throw new Error(
-            "Source coach not found."
-        );
-
-    }
-
-
-    const target =
-        getCoachFromBoard(
-            toLine,
-            toPosition
-        );
-
-
-    let message =
-        "Coach moved successfully.";
-
-
-    if (target) {
-
-        message =
-            "Coaches swapped successfully.";
-
-    }
-
-
-    await updateCoachPosition(
-
-        fromLine,
-        fromPosition,
-
-        toLine,
-        toPosition
-
-    );
-
-
-    showMessage(
-        message,
-        "success"
-    );
-
-}
-
-
-/* =========================================================
-   FIREBASE REALTIME BOARD
-========================================================= */
-
-export function startBoardListener() {
-
-    /*
-       Prevent multiple listeners.
-    */
-
-    if (
-        typeof realtimeUnsubscribe ===
-        "function"
-    ) {
-
-        try {
-
-            realtimeUnsubscribe();
-
-        }
-        catch (error) {}
-
-    }
-
-
-    realtimeUnsubscribe =
-        listenBoard(
-            data => {
-
-                console.log(
-                    "REALTIME BOARD UPDATE",
-                    data
+                element.classList.remove(
+                    "drag-source"
                 );
 
-
-                renderBoard(
-                    data
+                element.classList.remove(
+                    "drag-over"
                 );
-
-
-                applyStatusColours();
 
             }
         );
-
-
-    return realtimeUnsubscribe;
 
 }
 
@@ -6212,9 +1011,6 @@ export async function loadBoard() {
         );
 
 
-        applyStatusColours();
-
-
         return data;
 
     }
@@ -6227,7 +1023,7 @@ export async function loadBoard() {
 
 
         showMessage(
-            "Board load failed.",
+            "Unable to load board.",
             "danger"
         );
 
@@ -6240,7 +1036,7 @@ export async function loadBoard() {
 
 
 /* =========================================================
-   REFRESH BOARD
+   REFRESH
 ========================================================= */
 
 export async function refreshBoard() {
@@ -6264,8 +1060,9 @@ export async function refreshBoard() {
 
         await loadBoard();
 
+
         showMessage(
-            "Board refreshed.",
+            "Board refreshed successfully.",
             "success"
         );
 
@@ -6273,7 +1070,6 @@ export async function refreshBoard() {
     catch (error) {
 
         console.error(
-            "REFRESH ERROR:",
             error
         );
 
@@ -6296,10 +1092,62 @@ export async function refreshBoard() {
 
 
 /* =========================================================
-   BOARD COUNTERS
+   START REALTIME
 ========================================================= */
 
-export function updateBoardCounters() {
+export function startBoardListener() {
+
+    if (
+        typeof realtimeUnsubscribe ===
+        "function"
+    ) {
+
+        try {
+
+            realtimeUnsubscribe();
+
+        }
+        catch (error) {}
+
+    }
+
+
+    realtimeUnsubscribe =
+        listenBoard(
+            data => {
+
+                boardData =
+                    data ||
+                    {};
+
+
+                renderBoard(
+                    boardData
+                );
+
+
+                updateLastUpdate();
+
+            }
+        );
+
+
+    return realtimeUnsubscribe;
+
+}
+
+
+/* =========================================================
+   COUNTERS
+========================================================= */
+
+function updateCounters() {
+
+    const cells =
+        document.querySelectorAll(
+            "td[id]"
+        );
+
 
     let total =
         0;
@@ -6307,25 +1155,12 @@ export function updateBoardCounters() {
     let occupied =
         0;
 
-    let free =
-        0;
-
-
-    const cells =
-        getBoardCells();
-
 
     cells.forEach(
         cell => {
 
-            const id =
-                clean(
-                    cell.id
-                );
-
-
             if (
-                !id.includes("_")
+                !cell.id.includes("_")
             ) {
 
                 return;
@@ -6344,45 +1179,45 @@ export function updateBoardCounters() {
                 occupied++;
 
             }
-            else {
-
-                free++;
-
-            }
 
         }
     );
 
 
-    const totalElement =
+    const free =
+        total -
+        occupied;
+
+
+    const totalEl =
         $("totalCoach");
 
-    const occupiedElement =
+    const occupiedEl =
         $("occupiedCoach");
 
-    const freeElement =
+    const freeEl =
         $("freeCoach");
 
 
-    if (totalElement) {
+    if (totalEl) {
 
-        totalElement.textContent =
+        totalEl.textContent =
             total;
 
     }
 
 
-    if (occupiedElement) {
+    if (occupiedEl) {
 
-        occupiedElement.textContent =
+        occupiedEl.textContent =
             occupied;
 
     }
 
 
-    if (freeElement) {
+    if (freeEl) {
 
-        freeElement.textContent =
+        freeEl.textContent =
             free;
 
     }
@@ -6391,64 +1226,10 @@ export function updateBoardCounters() {
 
 
 /* =========================================================
-   LAST UPDATE
+   DATABASE STATUS
 ========================================================= */
 
-function updateLastUpdateTime() {
-
-    const date =
-        new Date(
-            lastBoardUpdate ||
-            Date.now()
-        );
-
-
-    const text =
-        date.toLocaleTimeString(
-            "en-IN",
-            {
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit"
-            }
-        );
-
-
-    const lastUpdate =
-        $("lastUpdate");
-
-    const lastUpdateTime =
-        $("lastUpdateTime");
-
-
-    if (lastUpdate) {
-
-        lastUpdate.textContent =
-            `Last Update: ${text}`;
-
-    }
-
-
-    if (lastUpdateTime) {
-
-        lastUpdateTime.textContent =
-            text;
-
-    }
-
-}
-
-
-/* =========================================================
-   DATABASE CONNECTION STATUS
-========================================================= */
-
-export function startDatabaseStatus() {
+function startDatabaseStatus() {
 
     listenDatabaseStatus(
         connected => {
@@ -6519,17 +1300,14 @@ export function startDatabaseStatus() {
    MODAL
 ========================================================= */
 
-let bootstrapModal = null;
+function getModal() {
 
-
-function getCoachModal() {
-
-    const modalElement =
+    const element =
         $("coachModal");
 
 
     if (
-        !modalElement ||
+        !element ||
         typeof bootstrap ===
         "undefined"
     ) {
@@ -6543,7 +1321,7 @@ function getCoachModal() {
 
         bootstrapModal =
             new bootstrap.Modal(
-                modalElement
+                element
             );
 
     }
@@ -6555,7 +1333,7 @@ function getCoachModal() {
 
 
 /* =========================================================
-   OPEN COACH MODAL
+   OPEN MODAL
 ========================================================= */
 
 export function openCoachModal(
@@ -6572,17 +1350,15 @@ export function openCoachModal(
 
     currentCell = {
 
-        line:
-            line,
+        line,
 
-        position:
-            position
+        position
 
     };
 
 
     currentCoach =
-        getCoachFromBoard(
+        getBoardCoach(
             line,
             position
         );
@@ -6595,70 +1371,70 @@ export function openCoachModal(
         );
 
 
-    const modalShop =
+    const shopInput =
         $("modalShop");
 
-    const modalLine =
+    const lineInput =
         $("modalLine");
 
-    const modalPosition =
+    const positionInput =
         $("modalPosition");
 
-    const modalCoachNo =
+    const coachInput =
         $("modalCoachNo");
 
-    const modalCoachType =
+    const typeInput =
         $("modalCoachType");
 
-    const modalStatus =
+    const statusInput =
         $("modalStatus");
 
 
-    if (modalShop) {
+    if (shopInput) {
 
-        modalShop.value =
+        shopInput.value =
             shop;
 
     }
 
 
-    if (modalLine) {
+    if (lineInput) {
 
-        modalLine.value =
+        lineInput.value =
             line;
 
     }
 
 
-    if (modalPosition) {
+    if (positionInput) {
 
-        modalPosition.value =
+        positionInput.value =
             position;
 
     }
 
 
-    if (modalCoachNo) {
+    if (coachInput) {
 
-        modalCoachNo.value =
+        coachInput.value =
             currentCoach?.coachNo ||
             "";
 
     }
 
 
-    if (modalCoachType) {
+    if (typeInput) {
 
-        modalCoachType.value =
+        typeInput.value =
             currentCoach?.coachType ||
             "";
 
     }
 
 
-    if (modalStatus) {
+    if (statusInput) {
 
-        modalStatus.value =
+        statusInput.value =
             currentCoach?.status ||
             "";
 
@@ -6669,7 +1445,7 @@ export function openCoachModal(
 
 
     const modal =
-        getCoachModal();
+        getModal();
 
 
     if (modal) {
@@ -6687,16 +1463,16 @@ export function openCoachModal(
 
 function updateModalButtons() {
 
-    const saveBtn =
+    const save =
         $("saveCoachBtn");
 
-    const updateBtn =
+    const update =
         $("updateCoachBtn");
 
     const deleteBtn =
         $("deleteCoachBtn");
 
-    const pullBtn =
+    const pull =
         $("pullOutBtn");
 
     const returnBtn =
@@ -6707,9 +1483,9 @@ function updateModalButtons() {
         !!currentCoach;
 
 
-    if (saveBtn) {
+    if (save) {
 
-        saveBtn.style.display =
+        save.style.display =
             occupied
                 ? "none"
                 : "";
@@ -6717,9 +1493,9 @@ function updateModalButtons() {
     }
 
 
-    if (updateBtn) {
+    if (update) {
 
-        updateBtn.style.display =
+        update.style.display =
             occupied
                 ? ""
                 : "none";
@@ -6737,20 +1513,15 @@ function updateModalButtons() {
     }
 
 
-    if (pullBtn) {
+    if (pull) {
 
-        pullBtn.style.display =
+        pull.style.display =
             occupied
                 ? ""
                 : "none";
 
     }
 
-
-    /*
-       Return button works with pulled-out
-       coach only. Normal board cells hide it.
-    */
 
     if (returnBtn) {
 
@@ -6763,10 +1534,10 @@ function updateModalButtons() {
 
 
 /* =========================================================
-   GET MODAL DATA
+   MODAL DATA
 ========================================================= */
 
-function getModalCoachData() {
+function getModalData() {
 
     if (!currentCell) {
 
@@ -6795,24 +1566,6 @@ function getModalCoachData() {
         );
 
 
-    const shop =
-        clean(
-            $("modalShop")?.value
-        );
-
-
-    const line =
-        clean(
-            $("modalLine")?.value
-        );
-
-
-    const position =
-        clean(
-            $("modalPosition")?.value
-        );
-
-
     if (!coachNo) {
 
         throw new Error(
@@ -6830,11 +1583,20 @@ function getModalCoachData() {
 
         status,
 
-        shop,
+        shop:
+            clean(
+                $("modalShop")?.value
+            ),
 
-        line,
+        line:
+            clean(
+                $("modalLine")?.value
+            ),
 
-        position
+        position:
+            clean(
+                $("modalPosition")?.value
+            )
 
     };
 
@@ -6842,21 +1604,21 @@ function getModalCoachData() {
 
 
 /* =========================================================
-   SAVE FROM MODAL
+   SAVE
 ========================================================= */
 
-export async function saveCoachFromModal() {
+async function saveFromModal() {
 
     try {
 
         const coach =
-            getModalCoachData();
+            getModalData();
 
 
         if (currentCoach) {
 
             throw new Error(
-                "This cell is already occupied."
+                "Cell already occupied."
             );
 
         }
@@ -6867,7 +1629,7 @@ export async function saveCoachFromModal() {
         );
 
 
-        closeCoachModal();
+        closeModal();
 
 
         showMessage(
@@ -6896,24 +1658,15 @@ export async function saveCoachFromModal() {
 
 
 /* =========================================================
-   UPDATE FROM MODAL
+   UPDATE
 ========================================================= */
 
-export async function updateCoachFromModal() {
+async function updateFromModal() {
 
     try {
 
-        if (!currentCell) {
-
-            throw new Error(
-                "No cell selected."
-            );
-
-        }
-
-
         const coach =
-            getModalCoachData();
+            getModalData();
 
 
         await updateCoach(
@@ -6921,7 +1674,7 @@ export async function updateCoachFromModal() {
         );
 
 
-        closeCoachModal();
+        closeModal();
 
 
         showMessage(
@@ -6950,81 +1703,28 @@ export async function updateCoachFromModal() {
 
 
 /* =========================================================
-   UPDATE STATUS FROM MODAL
+   DELETE
 ========================================================= */
 
-export async function updateStatusFromModal() {
+async function deleteFromModal() {
 
-    if (!currentCell) {
-
-        return;
-
-    }
-
-
-    try {
-
-        const status =
-            upper(
-                $("modalStatus")?.value
-            );
-
-
-        await updateCoachStatus(
-
-            currentCell.line,
-
-            currentCell.position,
-
-            status
-
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "STATUS UPDATE ERROR:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DELETE FROM MODAL
-========================================================= */
-
-export async function deleteCoachFromModal() {
-
-    if (!currentCell) {
+    if (
+        !currentCell ||
+        !currentCoach
+    ) {
 
         return;
 
     }
 
 
-    if (!currentCoach) {
-
-        showMessage(
-            "No coach in this cell.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
+    const yes =
         window.confirm(
             `Delete coach ${currentCoach.coachNo}?`
         );
 
 
-    if (!confirmed) {
+    if (!yes) {
 
         return;
 
@@ -7042,11 +1742,11 @@ export async function deleteCoachFromModal() {
         );
 
 
-        closeCoachModal();
+        closeModal();
 
 
         showMessage(
-            "Coach deleted.",
+            "Coach deleted successfully.",
             "success"
         );
 
@@ -7071,37 +1771,28 @@ export async function deleteCoachFromModal() {
 
 
 /* =========================================================
-   PULL OUT FROM MODAL
+   PULL OUT
 ========================================================= */
 
-export async function pullOutCoachFromModal() {
+async function pullOutFromModal() {
 
-    if (!currentCell) {
-
-        return;
-
-    }
-
-
-    if (!currentCoach) {
-
-        showMessage(
-            "No coach in this cell.",
-            "warning"
-        );
+    if (
+        !currentCell ||
+        !currentCoach
+    ) {
 
         return;
 
     }
 
 
-    const confirmed =
+    const yes =
         window.confirm(
             `Pull out coach ${currentCoach.coachNo}?`
         );
 
 
-    if (!confirmed) {
+    if (!yes) {
 
         return;
 
@@ -7119,7 +1810,7 @@ export async function pullOutCoachFromModal() {
         );
 
 
-        closeCoachModal();
+        closeModal();
 
 
         showMessage(
@@ -7151,10 +1842,10 @@ export async function pullOutCoachFromModal() {
    CLOSE MODAL
 ========================================================= */
 
-function closeCoachModal() {
+function closeModal() {
 
     const modal =
-        getCoachModal();
+        getModal();
 
 
     if (modal) {
@@ -7174,6 +1865,463 @@ function closeCoachModal() {
 
 
 /* =========================================================
+   SEARCH
+========================================================= */
+
+async function performSearch(
+    keyword
+) {
+
+    keyword =
+        clean(keyword);
+
+
+    const resultBox =
+        $("searchResult");
+
+
+    if (!resultBox) {
+
+        return;
+
+    }
+
+
+    if (!keyword) {
+
+        resultBox.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    try {
+
+        const results =
+            await searchCoach(
+                keyword
+            );
+
+
+        if (!results.length) {
+
+            resultBox.innerHTML = `
+
+                <div class="alert alert-warning mt-2">
+
+                    No coach found.
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        resultBox.innerHTML =
+            results
+                .map(
+                    coach => `
+
+                    <div
+                        class="search-item"
+                        data-line="${escapeHTML(coach.line)}"
+                        data-position="${escapeHTML(coach.position)}"
+                    >
+
+                        <b>
+                            ${escapeHTML(coach.coachNo)}
+                        </b>
+
+                        <span>
+                            ${escapeHTML(coach.coachType || "")}
+                        </span>
+
+                        <span>
+                            ${escapeHTML(coach.status || "")}
+                        </span>
+
+                        <small>
+                            ${escapeHTML(coach.shop || "")}
+                            -
+                            ${escapeHTML(coach.line)}
+                            /
+                            ${escapeHTML(coach.position)}
+                        </small>
+
+                    </div>
+
+                `
+                )
+                .join("");
+
+
+        resultBox
+            .querySelectorAll(
+                ".search-item"
+            )
+            .forEach(
+                item => {
+
+                    item.addEventListener(
+                        "click",
+                        () => {
+
+                            openCoachModal(
+
+                                item.dataset.line,
+
+                                item.dataset.position
+
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+    catch (error) {
+
+        console.error(
+            "SEARCH ERROR:",
+            error
+        );
+
+        resultBox.innerHTML = `
+
+            <div class="alert alert-danger">
+
+                Search failed.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   EXCEL EXPORT
+========================================================= */
+
+async function exportExcel() {
+
+    try {
+
+        const coaches =
+            await getAllCoaches();
+
+
+        if (
+            !coaches.length
+        ) {
+
+            showMessage(
+                "No coach data available.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+
+        let csv =
+            "Coach Number,Coach Type,Status,Shop,Line,Position\n";
+
+
+        coaches.forEach(
+            coach => {
+
+                csv += [
+
+                    coach.coachNo,
+
+                    coach.coachType,
+
+                    coach.status,
+
+                    coach.shop,
+
+                    coach.line,
+
+                    coach.position
+
+                ]
+                .map(
+                    value =>
+                        `"${String(
+                            value ?? ""
+                        )
+                        .replaceAll(
+                            '"',
+                            '""'
+                        )}"`
+                )
+                .join(",") +
+                "\n";
+
+            }
+        );
+
+
+        const blob =
+            new Blob(
+                [csv],
+                {
+                    type:
+                        "text/csv;charset=utf-8;"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(
+                blob
+            );
+
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+
+        link.href =
+            url;
+
+
+        link.download =
+            `MR-COORDINATION-${Date.now()}.csv`;
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+        link.click();
+
+
+        link.remove();
+
+
+        URL.revokeObjectURL(
+            url
+        );
+
+
+        showMessage(
+            "Excel-compatible CSV exported.",
+            "success"
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "EXCEL ERROR:",
+            error
+        );
+
+
+        showMessage(
+            "Excel export failed.",
+            "danger"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PDF / PRINT
+========================================================= */
+
+function printBoard() {
+
+    window.print();
+
+}
+
+
+/* =========================================================
+   FULL SCREEN
+========================================================= */
+
+async function toggleFullscreen() {
+
+    try {
+
+        if (
+            !document.fullscreenElement
+        ) {
+
+            await document.documentElement
+                .requestFullscreen();
+
+        }
+        else {
+
+            await document.exitFullscreen();
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "FULLSCREEN ERROR:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LAST UPDATE
+========================================================= */
+
+function updateLastUpdate() {
+
+    const now =
+        new Date();
+
+
+    const time =
+        now.toLocaleTimeString(
+            "en-IN",
+            {
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit",
+
+                hour12:
+                    true
+
+            }
+        );
+
+
+    const header =
+        $("lastUpdate");
+
+
+    const footer =
+        $("lastUpdateTime");
+
+
+    if (header) {
+
+        header.textContent =
+            `Last Update: ${time}`;
+
+    }
+
+
+    if (footer) {
+
+        footer.textContent =
+            time;
+
+    }
+
+}
+
+
+/* =========================================================
+   LIVE CLOCK
+========================================================= */
+
+function updateClock() {
+
+    const now =
+        new Date();
+
+
+    const date =
+        now.toLocaleDateString(
+            "en-IN",
+            {
+
+                day:
+                    "2-digit",
+
+                month:
+                    "2-digit",
+
+                year:
+                    "numeric"
+
+            }
+        );
+
+
+    const time =
+        now.toLocaleTimeString(
+            "en-IN",
+            {
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit",
+
+                hour12:
+                    true
+
+            }
+        );
+
+
+    const dateElement =
+        $("liveDate");
+
+
+    const timeElement =
+        $("liveTime");
+
+
+    if (dateElement) {
+
+        dateElement.textContent =
+            `Date: ${date}`;
+
+    }
+
+
+    if (timeElement) {
+
+        timeElement.textContent =
+            `Time: ${time}`;
+
+    }
+
+}
+
+
+/* =========================================================
    MESSAGE
 ========================================================= */
 
@@ -7182,22 +2330,14 @@ function showMessage(
     type = "info"
 ) {
 
-    /*
-       Bootstrap alert.
-       Automatically disappears.
-    */
-
-    const existing =
-        document.querySelector(
+    document
+        .querySelectorAll(
             ".board-alert"
+        )
+        .forEach(
+            element =>
+                element.remove()
         );
-
-
-    if (existing) {
-
-        existing.remove();
-
-    }
 
 
     const alert =
@@ -7207,16 +2347,24 @@ function showMessage(
 
 
     alert.className =
-        `alert alert-${type} board-alert position-fixed`;
+        `alert alert-${type} board-alert`;
+
+
+    alert.style.position =
+        "fixed";
+
 
     alert.style.top =
         "20px";
 
+
     alert.style.right =
         "20px";
 
+
     alert.style.zIndex =
         "99999";
+
 
     alert.style.minWidth =
         "250px";
@@ -7244,7 +2392,7 @@ function showMessage(
 
 
 /* =========================================================
-   INITIAL BOARD SETUP
+   EVENT LISTENERS
 ========================================================= */
 
 document.addEventListener(
@@ -7252,12 +2400,20 @@ document.addEventListener(
     async () => {
 
         console.log(
-            "BOARD.JS VERSION 9 PART 3 LOADED"
+            "=========================================="
+        );
+
+        console.log(
+            "BOARD.JS VERSION 9.0 FINAL"
+        );
+
+        console.log(
+            "=========================================="
         );
 
 
         /*
-           Initial empty rendering.
+           Initial board.
         */
 
         renderBoard(
@@ -7266,37 +2422,45 @@ document.addEventListener(
 
 
         /*
-           Load existing Firebase data.
+           Load Firebase.
         */
 
         await loadBoard();
 
 
         /*
-           Start realtime Firebase listener.
+           Realtime listener.
         */
 
         startBoardListener();
 
 
         /*
-           Database connection indicator.
+           Database status.
         */
 
         startDatabaseStatus();
 
 
         /*
-           Refresh button.
+           Clock.
         */
 
-        const refreshBtn =
-            $("refreshBtn");
+        updateClock();
 
 
-        if (refreshBtn) {
+        setInterval(
+            updateClock,
+            1000
+        );
 
-            refreshBtn.addEventListener(
+
+        /* =====================================
+           REFRESH
+        ===================================== */
+
+        $("refreshBtn")
+            ?.addEventListener(
                 "click",
                 event => {
 
@@ -7307,26 +2471,109 @@ document.addEventListener(
                 }
             );
 
-        }
 
+        /* =====================================
+           SAVE
+        ===================================== */
 
-        /*
-           Modal SAVE.
-        */
-
-        const saveBtn =
-            $("saveCoachBtn");
-
-
-        if (saveBtn) {
-
-            saveBtn.addEventListener(
+        $("saveCoachBtn")
+            ?.addEventListener(
                 "click",
                 event => {
 
                     event.preventDefault();
 
-                    saveCoachFromModal();
+                    saveFromModal();
+
+                }
+            );
+
+
+        /* =====================================
+           UPDATE
+        ===================================== */
+
+        $("updateCoachBtn")
+            ?.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    updateFromModal();
+
+                }
+            );
+
+
+        /* =====================================
+           DELETE
+        ===================================== */
+
+        $("deleteCoachBtn")
+            ?.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    deleteFromModal();
+
+                }
+            );
+
+
+        /* =====================================
+           PULL OUT
+        ===================================== */
+
+        $("pullOutBtn")
+            ?.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    pullOutFromModal();
+
+                }
+            );
+
+
+        /* =====================================
+           SEARCH
+        ===================================== */
+
+        const searchBox =
+            $("searchBox");
+
+
+        if (searchBox) {
+
+            let searchTimer =
+                null;
+
+
+            searchBox.addEventListener(
+                "input",
+                () => {
+
+                    clearTimeout(
+                        searchTimer
+                    );
+
+
+                    searchTimer =
+                        setTimeout(
+                            () => {
+
+                                performSearch(
+                                    searchBox.value
+                                );
+
+                            },
+                            250
+                        );
 
                 }
             );
@@ -7334,87 +2581,59 @@ document.addEventListener(
         }
 
 
-        /*
-           Modal UPDATE.
-        */
+        /* =====================================
+           EXCEL
+        ===================================== */
 
-        const updateBtn =
-            $("updateCoachBtn");
-
-
-        if (updateBtn) {
-
-            updateBtn.addEventListener(
+        $("excelBtn")
+            ?.addEventListener(
                 "click",
                 event => {
 
                     event.preventDefault();
 
-                    updateCoachFromModal();
+                    exportExcel();
 
                 }
             );
 
-        }
 
+        /* =====================================
+           PDF
+        ===================================== */
 
-        /*
-           Modal DELETE.
-        */
-
-        const deleteBtn =
-            $("deleteCoachBtn");
-
-
-        if (deleteBtn) {
-
-            deleteBtn.addEventListener(
+        $("pdfBtn")
+            ?.addEventListener(
                 "click",
                 event => {
 
                     event.preventDefault();
 
-                    deleteCoachFromModal();
+                    printBoard();
 
                 }
             );
 
-        }
 
+        /* =====================================
+           FULL SCREEN
+        ===================================== */
 
-        /*
-           Modal PULL OUT.
-        */
-
-        const pullBtn =
-            $("pullOutBtn");
-
-
-        if (pullBtn) {
-
-            pullBtn.addEventListener(
+        $("fullscreenBtn")
+            ?.addEventListener(
                 "click",
                 event => {
 
                     event.preventDefault();
 
-                    pullOutCoachFromModal();
+                    toggleFullscreen();
 
                 }
             );
 
-        }
 
-
-        /*
-           Live date/time.
-        */
-
-        updateClock();
-
-        setInterval(
-            updateClock,
-            1000
+        console.log(
+            "BOARD.JS INITIALIZATION COMPLETE"
         );
 
     }
@@ -7422,79 +2641,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   LIVE DATE + TIME
-========================================================= */
-
-function updateClock() {
-
-    const now =
-        new Date();
-
-
-    const date =
-        now.toLocaleDateString(
-            "en-IN",
-            {
-                day:
-                    "2-digit",
-
-                month:
-                    "2-digit",
-
-                year:
-                    "numeric"
-            }
-        );
-
-
-    const time =
-        now.toLocaleTimeString(
-            "en-IN",
-            {
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit",
-
-                hour12:
-                    true
-            }
-        );
-
-
-    const dateElement =
-        $("liveDate");
-
-    const timeElement =
-        $("liveTime");
-
-
-    if (dateElement) {
-
-        dateElement.textContent =
-            `Date: ${date}`;
-
-    }
-
-
-    if (timeElement) {
-
-        timeElement.textContent =
-            `Time: ${time}`;
-
-    }
-
-}
-
-
-/* =========================================================
    GLOBAL COMPATIBILITY
-   ---------------------------------------------------------
-   Useful if HTML / other JS calls these functions.
 ========================================================= */
 
 window.refreshBoard =
@@ -7506,39 +2653,11 @@ window.renderBoard =
 window.openCoachModal =
     openCoachModal;
 
-window.saveCoachFromModal =
-    saveCoachFromModal;
-
-window.updateCoachFromModal =
-    updateCoachFromModal;
-
-window.deleteCoachFromModal =
-    deleteCoachFromModal;
-
-window.pullOutCoachFromModal =
-    pullOutCoachFromModal;
-
 
 /* =========================================================
    READY
 ========================================================= */
 
 console.log(
-    "=========================================="
-);
-
-console.log(
-    "MR CO-ORDINATION BOARD"
-);
-
-console.log(
-    "board.js VERSION 9.0 PART 3"
-);
-
-console.log(
-    "Realtime + Rendering + Drag Drop Ready"
-);
-
-console.log(
-    "=========================================="
+    "MR CO-ORDINATION BOARD VERSION 9 READY"
 );
