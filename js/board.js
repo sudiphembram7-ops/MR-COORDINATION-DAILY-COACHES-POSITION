@@ -288,46 +288,34 @@ function getStatusClass(
 
 
 /* =========================================================
-   RENDER EMPTY
+   RENDER EMPTY CELL
+   EMPTY CELL MUST REMAIN COMPLETELY BLANK
 ========================================================= */
 
-function renderEmptyCell(
-    cell
-) {
+function renderEmptyCell(cell) {
 
     if (!cell) {
         return;
     }
 
+    /*
+       IMPORTANT:
+       Do not write EMPTY text here.
+       Do not create empty coach-card.
+    */
 
-    cell.innerHTML = `
+    cell.innerHTML = "";
 
-        <div class="coach-card empty-coach">
+    cell.textContent = "";
 
-            <span class="empty-text">
-                EMPTY
-            </span>
-
-        </div>
-
-    `;
-
-
-    cell.dataset.occupied =
-        "false";
-
+    cell.dataset.occupied = "false";
 
     cell.classList.remove(
-        "occupied-cell"
-    );
-
-
-    cell.classList.add(
+        "occupied-cell",
         "empty-cell"
     );
 
 }
-
 
 /* =========================================================
    RENDER COACH
