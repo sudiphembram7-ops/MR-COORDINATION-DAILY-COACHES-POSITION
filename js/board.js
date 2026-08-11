@@ -1471,6 +1471,10 @@ function updateModalButtons() {
         !!currentCoach;
 
 
+    /* =========================
+       SAVE
+    ========================= */
+
     if (save) {
 
         save.style.display =
@@ -1480,6 +1484,10 @@ function updateModalButtons() {
 
     }
 
+
+    /* =========================
+       UPDATE
+    ========================= */
 
     if (update) {
 
@@ -1491,6 +1499,10 @@ function updateModalButtons() {
     }
 
 
+    /* =========================
+       DELETE
+    ========================= */
+
     if (deleteBtn) {
 
         deleteBtn.style.display =
@@ -1500,6 +1512,10 @@ function updateModalButtons() {
 
     }
 
+
+    /* =========================
+       PULL OUT
+    ========================= */
 
     if (pull) {
 
@@ -1511,16 +1527,19 @@ function updateModalButtons() {
     }
 
 
+    /* =========================
+       RETURN TO BOARD
+       ALWAYS VISIBLE
+    ========================= */
+
     if (returnBtn) {
 
         returnBtn.style.display =
-            "none";
+            "";
 
     }
 
 }
-
-
 /* =========================================================
    MODAL DATA
 ========================================================= */
