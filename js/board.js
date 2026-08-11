@@ -2545,7 +2545,25 @@ document.addEventListener(
 
                 }
             );
+/* =====================================
+   RETURN TO BOARD
+===================================== */
 
+$("returnToBoardBtn")
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            console.log(
+                "RETURN TO BOARD CLICKED"
+            );
+
+            closeModal();
+
+        }
+    );
 
         /* =====================================
            SEARCH
