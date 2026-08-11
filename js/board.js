@@ -1,7 +1,7 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    BOARD.JS
-   VERSION 9.0 FINAL
+   VERSION 9.1 FINAL
 
    FEATURES
    ---------------------------------------------------------
@@ -11,6 +11,7 @@
    DELETE
    PULL OUT
    RETURN
+   RETURN TO ANY EMPTY CELL
    MOVE
    SWAP
    STATUS
@@ -39,10 +40,16 @@ import {
     updateCoach,
     updateCoachPosition,
     updateCoachStatus,
+
     firebaseDeleteCoach,
     firebasePullOutCoach,
+
     firebaseReturnCoachToBoard,
     returnPulledOutToOriginal,
+
+    getPulledOutCoaches,
+    listenPulledOutCoaches,
+
     listenDatabaseStatus,
     searchCoach,
     getAllCoaches
@@ -66,11 +73,25 @@ let draggedCell = null;
 
 let realtimeUnsubscribe = null;
 
+let pulledOutUnsubscribe = null;
+
 let bootstrapModal = null;
 
 let longPressTimer = null;
 
 let longPressTriggered = false;
+
+
+/*
+   RETURN MODE
+
+   false = normal board operation
+
+   true = selected pulled-out coach will be
+          returned to the next EMPTY cell clicked.
+*/
+
+let returnMode = false;
 
 
 /* =========================================================
@@ -295,20 +316,18 @@ function getStatusClass(
 function renderEmptyCell(cell) {
 
     if (!cell) {
+
         return;
+
     }
 
-    /*
-       IMPORTANT:
-       Do not write EMPTY text here.
-       Do not create empty coach-card.
-    */
 
     cell.innerHTML = "";
 
     cell.textContent = "";
 
-    cell.dataset.occupied = "false";
+    cell.dataset.occupied =
+        "false";
 
     cell.classList.remove(
         "occupied-cell",
@@ -316,6 +335,7 @@ function renderEmptyCell(cell) {
     );
 
 }
+
 
 /* =========================================================
    RENDER COACH
@@ -598,6 +618,33 @@ function attachCellEvents(
             }
 
 
+            /*
+               ==============================================
+               RETURN MODE
+               ==============================================
+            */
+
+            if (
+                returnMode &&
+                currentPulledCoach
+            ) {
+
+                handleReturnCellClick(
+                    line,
+                    position
+                );
+
+                return;
+
+            }
+
+
+            /*
+               ==============================================
+               NORMAL MODE
+               ==============================================
+            */
+
             openCoachModal(
                 line,
                 position
@@ -614,6 +661,21 @@ function attachCellEvents(
     cell.addEventListener(
         "dragstart",
         event => {
+
+            /*
+               Return mode must not start normal drag.
+            */
+
+            if (
+                returnMode
+            ) {
+
+                event.preventDefault();
+
+                return;
+
+            }
+
 
             const coach =
                 getBoardCoach(
@@ -682,7 +744,17 @@ function attachCellEvents(
         "dragover",
         event => {
 
+            if (
+                returnMode
+            ) {
+
+                return;
+
+            }
+
+
             event.preventDefault();
+
 
             cell.classList.add(
                 "drag-over"
@@ -715,6 +787,15 @@ function attachCellEvents(
     cell.addEventListener(
         "drop",
         async event => {
+
+            if (
+                returnMode
+            ) {
+
+                return;
+
+            }
+
 
             event.preventDefault();
 
@@ -841,6 +922,15 @@ function attachCellEvents(
         event => {
 
             if (
+                returnMode
+            ) {
+
+                return;
+
+            }
+
+
+            if (
                 event.touches.length !==
                 1
             ) {
@@ -947,6 +1037,473 @@ function attachCellEvents(
             passive: true
         }
     );
+
+}
+
+
+/* =========================================================
+   RETURN MODE
+========================================================= */
+
+/*
+   Start return mode.
+
+   A pulled-out coach must already be selected.
+*/
+
+function startReturnMode(
+    coach
+) {
+
+    if (!coach) {
+
+        showMessage(
+            "Please select a pulled-out coach first.",
+            "warning"
+        );
+
+        return false;
+
+    }
+
+
+    if (!coach.id) {
+
+        showMessage(
+            "Invalid pulled-out coach ID.",
+            "danger"
+        );
+
+        return false;
+
+    }
+
+
+    currentPulledCoach =
+        coach;
+
+
+    returnMode =
+        true;
+
+
+    currentCell =
+        null;
+
+    currentCoach =
+        null;
+
+
+    clearDragState();
+
+
+    document.body.classList.add(
+        "return-mode-active"
+    );
+
+
+    showReturnModeIndicator(
+        coach
+    );
+
+
+    showMessage(
+        `Return mode active: select ANY EMPTY CELL for coach ${coach.coachNo}.`,
+        "info"
+    );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   STOP RETURN MODE
+========================================================= */
+
+function stopReturnMode() {
+
+    returnMode =
+        false;
+
+
+    currentPulledCoach =
+        null;
+
+
+    currentCell =
+        null;
+
+
+    currentCoach =
+        null;
+
+
+    document.body.classList.remove(
+        "return-mode-active"
+    );
+
+
+    removeReturnModeIndicator();
+
+}
+
+
+/* =========================================================
+   RETURN MODE INDICATOR
+========================================================= */
+
+function showReturnModeIndicator(
+    coach
+) {
+
+    removeReturnModeIndicator();
+
+
+    const indicator =
+        document.createElement(
+            "div"
+        );
+
+
+    indicator.id =
+        "returnModeIndicator";
+
+
+    indicator.style.position =
+        "fixed";
+
+
+    indicator.style.top =
+        "10px";
+
+
+    indicator.style.left =
+        "50%";
+
+
+    indicator.style.transform =
+        "translateX(-50%)";
+
+
+    indicator.style.zIndex =
+        "99999";
+
+
+    indicator.style.padding =
+        "10px 16px";
+
+
+    indicator.style.background =
+        "#0d6efd";
+
+
+    indicator.style.color =
+        "#ffffff";
+
+
+    indicator.style.borderRadius =
+        "8px";
+
+
+    indicator.style.fontWeight =
+        "600";
+
+
+    indicator.style.boxShadow =
+        "0 4px 12px rgba(0,0,0,.25)";
+
+
+    indicator.innerHTML = `
+
+        RETURN MODE:
+        <strong>
+            ${escapeHTML(
+                coach?.coachNo ||
+                ""
+            )}
+        </strong>
+
+        — Select ANY EMPTY CELL
+
+        <button
+            type="button"
+            id="cancelReturnModeBtn"
+            style="
+                margin-left:10px;
+                border:0;
+                border-radius:5px;
+                padding:4px 9px;
+                cursor:pointer;
+            "
+        >
+            Cancel
+        </button>
+
+    `;
+
+
+    document.body.appendChild(
+        indicator
+    );
+
+
+    $("cancelReturnModeBtn")
+        ?.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                stopReturnMode();
+
+                showMessage(
+                    "Return mode cancelled.",
+                    "warning"
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   REMOVE RETURN MODE INDICATOR
+========================================================= */
+
+function removeReturnModeIndicator() {
+
+    const indicator =
+        $("returnModeIndicator");
+
+
+    if (indicator) {
+
+        indicator.remove();
+
+    }
+
+}
+
+
+/* =========================================================
+   HANDLE RETURN CELL CLICK
+========================================================= */
+
+async function handleReturnCellClick(
+    line,
+    position
+) {
+
+    if (
+        !returnMode ||
+        !currentPulledCoach
+    ) {
+
+        return;
+
+    }
+
+
+    line =
+        clean(line);
+
+    position =
+        clean(position);
+
+
+    /*
+       ==============================================
+       TARGET MUST BE EMPTY
+       ==============================================
+    */
+
+    const existingCoach =
+        getBoardCoach(
+            line,
+            position
+        );
+
+
+    if (existingCoach) {
+
+        showMessage(
+            `Cell ${line}/${position} is occupied. Please select an empty cell.`,
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    const coachNo =
+        clean(
+            currentPulledCoach.coachNo
+        ) ||
+        "Coach";
+
+
+    const yes =
+        window.confirm(
+            `Return coach ${coachNo} to ${line}/${position}?`
+        );
+
+
+    if (!yes) {
+
+        return;
+
+    }
+
+
+    try {
+
+        /*
+           Disable return mode temporarily
+           to prevent double click.
+        */
+
+        const selectedCoach =
+            currentPulledCoach;
+
+
+        const result =
+            await firebaseReturnCoachToBoard(
+
+                selectedCoach.id,
+
+                line,
+
+                position
+
+            );
+
+
+        console.log(
+            "RETURN SUCCESS:",
+            result
+        );
+
+
+        stopReturnMode();
+
+
+        showMessage(
+            `${coachNo} returned successfully to ${line}/${position}.`,
+            "success"
+        );
+
+
+        /*
+           Realtime listener updates the board.
+        */
+
+    }
+    catch (error) {
+
+        console.error(
+            "RETURN TO BOARD ERROR:",
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            "Return to board failed.",
+            "danger"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SELECT PULLED OUT COACH
+========================================================= */
+
+export function selectPulledOutCoach(
+    coach
+) {
+
+    return startReturnMode(
+        coach
+    );
+
+}
+
+
+/* =========================================================
+   RETURN SELECTED COACH TO ORIGINAL CELL
+========================================================= */
+
+async function returnSelectedCoachToOriginal() {
+
+    if (
+        !currentPulledCoach
+    ) {
+
+        showMessage(
+            "Please select a pulled-out coach first.",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    const coach =
+        currentPulledCoach;
+
+
+    const yes =
+        window.confirm(
+            `Return ${coach.coachNo} to its original cell ${coach.originalLine}/${coach.originalPosition}?`
+        );
+
+
+    if (!yes) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await returnPulledOutToOriginal(
+            coach.id
+        );
+
+
+        stopReturnMode();
+
+
+        showMessage(
+            `${coach.coachNo} returned to its original cell.`,
+            "success"
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "RETURN ORIGINAL ERROR:",
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            "Return failed.",
+            "danger"
+        );
+
+    }
 
 }
 
@@ -1080,7 +1637,7 @@ export async function refreshBoard() {
 
 
 /* =========================================================
-   START REALTIME
+   START REALTIME BOARD
 ========================================================= */
 
 export function startBoardListener() {
@@ -1121,6 +1678,302 @@ export function startBoardListener() {
 
 
     return realtimeUnsubscribe;
+
+}
+
+
+/* =========================================================
+   START PULLED OUT LISTENER
+========================================================= */
+
+export function startPulledOutListener() {
+
+    if (
+        typeof pulledOutUnsubscribe ===
+        "function"
+    ) {
+
+        try {
+
+            pulledOutUnsubscribe();
+
+        }
+        catch (error) {}
+
+    }
+
+
+    pulledOutUnsubscribe =
+        listenPulledOutCoaches(
+            coaches => {
+
+                renderPulledOutList(
+                    coaches
+                );
+
+            }
+        );
+
+
+    return pulledOutUnsubscribe;
+
+}
+
+
+/* =========================================================
+   RENDER PULLED OUT LIST
+========================================================= */
+
+function renderPulledOutList(
+    coaches = []
+) {
+
+    /*
+       Supports any of these IDs in HTML:
+
+       pulledOutList
+       pulledOutTableBody
+       pulledOutCoaches
+    */
+
+    const container =
+        $("pulledOutList") ||
+        $("pulledOutTableBody") ||
+        $("pulledOutCoaches");
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    if (!coaches.length) {
+
+        container.innerHTML = `
+
+            <div class="text-muted text-center p-2">
+
+                No pulled-out coaches.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    /*
+       If target is TBODY,
+       use table rows.
+    */
+
+    if (
+        container.tagName ===
+        "TBODY"
+    ) {
+
+        container.innerHTML =
+            coaches
+                .map(
+                    coach => `
+
+                    <tr>
+
+                        <td>
+                            ${escapeHTML(
+                                coach.coachNo
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                coach.coachType ||
+                                ""
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                coach.originalLine ||
+                                ""
+                            )}
+                            /
+                            ${escapeHTML(
+                                coach.originalPosition ||
+                                ""
+                            )}
+                        </td>
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-primary pulled-return-btn"
+                                data-pulled-id="${escapeHTML(coach.id)}"
+                            >
+                                Return
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `
+                )
+                .join("");
+
+    }
+    else {
+
+        container.innerHTML =
+            coaches
+                .map(
+                    coach => `
+
+                    <div
+                        class="pulled-out-item"
+                        data-pulled-id="${escapeHTML(coach.id)}"
+                    >
+
+                        <strong>
+                            ${escapeHTML(
+                                coach.coachNo
+                            )}
+                        </strong>
+
+                        <span>
+                            ${escapeHTML(
+                                coach.coachType ||
+                                ""
+                            )}
+                        </span>
+
+                        <small>
+
+                            Original:
+                            ${escapeHTML(
+                                coach.originalLine ||
+                                ""
+                            )}
+                            /
+                            ${escapeHTML(
+                                coach.originalPosition ||
+                                ""
+                            )}
+
+                        </small>
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-primary pulled-return-btn"
+                            data-pulled-id="${escapeHTML(coach.id)}"
+                        >
+                            Return
+                        </button>
+
+                    </div>
+
+                `
+                )
+                .join("");
+
+    }
+
+
+    /*
+       Attach Return buttons.
+    */
+
+    container
+        .querySelectorAll(
+            ".pulled-return-btn"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                        const id =
+                            button.dataset.pulledId;
+
+
+                        const coach =
+                            coaches.find(
+                                item =>
+                                    item.id === id
+                            );
+
+
+                        if (!coach) {
+
+                            showMessage(
+                                "Pulled-out coach not found.",
+                                "danger"
+                            );
+
+                            return;
+
+                        }
+
+
+                        selectPulledOutCoach(
+                            coach
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   GET PULLED OUT COACHES MANUALLY
+========================================================= */
+
+export async function loadPulledOutCoaches() {
+
+    try {
+
+        const coaches =
+            await getPulledOutCoaches();
+
+
+        renderPulledOutList(
+            coaches
+        );
+
+
+        return coaches;
+
+    }
+    catch (error) {
+
+        console.error(
+            "LOAD PULLED OUT ERROR:",
+            error
+        );
+
+
+        showMessage(
+            "Unable to load pulled-out coaches.",
+            "danger"
+        );
+
+
+        return [];
+
+    }
 
 }
 
@@ -1336,6 +2189,26 @@ export function openCoachModal(
         clean(position);
 
 
+    /*
+       If Return mode is active,
+       this cell is the target.
+    */
+
+    if (
+        returnMode &&
+        currentPulledCoach
+    ) {
+
+        handleReturnCellClick(
+            line,
+            position
+        );
+
+        return;
+
+    }
+
+
     currentCell = {
 
         line,
@@ -1471,9 +2344,9 @@ function updateModalButtons() {
         !!currentCoach;
 
 
-    /* =========================
+    /*
        SAVE
-    ========================= */
+    */
 
     if (save) {
 
@@ -1485,9 +2358,9 @@ function updateModalButtons() {
     }
 
 
-    /* =========================
+    /*
        UPDATE
-    ========================= */
+    */
 
     if (update) {
 
@@ -1499,9 +2372,9 @@ function updateModalButtons() {
     }
 
 
-    /* =========================
+    /*
        DELETE
-    ========================= */
+    */
 
     if (deleteBtn) {
 
@@ -1513,9 +2386,9 @@ function updateModalButtons() {
     }
 
 
-    /* =========================
+    /*
        PULL OUT
-    ========================= */
+    */
 
     if (pull) {
 
@@ -1527,19 +2400,28 @@ function updateModalButtons() {
     }
 
 
-    /* =========================
-       RETURN TO BOARD
-       ALWAYS VISIBLE
-    ========================= */
+    /*
+       RETURN BUTTON
+
+       IMPORTANT:
+       This button is for selecting a pulled-out
+       coach and entering return mode.
+
+       It should NOT simply close the modal.
+    */
 
     if (returnBtn) {
 
         returnBtn.style.display =
-            "";
+            currentPulledCoach
+                ? ""
+                : "none";
 
     }
 
 }
+
+
 /* =========================================================
    MODAL DATA
 ========================================================= */
@@ -1872,6 +2754,50 @@ function closeModal() {
 
 
 /* =========================================================
+   RETURN BUTTON
+========================================================= */
+
+function handleReturnButton() {
+
+    /*
+       If a pulled-out coach has already been selected,
+       simply close the modal and activate return mode.
+    */
+
+    if (
+        currentPulledCoach
+    ) {
+
+        const coach =
+            currentPulledCoach;
+
+
+        closeModal();
+
+
+        startReturnMode(
+            coach
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       No pulled-out coach selected.
+    */
+
+    showMessage(
+        "Please select a pulled-out coach first.",
+        "warning"
+    );
+
+}
+
+
+/* =========================================================
    SEARCH
 ========================================================= */
 
@@ -1945,19 +2871,32 @@ async function performSearch(
                         </b>
 
                         <span>
-                            ${escapeHTML(coach.coachType || "")}
+                            ${escapeHTML(
+                                coach.coachType ||
+                                ""
+                            )}
                         </span>
 
                         <span>
-                            ${escapeHTML(coach.status || "")}
+                            ${escapeHTML(
+                                coach.status ||
+                                ""
+                            )}
                         </span>
 
                         <small>
-                            ${escapeHTML(coach.shop || "")}
+                            ${escapeHTML(
+                                coach.shop ||
+                                ""
+                            )}
                             -
-                            ${escapeHTML(coach.line)}
+                            ${escapeHTML(
+                                coach.line
+                            )}
                             /
-                            ${escapeHTML(coach.position)}
+                            ${escapeHTML(
+                                coach.position
+                            )}
                         </small>
 
                     </div>
@@ -1999,6 +2938,7 @@ async function performSearch(
             "SEARCH ERROR:",
             error
         );
+
 
         resultBox.innerHTML = `
 
@@ -2389,7 +3329,11 @@ function showMessage(
     setTimeout(
         () => {
 
-            alert.remove();
+            if (alert.parentNode) {
+
+                alert.remove();
+
+            }
 
         },
         3000
@@ -2411,7 +3355,11 @@ document.addEventListener(
         );
 
         console.log(
-            "BOARD.JS VERSION 9.0 FINAL"
+            "BOARD.JS VERSION 9.1 FINAL"
+        );
+
+        console.log(
+            "RETURN TO ANY EMPTY CELL ENABLED"
         );
 
         console.log(
@@ -2420,7 +3368,7 @@ document.addEventListener(
 
 
         /*
-           Initial board.
+           Initial empty board.
         */
 
         renderBoard(
@@ -2436,10 +3384,17 @@ document.addEventListener(
 
 
         /*
-           Realtime listener.
+           Realtime board.
         */
 
         startBoardListener();
+
+
+        /*
+           Realtime pulled-out list.
+        */
+
+        startPulledOutListener();
 
 
         /*
@@ -2545,25 +3500,29 @@ document.addEventListener(
 
                 }
             );
-/* =====================================
-   RETURN TO BOARD
-===================================== */
 
-$("returnToBoardBtn")
-    ?.addEventListener(
-        "click",
-        event => {
 
-            event.preventDefault();
+        /* =====================================
+           RETURN TO BOARD
+        ===================================== */
 
-            console.log(
-                "RETURN TO BOARD CLICKED"
+        $("returnToBoardBtn")
+            ?.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    console.log(
+                        "RETURN TO BOARD CLICKED"
+                    );
+
+
+                    handleReturnButton();
+
+                }
             );
 
-            closeModal();
-
-        }
-    );
 
         /* =====================================
            SEARCH
@@ -2658,7 +3617,7 @@ $("returnToBoardBtn")
 
 
         console.log(
-            "BOARD.JS INITIALIZATION COMPLETE"
+            "BOARD.JS VERSION 9.1 INITIALIZATION COMPLETE"
         );
 
     }
@@ -2678,11 +3637,21 @@ window.renderBoard =
 window.openCoachModal =
     openCoachModal;
 
+window.selectPulledOutCoach =
+    selectPulledOutCoach;
+
+window.loadPulledOutCoaches =
+    loadPulledOutCoaches;
+
 
 /* =========================================================
    READY
 ========================================================= */
 
 console.log(
-    "MR CO-ORDINATION BOARD VERSION 9 READY"
+    "MR CO-ORDINATION BOARD VERSION 9.1 READY"
+);
+
+console.log(
+    "RETURN-TO-ANY-EMPTY-CELL SYSTEM READY"
 );
