@@ -1,63 +1,40 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    MOBILE CSS
-   VERSION 9.2 FIXED
-
-   FILE:
-   css/mobile.css
-
-   FIXES
+   VERSION 9.2 FINAL
    ---------------------------------------------------------
-   MOBILE RESPONSIVE
-   TABLE HORIZONTAL SCROLL
-   COACH NUMBER VISIBILITY
-   COACH TYPE
-   STATUS
-   TOUCH FRIENDLY
-   LONG PRESS SUPPORT
-   SEARCH
-   MODAL
-   PULLED OUT LIST
-   RETURN MODE
-   BUTTONS
-   COUNTERS
-   HEADER
-   PRINT SAFETY
+   FIXED:
+   ✔ SCR HEADER OVERLAP
+   ✔ COACH NUMBER NOT VISIBLE
+   ✔ NARROW MOBILE CELLS
+   ✔ COACH CARD WIDTH
+   ✔ HORIZONTAL SCROLL
+   ✔ TOUCH SUPPORT
+   ✔ RETURN MODE
+   ✔ PULLED OUT LIST
+   ✔ MOBILE MODAL
 ========================================================= */
 
 
 /* =========================================================
-   GLOBAL BOX SIZING
+   GLOBAL
 ========================================================= */
 
-*,
-*::before,
-*::after {
+* {
     box-sizing: border-box;
 }
-
-
-/* =========================================================
-   HTML / BODY
-========================================================= */
 
 html {
     width: 100%;
     max-width: 100%;
-
     overflow-x: hidden;
-
-    -webkit-text-size-adjust: 100%;
 }
 
-
 body {
-    width: 100%;
-    max-width: 100%;
-
     margin: 0;
     padding: 0;
-
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
 }
 
@@ -82,29 +59,20 @@ header,
 .dashboard-header {
     width: 100%;
     max-width: 100%;
-
     overflow: hidden;
 }
-
 
 header h1,
 header h2,
 header h3,
-
 .board-header h1,
 .board-header h2,
 .board-header h3,
-
 .dashboard-header h1,
 .dashboard-header h2,
 .dashboard-header h3 {
-    max-width: 100%;
-
     line-height: 1.2;
-
-    word-break: break-word;
-
-    overflow-wrap: break-word;
+    word-break: normal;
 }
 
 
@@ -120,58 +88,38 @@ header h3,
 
 
 /* =========================================================
-   SEARCH AREA
+   SEARCH
 ========================================================= */
 
 #searchBox {
     width: 100%;
     max-width: 100%;
-
     min-height: 42px;
-
     font-size: 16px;
-
-    padding: 8px 10px;
 }
-
 
 #searchResult {
     width: 100%;
     max-width: 100%;
-
     overflow-x: hidden;
 }
 
-
 .search-item {
+    width: 100%;
     display: flex;
-
     flex-direction: column;
-
     gap: 3px;
 
-    width: 100%;
-
     padding: 10px;
-
     margin-bottom: 6px;
 
     border: 1px solid #ddd;
-
-    border-radius: 6px;
+    border-radius: 7px;
 
     background: #fff;
 
     cursor: pointer;
-
     touch-action: manipulation;
-
-    overflow: hidden;
-}
-
-
-.search-item:active {
-    transform: scale(.99);
 }
 
 
@@ -182,7 +130,6 @@ header h3,
 .board-wrapper,
 .table-responsive,
 #boardContainer {
-    display: block;
 
     width: 100%;
     max-width: 100%;
@@ -197,69 +144,135 @@ header h3,
 
 
 /* =========================================================
+   IMPORTANT:
+   BOARD TABLE MUST KEEP ITS REAL WIDTH
+   ---------------------------------------------------------
+   DO NOT squeeze all SCR columns into mobile width.
+========================================================= */
+
+.board-wrapper table,
+.table-responsive table,
+#boardContainer table {
+
+    width: max-content !important;
+
+    min-width: max-content !important;
+
+    table-layout: fixed !important;
+
+    border-collapse: collapse;
+}
+
+
+/* =========================================================
    BOARD TABLE
 ========================================================= */
 
 .board-table,
 #coachBoard,
 table.board-table {
+
+    width: max-content !important;
+
+    min-width: max-content !important;
+
+    table-layout: fixed !important;
+
     border-collapse: collapse;
-
-    border-spacing: 0;
-
-    table-layout: fixed;
-
-    width: max-content;
-
-    min-width: 900px;
-
-    margin: 0;
-
-    padding: 0;
 }
 
 
 /* =========================================================
    TABLE HEADER
+   ---------------------------------------------------------
+   FIX SCR1 SCR2 SCR3 OVERLAPPING
 ========================================================= */
 
 .board-table th,
 #coachBoard th {
-    min-width: 85px;
 
-    width: 85px;
+    min-width: 72px !important;
 
-    height: 42px;
+    width: 72px !important;
 
-    padding: 4px;
+    height: 48px;
+
+    padding: 5px 3px !important;
 
     text-align: center;
 
     vertical-align: middle;
 
-    white-space: nowrap;
+    white-space: nowrap !important;
 
     overflow: hidden;
 
-    text-overflow: ellipsis;
+    text-overflow: clip;
+
+    font-size: 14px;
+
+    line-height: 1;
+
+    font-weight: 800;
 }
 
 
 /* =========================================================
-   TABLE CELLS
+   POSITION HEADER / POSITION COLUMN
+========================================================= */
+
+.board-table th:first-child,
+#coachBoard th:first-child {
+
+    width: 82px !important;
+
+    min-width: 82px !important;
+
+    max-width: 82px !important;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   POSITION CELLS
+========================================================= */
+
+.board-table td:first-child,
+#coachBoard td:first-child {
+
+    width: 82px !important;
+
+    min-width: 82px !important;
+
+    max-width: 82px !important;
+
+    font-weight: 800;
+
+    font-size: 16px;
+
+    text-align: center;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   NORMAL BOARD CELLS
 ========================================================= */
 
 .board-table td,
 #coachBoard td {
-    min-width: 85px;
 
-    width: 85px;
+    width: 72px !important;
 
-    height: 65px;
+    min-width: 72px !important;
 
-    padding: 2px;
+    max-width: 72px !important;
 
-    margin: 0;
+    height: 82px;
+
+    padding: 4px !important;
 
     text-align: center;
 
@@ -267,7 +280,7 @@ table.board-table {
 
     position: relative;
 
-    overflow: visible;
+    overflow: hidden;
 
     touch-action: manipulation;
 }
@@ -279,15 +292,31 @@ table.board-table {
 
 .board-table td:empty,
 #coachBoard td:empty {
-    min-height: 65px;
+
+    min-width: 72px !important;
+
+    width: 72px !important;
 }
 
 
 /* =========================================================
    COACH CARD
+   ---------------------------------------------------------
+   MAIN FIX FOR COACH NUMBER
 ========================================================= */
 
 .coach-card {
+
+    width: 100% !important;
+
+    min-width: 60px !important;
+
+    max-width: 100%;
+
+    min-height: 70px !important;
+
+    height: auto;
+
     display: flex;
 
     flex-direction: column;
@@ -296,27 +325,19 @@ table.board-table {
 
     align-items: center;
 
-    width: 100%;
-
-    min-width: 0;
-
-    min-height: 58px;
-
-    padding: 3px;
-
-    margin: 0;
-
     text-align: center;
 
-    border-radius: 5px;
+    padding: 5px 2px !important;
+
+    margin: 0 auto;
+
+    border-radius: 6px;
 
     overflow: hidden;
 
     user-select: none;
 
     -webkit-user-select: none;
-
-    -webkit-touch-callout: none;
 
     cursor: pointer;
 
@@ -326,37 +347,39 @@ table.board-table {
 
 /* =========================================================
    COACH NUMBER
-   IMPORTANT
+   ---------------------------------------------------------
+   IMPORTANT FIX
 ========================================================= */
 
 .coach-number {
-    display: block;
 
-    width: 100%;
+    display: block !important;
+
+    width: 100% !important;
 
     min-width: 0;
 
-    margin: 0;
+    max-width: 100%;
 
-    padding: 0;
+    font-size: 17px !important;
 
-    font-size: 16px;
+    line-height: 1.15 !important;
 
-    font-weight: 900;
+    font-weight: 900 !important;
 
-    line-height: 1.2;
+    letter-spacing: 0 !important;
+
+    white-space: nowrap !important;
+
+    overflow: visible !important;
+
+    text-overflow: clip !important;
+
+    word-break: normal !important;
+
+    overflow-wrap: normal !important;
 
     text-align: center;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    visibility: visible;
-
-    opacity: 1;
 }
 
 
@@ -365,31 +388,26 @@ table.board-table {
 ========================================================= */
 
 .coach-type {
+
     display: block;
 
     width: 100%;
 
-    min-width: 0;
+    max-width: 100%;
 
-    margin: 0;
+    margin-top: 2px;
 
-    padding: 0;
+    font-size: 10px !important;
 
-    font-size: 10px;
+    line-height: 1.15 !important;
 
-    line-height: 1.15;
-
-    text-align: center;
+    font-weight: 700;
 
     white-space: nowrap;
 
     overflow: hidden;
 
     text-overflow: ellipsis;
-
-    visibility: visible;
-
-    opacity: 1;
 }
 
 
@@ -398,33 +416,26 @@ table.board-table {
 ========================================================= */
 
 .coach-status {
+
     display: block;
 
     width: 100%;
 
-    min-width: 0;
+    max-width: 100%;
 
-    margin: 0;
+    margin-top: 1px;
 
-    padding: 0;
+    font-size: 10px !important;
 
-    font-size: 10px;
+    line-height: 1.15 !important;
 
-    font-weight: 700;
-
-    line-height: 1.15;
-
-    text-align: center;
+    font-weight: 800;
 
     white-space: nowrap;
 
     overflow: hidden;
 
     text-overflow: ellipsis;
-
-    visibility: visible;
-
-    opacity: 1;
 }
 
 
@@ -433,13 +444,12 @@ table.board-table {
 ========================================================= */
 
 .drag-source {
+
     opacity: .45;
 
     transform: scale(.97);
 
-    outline: 3px dashed #0d6efd;
-
-    outline-offset: -2px;
+    outline: 3px dashed #0d6efd !important;
 }
 
 
@@ -448,11 +458,10 @@ table.board-table {
 ========================================================= */
 
 .drag-over {
+
     outline: 3px solid #198754 !important;
 
-    outline-offset: -2px !important;
-
-    background: rgba(25, 135, 84, .15) !important;
+    background: rgba(25,135,84,.15) !important;
 }
 
 
@@ -460,8 +469,7 @@ table.board-table {
    RETURN MODE
 ========================================================= */
 
-body.return-mode-active
-td[data-occupied="false"] {
+body.return-mode-active td[data-occupied="false"] {
 
     cursor: pointer;
 
@@ -470,23 +478,20 @@ td[data-occupied="false"] {
     outline-offset: -2px;
 }
 
-
-body.return-mode-active
-td[data-occupied="true"] {
+body.return-mode-active td[data-occupied="true"] {
 
     cursor: not-allowed;
 }
 
-
 body.return-mode-active
 td[data-occupied="false"]:active {
 
-    background: rgba(13, 110, 253, .15);
+    background: rgba(13,110,253,.15);
 }
 
 
 /* =========================================================
-   RETURN MODE INDICATOR
+   RETURN INDICATOR
 ========================================================= */
 
 #returnModeIndicator {
@@ -498,23 +503,18 @@ td[data-occupied="false"]:active {
     text-align: center;
 
     font-size: 13px;
-
-    z-index: 1050;
 }
-
 
 #cancelReturnModeBtn {
 
-    min-height: 32px;
+    min-height: 34px;
 
     font-size: 13px;
-
-    touch-action: manipulation;
 }
 
 
 /* =========================================================
-   PULLED OUT SECTION
+   PULLED OUT
 ========================================================= */
 
 #pulledOutList,
@@ -526,20 +526,13 @@ td[data-occupied="false"]:active {
     max-width: 100%;
 }
 
-
-/* =========================================================
-   PULLED OUT ITEM
-========================================================= */
-
 .pulled-out-item {
 
     display: flex;
 
     flex-direction: column;
 
-    gap: 4px;
-
-    width: 100%;
+    gap: 5px;
 
     padding: 10px;
 
@@ -550,36 +543,17 @@ td[data-occupied="false"]:active {
     border-radius: 7px;
 
     background: #fff;
-
-    overflow: hidden;
 }
-
 
 .pulled-out-item strong {
 
     font-size: 16px;
-
-    line-height: 1.2;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
 }
-
 
 .pulled-out-item small {
 
     color: #666;
-
-    line-height: 1.2;
 }
-
-
-/* =========================================================
-   RETURN BUTTON
-========================================================= */
 
 .pulled-return-btn {
 
@@ -588,8 +562,6 @@ td[data-occupied="false"]:active {
     min-height: 40px;
 
     margin-top: 4px;
-
-    touch-action: manipulation;
 }
 
 
@@ -602,13 +574,9 @@ td[data-occupied="false"]:active {
     white-space: nowrap;
 
     font-size: 13px;
-
-    vertical-align: middle;
 }
 
-
-#pulledOutTableBody
-.pulled-return-btn {
+#pulledOutTableBody .pulled-return-btn {
 
     width: auto;
 }
@@ -627,7 +595,6 @@ td[data-occupied="false"]:active {
     margin-bottom: 8px;
 }
 
-
 #totalCoach,
 #occupiedCoach,
 #freeCoach {
@@ -635,13 +602,11 @@ td[data-occupied="false"]:active {
     font-size: 22px;
 
     font-weight: 800;
-
-    line-height: 1.1;
 }
 
 
 /* =========================================================
-   BUTTON AREA
+   BUTTONS
 ========================================================= */
 
 button,
@@ -652,16 +617,12 @@ button,
     touch-action: manipulation;
 }
 
-
 .btn-group {
-
-    display: flex;
 
     flex-wrap: wrap;
 
     gap: 5px;
 }
-
 
 .btn-group > .btn {
 
@@ -682,30 +643,20 @@ button,
     margin: 10px auto;
 }
 
-
 .modal-content {
 
-    width: 100%;
-
     border-radius: 10px;
-
-    overflow: hidden;
 }
-
 
 .modal-header {
 
     padding: 12px 15px;
 }
 
-
 .modal-body {
 
     padding: 15px;
-
-    overflow-x: hidden;
 }
-
 
 .modal-footer {
 
@@ -717,7 +668,6 @@ button,
 
     padding: 12px 15px;
 }
-
 
 .modal-footer .btn {
 
@@ -736,8 +686,6 @@ button,
 .modal textarea {
 
     width: 100%;
-
-    max-width: 100%;
 
     min-height: 42px;
 
@@ -762,8 +710,6 @@ button,
     text-align: center;
 
     font-size: 14px;
-
-    word-break: break-word;
 }
 
 
@@ -775,10 +721,6 @@ button,
 #footerDatabase {
 
     white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
 }
 
 
@@ -790,11 +732,8 @@ footer {
 
     width: 100%;
 
-    max-width: 100%;
-
     overflow: hidden;
 }
-
 
 footer .row {
 
@@ -805,12 +744,10 @@ footer .row {
 
 
 /* =========================================================
-   SMALL MOBILE
-   <= 576px
+   MOBILE <= 576px
 ========================================================= */
 
 @media (max-width: 576px) {
-
 
     body {
 
@@ -855,7 +792,7 @@ footer .row {
 
 
     /* ---------------------------------------------
-       DATE / TIME
+       DATE
     --------------------------------------------- */
 
     #liveDate,
@@ -867,45 +804,69 @@ footer .row {
 
 
     /* ---------------------------------------------
-       BOARD TABLE
+       SCR BOARD
+       Keep columns wide enough
     --------------------------------------------- */
-
-    .board-table,
-    #coachBoard {
-
-        width: max-content !important;
-
-        min-width: 760px !important;
-
-        table-layout: fixed !important;
-    }
-
 
     .board-table th,
     #coachBoard th {
 
-        min-width: 75px !important;
+        width: 70px !important;
 
-        width: 75px !important;
+        min-width: 70px !important;
 
-        height: 40px !important;
+        max-width: 70px !important;
 
-        padding: 3px !important;
+        height: 44px;
 
-        font-size: 11px;
+        padding: 4px 2px !important;
+
+        font-size: 13px !important;
+
+        white-space: nowrap !important;
     }
 
+
+    .board-table th:first-child,
+    #coachBoard th:first-child {
+
+        width: 72px !important;
+
+        min-width: 72px !important;
+
+        max-width: 72px !important;
+    }
+
+
+    /* ---------------------------------------------
+       CELLS
+    --------------------------------------------- */
 
     .board-table td,
     #coachBoard td {
 
-        min-width: 75px !important;
+        width: 70px !important;
 
-        width: 75px !important;
+        min-width: 70px !important;
 
-        height: 58px !important;
+        max-width: 70px !important;
 
-        padding: 2px !important;
+        height: 78px;
+
+        padding: 3px !important;
+    }
+
+
+    .board-table td:first-child,
+    #coachBoard td:first-child {
+
+        width: 72px !important;
+
+        min-width: 72px !important;
+
+        max-width: 72px !important;
+
+        font-size: 16px;
     }
 
 
@@ -915,11 +876,13 @@ footer .row {
 
     .coach-card {
 
-        width: 100% !important;
+        min-width: 60px !important;
 
-        min-height: 52px !important;
+        min-height: 68px !important;
 
-        padding: 3px !important;
+        padding: 4px 2px !important;
+
+        border-radius: 6px;
     }
 
 
@@ -929,46 +892,38 @@ footer .row {
 
     .coach-number {
 
-        display: block !important;
-
-        width: 100% !important;
-
-        font-size: 14px !important;
+        font-size: 17px !important;
 
         font-weight: 900 !important;
 
-        line-height: 1.2 !important;
+        line-height: 1.15 !important;
 
         white-space: nowrap !important;
 
-        overflow: hidden !important;
+        overflow: visible !important;
 
-        text-overflow: ellipsis !important;
-
-        visibility: visible !important;
-
-        opacity: 1 !important;
+        text-overflow: clip !important;
     }
 
 
     .coach-type {
 
-        font-size: 9px !important;
+        font-size: 10px !important;
 
-        line-height: 1.1 !important;
+        line-height: 1.15 !important;
     }
 
 
     .coach-status {
 
-        font-size: 9px !important;
+        font-size: 10px !important;
 
-        line-height: 1.1 !important;
+        line-height: 1.15 !important;
     }
 
 
     /* ---------------------------------------------
-       BUTTONS
+       BUTTON
     --------------------------------------------- */
 
     .btn {
@@ -1013,7 +968,8 @@ footer .row {
 
         display: grid;
 
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
 
@@ -1038,7 +994,7 @@ footer .row {
 
 
     /* ---------------------------------------------
-       RETURN INDICATOR
+       RETURN
     --------------------------------------------- */
 
     #returnModeIndicator {
@@ -1082,55 +1038,70 @@ footer .row {
 
 
 /* =========================================================
-   VERY SMALL MOBILE
-   <= 400px
+   VERY SMALL MOBILE <= 400px
 ========================================================= */
 
 @media (max-width: 400px) {
 
-
-    .board-table,
-    #coachBoard {
-
-        min-width: 700px !important;
-
-        width: max-content !important;
-    }
-
-
     .board-table th,
     #coachBoard th {
 
+        width: 68px !important;
+
         min-width: 68px !important;
+
+        max-width: 68px !important;
+
+        font-size: 12px !important;
+    }
+
+
+    .board-table th:first-child,
+    #coachBoard th:first-child {
 
         width: 68px !important;
 
-        height: 38px !important;
+        min-width: 68px !important;
+
+        max-width: 68px !important;
     }
 
 
     .board-table td,
     #coachBoard td {
 
+        width: 68px !important;
+
         min-width: 68px !important;
+
+        max-width: 68px !important;
+
+        height: 74px;
+    }
+
+
+    .board-table td:first-child,
+    #coachBoard td:first-child {
 
         width: 68px !important;
 
-        height: 54px !important;
+        min-width: 68px !important;
+
+        max-width: 68px !important;
     }
 
 
     .coach-card {
 
-        min-height: 48px !important;
+        min-width: 60px !important;
 
-        padding: 2px !important;
+        min-height: 64px !important;
     }
 
 
     .coach-number {
 
-        font-size: 13px !important;
+        font-size: 16px !important;
 
         font-weight: 900 !important;
     }
@@ -1139,7 +1110,7 @@ footer .row {
     .coach-type,
     .coach-status {
 
-        font-size: 8px !important;
+        font-size: 9px !important;
     }
 
 
@@ -1169,58 +1140,44 @@ footer .row {
 
 /* =========================================================
    LANDSCAPE MOBILE
-   <= 900px
 ========================================================= */
 
 @media (max-width: 900px)
 and (orientation: landscape) {
 
-
-    .board-table,
-    #coachBoard {
-
-        width: max-content !important;
-
-        min-width: 900px !important;
-    }
-
-
     .board-table th,
     #coachBoard th {
 
-        min-width: 80px !important;
+        width: 72px !important;
 
-        width: 80px !important;
+        min-width: 72px !important;
+
+        max-width: 72px !important;
     }
 
 
     .board-table td,
     #coachBoard td {
 
-        min-width: 80px !important;
+        width: 72px !important;
 
-        width: 80px !important;
+        min-width: 72px !important;
 
-        height: 52px !important;
+        max-width: 72px !important;
+
+        height: 70px;
     }
 
 
     .coach-card {
 
-        min-height: 46px !important;
+        min-height: 60px !important;
     }
 
 
     .coach-number {
 
-        font-size: 13px !important;
-    }
-
-
-    .coach-type,
-    .coach-status {
-
-        font-size: 8px !important;
+        font-size: 16px !important;
     }
 
 }
@@ -1232,16 +1189,11 @@ and (orientation: landscape) {
 
 @media (pointer: coarse) {
 
-
     .coach-card {
 
         cursor: grab;
 
         -webkit-touch-callout: none;
-
-        -webkit-user-select: none;
-
-        user-select: none;
     }
 
 
@@ -1254,7 +1206,7 @@ and (orientation: landscape) {
     td {
 
         -webkit-tap-highlight-color:
-            rgba(13, 110, 253, .15);
+            rgba(13,110,253,.15);
     }
 
 
@@ -1263,14 +1215,14 @@ and (orientation: landscape) {
     .search-item {
 
         -webkit-tap-highlight-color:
-            rgba(13, 110, 253, .15);
+            rgba(13,110,253,.15);
     }
 
 }
 
 
 /* =========================================================
-   PREVENT BOARD TEXT SELECTION
+   PREVENT TEXT SELECTION
 ========================================================= */
 
 .board-table,
@@ -1293,7 +1245,6 @@ and (orientation: landscape) {
     height: 8px;
 }
 
-
 .board-wrapper::-webkit-scrollbar-thumb,
 .table-responsive::-webkit-scrollbar-thumb,
 #boardContainer::-webkit-scrollbar-thumb {
@@ -1308,13 +1259,8 @@ and (orientation: landscape) {
 
 @media print {
 
-
     html,
     body {
-
-        width: 100% !important;
-
-        max-width: none !important;
 
         overflow: visible !important;
     }
@@ -1324,10 +1270,6 @@ and (orientation: landscape) {
     .table-responsive,
     #boardContainer {
 
-        width: 100% !important;
-
-        max-width: none !important;
-
         overflow: visible !important;
     }
 
@@ -1335,42 +1277,11 @@ and (orientation: landscape) {
     .board-table,
     #coachBoard {
 
+        min-width: 0 !important;
+
         width: 100% !important;
 
-        min-width: 0 !important;
-
         table-layout: fixed !important;
-    }
-
-
-    .board-table th,
-    .board-table td,
-    #coachBoard th,
-    #coachBoard td {
-
-        min-width: 0 !important;
-
-        width: auto !important;
-
-        height: auto !important;
-    }
-
-
-    .coach-card {
-
-        min-height: 0 !important;
-
-        overflow: visible !important;
-    }
-
-
-    .coach-number {
-
-        overflow: visible !important;
-
-        white-space: nowrap !important;
-
-        text-overflow: clip !important;
     }
 
 
@@ -1384,5 +1295,5 @@ and (orientation: landscape) {
 
 
 /* =========================================================
-   END MOBILE CSS
+   END MOBILE CSS VERSION 9.2
 ========================================================= */
