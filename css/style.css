@@ -1,7 +1,24 @@
 /* =========================================================
-   MR CO-ORDINATION DAILY COACHES POSITION
+   MR CO-ORDINATION BOARD
    STYLE.CSS
-   FINAL MOBILE + DESKTOP VERSION
+   VERSION 9.1 FINAL
+
+   FEATURES
+   ---------------------------------------------------------
+   DESKTOP
+   MOBILE
+   RESPONSIVE
+   BOARD TABLE
+   COACH CARD
+   STATUS COLOUR
+   PULL OUT
+   RETURN MODE
+   DRAG & DROP
+   SEARCH
+   COUNTERS
+   MODAL
+   PRINT / A4
+   FULL SCREEN
 ========================================================= */
 
 
@@ -13,17 +30,27 @@
     box-sizing: border-box;
 }
 
-html {
-    scroll-behavior: smooth;
-}
 
+html,
 body {
     margin: 0;
     padding: 0;
-    background: #f1f3f6;
-    font-family: Arial, Helvetica, sans-serif;
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #f4f6f9;
+
     color: #212529;
-    overflow-x: hidden;
+
+    overflow-x: auto;
 }
 
 
@@ -31,211 +58,356 @@ body {
    HEADER
 ========================================================= */
 
-.header {
+.board-header {
     width: 100%;
-    padding: 18px 10px !important;
+
+    background: #0b3d91;
+
+    color: #ffffff;
+
+    padding: 10px 15px;
+
+    border-bottom:
+        4px solid #ffc107;
 }
 
-.header h3 {
+
+.board-header h1,
+.board-header h2,
+.board-header h3,
+.board-header p {
     margin: 0;
-    font-size: 28px;
-    font-weight: 800;
 }
 
-.header h5 {
-    margin: 8px 0 0;
-    font-size: 22px;
-    font-weight: 700;
+
+.board-title {
+    font-size: 24px;
+
+    font-weight: 800;
+
+    text-align: center;
+
+    letter-spacing: .5px;
 }
+
+
+.board-subtitle {
+    text-align: center;
+
+    font-size: 15px;
+
+    margin-top: 3px;
+}
+
+
+.board-header-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   LIVE DATE / TIME
+========================================================= */
 
 #liveDate,
 #liveTime,
 #lastUpdate {
-    font-size: 17px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+#liveDate,
+#liveTime {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   DATABASE STATUS
+========================================================= */
+
+#databaseStatus {
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+#footerDatabase {
     font-weight: 700;
 }
 
 
 /* =========================================================
-   NAVBAR
+   TOOLBAR
 ========================================================= */
 
-.navbar {
-    min-height: 62px;
+.board-toolbar {
+    background: #ffffff;
+
+    border-bottom: 1px solid #dee2e6;
+
+    padding: 8px 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1000;
 }
 
-.navbar-brand {
-    font-size: 28px;
-    font-weight: 800;
-}
 
-.nav-link {
-    font-size: 18px;
+.board-toolbar .btn {
     font-weight: 600;
+
+    white-space: nowrap;
 }
 
 
 /* =========================================================
-   SEARCH AREA
+   SEARCH
 ========================================================= */
+
+.search-wrapper {
+    position: relative;
+
+    min-width: 230px;
+
+    max-width: 360px;
+
+    flex: 1;
+}
+
 
 #searchBox {
     width: 100%;
-    min-height: 52px;
 
-    border: 2px solid #adb5bd;
-    border-radius: 8px;
+    min-height: 38px;
 
-    padding: 10px 16px;
+    border: 1px solid #adb5bd;
 
-    font-size: 20px;
-    background: #ffffff;
-    color: #212529;
+    border-radius: 6px;
+
+    padding:
+        7px
+        12px;
 
     outline: none;
 }
 
+
 #searchBox:focus {
     border-color: #0d6efd;
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(13, 110, 253, .12);
 }
 
-#searchBox::placeholder {
-    color: #8a8f94;
-}
-
-
-/* =========================================================
-   SEARCH RESULT
-========================================================= */
 
 #searchResult {
-    position: relative;
-    z-index: 1000;
-    width: 100%;
-}
+    position: absolute;
 
-#searchResult .search-item {
+    top: calc(100% + 4px);
+
+    left: 0;
+
+    right: 0;
+
     background: #ffffff;
-    border: 1px solid #dee2e6;
-    padding: 10px;
-    cursor: pointer;
-}
 
-#searchResult .search-item:hover {
-    background: #e9ecef;
-}
+    border: 1px solid #ced4da;
 
+    border-radius: 6px;
 
-/* =========================================================
-   TOP BUTTON AREA
-========================================================= */
+    box-shadow:
+        0 5px 18px
+        rgba(0, 0, 0, .15);
 
-#excelBtn,
-#pdfBtn,
-#refreshBtn,
-#fullscreenBtn {
-    min-height: 48px;
-    padding: 8px 18px;
+    max-height: 350px;
 
-    font-size: 18px;
-    font-weight: 700;
+    overflow-y: auto;
 
-    border-radius: 8px;
+    z-index: 5000;
 }
 
 
-/* =========================================================
-   COUNTER BOX
-========================================================= */
-
-#totalCoach,
-#occupiedCoach,
-#freeCoach {
-    display: inline-flex;
-
-    min-width: 58px;
-    height: 48px;
-
-    margin-left: 5px;
-
-    align-items: center;
-    justify-content: center;
-
-    background: #212529;
-    color: #ffffff;
-
-    border-radius: 8px;
-
-    font-size: 18px;
-    font-weight: 800;
-}
-
-
-/* =========================================================
-   SHOP CARD
-========================================================= */
-
-.shop-card {
-    width: 100%;
-    margin-top: 25px;
-    background: #ffffff;
-    border-radius: 0;
-}
-
-
-/* =========================================================
-   SHOP TITLE
-========================================================= */
-
-.shop-title {
-    margin: 0 !important;
-
-    min-height: 58px;
-
+.search-item {
     display: flex;
-    align-items: center;
-    justify-content: center;
 
-    font-size: 30px;
-    font-weight: 800;
+    flex-direction: column;
 
-    letter-spacing: 0.5px;
+    gap: 2px;
+
+    padding: 9px 11px;
+
+    border-bottom:
+        1px solid #eeeeee;
+
+    cursor: pointer;
+
+    background: #ffffff;
+}
+
+
+.search-item:hover {
+    background: #f1f5ff;
+}
+
+
+.search-item b {
+    font-size: 15px;
+}
+
+
+.search-item span {
+    font-size: 12px;
+}
+
+
+.search-item small {
+    color: #6c757d;
+
+    font-size: 11px;
 }
 
 
 /* =========================================================
-   TABLE SCROLL CONTAINER
+   COUNTERS
 ========================================================= */
 
-.table-responsive {
+.counter-container {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: stretch;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    padding: 8px;
+}
+
+
+.counter-box {
+    min-width: 120px;
+
+    background: #ffffff;
+
+    border:
+        1px solid #dee2e6;
+
+    border-radius: 7px;
+
+    padding: 7px 12px;
+
+    text-align: center;
+
+    box-shadow:
+        0 1px 4px
+        rgba(0, 0, 0, .08);
+}
+
+
+.counter-box .counter-title {
+    font-size: 11px;
+
+    color: #6c757d;
+
+    text-transform: uppercase;
+
+    font-weight: 700;
+}
+
+
+.counter-box .counter-value {
+    font-size: 21px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   BOARD WRAPPER
+========================================================= */
+
+.board-container {
     width: 100%;
 
     overflow-x: auto;
-    overflow-y: hidden;
 
-    -webkit-overflow-scrolling: touch;
+    overflow-y: visible;
 
-    scrollbar-width: thin;
+    padding: 8px;
+}
+
+
+.board-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    padding: 5px;
 }
 
 
 /* =========================================================
-   TABLE
+   BOARD TABLE
 ========================================================= */
 
-.coach-table {
-    width: max-content !important;
+#coachBoard,
+.coach-board,
+.board-table {
+    border-collapse: collapse;
 
-    min-width: 100%;
+    border-spacing: 0;
+
+    width: 100%;
+
+    min-width: 900px;
 
     table-layout: fixed;
 
-    border-collapse: collapse;
-
-    margin: 0 !important;
-
     background: #ffffff;
+}
+
+
+#coachBoard th,
+#coachBoard td,
+.coach-board th,
+.coach-board td,
+.board-table th,
+.board-table td {
+    border:
+        1px solid #343a40;
+
+    padding: 2px;
+
+    text-align: center;
+
+    vertical-align: middle;
 }
 
 
@@ -243,87 +415,96 @@ body {
    TABLE HEADER
 ========================================================= */
 
-.coach-table thead th {
-    height: 64px;
+#coachBoard th,
+.coach-board th,
+.board-table th {
+    background: #212529;
 
-    min-width: 150px;
-    width: 150px;
+    color: #ffffff;
 
-    padding: 8px !important;
+    font-size: 12px;
 
-    background: #212529 !important;
-    color: #ffffff !important;
-
-    border: 2px solid #111111 !important;
-
-    text-align: center;
-    vertical-align: middle;
-
-    font-size: 22px;
     font-weight: 800;
+
+    height: 32px;
 
     white-space: nowrap;
 }
 
 
 /* =========================================================
-   POSITION COLUMN
+   BOARD CELL
 ========================================================= */
 
-.coach-table thead th:first-child,
-.coach-table tbody th {
-    width: 160px !important;
-    min-width: 160px !important;
-    max-width: 160px !important;
-}
+#coachBoard td,
+.coach-board td,
+.board-table td {
+    height: 62px;
 
-
-/* =========================================================
-   BODY CELLS
-========================================================= */
-
-.coach-table tbody td {
-    width: 150px;
-    min-width: 150px;
-    max-width: 150px;
-
-    height: 145px;
-    min-height: 145px;
-
-    padding: 0 !important;
-
-    border: 2px solid #777 !important;
-
-    text-align: center;
-    vertical-align: middle;
+    min-height: 62px;
 
     background: #ffffff;
 
+    position: relative;
+
     overflow: hidden;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        box-shadow .15s ease;
+}
+
+
+#coachBoard td:hover,
+.coach-board td:hover,
+.board-table td:hover {
+    background: #f5f9ff;
+
+    box-shadow:
+        inset 0 0 0 2px
+        rgba(13, 110, 253, .25);
 }
 
 
 /* =========================================================
-   POSITION CELLS
+   EMPTY CELL
 ========================================================= */
 
-.coach-table tbody th {
-    height: 145px;
+#coachBoard td[data-occupied="false"],
+.coach-board td[data-occupied="false"],
+.board-table td[data-occupied="false"] {
+    background: #ffffff;
 
-    padding: 8px !important;
+    color: transparent;
+}
 
-    background: #e9ecef !important;
-    color: #111111 !important;
 
-    border: 2px solid #555 !important;
+/*
+   IMPORTANT:
+   Empty cell must remain visually blank.
+*/
 
-    text-align: center;
-    vertical-align: middle;
+.empty-cell {
+    background: #ffffff !important;
 
-    font-size: 22px;
-    font-weight: 800;
+    color: transparent !important;
+}
 
-    white-space: nowrap;
+
+.empty-cell::before,
+.empty-cell::after {
+    content: none !important;
+}
+
+
+/* =========================================================
+   OCCUPIED CELL
+========================================================= */
+
+.occupied-cell {
+    background: #ffffff;
 }
 
 
@@ -333,112 +514,76 @@ body {
 
 .coach-card {
     width: 100%;
+
     height: 100%;
 
-    min-height: 145px;
+    min-height: 55px;
 
     display: flex;
 
     flex-direction: column;
 
-    align-items: center;
     justify-content: center;
 
-    text-align: center;
+    align-items: center;
 
-    padding: 6px;
+    gap: 1px;
 
-    overflow: hidden;
+    border-radius: 3px;
 
-    cursor: pointer;
+    padding: 2px;
 
     user-select: none;
+
     -webkit-user-select: none;
 
-    transition:
-        background 0.15s ease,
-        transform 0.1s ease;
+    cursor: grab;
+
+    overflow: hidden;
 }
 
 
-/* =========================================================
-   COACH NUMBER
-========================================================= */
+.coach-card:active {
+    cursor: grabbing;
+}
+
 
 .coach-number {
-    display: block;
+    font-size: 18px;
 
-    width: 100%;
-
-    margin: 0;
-
-    font-size: 26px;
-
-    line-height: 1.15;
+    line-height: 20px;
 
     font-weight: 900;
 
-    color: #111111;
-
-    text-align: center;
+    letter-spacing: .3px;
 
     white-space: nowrap;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 
-/* =========================================================
-   COACH TYPE
-========================================================= */
-
 .coach-type {
-    display: block;
+    font-size: 10px;
 
-    max-width: 100%;
-
-    margin-top: 5px;
-
-    font-size: 15px;
+    line-height: 12px;
 
     font-weight: 700;
 
-    line-height: 1.15;
-
-    text-align: center;
-
     white-space: nowrap;
 
     overflow: hidden;
 
     text-overflow: ellipsis;
+
+    max-width: 100%;
 }
 
 
-/* =========================================================
-   COACH STATUS
-========================================================= */
-
 .coach-status {
-    display: inline-flex;
+    font-size: 10px;
 
-    align-items: center;
-    justify-content: center;
-
-    min-width: 58px;
-
-    padding: 4px 10px;
-
-    margin-top: 6px;
-
-    border-radius: 6px;
-
-    font-size: 15px;
+    line-height: 12px;
 
     font-weight: 900;
-
-    line-height: 1;
 
     white-space: nowrap;
 }
@@ -448,118 +593,232 @@ body {
    STATUS COLOURS
 ========================================================= */
 
-.status-PO {
-    background: #198754 !important;
-    color: #ffffff !important;
+.status-empty {
+    background: #ffffff;
+
+    color: #212529;
 }
 
-.status-S {
-    background: #198754 !important;
-    color: #ffffff !important;
+
+.status-po {
+    background: #ffc107;
+
+    color: #000000;
 }
 
-.status-LM {
-    background: #ffc107 !important;
-    color: #111111 !important;
+
+.status-s {
+    background: #dc3545;
+
+    color: #ffffff;
 }
 
-.status-MED {
-    background: #dc3545 !important;
-    color: #ffffff !important;
+
+.status-lm {
+    background: #0dcaf0;
+
+    color: #000000;
 }
 
-.status-RL {
-    background: #0d6efd !important;
-    color: #ffffff !important;
+
+.status-med {
+    background: #6f42c1;
+
+    color: #ffffff;
 }
 
-.status-R1 {
-    background: #0dcaf0 !important;
-    color: #111111 !important;
+
+.status-rl {
+    background: #198754;
+
+    color: #ffffff;
 }
 
-.status-RS {
-    background: #20c997 !important;
-    color: #ffffff !important;
+
+.status-r1 {
+    background: #20c997;
+
+    color: #000000;
 }
 
-.status-L {
-    background: #6c757d !important;
-    color: #ffffff !important;
+
+.status-rs {
+    background: #fd7e14;
+
+    color: #000000;
 }
 
-.status-HVY {
-    background: #343a40 !important;
-    color: #ffffff !important;
+
+.status-l {
+    background: #0d6efd;
+
+    color: #ffffff;
+}
+
+
+.status-hvy {
+    background: #343a40;
+
+    color: #ffffff;
 }
 
 
 /* =========================================================
-   EMPTY CELL
+   DRAG SOURCE
 ========================================================= */
 
-.coach-card:empty {
+.drag-source {
+    opacity: .45 !important;
+
+    outline:
+        3px dashed #0d6efd !important;
+
+    outline-offset: -3px;
+
+    transform: scale(.98);
+}
+
+
+/* =========================================================
+   DRAG OVER
+========================================================= */
+
+.drag-over {
+    background: #dbeafe !important;
+
+    outline:
+        3px dashed #0d6efd !important;
+
+    outline-offset: -3px;
+}
+
+
+/* =========================================================
+   RETURN MODE
+========================================================= */
+
+.return-mode-active {
+    cursor: crosshair;
+}
+
+
+.return-mode-active td[data-occupied="false"] {
+    background: #e8f5e9 !important;
+
+    outline:
+        2px dashed #198754;
+
+    outline-offset: -2px;
+}
+
+
+.return-mode-active td[data-occupied="true"] {
+    cursor: not-allowed;
+
+    opacity: .85;
+}
+
+
+#returnModeIndicator {
+    white-space: nowrap;
+
+    max-width: calc(100vw - 20px);
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   PULLED OUT SECTION
+========================================================= */
+
+.pulled-out-section {
+    margin: 10px;
+
+    background: #ffffff;
+
+    border:
+        1px solid #dee2e6;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 2px 7px
+        rgba(0, 0, 0, .08);
+}
+
+
+.pulled-out-header {
+    background: #dc3545;
+
+    color: #ffffff;
+
+    padding: 8px 12px;
+
+    font-size: 15px;
+
+    font-weight: 800;
+}
+
+
+#pulledOutList,
+#pulledOutCoaches {
+    padding: 8px;
+}
+
+
+#pulledOutTableBody {
     background: #ffffff;
 }
 
 
-/* =========================================================
-   CELL HOVER
-========================================================= */
+.pulled-out-item {
+    display: flex;
 
-.coach-table tbody td:hover {
-    background: #f0f7ff;
-}
+    align-items: center;
 
-.coach-table tbody td:hover .coach-card {
-    background: rgba(13, 110, 253, 0.04);
-}
+    gap: 8px;
 
+    padding: 7px;
 
-/* =========================================================
-   DRAG & DROP
-========================================================= */
+    border-bottom:
+        1px solid #eeeeee;
 
-.coach-card.dragging {
-    opacity: 0.45;
-}
-
-.coach-table tbody td.drag-over {
-    outline: 4px dashed #0d6efd !important;
-    outline-offset: -4px;
-
-    background: #e7f1ff !important;
+    flex-wrap: wrap;
 }
 
 
-/* =========================================================
-   STATUS LEGEND
-========================================================= */
-
-.card {
-    border-radius: 10px;
-    overflow: hidden;
+.pulled-out-item strong {
+    font-size: 16px;
 }
 
-.card-header {
-    font-size: 24px;
-    font-weight: 800;
+
+.pulled-out-item span {
+    font-size: 12px;
+
+    font-weight: 600;
 }
 
-.card-body {
-    padding: 25px;
+
+.pulled-out-item small {
+    color: #6c757d;
+
+    flex: 1;
+
+    min-width: 160px;
 }
 
-.card-body .badge {
-    min-width: 70px;
 
-    margin: 5px;
+#pulledOutTableBody td {
+    padding: 6px;
 
-    padding: 10px 18px;
+    font-size: 12px;
 
-    font-size: 18px;
-
-    border-radius: 8px;
+    vertical-align: middle;
 }
 
 
@@ -567,120 +826,97 @@ body {
    MODAL
 ========================================================= */
 
-#coachModal {
-    z-index: 2000;
-}
-
-#coachModal .modal-dialog {
-    max-width: 620px;
-
-    margin: 1rem auto;
-}
-
 #coachModal .modal-content {
-    border: none;
-
-    border-radius: 14px;
+    border-radius: 10px;
 
     overflow: hidden;
 }
 
 
-/* =========================================================
-   MODAL HEADER
-========================================================= */
-
 #coachModal .modal-header {
-    padding: 18px 22px;
+    background: #0b3d91;
 
-    background: #0d6efd !important;
+    color: #ffffff;
 }
+
 
 #coachModal .modal-title {
-    font-size: 26px;
     font-weight: 800;
+}
+
+
+#coachModal .form-label {
+    font-weight: 700;
+
+    font-size: 13px;
+}
+
+
+#coachModal input,
+#coachModal select {
+    min-height: 38px;
+}
+
+
+#coachModal input:read-only {
+    background: #f1f3f5;
 }
 
 
 /* =========================================================
-   MODAL BODY
+   BUTTONS
 ========================================================= */
 
-#coachModal .modal-body {
-    padding: 24px;
+.btn {
+    font-weight: 600;
 }
 
-#coachModal label {
-    display: block;
 
-    margin-top: 8px;
-    margin-bottom: 6px;
-
-    font-size: 18px;
-    font-weight: 800;
+#saveCoachBtn {
+    min-width: 80px;
 }
 
-#coachModal .form-control,
-#coachModal .form-select {
-    min-height: 52px;
 
-    font-size: 18px;
+#updateCoachBtn {
+    min-width: 80px;
+}
 
-    border: 2px solid #dee2e6;
 
-    border-radius: 8px;
+#deleteCoachBtn {
+    min-width: 80px;
+}
+
+
+#pullOutBtn {
+    min-width: 80px;
+}
+
+
+#returnToBoardBtn {
+    min-width: 100px;
 }
 
 
 /* =========================================================
-   MODAL FOOTER
+   ALERT MESSAGE
 ========================================================= */
 
-#coachModal .modal-footer {
-    display: flex;
+.board-alert {
+    position: fixed !important;
 
-    flex-wrap: wrap;
+    top: 20px !important;
 
-    gap: 10px;
+    right: 20px !important;
 
-    padding: 18px;
-}
+    z-index: 99999 !important;
 
-#coachModal .modal-footer button {
-    min-height: 48px;
+    min-width: 250px;
 
-    padding: 8px 16px;
+    max-width: 420px;
 
-    font-size: 17px;
-
-    font-weight: 800;
-
-    border-radius: 8px;
-}
-
-
-/* =========================================================
-   DATABASE STATUS
-========================================================= */
-
-#databaseStatus {
-    display: inline-flex;
-
-    align-items: center;
-
-    margin-left: 10px;
-
-    font-size: 16px;
-
-    font-weight: 800;
-}
-
-.database-connected {
-    color: #198754 !important;
-}
-
-.database-disconnected {
-    color: #dc3545 !important;
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, .18);
 }
 
 
@@ -688,28 +924,42 @@ body {
    FOOTER
 ========================================================= */
 
-footer {
+.board-footer {
     width: 100%;
 
-    margin-top: 35px !important;
-
-    padding: 25px 20px !important;
-
-    background: #212529 !important;
+    background: #212529;
 
     color: #ffffff;
+
+    padding: 7px 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    font-size: 12px;
+
+    flex-wrap: wrap;
 }
 
-footer b {
-    font-size: 20px;
+
+/* =========================================================
+   FULL SCREEN
+========================================================= */
+
+:fullscreen {
+    background: #ffffff;
 }
 
-#lastUpdateTime {
-    font-weight: 700;
-}
 
-#footerDatabase {
-    font-weight: 800;
+:fullscreen .board-toolbar {
+    position: sticky;
+
+    top: 0;
 }
 
 
@@ -719,498 +969,509 @@ footer b {
 
 @media (max-width: 768px) {
 
-    body {
-        font-size: 16px;
+    .board-title {
+        font-size: 18px;
     }
 
 
-    /* HEADER */
-
-    .header {
-        padding: 20px 8px !important;
-    }
-
-    .header h3 {
-        font-size: 24px;
-        line-height: 1.2;
-    }
-
-    .header h5 {
-        font-size: 19px;
-    }
-
-    #liveDate,
-    #liveTime,
-    #lastUpdate {
-        font-size: 15px;
+    .board-subtitle {
+        font-size: 12px;
     }
 
 
-    /* NAVBAR */
-
-    .navbar {
-        min-height: 68px;
-    }
-
-    .navbar-brand {
-        font-size: 26px;
+    .board-header {
+        padding: 7px;
     }
 
 
-    /* MAIN TOP AREA */
-
-    .container-fluid.mt-3 {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-
-
-    /* SEARCH */
-
-    #searchBox {
-        min-height: 56px;
-
-        font-size: 19px;
-
-        padding: 12px 14px;
-    }
-
-
-    /* BUTTON AREA */
-
-    .col-md-7.text-end {
-        margin-top: 15px;
-
-        text-align: left !important;
-
-        display: flex;
-
-        flex-wrap: wrap;
-
-        gap: 8px;
-
-        align-items: center;
-    }
-
-    #excelBtn,
-    #pdfBtn,
-    #refreshBtn,
-    #fullscreenBtn {
-        min-height: 54px;
-
-        margin: 0 !important;
-
-        font-size: 17px;
-    }
-
-    #excelBtn {
-        min-width: 92px;
-    }
-
-    #pdfBtn {
-        min-width: 80px;
-    }
-
-    #refreshBtn {
-        min-width: 105px;
-    }
-
-    #fullscreenBtn {
-        min-width: 145px;
-    }
-
-
-    /* COUNTERS */
-
-    #totalCoach,
-    #occupiedCoach,
-    #freeCoach {
-        min-width: 58px;
-        height: 54px;
-
-        margin: 0;
-
-        font-size: 17px;
-    }
-
-
-    /* SHOP */
-
-    .shop-card {
-        margin-top: 22px;
-    }
-
-    .shop-title {
-        min-height: 70px;
-
-        font-size: 28px;
-    }
-
-
-    /* TABLE */
-
-    .table-responsive {
-        width: 100%;
+    .board-toolbar {
+        justify-content: flex-start;
 
         overflow-x: auto;
 
-        overflow-y: hidden;
+        flex-wrap: nowrap;
 
-        display: block;
-    }
-
-    .coach-table {
-        width: max-content !important;
-
-        min-width: max-content !important;
-
-        table-layout: fixed;
+        -webkit-overflow-scrolling: touch;
     }
 
 
-    /* TABLE HEADER */
+    .board-toolbar .btn {
+        font-size: 12px;
 
-    .coach-table thead th {
-        width: 195px !important;
-
-        min-width: 195px !important;
-
-        max-width: 195px !important;
-
-        height: 70px;
-
-        font-size: 22px;
-
-        padding: 8px !important;
-    }
-
-    .coach-table thead th:first-child {
-        width: 160px !important;
-
-        min-width: 160px !important;
-
-        max-width: 160px !important;
+        padding:
+            6px 9px;
     }
 
 
-    /* TABLE BODY */
+    .search-wrapper {
+        min-width: 180px;
 
-    .coach-table tbody td {
-        width: 195px !important;
-
-        min-width: 195px !important;
-
-        max-width: 195px !important;
-
-        height: 165px !important;
-
-        min-height: 165px !important;
-    }
-
-    .coach-table tbody th {
-        width: 160px !important;
-
-        min-width: 160px !important;
-
-        max-width: 160px !important;
-
-        height: 165px !important;
-
-        font-size: 21px;
+        flex: 0 0 180px;
     }
 
 
-    /* COACH */
+    .counter-container {
+        justify-content: flex-start;
 
-    .coach-card {
-        min-height: 165px;
+        overflow-x: auto;
 
-        padding: 8px;
-    }
+        flex-wrap: nowrap;
 
-    .coach-number {
-        font-size: 27px;
-    }
-
-    .coach-type {
-        font-size: 15px;
-    }
-
-    .coach-status {
-        font-size: 15px;
-
-        min-width: 60px;
+        padding: 6px;
     }
 
 
-    /* LEGEND */
+    .counter-box {
+        min-width: 100px;
 
-    .card-header {
-        font-size: 23px;
-    }
-
-    .card-body {
-        padding: 20px;
-    }
-
-    .card-body .badge {
-        min-width: 75px;
-
-        font-size: 17px;
-
-        margin: 5px 3px;
+        flex: 0 0 100px;
     }
 
 
-    /* MODAL */
-
-    #coachModal .modal-dialog {
-        width: calc(100% - 20px);
-
-        max-width: none;
-
-        margin: 10px auto;
+    #coachBoard,
+    .coach-board,
+    .board-table {
+        min-width: 760px;
     }
 
-    #coachModal .modal-content {
-        max-height: calc(100vh - 20px);
 
-        border-radius: 14px;
-    }
-
-    #coachModal .modal-body {
-        overflow-y: auto;
-
-        max-height: calc(100vh - 260px);
-
-        padding: 20px;
-    }
-
-    #coachModal .modal-title {
-        font-size: 24px;
-    }
-
-    #coachModal label {
-        font-size: 18px;
-    }
-
-    #coachModal .form-control,
-    #coachModal .form-select {
-        min-height: 56px;
-
-        font-size: 18px;
-    }
-
-    #coachModal .modal-footer {
-        padding: 15px;
-
-        display: grid;
-
-        grid-template-columns: 1fr 1fr;
-    }
-
-    #coachModal .modal-footer button {
-        width: 100%;
+    #coachBoard td,
+    .coach-board td,
+    .board-table td {
+        height: 55px;
 
         min-height: 55px;
-
-        font-size: 16px;
     }
 
 
-    /* FOOTER */
+    .coach-number {
+        font-size: 15px;
 
-    footer {
-        padding: 25px 15px !important;
+        line-height: 17px;
+    }
+
+
+    .coach-type {
+        font-size: 9px;
+    }
+
+
+    .coach-status {
+        font-size: 9px;
+    }
+
+
+    #returnModeIndicator {
+        top: 5px !important;
+
+        font-size: 12px;
+
+        padding: 7px 9px !important;
+    }
+
+
+    .pulled-out-item {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .pulled-out-item small {
+        min-width: 0;
+    }
+
+
+    .board-footer {
+        justify-content: center;
 
         text-align: center;
     }
 
-    footer .row > div {
-        text-align: center !important;
-
-        margin-bottom: 10px;
-    }
-
 }
 
 
 /* =========================================================
-   VERY SMALL MOBILE
+   SMALL MOBILE
 ========================================================= */
 
 @media (max-width: 480px) {
 
-    .header h3 {
-        font-size: 21px;
-    }
-
-    .header h5 {
-        font-size: 17px;
-    }
-
-    #liveDate,
-    #liveTime,
-    #lastUpdate {
-        font-size: 13px;
-    }
-
-
-    .navbar-brand {
-        font-size: 24px;
-    }
-
-
-    #excelBtn,
-    #pdfBtn,
-    #refreshBtn,
-    #fullscreenBtn {
+    .board-title {
         font-size: 16px;
     }
 
 
-    .shop-title {
-        font-size: 26px;
+    .board-subtitle {
+        font-size: 10px;
     }
 
 
-    .coach-table thead th {
-        width: 190px !important;
-        min-width: 190px !important;
-        max-width: 190px !important;
-
-        font-size: 20px;
+    #liveDate,
+    #liveTime,
+    #lastUpdate {
+        font-size: 10px;
     }
 
-    .coach-table tbody td {
-        width: 190px !important;
-        min-width: 190px !important;
-        max-width: 190px !important;
 
-        height: 155px !important;
+    .counter-box {
+        min-width: 90px;
+
+        flex-basis: 90px;
+
+        padding: 5px;
     }
 
-    .coach-table tbody th {
-        width: 150px !important;
-        min-width: 150px !important;
-        max-width: 150px !important;
 
-        height: 155px !important;
-
-        font-size: 20px;
+    .counter-box .counter-value {
+        font-size: 17px;
     }
 
-    .coach-card {
-        min-height: 155px;
+
+    #coachBoard,
+    .coach-board,
+    .board-table {
+        min-width: 700px;
     }
+
+
+    #coachBoard th,
+    #coachBoard td,
+    .coach-board th,
+    .coach-board td,
+    .board-table th,
+    .board-table td {
+        font-size: 10px;
+    }
+
+
+    #coachBoard td,
+    .coach-board td,
+    .board-table td {
+        height: 50px;
+    }
+
 
     .coach-number {
-        font-size: 25px;
+        font-size: 13px;
+    }
+
+
+    .coach-type,
+    .coach-status {
+        font-size: 8px;
     }
 
 }
 
 
 /* =========================================================
-   PRINT
+   TOUCH DEVICE
+========================================================= */
+
+@media (pointer: coarse) {
+
+    .coach-card {
+        cursor: pointer;
+
+        touch-action: manipulation;
+    }
+
+
+    #coachBoard td,
+    .coach-board td,
+    .board-table td {
+        touch-action: manipulation;
+    }
+
+}
+
+
+/* =========================================================
+   PRINT / A4
 ========================================================= */
 
 @media print {
 
     @page {
         size: A4 landscape;
+
         margin: 5mm;
     }
 
+
+    html,
     body {
+        width: 100%;
+
+        margin: 0;
+
+        padding: 0;
+
         background: #ffffff !important;
     }
 
-    .navbar,
-    #searchBox,
-    #searchResult,
-    #excelBtn,
-    #pdfBtn,
-    #refreshBtn,
-    #fullscreenBtn,
-    #databaseStatus,
+
+    /*
+       Hide everything that should not
+       appear on printed board.
+    */
+
+    .board-toolbar,
+    .counter-container,
+    .pulled-out-section,
+    .board-footer,
     .modal,
-    footer,
-    .card {
+    .modal-backdrop,
+    #returnModeIndicator,
+    .board-alert,
+    button,
+    input,
+    select,
+    textarea {
         display: none !important;
     }
 
-    .header {
+
+    .board-header {
         background: #ffffff !important;
+
         color: #000000 !important;
-        padding: 5px !important;
+
+        border: 0 !important;
+
+        padding: 2mm 0 !important;
     }
 
-    .header h3 {
-        font-size: 18px;
+
+    .board-title {
+        font-size: 16pt;
+
+        color: #000000 !important;
     }
 
-    .header h5 {
-        font-size: 14px;
+
+    .board-subtitle {
+        font-size: 9pt;
+
+        color: #000000 !important;
     }
 
-    .shop-card {
-        page-break-inside: avoid;
-        margin-top: 5px;
-    }
 
-    .shop-title {
-        min-height: 30px;
-        font-size: 16px;
-    }
+    .board-container,
+    .board-wrapper {
+        width: 100%;
 
-    .table-responsive {
         overflow: visible !important;
+
+        padding: 0 !important;
+
+        margin: 0 !important;
     }
 
-    .coach-table {
+
+    #coachBoard,
+    .coach-board,
+    .board-table {
         width: 100% !important;
-        min-width: 0 !important;
-    }
 
-    .coach-table thead th {
-        width: auto !important;
-        min-width: 0 !important;
-        height: 25px !important;
-
-        font-size: 10px;
-    }
-
-    .coach-table tbody td {
-        width: auto !important;
         min-width: 0 !important;
 
-        height: 45px !important;
+        table-layout: fixed !important;
+
+        border-collapse: collapse !important;
     }
 
-    .coach-table tbody th {
-        width: auto !important;
-        min-width: 0 !important;
 
-        height: 45px !important;
+    #coachBoard th,
+    #coachBoard td,
+    .coach-board th,
+    .coach-board td,
+    .board-table th,
+    .board-table td {
+        border:
+            .3mm solid #000000 !important;
 
-        font-size: 10px;
+        padding:
+            1mm !important;
+
+        height: auto !important;
+
+        min-height: 0 !important;
+
+        overflow: visible !important;
+
+        color: #000000 !important;
     }
+
+
+    #coachBoard th,
+    .coach-board th,
+    .board-table th {
+        background: #dddddd !important;
+
+        color: #000000 !important;
+
+        font-size: 7pt !important;
+    }
+
 
     .coach-card {
-        min-height: 45px !important;
+        min-height: 0 !important;
+
+        height: auto !important;
+
+        padding: 0 !important;
+
+        background: transparent !important;
+
+        color: #000000 !important;
     }
+
+
+    /*
+       PRINT:
+       Coach number only.
+    */
 
     .coach-number {
-        font-size: 12px;
+        font-size: 10pt !important;
+
+        font-weight: 900 !important;
+
+        color: #000000 !important;
     }
 
-    .coach-type {
-        font-size: 7px;
-    }
 
+    .coach-type,
     .coach-status {
-        font-size: 7px;
-        padding: 2px 4px;
+        display: none !important;
     }
+
+
+    /*
+       Keep status background visible
+       where browser supports background printing.
+    */
+
+    .status-po,
+    .status-s,
+    .status-lm,
+    .status-med,
+    .status-rl,
+    .status-r1,
+    .status-rs,
+    .status-l,
+    .status-hvy {
+        -webkit-print-color-adjust: exact;
+
+        print-color-adjust: exact;
+    }
+
+
+    /*
+       Empty cells stay blank.
+    */
+
+    .empty-cell {
+        background: #ffffff !important;
+
+        color: #ffffff !important;
+    }
+
+
+    /*
+       Prevent unnecessary page break.
+    */
+
+    tr,
+    td,
+    th {
+        page-break-inside: avoid !important;
+    }
+
+
+    table {
+        page-break-inside: auto;
+    }
+
 }
+
+
+/* =========================================================
+   PRINT PORTRAIT SAFETY
+========================================================= */
+
+@media print and (orientation: portrait) {
+
+    @page {
+        size: A4 portrait;
+
+        margin: 5mm;
+    }
+
+
+    #coachBoard,
+    .coach-board,
+    .board-table {
+        font-size: 7pt;
+    }
+
+
+    .coach-number {
+        font-size: 9pt !important;
+    }
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+.board-container::-webkit-scrollbar,
+.board-wrapper::-webkit-scrollbar,
+#searchResult::-webkit-scrollbar {
+    height: 8px;
+
+    width: 8px;
+}
+
+
+.board-container::-webkit-scrollbar-thumb,
+.board-wrapper::-webkit-scrollbar-thumb,
+#searchResult::-webkit-scrollbar-thumb {
+    background: #adb5bd;
+
+    border-radius: 10px;
+}
+
+
+.board-container::-webkit-scrollbar-track,
+.board-wrapper::-webkit-scrollbar-track,
+#searchResult::-webkit-scrollbar-track {
+    background: #f1f3f5;
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+td:focus-visible {
+    outline:
+        3px solid
+        rgba(13, 110, 253, .35);
+
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   END
+========================================================= */
+
+console.log("MR CO-ORDINATION style.css VERSION 9.1 LOADED");
