@@ -1,990 +1,897 @@
-/* =====================================================
+/* =========================================================
    MR CO-ORDINATION BOARD
    MOBILE CSS
-   VERSION 8.0
-   FINAL PRODUCTION VERSION
-===================================================== */
+   VERSION 9.1 FINAL
+
+   FILE:
+   css/mobile.css
+
+   FEATURES
+   ---------------------------------------------------------
+   MOBILE RESPONSIVE
+   TABLE SCROLL
+   TOUCH FRIENDLY
+   LONG PRESS DRAG SUPPORT
+   SEARCH
+   MODAL
+   PULLED OUT LIST
+   RETURN MODE
+   BUTTONS
+   COUNTERS
+   HEADER
+========================================================= */
 
 
-/* =====================================================
-   MOBILE BREAKPOINT
-===================================================== */
+/* =========================================================
+   MOBILE BASE
+========================================================= */
 
-@media (max-width: 768px) {
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
 
 
-    /* =================================================
-       GLOBAL
-    ================================================= */
+/* =========================================================
+   MAIN CONTAINER
+========================================================= */
 
-    html,
+.container,
+.container-fluid {
+    max-width: 100%;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header,
+.board-header,
+.dashboard-header {
+    width: 100%;
+    overflow: hidden;
+}
+
+header h1,
+header h2,
+header h3,
+.board-header h1,
+.board-header h2,
+.board-header h3,
+.dashboard-header h1,
+.dashboard-header h2,
+.dashboard-header h3 {
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   LIVE DATE / TIME
+========================================================= */
+
+#liveDate,
+#liveTime,
+#lastUpdate {
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+#searchBox {
+    width: 100%;
+    min-height: 42px;
+    font-size: 16px;
+}
+
+#searchResult {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.search-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    width: 100%;
+
+    padding: 10px;
+
+    margin-bottom: 6px;
+
+    border: 1px solid #ddd;
+    border-radius: 6px;
+
+    background: #fff;
+
+    cursor: pointer;
+
+    touch-action: manipulation;
+}
+
+.search-item:active {
+    transform: scale(.99);
+}
+
+
+/* =========================================================
+   BOARD WRAPPER
+========================================================= */
+
+.board-wrapper,
+.table-responsive,
+#boardContainer {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: auto;
+    overflow-y: visible;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   BOARD TABLE
+========================================================= */
+
+table {
+    border-collapse: collapse;
+}
+
+.board-table,
+#coachBoard,
+table.board-table {
+    min-width: 900px;
+}
+
+
+/* =========================================================
+   BOARD CELLS
+========================================================= */
+
+td,
+th {
+    vertical-align: middle;
+}
+
+.board-table td,
+#coachBoard td {
+    min-width: 85px;
+    height: 65px;
+
+    padding: 3px;
+
+    text-align: center;
+
+    position: relative;
+
+    touch-action: manipulation;
+}
+
+
+/* =========================================================
+   COACH CARD
+========================================================= */
+
+.coach-card {
+    width: 100%;
+    min-height: 58px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    border-radius: 5px;
+
+    padding: 4px;
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    cursor: pointer;
+
+    touch-action: manipulation;
+}
+
+.coach-number {
+    font-size: 16px;
+    font-weight: 800;
+
+    line-height: 1.1;
+
+    white-space: nowrap;
+}
+
+.coach-type {
+    font-size: 10px;
+    line-height: 1.1;
+
+    max-width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.coach-status {
+    font-size: 10px;
+    font-weight: 700;
+
+    line-height: 1.1;
+}
+
+
+/* =========================================================
+   DRAG SOURCE
+========================================================= */
+
+.drag-source {
+    opacity: .45;
+
+    transform: scale(.97);
+
+    outline: 3px dashed #0d6efd;
+}
+
+
+/* =========================================================
+   DRAG OVER
+========================================================= */
+
+.drag-over {
+    outline: 3px solid #198754 !important;
+
+    background: rgba(25, 135, 84, .15) !important;
+}
+
+
+/* =========================================================
+   RETURN MODE
+========================================================= */
+
+body.return-mode-active td[data-occupied="false"] {
+    cursor: pointer;
+
+    outline: 2px dashed #0d6efd;
+    outline-offset: -2px;
+}
+
+body.return-mode-active
+td[data-occupied="true"] {
+    cursor: not-allowed;
+}
+
+body.return-mode-active
+td[data-occupied="false"]:active {
+    background: rgba(13, 110, 253, .15);
+}
+
+
+/* =========================================================
+   RETURN MODE INDICATOR
+========================================================= */
+
+#returnModeIndicator {
+    max-width: calc(100% - 20px);
+
+    white-space: normal;
+
+    text-align: center;
+
+    font-size: 13px;
+}
+
+#cancelReturnModeBtn {
+    min-height: 32px;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   PULLED OUT SECTION
+========================================================= */
+
+#pulledOutList,
+#pulledOutCoaches,
+#pulledOutTableBody {
+    width: 100%;
+    max-width: 100%;
+}
+
+.pulled-out-item {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    padding: 10px;
+
+    margin-bottom: 7px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 7px;
+
+    background: #fff;
+}
+
+.pulled-out-item strong {
+    font-size: 16px;
+}
+
+.pulled-out-item small {
+    color: #666;
+}
+
+.pulled-return-btn {
+    width: 100%;
+
+    min-height: 40px;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================================
+   PULLED OUT TABLE
+========================================================= */
+
+#pulledOutTableBody td {
+    white-space: nowrap;
+
+    font-size: 13px;
+}
+
+#pulledOutTableBody .pulled-return-btn {
+    width: auto;
+}
+
+
+/* =========================================================
+   COUNTERS
+========================================================= */
+
+.counter-card,
+.stat-card,
+.dashboard-card {
+    width: 100%;
+
+    margin-bottom: 8px;
+}
+
+#totalCoach,
+#occupiedCoach,
+#freeCoach {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   BUTTON AREA
+========================================================= */
+
+button,
+.btn {
+    min-height: 40px;
+
+    touch-action: manipulation;
+}
+
+.btn-group {
+    flex-wrap: wrap;
+
+    gap: 5px;
+}
+
+.btn-group > .btn {
+    margin-left: 0 !important;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-dialog {
+    width: calc(100% - 20px);
+
+    max-width: 500px;
+
+    margin: 10px auto;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-header {
+    padding: 12px 15px;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.modal-footer {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    padding: 12px 15px;
+}
+
+.modal-footer .btn {
+    flex: 1 1 auto;
+
+    min-width: 100px;
+}
+
+
+/* =========================================================
+   MODAL INPUT
+========================================================= */
+
+.modal input,
+.modal select,
+.modal textarea {
+    width: 100%;
+
+    min-height: 42px;
+
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   ALERT
+========================================================= */
+
+.board-alert {
+    max-width: calc(100% - 20px);
+
+    left: 10px;
+    right: 10px;
+
+    min-width: 0 !important;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   DATABASE STATUS
+========================================================= */
+
+#databaseStatus,
+#footerDatabase {
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    width: 100%;
+
+    overflow: hidden;
+}
+
+footer .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   WIDTH <= 576px
+========================================================= */
+
+@media (max-width: 576px) {
+
     body {
-
-        width: 100%;
-        min-width: 100%;
-
-        margin: 0;
-        padding: 0;
-
-        overflow-x: hidden;
-
-        -webkit-text-size-adjust: 100%;
-        touch-action: manipulation;
-
-    }
-
-
-    body {
-
         font-size: 14px;
-
     }
 
 
-    /* =================================================
-       MAIN CONTAINER
-    ================================================= */
-
-    .container,
-    .container-fluid {
-
-        width: 100% !important;
-
-        max-width: 100% !important;
-
-        margin: 0 !important;
-
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-
-    }
-
-
-    /* =================================================
+    /* ---------------------------------------------
        HEADER
-    ================================================= */
+    --------------------------------------------- */
 
     header,
-    .header,
-    .top-header {
-
-        width: 100%;
-
-        padding: 8px 6px;
-
-        text-align: center;
-
+    .board-header,
+    .dashboard-header {
+        padding: 8px !important;
     }
 
 
     header h1,
-    .header h1 {
-
-        font-size: 18px;
-
-        line-height: 1.2;
-
-        margin: 2px 0;
-
+    .board-header h1,
+    .dashboard-header h1 {
+        font-size: 20px;
     }
 
 
     header h2,
-    .header h2 {
+    .board-header h2,
+    .dashboard-header h2 {
+        font-size: 17px;
+    }
 
+
+    header h3,
+    .board-header h3,
+    .dashboard-header h3 {
         font-size: 15px;
-
-        margin: 2px 0;
-
     }
 
 
-    header p,
-    .header p {
+    /* ---------------------------------------------
+       DATE / TIME
+    --------------------------------------------- */
 
+    #liveDate,
+    #liveTime,
+    #lastUpdate {
         font-size: 11px;
-
-        margin: 2px 0;
-
     }
 
 
-    /* =================================================
-       DASHBOARD TITLE
-    ================================================= */
+    /* ---------------------------------------------
+       BOARD
+    --------------------------------------------- */
 
-    .dashboard-title {
-
-        font-size: 18px;
-
-        line-height: 1.25;
-
-        padding: 8px 4px;
-
-        margin: 0;
-
+    .board-table,
+    #coachBoard {
+        min-width: 760px;
     }
 
 
-    .dashboard-subtitle {
+    .board-table td,
+    #coachBoard td {
+        min-width: 75px;
 
-        font-size: 12px;
+        height: 58px;
 
+        padding: 2px;
     }
 
 
-    /* =================================================
-       SEARCH AREA
-    ================================================= */
+    .coach-card {
+        min-height: 52px;
 
-    .search-container,
-    .search-box,
-    .search-section {
-
-        width: 100% !important;
-
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 6px;
-
-        margin: 6px 0;
-
+        padding: 3px;
     }
 
 
-    #searchInput,
-    .search-input {
-
-        width: 100% !important;
-
-        min-height: 42px;
-
-        box-sizing: border-box;
-
-        padding: 9px 12px;
-
-        font-size: 16px;
-
-        border-radius: 6px;
-
-    }
-
-
-    #clearSearch,
-    .clear-search {
-
-        min-height: 40px;
-
-        width: 100%;
-
+    .coach-number {
         font-size: 14px;
-
     }
 
-
-    /* =================================================
-       BUTTON AREA
-    ================================================= */
-
-    .button-container,
-    .toolbar,
-    .action-buttons,
-    .board-actions {
-
-        width: 100%;
-
-        display: flex;
-
-        flex-wrap: wrap;
-
-        justify-content: center;
-
-        gap: 6px;
-
-        margin: 6px 0;
-
-    }
-
-
-    button,
-    .btn {
-
-        min-height: 40px;
-
-        padding: 8px 12px;
-
-        font-size: 13px;
-
-        border-radius: 6px;
-
-        white-space: nowrap;
-
-        touch-action: manipulation;
-
-    }
-
-
-    /* =================================================
-       BOARD WRAPPER
-    ================================================= */
-
-    .board-wrapper,
-    .table-wrapper,
-    .board-container {
-
-        width: 100%;
-
-        max-width: 100%;
-
-        overflow-x: auto;
-
-        overflow-y: hidden;
-
-        -webkit-overflow-scrolling: touch;
-
-        margin: 0;
-
-        padding: 0;
-
-        border-radius: 0;
-
-    }
-
-
-    /* =================================================
-       BOARD TABLE
-    ================================================= */
-
-    table {
-
-        border-collapse: collapse;
-
-        table-layout: fixed;
-
-    }
-
-
-    .board-table {
-
-        width: max-content;
-
-        min-width: 900px;
-
-    }
-
-
-    .board-table th {
-
-        font-size: 11px;
-
-        padding: 5px 4px;
-
-        height: 34px;
-
-        white-space: nowrap;
-
-    }
-
-
-    .board-table td {
-
-        font-size: 11px;
-
-        padding: 3px;
-
-        height: 48px;
-
-        min-height: 48px;
-
-        vertical-align: middle;
-
-        text-align: center;
-
-        overflow: hidden;
-
-        word-break: break-word;
-
-    }
-
-
-    /* =================================================
-       BOARD CELL
-    ================================================= */
-
-    .board-cell,
-    td.board-cell {
-
-        position: relative;
-
-        min-width: 72px;
-
-        height: 48px;
-
-        padding: 3px;
-
-        cursor: pointer;
-
-        user-select: none;
-
-        -webkit-user-select: none;
-
-        -webkit-touch-callout: none;
-
-    }
-
-
-    .board-cell:active {
-
-        transform: scale(0.98);
-
-    }
-
-
-    /* =================================================
-       COACH NUMBER
-    ================================================= */
-
-    .coach-number,
-    .coachNo {
-
-        display: block;
-
-        font-size: 13px;
-
-        font-weight: 700;
-
-        line-height: 1.1;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-
-    }
-
-
-    /* =================================================
-       COACH TYPE
-    ================================================= */
 
     .coach-type,
-    .coachType {
-
-        display: block;
-
+    .coach-status {
         font-size: 9px;
-
-        line-height: 1.1;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-
     }
 
 
-    /* =================================================
-       STATUS
-    ================================================= */
+    /* ---------------------------------------------
+       BUTTONS
+    --------------------------------------------- */
 
-    .status {
-
-        display: block;
-
-        font-size: 9px;
-
-        font-weight: 700;
-
-        line-height: 1.1;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-
-    }
-
-
-    /* =================================================
-       EMPTY CELL
-    ================================================= */
-
-    .empty-cell,
-    td.empty-cell {
-
-        min-height: 48px;
-
-        height: 48px;
-
-        cursor: pointer;
-
-    }
-
-
-    /* =================================================
-       LINE / POSITION COLUMN
-    ================================================= */
-
-    .line-column,
-    .position-column {
-
-        min-width: 55px !important;
-
-        width: 55px !important;
-
-        font-size: 10px !important;
-
-        white-space: nowrap;
-
-    }
-
-
-    /* =================================================
-       SHOP HEADER
-    ================================================= */
-
-    .shop-header {
-
+    .btn {
         font-size: 13px;
 
-        padding: 6px 4px;
-
-        white-space: nowrap;
-
+        padding: 7px 9px;
     }
 
 
-    /* =================================================
-       DRAG & DROP
-    ================================================= */
-
-    .dragging {
-
-        opacity: 0.45;
-
+    .btn-group {
+        width: 100%;
     }
 
 
-    .drag-over {
-
-        outline: 2px dashed currentColor;
-
-        outline-offset: -2px;
-
+    .btn-group .btn {
+        flex: 1 1 45%;
     }
 
 
-    /* =================================================
-       LONG PRESS
-    ================================================= */
-
-    [draggable="true"] {
-
-        -webkit-user-drag: none;
-
-    }
-
-
-    /* =================================================
+    /* ---------------------------------------------
        MODAL
-    ================================================= */
+    --------------------------------------------- */
 
-    .modal-content {
+    .modal-dialog {
+        width: calc(100% - 10px);
 
-        width: calc(100% - 20px) !important;
-
-        max-width: 500px;
-
-        margin: 10px auto;
-
-        border-radius: 10px;
-
-    }
-
-
-    .modal-header {
-
-        padding: 10px;
-
+        margin: 5px auto;
     }
 
 
     .modal-title {
-
-        font-size: 16px;
-
-    }
-
-
-    .modal-body {
-
-        padding: 12px;
-
-        max-height: 70vh;
-
-        overflow-y: auto;
-
-        -webkit-overflow-scrolling: touch;
-
+        font-size: 17px;
     }
 
 
     .modal-footer {
+        display: grid;
 
-        padding: 10px;
-
-        display: flex;
-
-        flex-wrap: wrap;
-
-        gap: 6px;
-
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
 
-    .modal-footer button {
-
-        flex: 1 1 120px;
-
-        min-height: 42px;
-
-    }
-
-
-    /* =================================================
-       FORM INPUTS
-    ================================================= */
-
-    input,
-    select,
-    textarea {
-
+    .modal-footer .btn {
         width: 100%;
 
-        min-height: 42px;
+        min-width: 0;
+    }
 
-        box-sizing: border-box;
+
+    /* ---------------------------------------------
+       COUNTERS
+    --------------------------------------------- */
+
+    #totalCoach,
+    #occupiedCoach,
+    #freeCoach {
+        font-size: 20px;
+    }
+
+
+    /* ---------------------------------------------
+       RETURN INDICATOR
+    --------------------------------------------- */
+
+    #returnModeIndicator {
+        top: 5px !important;
+
+        font-size: 11px;
+
+        padding: 7px 9px !important;
+    }
+
+
+    /* ---------------------------------------------
+       SEARCH
+    --------------------------------------------- */
+
+    #searchBox {
+        min-height: 40px;
 
         font-size: 16px;
-
-        padding: 8px 10px;
-
-        border-radius: 6px;
-
     }
 
 
-    label {
+    /* ---------------------------------------------
+       PULLED OUT
+    --------------------------------------------- */
 
-        display: block;
-
-        font-size: 13px;
-
-        margin-bottom: 4px;
-
+    .pulled-out-item {
+        padding: 8px;
     }
 
 
-    /* =================================================
-       COACH FORM
-    ================================================= */
-
-    .coach-form {
-
-        width: 100%;
-
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 8px;
-
-    }
-
-
-    .form-group {
-
-        width: 100%;
-
-        margin-bottom: 6px;
-
-    }
-
-
-    /* =================================================
-       PULL OUT / RETURN BUTTONS
-    ================================================= */
-
-    .pull-out-btn,
-    .return-board-btn {
-
-        width: 100%;
-
-        min-height: 42px;
-
-        font-size: 14px;
-
-        font-weight: 600;
-
-    }
-
-
-    /* =================================================
-       PULLED OUT LIST
-    ================================================= */
-
-    .pulled-out-container {
-
-        width: 100%;
-
-        overflow-x: auto;
-
-        -webkit-overflow-scrolling: touch;
-
-    }
-
-
-    .pulled-out-table {
-
-        width: max-content;
-
-        min-width: 700px;
-
-    }
-
-
-    .pulled-out-table th {
-
-        font-size: 11px;
-
-        padding: 6px;
-
-    }
-
-
-    .pulled-out-table td {
-
-        font-size: 11px;
-
-        padding: 5px;
-
-    }
-
-
-    /* =================================================
-       SEARCH RESULTS
-    ================================================= */
-
-    .search-results {
-
-        width: 100%;
-
-        max-height: 55vh;
-
-        overflow-y: auto;
-
-        -webkit-overflow-scrolling: touch;
-
-    }
-
-
-    .search-result {
-
-        padding: 10px;
-
-        margin-bottom: 5px;
-
-        font-size: 13px;
-
-    }
-
-
-    /* =================================================
-       DATABASE STATUS
-    ================================================= */
-
-    #databaseStatus,
-    .database-status {
-
-        position: fixed;
-
-        left: 6px;
-
-        bottom: 6px;
-
-        z-index: 9999;
-
-        font-size: 10px;
-
-        padding: 5px 8px;
-
-        border-radius: 5px;
-
-    }
-
-
-    /* =================================================
-       MOBILE FOOTER
-    ================================================= */
-
-    footer {
-
-        width: 100%;
-
-        padding: 8px 5px;
-
-        font-size: 10px;
-
-        text-align: center;
-
-    }
-
-
-    /* =================================================
-       PREVENT HORIZONTAL PAGE SCROLL
-    ================================================= */
-
-    body {
-
-        overflow-x: hidden;
-
-    }
-
-
-    /* =================================================
-       SAFE TOUCH TARGET
-    ================================================= */
-
-    button,
-    input,
-    select,
-    .board-cell,
-    .return-board-btn,
-    .pull-out-btn {
-
-        touch-action: manipulation;
-
+    .pulled-out-item strong {
+        font-size: 15px;
     }
 
 }
 
 
-/* =====================================================
-   SMALL MOBILE
-   480px AND BELOW
-===================================================== */
-
-@media (max-width: 480px) {
-
-
-    .dashboard-title {
-
-        font-size: 16px;
-
-    }
-
-
-    header h1,
-    .header h1 {
-
-        font-size: 16px;
-
-    }
-
-
-    header h2,
-    .header h2 {
-
-        font-size: 13px;
-
-    }
-
-
-    .board-table {
-
-        min-width: 820px;
-
-    }
-
-
-    .board-table th {
-
-        font-size: 10px;
-
-        padding: 4px 3px;
-
-    }
-
-
-    .board-table td {
-
-        font-size: 10px;
-
-        height: 44px;
-
-        min-height: 44px;
-
-    }
-
-
-    .board-cell,
-    td.board-cell {
-
-        min-width: 66px;
-
-        height: 44px;
-
-    }
-
-
-    .coach-number,
-    .coachNo {
-
-        font-size: 12px;
-
-    }
-
-
-    .coach-type,
-    .coachType,
-    .status {
-
-        font-size: 8px;
-
-    }
-
-
-    button,
-    .btn {
-
-        min-height: 42px;
-
-        font-size: 12px;
-
-        padding: 8px 10px;
-
-    }
-
-
-}
-
-
-/* =====================================================
+/* =========================================================
    VERY SMALL MOBILE
-   360px AND BELOW
-===================================================== */
+   WIDTH <= 400px
+========================================================= */
 
-@media (max-width: 360px) {
+@media (max-width: 400px) {
 
-
-    .board-table {
-
-        min-width: 760px;
-
+    .board-table,
+    #coachBoard {
+        min-width: 700px;
     }
 
 
-    .board-cell,
-    td.board-cell {
+    .board-table td,
+    #coachBoard td {
+        min-width: 68px;
 
-        min-width: 60px;
-
+        height: 54px;
     }
 
 
-    .coach-number,
-    .coachNo {
-
-        font-size: 11px;
-
+    .coach-number {
+        font-size: 13px;
     }
 
 
     .coach-type,
-    .coachType,
-    .status {
-
-        font-size: 7px;
-
+    .coach-status {
+        font-size: 8px;
     }
 
 
-    .button-container,
-    .toolbar,
-    .action-buttons {
+    .btn {
+        font-size: 12px;
 
-        gap: 4px;
+        padding: 6px 7px;
+    }
 
+
+    .modal-footer {
+        grid-template-columns: 1fr;
+    }
+
+
+    #returnModeIndicator {
+        max-width: 95%;
+
+        font-size: 10px;
+    }
+
+}
+
+
+/* =========================================================
+   LANDSCAPE MOBILE
+========================================================= */
+
+@media (max-width: 900px)
+and (orientation: landscape) {
+
+    .board-table,
+    #coachBoard {
+        min-width: 900px;
+    }
+
+
+    .board-table td,
+    #coachBoard td {
+        height: 52px;
+    }
+
+
+    .coach-card {
+        min-height: 46px;
+    }
+
+
+    .coach-number {
+        font-size: 13px;
+    }
+
+}
+
+
+/* =========================================================
+   TOUCH DEVICE
+========================================================= */
+
+@media (pointer: coarse) {
+
+    .coach-card {
+        cursor: grab;
+
+        -webkit-touch-callout: none;
+    }
+
+
+    .coach-card:active {
+        cursor: grabbing;
+    }
+
+
+    td {
+        -webkit-tap-highlight-color:
+            rgba(13, 110, 253, .15);
     }
 
 
     button,
-    .btn {
-
-        padding: 7px 8px;
-
-        font-size: 11px;
-
+    .btn,
+    .search-item {
+        -webkit-tap-highlight-color:
+            rgba(13, 110, 253, .15);
     }
 
 }
 
 
-/* =====================================================
-   LANDSCAPE MOBILE
-===================================================== */
+/* =========================================================
+   PREVENT TEXT SELECTION DURING BOARD TOUCH
+========================================================= */
 
-@media (max-width: 900px) and (orientation: landscape) {
-
-
-    .board-wrapper,
-    .table-wrapper,
-    .board-container {
-
-        max-height: calc(100vh - 100px);
-
-        overflow: auto;
-
-    }
-
-
-    .board-table td {
-
-        height: 42px;
-
-        min-height: 42px;
-
-    }
-
-
-    .modal-body {
-
-        max-height: 55vh;
-
-    }
-
+.board-table,
+#coachBoard {
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 
-/* =====================================================
-   MOBILE PRINT SAFETY
-===================================================== */
+/* =========================================================
+   HORIZONTAL SCROLLBAR
+========================================================= */
+
+.board-wrapper::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar,
+#boardContainer::-webkit-scrollbar {
+    height: 8px;
+}
+
+.board-wrapper::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb,
+#boardContainer::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   PRINT SAFETY
+========================================================= */
 
 @media print {
 
+    html,
+    body {
+        overflow: visible !important;
+    }
 
-    .mobile-only,
-    .mobile-menu,
-    .mobile-toolbar {
 
+    .board-wrapper,
+    .table-responsive,
+    #boardContainer {
+        overflow: visible !important;
+    }
+
+
+    .board-table,
+    #coachBoard {
+        min-width: 0 !important;
+
+        width: 100% !important;
+    }
+
+
+    #returnModeIndicator,
+    .board-alert {
         display: none !important;
-
     }
 
 }
+
+
+/* =========================================================
+   END MOBILE CSS
+========================================================= */
