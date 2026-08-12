@@ -1292,7 +1292,498 @@ and (orientation: landscape) {
     }
 
 }
+/* =========================================================
+   MR CO-ORDINATION BOARD
+   PULLED OUT SEARCH
+   MOBILE VERSION
+========================================================= */
 
+
+/* =========================================================
+   PULLED OUT SEARCH AREA
+========================================================= */
+
+.pulled-out-search-area {
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    background: #ffffff;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   SEARCH ROW
+========================================================= */
+
+.pulled-out-search-row {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+/* =========================================================
+   SEARCH INPUT
+========================================================= */
+
+#pulledOutSearchBox {
+
+    width: 100%;
+
+    height: 48px;
+
+    padding: 8px 14px;
+
+    box-sizing: border-box;
+
+    border: 2px solid #adb5bd;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #212529;
+
+    font-size: 17px;
+
+    font-weight: 500;
+
+    outline: none;
+
+    -webkit-appearance: none;
+
+    appearance: none;
+
+}
+
+
+/* =========================================================
+   SEARCH FOCUS
+========================================================= */
+
+#pulledOutSearchBox:focus {
+
+    border-color: #0d6efd;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(13, 110, 253, 0.15);
+
+}
+
+
+/* =========================================================
+   PLACEHOLDER
+========================================================= */
+
+#pulledOutSearchBox::placeholder {
+
+    color: #6c757d;
+
+    font-size: 15px;
+
+    opacity: 1;
+
+}
+
+
+/* =========================================================
+   SEARCH RESULT COUNT
+========================================================= */
+
+.pulled-out-search-count {
+
+    flex-shrink: 0;
+
+    min-width: 60px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #0d6efd;
+
+}
+
+
+/* =========================================================
+   PULLED OUT TABLE
+========================================================= */
+
+.pulled-out-section {
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* =========================================================
+   HORIZONTAL SCROLL
+========================================================= */
+
+.pulled-out-section
+.table-responsive {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: thin;
+
+}
+
+
+/* =========================================================
+   TABLE WIDTH
+========================================================= */
+
+.pulled-out-section table {
+
+    min-width: 850px;
+
+    width: max-content;
+
+    margin-bottom: 0;
+
+}
+
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.pulled-out-section
+table thead th {
+
+    white-space: nowrap;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    padding: 12px 10px;
+
+    vertical-align: middle;
+
+}
+
+
+/* =========================================================
+   TABLE BODY
+========================================================= */
+
+.pulled-out-section
+table tbody td {
+
+    white-space: nowrap;
+
+    font-size: 16px;
+
+    padding: 14px 10px;
+
+    vertical-align: middle;
+
+}
+
+
+/* =========================================================
+   COACH NUMBER COLUMN
+========================================================= */
+
+.pulled-out-section
+table th:first-child,
+
+.pulled-out-section
+table td:first-child {
+
+    min-width: 115px;
+
+    width: 115px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   COACH NUMBER
+========================================================= */
+
+.pulled-out-section
+table td:first-child {
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================================
+   TYPE COLUMN
+========================================================= */
+
+.pulled-out-section
+table th:nth-child(2),
+
+.pulled-out-section
+table td:nth-child(2) {
+
+    min-width: 95px;
+
+}
+
+
+/* =========================================================
+   STATUS COLUMN
+========================================================= */
+
+.pulled-out-section
+table th:nth-child(3),
+
+.pulled-out-section
+table td:nth-child(3) {
+
+    min-width: 95px;
+
+}
+
+
+/* =========================================================
+   ORIGINAL SHOP
+========================================================= */
+
+.pulled-out-section
+table th:nth-child(4),
+
+.pulled-out-section
+table td:nth-child(4) {
+
+    min-width: 130px;
+
+}
+
+
+/* =========================================================
+   ORIGINAL CELL
+========================================================= */
+
+.pulled-out-section
+table th:nth-child(5),
+
+.pulled-out-section
+table td:nth-child(5) {
+
+    min-width: 130px;
+
+}
+
+
+/* =========================================================
+   PULL OUT TIME
+========================================================= */
+
+.pulled-out-section
+table th:nth-child(6),
+
+.pulled-out-section
+table td:nth-child(6) {
+
+    min-width: 180px;
+
+}
+
+
+/* =========================================================
+   ACTION
+========================================================= */
+
+.pulled-out-section
+table th:nth-child(7),
+
+.pulled-out-section
+table td:nth-child(7) {
+
+    min-width: 100px;
+
+    text-align: center;
+
+}
+
+
+/* =========================================================
+   RETURN BUTTON
+========================================================= */
+
+.pulled-return-btn {
+
+    min-width: 82px;
+
+    min-height: 42px;
+
+    padding: 7px 12px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    border-radius: 8px;
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+
+    .pulled-out-search-area {
+
+        padding: 10px;
+
+    }
+
+
+    #pulledOutSearchBox {
+
+        height: 46px;
+
+        font-size: 16px;
+
+        padding-left: 12px;
+
+        padding-right: 12px;
+
+    }
+
+
+    #pulledOutSearchBox::placeholder {
+
+        font-size: 14px;
+
+    }
+
+
+    .pulled-out-search-row {
+
+        gap: 6px;
+
+    }
+
+
+    .pulled-out-search-count {
+
+        font-size: 13px;
+
+        min-width: 52px;
+
+    }
+
+
+    .pulled-out-section
+    table {
+
+        min-width: 850px;
+
+    }
+
+
+    .pulled-out-section
+    table thead th {
+
+        font-size: 15px;
+
+        padding: 11px 9px;
+
+    }
+
+
+    .pulled-out-section
+    table tbody td {
+
+        font-size: 15px;
+
+        padding: 13px 9px;
+
+    }
+
+
+    .pulled-out-section
+    table td:first-child {
+
+        font-size: 18px;
+
+        min-width: 115px;
+
+    }
+
+
+    .pulled-return-btn {
+
+        min-width: 78px;
+
+        min-height: 40px;
+
+        font-size: 14px;
+
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONE
+========================================================= */
+
+@media (max-width: 400px) {
+
+    #pulledOutSearchBox {
+
+        height: 44px;
+
+        font-size: 15px;
+
+    }
+
+
+    #pulledOutSearchBox::placeholder {
+
+        font-size: 13px;
+
+    }
+
+
+    .pulled-out-section
+    table {
+
+        min-width: 850px;
+
+    }
+
+}
 
 /* =========================================================
    END MOBILE CSS VERSION 9.2
