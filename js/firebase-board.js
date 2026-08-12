@@ -1,15 +1,12 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    FIREBASE BOARD CONTROL
-   VERSION 9.0 FINAL
+   VERSION 9.1 FINAL
 
    FILE:
    js/firebase-board.js
 
-   RESPONSIBILITY:
-   Firebase Realtime Database ONLY
-
-   FEATURES:
+   FEATURES
    ---------------------------------------------------------
    SAVE
    UPDATE
@@ -18,7 +15,8 @@
    STATUS UPDATE
    DELETE
    PULL OUT
-   RETURN TO BOARD
+   RETURN TO ANY EMPTY CELL
+   RETURN TO ORIGINAL CELL
    SEARCH
    REALTIME BOARD
    REALTIME PULLED OUT
@@ -40,7 +38,7 @@ import {
 
 
 /* =========================================================
-   FIREBASE DATABASE
+   FIREBASE DATABASE IMPORTS
 ========================================================= */
 
 import {
@@ -88,7 +86,7 @@ const CONNECTION_PATH =
 
 
 /* =========================================================
-   UTILITY
+   BASIC HELPERS
 ========================================================= */
 
 function clean(value) {
@@ -141,42 +139,54 @@ export function getShopFromLine(line) {
         upper(line);
 
 
-    if (value.startsWith("SCR")) {
+    if (
+        value.startsWith("SCR")
+    ) {
 
         return "MR SCR SHOP";
 
     }
 
 
-    if (value.startsWith("N")) {
+    if (
+        value.startsWith("N")
+    ) {
 
         return "N SHOP";
 
     }
 
 
-    if (value.startsWith("M")) {
+    if (
+        value.startsWith("M")
+    ) {
 
         return "M SHOP";
 
     }
 
 
-    if (value.startsWith("F")) {
+    if (
+        value.startsWith("F")
+    ) {
 
         return "CR SHOP";
 
     }
 
 
-    if (value.startsWith("J")) {
+    if (
+        value.startsWith("J")
+    ) {
 
         return "J SHOP";
 
     }
 
 
-    if (value.startsWith("L")) {
+    if (
+        value.startsWith("L")
+    ) {
 
         return "LIFTING BAY";
 
@@ -328,6 +338,11 @@ export async function writeHistory(
     }
     catch (error) {
 
+        /*
+           History failure should NOT
+           break the main operation.
+        */
+
         console.error(
             "HISTORY ERROR:",
             error
@@ -388,7 +403,7 @@ export function listenBoard(
     ) {
 
         console.error(
-            "listenBoard callback required"
+            "listenBoard callback required."
         );
 
         return () => {};
@@ -404,6 +419,7 @@ export function listenBoard(
 
 
     return onValue(
+
         boardRef,
 
         snapshot => {
@@ -706,20 +722,7 @@ export async function updateCoach(
 
 
 /* =========================================================
-   MOVE / SWAP COACH
-   ---------------------------------------------------------
-   IMPORTANT FIX:
-
-   Transaction determines source/target atomically.
-
-   Empty target:
-       MOVE
-
-   Occupied target:
-       SWAP
-
-   Same cell:
-       NO ACTION
+   MOVE / SWAP
 ========================================================= */
 
 export async function updateCoachPosition(
@@ -784,12 +787,6 @@ export async function updateCoachPosition(
     let operation =
         "MOVE";
 
-    let movedCoach =
-        null;
-
-    let swappedCoach =
-        null;
-
 
     const result =
         await runTransaction(
@@ -812,6 +809,10 @@ export async function updateCoachPosition(
                     null;
 
 
+                /*
+                   Source does not exist.
+                */
+
                 if (!sourceCoach) {
 
                     return;
@@ -828,21 +829,13 @@ export async function updateCoachPosition(
                     null;
 
 
-                if (targetCoach) {
-
-                    operation =
-                        "SWAP";
-
-                }
-                else {
-
-                    operation =
-                        "MOVE";
-
-                }
+                operation =
+                    targetCoach
+                        ? "SWAP"
+                        : "MOVE";
 
 
-                movedCoach =
+                const movedCoach =
                     {
 
                         ...sourceCoach,
@@ -870,6 +863,14 @@ export async function updateCoachPosition(
 
                     };
 
+
+                let swappedCoach =
+                    null;
+
+
+                /*
+                   SWAP
+                */
 
                 if (targetCoach) {
 
@@ -906,7 +907,8 @@ export async function updateCoachPosition(
 
                 if (!data[toLine]) {
 
-                    data[toLine] = {};
+                    data[toLine] =
+                        {};
 
                 }
 
@@ -921,7 +923,8 @@ export async function updateCoachPosition(
 
                     if (!data[fromLine]) {
 
-                        data[fromLine] = {};
+                        data[fromLine] =
+                            {};
 
                     }
 
@@ -948,6 +951,10 @@ export async function updateCoachPosition(
 
                 }
 
+
+                /*
+                   Remove empty line.
+                */
 
                 if (
                     data[fromLine] &&
@@ -991,7 +998,8 @@ export async function updateCoachPosition(
             toLine
         ]?.[
             toPosition
-        ];
+        ] ||
+        null;
 
 
     const finalSwapped =
@@ -999,7 +1007,8 @@ export async function updateCoachPosition(
             fromLine
         ]?.[
             fromPosition
-        ];
+        ] ||
+        null;
 
 
     if (finalMoved) {
@@ -1037,7 +1046,7 @@ export async function updateCoachPosition(
             finalMoved,
 
         swappedCoach:
-            finalSwapped || null
+            finalSwapped
 
     };
 
@@ -1157,6 +1166,18 @@ export async function firebaseDeleteCoach(
         clean(position);
 
 
+    if (
+        !line ||
+        !position
+    ) {
+
+        throw new Error(
+            "Line and Position are required."
+        );
+
+    }
+
+
     const coachRef =
         ref(
             database,
@@ -1210,7 +1231,7 @@ export async function firebaseDeleteCoach(
 
 
 /* =========================================================
-   PULL OUT
+   PULL OUT COACH
 ========================================================= */
 
 export async function firebasePullOutCoach(
@@ -1223,6 +1244,18 @@ export async function firebasePullOutCoach(
 
     position =
         clean(position);
+
+
+    if (
+        !line ||
+        !position
+    ) {
+
+        throw new Error(
+            "Line and Position are required."
+        );
+
+    }
 
 
     const boardRef =
@@ -1286,13 +1319,13 @@ export async function firebasePullOutCoach(
 
 
     /*
-       Atomic multi-location update.
-
-       Prevents coach being deleted from board
-       before it is successfully stored.
+       Atomic update:
+       1. Add to pulledOutCoaches
+       2. Remove from board
     */
 
-    const updates = {};
+    const updates =
+        {};
 
 
     updates[
@@ -1383,6 +1416,13 @@ export async function getPulledOutCoaches() {
 
             })
         )
+        .filter(
+            coach =>
+                coach &&
+                clean(
+                    coach.coachNo
+                )
+        )
         .sort(
             (a, b) =>
                 (
@@ -1424,6 +1464,7 @@ export function listenPulledOutCoaches(
 
 
     return onValue(
+
         pulledRef,
 
         snapshot => {
@@ -1454,6 +1495,13 @@ export function listenPulledOutCoaches(
                             ...coach
 
                         })
+                    )
+                    .filter(
+                        coach =>
+                            coach &&
+                            clean(
+                                coach.coachNo
+                            )
                     )
                     .sort(
                         (a, b) =>
@@ -1492,7 +1540,8 @@ export function listenPulledOutCoaches(
 
 
 /* =========================================================
-   RETURN PULLED OUT COACH
+   RETURN PULLED-OUT COACH
+   RETURN TO ANY EMPTY CELL
 ========================================================= */
 
 export async function firebaseReturnCoachToBoard(
@@ -1560,6 +1609,10 @@ export async function firebaseReturnCoachToBoard(
         pulledSnapshot.val();
 
 
+    /*
+       Check target cell.
+    */
+
     const targetRef =
         ref(
             database,
@@ -1583,6 +1636,10 @@ export async function firebaseReturnCoachToBoard(
 
     }
 
+
+    /*
+       Prepare returned coach.
+    */
 
     const returnedCoach =
         {
@@ -1613,6 +1670,10 @@ export async function firebaseReturnCoachToBoard(
         };
 
 
+    /*
+       Remove pulled-out-only fields.
+    */
+
     delete returnedCoach.id;
 
     delete returnedCoach.originalLine;
@@ -1624,7 +1685,12 @@ export async function firebaseReturnCoachToBoard(
     delete returnedCoach.pulledOutBy;
 
 
-    const updates = {};
+    /*
+       Atomic update.
+    */
+
+    const updates =
+        {};
 
 
     updates[
@@ -1663,6 +1729,19 @@ export async function firebaseReturnCoachToBoard(
 export async function returnPulledOutToOriginal(
     id
 ) {
+
+    id =
+        clean(id);
+
+
+    if (!id) {
+
+        throw new Error(
+            "Pulled-out coach ID required."
+        );
+
+    }
+
 
     const pulledRef =
         ref(
@@ -1752,7 +1831,8 @@ export async function searchCoach(
         await getBoard();
 
 
-    const results = [];
+    const results =
+        [];
 
 
     Object.entries(
@@ -1858,7 +1938,8 @@ export async function getAllCoaches() {
         await getBoard();
 
 
-    const result = [];
+    const result =
+        [];
 
 
     Object.entries(
@@ -1949,6 +2030,7 @@ export function listenDatabaseStatus(
 
 
     return onValue(
+
         connectionRef,
 
         snapshot => {
@@ -1995,20 +2077,21 @@ export async function backupBoard() {
         );
 
 
-    const backupData = {
+    const backupData =
+        {
 
-        backupId:
-            backupRef.key,
+            backupId:
+                backupRef.key,
 
-        board,
+            board,
 
-        createdAt:
-            Date.now(),
+            createdAt:
+                Date.now(),
 
-        createdBy:
-            getCurrentUser()
+            createdBy:
+                getCurrentUser()
 
-    };
+        };
 
 
     await set(
@@ -2186,7 +2269,7 @@ export async function restoreBackupById(
 export async function clearBoard() {
 
     /*
-       Automatic backup BEFORE clear.
+       Backup before clear.
     */
 
     const backup =
@@ -2314,7 +2397,15 @@ console.log(
 );
 
 console.log(
-    "firebase-board.js VERSION 9.0 FINAL"
+    "firebase-board.js VERSION 9.1 FINAL"
+);
+
+console.log(
+    "RETURN TO ANY EMPTY CELL ENABLED"
+);
+
+console.log(
+    "PULL OUT / RETURN / MOVE / SWAP READY"
 );
 
 console.log(
