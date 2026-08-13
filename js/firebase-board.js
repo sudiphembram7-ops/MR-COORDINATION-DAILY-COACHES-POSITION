@@ -29,12 +29,20 @@
 ========================================================= */
 
 import {
+    database,
+    auth
+} from "./firebase-config.js";
 
-    listenBoard,
-    getBoard,
-    listenDatabaseStatus
-
-} from "./firebase-board.js";
+import {
+    ref,
+    get,
+    set,
+    update,
+    remove,
+    push,
+    onValue,
+    runTransaction
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
 /* =========================================================
