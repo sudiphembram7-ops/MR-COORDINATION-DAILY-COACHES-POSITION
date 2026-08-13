@@ -1,23 +1,31 @@
- /* =========================================================
-    MR CO-ORDINATION DASHBOARD
-    DASHBOARD.JS
-    VERSION 1.0 FINAL
+/* =========================================================
+   MR CO-ORDINATION DASHBOARD
+   DASHBOARD.JS
+   VERSION 2.0 FINAL
 
-    FEATURES
-    ---------------------------------------------------------
-    FIREBASE REALTIME DATABASE
-    N SHOP TOTAL
-    M SHOP TOTAL
-    MR / SCR TOTAL
-    LIFTING BAY TOTAL
-    J SHOP TOTAL
-    GRAND TOTAL
-    N SHOP COACH NUMBER LIST
-    N SHOP SEARCH
-    REFRESH
-    DATABASE STATUS
-    DUPLICATE SAFE COUNTING
-    MOBILE FRIENDLY
+   MATCHED WITH
+   BOARD.JS VERSION 10.0 FINAL
+
+   FEATURES
+   ---------------------------------------------------------
+   FIREBASE REALTIME
+   N SHOP TOTAL
+   M SHOP TOTAL
+   MR / SCR TOTAL
+   LIFTING BAY TOTAL
+   J SHOP TOTAL
+   GRAND TOTAL
+
+   N SHOP COACH NUMBER LIST
+   N SHOP SEARCH
+
+   PULLED-OUT COACHES NOT INCLUDED
+   EMPTY CELLS NOT INCLUDED
+   DUPLICATE COACH NUMBER PROTECTION
+
+   REALTIME AUTO UPDATE
+   DATABASE STATUS
+   REFRESH
 ========================================================= */
 
 
@@ -36,134 +44,332 @@ import {
 
 
 /* =========================================================
-   GLOBAL DATA
+   GLOBAL VARIABLES
 ========================================================= */
 
-let dashboardData = {};
+let boardData = {};
 
 let nShopCoaches = [];
 
+let allBoardCoaches = [];
+
+let firebaseListenerStarted = false;
+
 
 /* =========================================================
-   DOM HELPER
+   BASIC HELPER
 ========================================================= */
 
-function getElement(id) {
+function $(id) {
 
     return document.getElementById(id);
 
 }
 
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+function clean(value) {
 
-const nShopTotal =
-    getElement("nShopTotal");
+    return String(
+        value ?? ""
+    ).trim();
 
-const mShopTotal =
-    getElement("mShopTotal");
-
-const mrScrTotal =
-    getElement("mrScrTotal");
-
-const liftingBayTotal =
-    getElement("liftingBayTotal");
-
-const jShopTotal =
-    getElement("jShopTotal");
-
-const grandTotal =
-    getElement("grandTotal");
-
-const nShopNewTotal =
-    getElement("nShopNewTotal");
-
-const nShopCoachList =
-    getElement("nShopCoachList");
-
-const databaseStatus =
-    getElement("databaseStatus");
-
-const nShopSearch =
-    getElement("nShopSearch");
-
-const refreshDashboardBtn =
-    getElement("refreshDashboardBtn");
+}
 
 
-/* =========================================================
-   DATABASE STATUS
-========================================================= */
+function upper(value) {
 
-function setDatabaseStatus(
-    text,
-    type = "connecting"
-) {
-
-    if (!databaseStatus) return;
-
-
-    databaseStatus.textContent =
-        text;
-
-
-    if (type === "online") {
-
-        databaseStatus.style.background =
-            "#198754";
-
-        databaseStatus.style.color =
-            "#ffffff";
-
-    }
-
-
-    else if (type === "offline") {
-
-        databaseStatus.style.background =
-            "#dc3545";
-
-        databaseStatus.style.color =
-            "#ffffff";
-
-    }
-
-
-    else {
-
-        databaseStatus.style.background =
-            "#ffc107";
-
-        databaseStatus.style.color =
-            "#000000";
-
-    }
+    return clean(value)
+        .toUpperCase();
 
 }
 
 
 /* =========================================================
-   NORMALIZE SHOP NAME
+   ESCAPE HTML
 ========================================================= */
 
-function normalizeShop(value) {
+function escapeHTML(value) {
+
+    return String(
+        value ?? ""
+    )
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+/* =========================================================
+   GET SHOP FROM LINE
+
+   EXACTLY MATCHED WITH BOARD.JS VERSION 10.0
+========================================================= */
+
+function getShopFromLine(line) {
+
+    line = upper(line);
+
+
+    /* ================================
+       SCR
+    ================================= */
 
     if (
-        value === null ||
-        value === undefined
+        line.startsWith("SCR")
     ) {
+
+        return "MR SCR SHOP";
+
+    }
+
+
+    /* ================================
+       N SHOP
+    ================================= */
+
+    if (
+        line.startsWith("N")
+    ) {
+
+        return "N SHOP";
+
+    }
+
+
+    /* ================================
+       M SHOP
+    ================================= */
+
+    if (
+        line.startsWith("M")
+    ) {
+
+        return "M SHOP";
+
+    }
+
+
+    /* ================================
+       CR SHOP
+    ================================= */
+
+    if (
+        line.startsWith("F") ||
+        line.startsWith("CR")
+    ) {
+
+        return "CR SHOP";
+
+    }
+
+
+    /* ================================
+       J SHOP
+    ================================= */
+
+    if (
+        line.startsWith("J")
+    ) {
+
+        return "J SHOP";
+
+    }
+
+
+    /* ================================
+       LIFTING BAY
+    ================================= */
+
+    if (
+        line.startsWith("L")
+    ) {
+
+        return "LIFTING BAY";
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   GET COACH NUMBER
+
+   MATCHED WITH BOARD.JS
+========================================================= */
+
+function getCoachNumber(coach) {
+
+    if (!coach) {
 
         return "";
 
     }
 
 
-    return String(value)
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, " ");
+    return clean(
+        coach.coachNo
+    );
+
+}
+
+
+/* =========================================================
+   GET COACH SHOP
+
+   PRIORITY:
+
+   1. coach.shop
+   2. line
+========================================================= */
+
+function getCoachShop(
+    coach,
+    line
+) {
+
+    if (!coach) {
+
+        return "";
+
+    }
+
+
+    const directShop =
+        upper(
+            coach.shop
+        );
+
+
+    if (directShop) {
+
+        /*
+           Normalize known shop names
+        */
+
+        if (
+            directShop === "N" ||
+            directShop === "N SHOP" ||
+            directShop === "NSHOP"
+        ) {
+
+            return "N SHOP";
+
+        }
+
+
+        if (
+            directShop === "M" ||
+            directShop === "M SHOP" ||
+            directShop === "MSHOP"
+        ) {
+
+            return "M SHOP";
+
+        }
+
+
+        if (
+            directShop === "SCR" ||
+            directShop === "MR SCR" ||
+            directShop === "MR SCR SHOP" ||
+            directShop === "MR/SCR" ||
+            directShop === "MR / SCR"
+        ) {
+
+            return "MR SCR SHOP";
+
+        }
+
+
+        if (
+            directShop === "J" ||
+            directShop === "J SHOP" ||
+            directShop === "JSHOP"
+        ) {
+
+            return "J SHOP";
+
+        }
+
+
+        if (
+            directShop === "L" ||
+            directShop === "LIFTING" ||
+            directShop === "LIFTING BAY" ||
+            directShop === "LIFTINGBAY"
+        ) {
+
+            return "LIFTING BAY";
+
+        }
+
+
+        /*
+           If shop already contains
+           known keyword
+        */
+
+        if (
+            directShop.includes("N SHOP")
+        ) {
+
+            return "N SHOP";
+
+        }
+
+
+        if (
+            directShop.includes("M SHOP")
+        ) {
+
+            return "M SHOP";
+
+        }
+
+
+        if (
+            directShop.includes("SCR")
+        )
+        {
+
+            return "MR SCR SHOP";
+
+        }
+
+
+        if (
+            directShop.includes("LIFTING")
+        ) {
+
+            return "LIFTING BAY";
+
+        }
+
+
+        if (
+            directShop.includes("J SHOP")
+        ) {
+
+            return "J SHOP";
+
+        }
+
+    }
+
+
+    /*
+       Fallback to line
+    */
+
+    return getShopFromLine(
+        line
+    );
 
 }
 
@@ -174,20 +380,9 @@ function normalizeShop(value) {
 
 function isNShop(shop) {
 
-    const value =
-        normalizeShop(shop);
-
-
     return (
-
-        value === "N" ||
-
-        value === "N SHOP" ||
-
-        value === "NSHOP" ||
-
-        value.includes("N SHOP")
-
+        upper(shop) ===
+        "N SHOP"
     );
 
 }
@@ -199,20 +394,9 @@ function isNShop(shop) {
 
 function isMShop(shop) {
 
-    const value =
-        normalizeShop(shop);
-
-
     return (
-
-        value === "M" ||
-
-        value === "M SHOP" ||
-
-        value === "MSHOP" ||
-
-        value.includes("M SHOP")
-
+        upper(shop) ===
+        "M SHOP"
     );
 
 }
@@ -222,25 +406,48 @@ function isMShop(shop) {
    CHECK MR / SCR
 ========================================================= */
 
-function isMrScr(shop) {
+function isMrScrShop(shop) {
 
     const value =
-        normalizeShop(shop);
+        upper(shop);
 
 
     return (
 
-        value === "MR" ||
+        value ===
+        "MR SCR SHOP"
 
-        value === "SCR" ||
+        ||
 
-        value === "MR/SCR" ||
+        value ===
+        "MR/SCR"
 
-        value === "MR / SCR" ||
+        ||
 
-        value.includes("MR") ||
+        value ===
+        "MR / SCR"
 
-        value.includes("SCR")
+        ||
+
+        value ===
+        "MR SCR"
+
+        ||
+
+        value ===
+        "SCR"
+
+        ||
+
+        value.includes(
+            "MR SCR"
+        )
+
+        ||
+
+        value.includes(
+            "MR/SCR"
+        )
 
     );
 
@@ -253,20 +460,9 @@ function isMrScr(shop) {
 
 function isLiftingBay(shop) {
 
-    const value =
-        normalizeShop(shop);
-
-
     return (
-
-        value === "LIFTING BAY" ||
-
-        value === "LIFTING" ||
-
-        value === "LIFTINGBAY" ||
-
-        value.includes("LIFTING")
-
+        upper(shop) ===
+        "LIFTING BAY"
     );
 
 }
@@ -278,310 +474,192 @@ function isLiftingBay(shop) {
 
 function isJShop(shop) {
 
-    const value =
-        normalizeShop(shop);
-
-
     return (
-
-        value === "J" ||
-
-        value === "J SHOP" ||
-
-        value === "JSHOP" ||
-
-        value.includes("J SHOP")
-
+        upper(shop) ===
+        "J SHOP"
     );
 
 }
 
 
 /* =========================================================
-   GET COACH NUMBER
+   READ BOARD DATA
+
+   EXACT STRUCTURE:
+
+   coachBoard
+      line
+         position
+            coach
 ========================================================= */
 
-function getCoachNumber(coach) {
+function readBoardCoaches(
+    data
+) {
 
-    if (!coach) return "";
-
-
-    const possibleFields = [
-
-        "coachNo",
-        "coachNumber",
-        "coach",
-        "number",
-        "coach_number"
-
-    ];
+    const coaches = [];
 
 
-    for (
-        const field of possibleFields
+    if (
+        !data ||
+        typeof data !== "object"
     ) {
 
-        if (
-            coach[field] !==
-            undefined &&
-            coach[field] !== null &&
-            String(coach[field]).trim() !== ""
-        ) {
-
-            return String(
-                coach[field]
-            ).trim();
-
-        }
+        return coaches;
 
     }
 
 
-    return "";
+    Object.entries(
+        data
+    ).forEach(
+        (
+            [
+                line,
+                lineData
+            ]
+        ) => {
 
-}
+            if (
+                !lineData ||
+                typeof lineData !==
+                "object"
+            ) {
 
+                return;
 
-/* =========================================================
-   GET SHOP / LINE
-========================================================= */
-
-function getShop(coach) {
-
-    if (!coach) return "";
-
-
-    const possibleFields = [
-
-        "shop",
-        "line",
-        "section"
-
-    ];
+            }
 
 
-    for (
-        const field of possibleFields
-    ) {
+            Object.entries(
+                lineData
+            ).forEach(
+                (
+                    [
+                        position,
+                        coach
+                    ]
+                ) => {
 
-        if (
-            coach[field] !==
-            undefined &&
-            coach[field] !== null
-        ) {
+                    if (
+                        !coach ||
+                        typeof coach !==
+                        "object"
+                    ) {
 
-            return String(
-                coach[field]
-            ).trim();
+                        return;
 
-        }
-
-    }
-
-
-    return "";
-
-}
+                    }
 
 
-/* =========================================================
-   FLATTEN FIREBASE DATA
-========================================================= */
+                    /*
+                       IMPORTANT:
 
-function flattenBoardData(data) {
+                       Empty cell has no coachNo.
+                    */
 
-    const result = [];
-
-
-    if (!data) {
-
-        return result;
-
-    }
+                    const coachNo =
+                        getCoachNumber(
+                            coach
+                        );
 
 
-    /*
-       Expected structure:
+                    if (!coachNo) {
 
-       coachBoard
-          N
-             1
-                coachNo: "03125"
-             2
-                coachNo: "04108"
+                        return;
 
-       OR
-
-       coachBoard
-          N
-             position
-                coachNo
-    */
+                    }
 
 
-    Object.entries(data)
-        .forEach(
-            ([lineKey, lineData]) => {
+                    const shop =
+                        getCoachShop(
+                            coach,
+                            line
+                        );
 
-                if (!lineData) return;
 
+                    coaches.push({
 
-                /*
-                   If line itself contains
-                   coach fields.
-                */
+                        line:
+                            clean(line),
 
-                if (
-                    typeof lineData ===
-                    "object" &&
+                        position:
+                            clean(position),
 
-                    (
-                        lineData.coachNo ||
-                        lineData.coachNumber ||
-                        lineData.coach
-                    )
-                ) {
+                        coachNo:
+                            coachNo,
 
-                    result.push({
+                        coachType:
+                            clean(
+                                coach.coachType
+                            ),
 
-                        key:
-                            lineKey,
-
-                        data:
-                            lineData,
+                        status:
+                            upper(
+                                coach.status
+                            ),
 
                         shop:
-                            getShop(
-                                {
-                                    ...lineData,
-                                    line:
-                                        lineData.line ||
-                                        lineKey
-                                }
-                            )
+                            shop,
+
+                        raw:
+                            coach
 
                     });
 
-                    return;
-
                 }
+            );
+
+        }
+    );
 
 
-                /*
-                   Normal nested structure
-                */
-
-                Object.entries(
-                    lineData
-                ).forEach(
-                    ([positionKey, coach]) => {
-
-                        if (!coach) return;
-
-
-                        if (
-                            typeof coach !==
-                            "object"
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        /*
-                           Ignore empty cells
-                        */
-
-                        const coachNo =
-                            getCoachNumber(
-                                coach
-                            );
-
-
-                        if (
-                            !coachNo
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        result.push({
-
-                            key:
-                                lineKey +
-                                "/" +
-                                positionKey,
-
-                            data:
-                                coach,
-
-                            shop:
-                                getShop(
-                                    {
-                                        ...coach,
-
-                                        line:
-                                            coach.line ||
-                                            coach.shop ||
-                                            lineKey
-                                    }
-                                )
-
-                        });
-
-                    }
-                );
-
-            }
-        );
-
-
-    return result;
+    return coaches;
 
 }
 
 
 /* =========================================================
-   REMOVE DUPLICATES
+   REMOVE DUPLICATE COACH NUMBERS
+
+   A coach should not be counted twice.
 ========================================================= */
 
-function uniqueCoaches(list) {
+function removeDuplicateCoaches(
+    coaches
+) {
 
     const map =
         new Map();
 
 
-    list.forEach(
-        item => {
+    coaches.forEach(
+        coach => {
 
-            const coachNo =
-                getCoachNumber(
-                    item.data
+            const number =
+                upper(
+                    coach.coachNo
                 );
 
 
-            if (!coachNo) return;
+            if (!number) {
 
+                return;
 
-            const key =
-                coachNo.toUpperCase();
+            }
 
 
             /*
-               Keep first occurrence
-               if same coach exists twice.
+               First occurrence only
             */
 
             if (
-                !map.has(key)
+                !map.has(number)
             ) {
 
                 map.set(
-                    key,
-                    item
+                    number,
+                    coach
                 );
 
             }
@@ -598,37 +676,68 @@ function uniqueCoaches(list) {
 
 
 /* =========================================================
-   UPDATE SHOP TOTALS
+   UPDATE ALL DASHBOARD COUNTERS
 ========================================================= */
 
-function updateShopTotals(coaches) {
+function updateDashboard(
+    data
+) {
 
-    let nCount = 0;
-
-    let mCount = 0;
-
-    let mrScrCount = 0;
-
-    let liftingCount = 0;
-
-    let jCount = 0;
+    boardData =
+        data || {};
 
 
     /*
-       Count each coach once
+       Read ONLY boardData.
+
+       Pulled-out data is NOT used.
     */
 
-    const unique =
-        uniqueCoaches(
+    let coaches =
+        readBoardCoaches(
+            boardData
+        );
+
+
+    /*
+       Remove duplicates
+    */
+
+    coaches =
+        removeDuplicateCoaches(
             coaches
         );
 
 
-    unique.forEach(
-        item => {
+    allBoardCoaches =
+        coaches;
+
+
+    /* =====================================================
+       COUNTERS
+    ===================================================== */
+
+    let nCount =
+        0;
+
+    let mCount =
+        0;
+
+    let mrScrCount =
+        0;
+
+    let liftingCount =
+        0;
+
+    let jCount =
+        0;
+
+
+    coaches.forEach(
+        coach => {
 
             const shop =
-                item.shop;
+                coach.shop;
 
 
             if (
@@ -650,7 +759,7 @@ function updateShopTotals(coaches) {
 
 
             else if (
-                isMrScr(shop)
+                isMrScrShop(shop)
             ) {
 
                 mrScrCount++;
@@ -679,6 +788,12 @@ function updateShopTotals(coaches) {
     );
 
 
+    /*
+       GRAND TOTAL
+
+       Only requested 5 areas.
+    */
+
     const total =
 
         nCount +
@@ -688,135 +803,164 @@ function updateShopTotals(coaches) {
         jCount;
 
 
-    if (nShopTotal) {
+    /* =====================================================
+       DISPLAY
+    ===================================================== */
 
-        nShopTotal.textContent =
-            nCount;
-
-    }
-
-
-    if (mShopTotal) {
-
-        mShopTotal.textContent =
-            mCount;
-
-    }
+    setText(
+        "nShopTotal",
+        nCount
+    );
 
 
-    if (mrScrTotal) {
-
-        mrScrTotal.textContent =
-            mrScrCount;
-
-    }
+    setText(
+        "mShopTotal",
+        mCount
+    );
 
 
-    if (liftingBayTotal) {
-
-        liftingBayTotal.textContent =
-            liftingCount;
-
-    }
+    setText(
+        "mrScrTotal",
+        mrScrCount
+    );
 
 
-    if (jShopTotal) {
-
-        jShopTotal.textContent =
-            jCount;
-
-    }
+    setText(
+        "liftingBayTotal",
+        liftingCount
+    );
 
 
-    if (grandTotal) {
+    setText(
+        "jShopTotal",
+        jCount
+    );
 
-        grandTotal.textContent =
-            total;
 
-    }
+    setText(
+        "grandTotal",
+        total
+    );
+
+
+    /*
+       N SHOP COACH LIST
+    */
+
+    updateNShopList(
+        coaches
+    );
+
+
+    /*
+       Last update
+    */
+
+    updateLastUpdate();
+
+
+    console.log(
+        "DASHBOARD UPDATED:",
+        {
+            N_SHOP:
+                nCount,
+
+            M_SHOP:
+                mCount,
+
+            MR_SCR:
+                mrScrCount,
+
+            LIFTING_BAY:
+                liftingCount,
+
+            J_SHOP:
+                jCount,
+
+            GRAND_TOTAL:
+                total
+        }
+    );
 
 }
 
 
 /* =========================================================
-   GET N SHOP COACHES
+   SET TEXT
 ========================================================= */
 
-function updateNShopCoaches(coaches) {
+function setText(
+    id,
+    value
+) {
 
-    const unique =
-        uniqueCoaches(
-            coaches
-        );
-
-
-    nShopCoaches =
-        unique
-            .filter(
-                item =>
-                    isNShop(
-                        item.shop
-                    )
-            )
-            .map(
-                item =>
-                    getCoachNumber(
-                        item.data
-                    )
-            )
-            .filter(
-                value =>
-                    value !== ""
-            );
+    const element =
+        $(id);
 
 
-    /*
-       Sort numerically where possible
-    */
+    if (!element) {
 
-    nShopCoaches.sort(
-        (a, b) => {
-
-            const na =
-                parseInt(
-                    a.replace(/\D/g, ""),
-                    10
-                );
-
-            const nb =
-                parseInt(
-                    b.replace(/\D/g, ""),
-                    10
-                );
-
-
-            if (
-                !isNaN(na) &&
-                !isNaN(nb)
-            ) {
-
-                return na - nb;
-
-            }
-
-
-            return a.localeCompare(
-                b
-            );
-
-        }
-    );
-
-
-    if (nShopNewTotal) {
-
-        nShopNewTotal.textContent =
-            nShopCoaches.length;
+        return;
 
     }
 
 
-    renderNShopCoaches(
+    element.textContent =
+        String(
+            value
+        );
+
+}
+
+
+/* =========================================================
+   UPDATE N SHOP LIST
+========================================================= */
+
+function updateNShopList(
+    coaches
+) {
+
+    nShopCoaches =
+        coaches
+            .filter(
+                coach =>
+                    isNShop(
+                        coach.shop
+                    )
+            )
+            .map(
+                coach =>
+                    coach.coachNo
+            )
+            .filter(
+                number =>
+                    clean(number)
+            );
+
+
+    /*
+       Sort Coach Numbers
+
+       Example:
+       03125
+       04108
+       06112
+       07135
+    */
+
+    nShopCoaches.sort(
+        compareCoachNumbers
+    );
+
+
+    setText(
+        "nShopNewTotal",
+        nShopCoaches.length
+    );
+
+
+    renderNShopList(
         nShopCoaches
     );
 
@@ -824,17 +968,78 @@ function updateNShopCoaches(coaches) {
 
 
 /* =========================================================
-   RENDER N SHOP COACH LIST
+   COACH NUMBER SORT
 ========================================================= */
 
-function renderNShopCoaches(
+function compareCoachNumbers(
+    a,
+    b
+) {
+
+    const aNumber =
+        parseInt(
+            String(a)
+                .replace(
+                    /\D/g,
+                    ""
+                ),
+            10
+        );
+
+
+    const bNumber =
+        parseInt(
+            String(b)
+                .replace(
+                    /\D/g,
+                    ""
+                ),
+            10
+        );
+
+
+    if (
+        !Number.isNaN(aNumber) &&
+        !Number.isNaN(bNumber)
+    ) {
+
+        return (
+            aNumber -
+            bNumber
+        );
+
+    }
+
+
+    return String(a)
+        .localeCompare(
+            String(b)
+        );
+
+}
+
+
+/* =========================================================
+   RENDER N SHOP LIST
+========================================================= */
+
+function renderNShopList(
     list
 ) {
 
-    if (!nShopCoachList) return;
+    const container =
+        $("nShopCoachList");
 
 
-    nShopCoachList.innerHTML = "";
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        "";
 
 
     if (
@@ -856,7 +1061,7 @@ function renderNShopCoaches(
             "No N Shop Coach Found";
 
 
-        nShopCoachList.appendChild(
+        container.appendChild(
             empty
         );
 
@@ -883,7 +1088,7 @@ function renderNShopCoaches(
                 coachNo;
 
 
-            nShopCoachList.appendChild(
+            container.appendChild(
                 item
             );
 
@@ -897,21 +1102,36 @@ function renderNShopCoaches(
    N SHOP SEARCH
 ========================================================= */
 
-if (nShopSearch) {
+function initializeNShopSearch() {
 
-    nShopSearch.addEventListener(
+    const searchBox =
+        $("nShopSearch");
+
+
+    if (!searchBox) {
+
+        console.warn(
+            "nShopSearch not found."
+        );
+
+        return;
+
+    }
+
+
+    searchBox.addEventListener(
         "input",
-        function () {
+        () => {
 
-            const search =
-                this.value
-                    .trim()
-                    .toUpperCase();
+            const keyword =
+                upper(
+                    searchBox.value
+                );
 
 
-            if (!search) {
+            if (!keyword) {
 
-                renderNShopCoaches(
+                renderNShopList(
                     nShopCoaches
                 );
 
@@ -923,15 +1143,15 @@ if (nShopSearch) {
             const filtered =
                 nShopCoaches.filter(
                     coachNo =>
-                        coachNo
-                            .toUpperCase()
-                            .includes(
-                                search
-                            )
+                        upper(
+                            coachNo
+                        ).includes(
+                            keyword
+                        )
                 );
 
 
-            renderNShopCoaches(
+            renderNShopList(
                 filtered
             );
 
@@ -942,37 +1162,66 @@ if (nShopSearch) {
 
 
 /* =========================================================
-   LOAD DASHBOARD
+   DATABASE STATUS
 ========================================================= */
 
-function processDashboardData(
-    data
+function setDatabaseStatus(
+    text,
+    type
 ) {
 
-    dashboardData =
-        data || {};
+    const element =
+        $("databaseStatus");
 
 
-    const coaches =
-        flattenBoardData(
-            dashboardData
-        );
+    if (!element) {
+
+        return;
+
+    }
 
 
-    updateShopTotals(
-        coaches
-    );
+    element.textContent =
+        text;
 
 
-    updateNShopCoaches(
-        coaches
-    );
+    if (
+        type ===
+        "online"
+    ) {
+
+        element.style.background =
+            "#198754";
+
+        element.style.color =
+            "#ffffff";
+
+    }
 
 
-    console.log(
-        "DASHBOARD DATA:",
-        coaches
-    );
+    else if (
+        type ===
+        "offline"
+    ) {
+
+        element.style.background =
+            "#dc3545";
+
+        element.style.color =
+            "#ffffff";
+
+    }
+
+
+    else {
+
+        element.style.background =
+            "#ffc107";
+
+        element.style.color =
+            "#000000";
+
+    }
 
 }
 
@@ -982,6 +1231,19 @@ function processDashboardData(
 ========================================================= */
 
 function startDashboardListener() {
+
+    if (
+        firebaseListenerStarted
+    ) {
+
+        return;
+
+    }
+
+
+    firebaseListenerStarted =
+        true;
+
 
     setDatabaseStatus(
         "Connecting...",
@@ -999,6 +1261,7 @@ function startDashboardListener() {
 
 
         onValue(
+
             boardRef,
 
             snapshot => {
@@ -1007,7 +1270,7 @@ function startDashboardListener() {
                     snapshot.val();
 
 
-                processDashboardData(
+                updateDashboard(
                     data
                 );
 
@@ -1019,7 +1282,7 @@ function startDashboardListener() {
 
 
                 console.log(
-                    "Firebase Dashboard Updated"
+                    "Dashboard Firebase realtime update received."
                 );
 
             },
@@ -1027,7 +1290,7 @@ function startDashboardListener() {
             error => {
 
                 console.error(
-                    "Firebase Dashboard Error:",
+                    "DASHBOARD FIREBASE ERROR:",
                     error
                 );
 
@@ -1038,6 +1301,7 @@ function startDashboardListener() {
                 );
 
             }
+
         );
 
     }
@@ -1045,7 +1309,7 @@ function startDashboardListener() {
     catch (error) {
 
         console.error(
-            "Dashboard Firebase Error:",
+            "DASHBOARD LISTENER ERROR:",
             error
         );
 
@@ -1061,46 +1325,144 @@ function startDashboardListener() {
 
 
 /* =========================================================
+   MANUAL REFRESH
+========================================================= */
+
+function refreshDashboard() {
+
+    /*
+       Re-render current Firebase data.
+    */
+
+    updateDashboard(
+        boardData
+    );
+
+
+    /*
+       Clear N Shop search
+    */
+
+    const searchBox =
+        $("nShopSearch");
+
+
+    if (searchBox) {
+
+        searchBox.value =
+            "";
+
+    }
+
+
+    renderNShopList(
+        nShopCoaches
+    );
+
+
+    showDashboardMessage(
+        "Dashboard refreshed.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
    REFRESH BUTTON
 ========================================================= */
 
-if (refreshDashboardBtn) {
+function initializeRefreshButton() {
 
-    refreshDashboardBtn.addEventListener(
+    const button =
+        $("refreshDashboardBtn");
+
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    button.addEventListener(
         "click",
-        () => {
+        event => {
 
-            /*
-               Re-render current data
-               without waiting for Firebase.
-            */
-
-            processDashboardData(
-                dashboardData
-            );
+            event.preventDefault();
 
 
-            /*
-               Clear search
-            */
-
-            if (nShopSearch) {
-
-                nShopSearch.value = "";
-
-            }
-
-
-            renderNShopCoaches(
-                nShopCoaches
-            );
-
-
-            console.log(
-                "DASHBOARD REFRESHED"
-            );
+            refreshDashboard();
 
         }
+    );
+
+}
+
+
+/* =========================================================
+   LAST UPDATE
+========================================================= */
+
+function updateLastUpdate() {
+
+    const element =
+        $("dashboardLastUpdate");
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    const now =
+        new Date();
+
+
+    const time =
+        now.toLocaleTimeString(
+            "en-IN",
+            {
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit",
+
+                hour12:
+                    true
+            }
+        );
+
+
+    element.textContent =
+        `Last Update: ${time}`;
+
+}
+
+
+/* =========================================================
+   DASHBOARD MESSAGE
+========================================================= */
+
+function showDashboardMessage(
+    message,
+    type = "info"
+) {
+
+    /*
+       If Bootstrap alert container
+       is not required, simply log.
+    */
+
+    console.log(
+        `DASHBOARD ${type.toUpperCase()}:`,
+        message
     );
 
 }
@@ -1113,29 +1475,106 @@ if (refreshDashboardBtn) {
 function initDashboard() {
 
     console.log(
-        "===================================="
+        "=========================================="
     );
+
 
     console.log(
         "MR CO-ORDINATION DASHBOARD"
     );
 
-    console.log(
-        "DASHBOARD.JS VERSION 1.0"
-    );
 
     console.log(
-        "===================================="
+        "DASHBOARD.JS VERSION 2.0 FINAL"
     );
 
+
+    console.log(
+        "MATCHED WITH BOARD.JS VERSION 10.0"
+    );
+
+
+    console.log(
+        "=========================================="
+    );
+
+
+    /*
+       Initial values
+    */
+
+    setText(
+        "nShopTotal",
+        0
+    );
+
+
+    setText(
+        "mShopTotal",
+        0
+    );
+
+
+    setText(
+        "mrScrTotal",
+        0
+    );
+
+
+    setText(
+        "liftingBayTotal",
+        0
+    );
+
+
+    setText(
+        "jShopTotal",
+        0
+    );
+
+
+    setText(
+        "grandTotal",
+        0
+    );
+
+
+    setText(
+        "nShopNewTotal",
+        0
+    );
+
+
+    /*
+       Initialize search
+    */
+
+    initializeNShopSearch();
+
+
+    /*
+       Initialize refresh
+    */
+
+    initializeRefreshButton();
+
+
+    /*
+       Start Firebase
+    */
 
     startDashboardListener();
+
+
+    console.log(
+        "Dashboard initialization complete."
+    );
 
 }
 
 
 /* =========================================================
-   START
+   DOM READY
 ========================================================= */
 
 if (
@@ -1155,3 +1594,20 @@ else {
     initDashboard();
 
 }
+
+
+/* =========================================================
+   GLOBAL ACCESS
+========================================================= */
+
+window.refreshDashboard =
+    refreshDashboard;
+
+
+/* =========================================================
+   READY
+========================================================= */
+
+console.log(
+    "MR CO-ORDINATION DASHBOARD JS READY"
+);
