@@ -2,18 +2,21 @@
    firebase-config.js
    MR CO-ORDINATION
    FIREBASE CONFIGURATION
-   GitHub Pages + iPhone/Safari
+   VERSION 11.1
+   GITHUB PAGES + IPHONE / SAFARI
 ========================================== */
+
 
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 
+
 import {
     getDatabase,
-    forceLongPolling,
     goOnline
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
 
 import {
     getAuth
@@ -26,7 +29,8 @@ import {
 
 const firebaseConfig = {
 
-    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
+    apiKey:
+        "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
 
     authDomain:
         "mr-coordi-coach.firebaseapp.com",
@@ -48,23 +52,18 @@ const firebaseConfig = {
 
     measurementId:
         "G-P6YEBEEWM3"
+
 };
 
 
 /* ==========================================
-   INITIALIZE FIREBASE
+   INITIALIZE APP
 ========================================== */
 
 const app =
-    initializeApp(firebaseConfig);
-
-
-/* ==========================================
-   IMPORTANT
-   iPhone / Safari / GitHub Pages
-========================================== */
-
-forceLongPolling();
+    initializeApp(
+        firebaseConfig
+    );
 
 
 /* ==========================================
@@ -73,24 +72,27 @@ forceLongPolling();
 
 const database =
     getDatabase(
-        app,
-        firebaseConfig.databaseURL
+        app
     );
 
 
 /* ==========================================
-   FORCE DATABASE ONLINE
+   FORCE ONLINE
 ========================================== */
 
-goOnline(database);
+goOnline(
+    database
+);
 
 
 /* ==========================================
-   FIREBASE AUTH
+   AUTH
 ========================================== */
 
 const auth =
-    getAuth(app);
+    getAuth(
+        app
+    );
 
 
 /* ==========================================
@@ -102,8 +104,10 @@ export {
     auth
 };
 
+
 export const FIREBASE_DATABASE_URL =
     firebaseConfig.databaseURL;
+
 
 export default app;
 
@@ -131,11 +135,7 @@ console.log(
 );
 
 console.log(
-    "Realtime Database: ONLINE"
-);
-
-console.log(
-    "Long Polling: ENABLED"
+    "Realtime Database: INITIALIZED"
 );
 
 console.log(
