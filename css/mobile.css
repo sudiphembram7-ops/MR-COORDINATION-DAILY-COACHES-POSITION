@@ -1,100 +1,179 @@
 /* =========================================================
-   FINAL MOBILE BOARD CELL FIX
-   ALL CELLS SAME SIZE
+   MR CO-ORDINATION BOARD
+   MOBILE CELL EQUAL WIDTH FIX
+   VERSION 10.0
+   IMPORTANT:
+   HTML TABLE CLASS = coach-table
 ========================================================= */
 
-.board-wrapper table,
-.table-responsive table,
-#boardContainer table,
-.board-table,
-#coachBoard {
 
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-    width: max-content !important;
+/* =========================================================
+   ALL SHOP TABLE WRAPPER
+========================================================= */
+
+.table-responsive {
+
+    width: 100% !important;
+
+    max-width: 100% !important;
+
+    overflow-x: auto !important;
+
+    overflow-y: hidden !important;
+
+    -webkit-overflow-scrolling: touch !important;
+
 }
 
 
 /* =========================================================
-   ALL BOARD CELLS
+   ALL BOARD TABLES
 ========================================================= */
 
-.board-table th:not(:first-child),
-.board-table td:not(:first-child),
-#coachBoard th:not(:first-child),
-#coachBoard td:not(:first-child) {
+.coach-table {
 
-    width: 72px !important;
-    min-width: 72px !important;
-    max-width: 72px !important;
+    width: max-content !important;
 
-    height: 82px !important;
+    min-width: max-content !important;
 
-    padding: 4px !important;
+    table-layout: fixed !important;
+
+    border-collapse: collapse !important;
+
+    margin: 0 !important;
+
+}
+
+
+/* =========================================================
+   ALL CELLS EXACT SAME WIDTH
+========================================================= */
+
+.coach-table th,
+.coach-table td {
+
+    width: 82px !important;
+
+    min-width: 82px !important;
+
+    max-width: 82px !important;
 
     box-sizing: border-box !important;
 
+    padding: 4px !important;
+
     text-align: center !important;
+
     vertical-align: middle !important;
 
-    overflow: hidden !important;
 }
 
 
 /* =========================================================
-   FIRST POSITION COLUMN
+   HEADER
 ========================================================= */
 
-.board-table th:first-child,
-.board-table td:first-child,
-#coachBoard th:first-child,
-#coachBoard td:first-child {
+.coach-table thead th {
 
     width: 82px !important;
+
     min-width: 82px !important;
+
+    max-width: 82px !important;
+
+    height: 48px !important;
+
+    padding: 4px 2px !important;
+
+    font-size: 14px !important;
+
+    font-weight: 800 !important;
+
+    line-height: 1.1 !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+}
+
+
+/* =========================================================
+   POSITION COLUMN ALSO SAME WIDTH
+========================================================= */
+
+.coach-table th:first-child,
+.coach-table td:first-child {
+
+    width: 82px !important;
+
+    min-width: 82px !important;
+
+    max-width: 82px !important;
+
+}
+
+
+/* =========================================================
+   BODY CELLS
+========================================================= */
+
+.coach-table tbody td,
+.coach-table tbody th {
+
+    width: 82px !important;
+
+    min-width: 82px !important;
+
     max-width: 82px !important;
 
     height: 82px !important;
 
-    padding: 4px !important;
-
-    box-sizing: border-box !important;
+    padding: 3px !important;
 
     text-align: center !important;
+
     vertical-align: middle !important;
 
     overflow: hidden !important;
+
 }
 
 
 /* =========================================================
-   COACH CARD MUST FIT CELL
+   COACH CARD
 ========================================================= */
 
-.board-table td .coach-card,
-#coachBoard td .coach-card {
+.coach-table .coach-card {
 
     width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
 
-    height: 100% !important;
-    min-height: 0 !important;
+    min-width: 74px !important;
 
-    margin: 0 !important;
+    max-width: 74px !important;
 
-    padding: 4px 2px !important;
+    min-height: 72px !important;
 
-    box-sizing: border-box !important;
+    height: 72px !important;
+
+    margin: 0 auto !important;
+
+    padding: 3px 1px !important;
 
     display: flex !important;
 
     flex-direction: column !important;
 
     justify-content: center !important;
+
     align-items: center !important;
 
+    text-align: center !important;
+
+    box-sizing: border-box !important;
+
     overflow: hidden !important;
+
 }
 
 
@@ -102,26 +181,30 @@
    COACH NUMBER
 ========================================================= */
 
-.board-table .coach-number,
-#coachBoard .coach-number {
+.coach-table .coach-number {
+
+    display: block !important;
 
     width: 100% !important;
 
-    font-size: 16px !important;
+    max-width: 100% !important;
 
-    line-height: 1.1 !important;
+    font-size: 15px !important;
 
     font-weight: 900 !important;
+
+    line-height: 1.15 !important;
 
     text-align: center !important;
 
     white-space: nowrap !important;
 
-    overflow: hidden !important;
+    overflow: visible !important;
 
     text-overflow: clip !important;
 
-    margin: 0 !important;
+    word-break: normal !important;
+
 }
 
 
@@ -129,8 +212,9 @@
    COACH TYPE
 ========================================================= */
 
-.board-table .coach-type,
-#coachBoard .coach-type {
+.coach-table .coach-type {
+
+    display: block !important;
 
     width: 100% !important;
 
@@ -138,7 +222,7 @@
 
     line-height: 1.1 !important;
 
-    text-align: center !important;
+    font-weight: 700 !important;
 
     white-space: nowrap !important;
 
@@ -146,16 +230,16 @@
 
     text-overflow: ellipsis !important;
 
-    margin: 2px 0 0 0 !important;
 }
 
 
 /* =========================================================
-   STATUS
+   COACH STATUS
 ========================================================= */
 
-.board-table .coach-status,
-#coachBoard .coach-status {
+.coach-table .coach-status {
+
+    display: block !important;
 
     width: 100% !important;
 
@@ -165,15 +249,23 @@
 
     font-weight: 800 !important;
 
-    text-align: center !important;
-
     white-space: nowrap !important;
 
     overflow: hidden !important;
 
     text-overflow: ellipsis !important;
 
-    margin: 2px 0 0 0 !important;
+}
+
+
+/* =========================================================
+   EMPTY CELL
+========================================================= */
+
+.coach-table td:has(.coach-card:empty) {
+
+    height: 82px !important;
+
 }
 
 
@@ -183,63 +275,170 @@
 
 @media (max-width: 576px) {
 
-    .board-table th:not(:first-child),
-    .board-table td:not(:first-child),
-    #coachBoard th:not(:first-child),
-    #coachBoard td:not(:first-child) {
+    .coach-table {
 
-        width: 72px !important;
-        min-width: 72px !important;
-        max-width: 72px !important;
+        width: max-content !important;
 
-        height: 78px !important;
+        min-width: max-content !important;
+
+        table-layout: fixed !important;
+
     }
 
 
-    .board-table th:first-child,
-    .board-table td:first-child,
-    #coachBoard th:first-child,
-    #coachBoard td:first-child {
+    .coach-table th,
+    .coach-table td {
 
         width: 78px !important;
+
         min-width: 78px !important;
+
+        max-width: 78px !important;
+
+    }
+
+
+    .coach-table thead th {
+
+        width: 78px !important;
+
+        min-width: 78px !important;
+
+        max-width: 78px !important;
+
+        height: 46px !important;
+
+        font-size: 13px !important;
+
+        padding: 3px 1px !important;
+
+    }
+
+
+    .coach-table tbody td,
+    .coach-table tbody th {
+
+        width: 78px !important;
+
+        min-width: 78px !important;
+
         max-width: 78px !important;
 
         height: 78px !important;
+
+    }
+
+
+    .coach-table .coach-card {
+
+        width: 72px !important;
+
+        min-width: 72px !important;
+
+        max-width: 72px !important;
+
+        height: 70px !important;
+
+        min-height: 70px !important;
+
+    }
+
+
+    .coach-table .coach-number {
+
+        font-size: 14px !important;
+
+        font-weight: 900 !important;
+
+        line-height: 1.1 !important;
+
+        white-space: nowrap !important;
+
+        overflow: visible !important;
+
+    }
+
+
+    .coach-table .coach-type {
+
+        font-size: 8px !important;
+
+    }
+
+
+    .coach-table .coach-status {
+
+        font-size: 8px !important;
+
     }
 
 }
 
 
 /* =========================================================
-   VERY SMALL MOBILE
+   VERY SMALL PHONE
 ========================================================= */
 
 @media (max-width: 400px) {
 
-    .board-table th:not(:first-child),
-    .board-table td:not(:first-child),
-    #coachBoard th:not(:first-child),
-    #coachBoard td:not(:first-child) {
+    .coach-table th,
+    .coach-table td {
 
-        width: 68px !important;
-        min-width: 68px !important;
-        max-width: 68px !important;
+        width: 74px !important;
 
-        height: 72px !important;
+        min-width: 74px !important;
+
+        max-width: 74px !important;
+
     }
 
 
-    .board-table th:first-child,
-    .board-table td:first-child,
-    #coachBoard th:first-child,
-    #coachBoard td:first-child {
+    .coach-table thead th {
+
+        width: 74px !important;
+
+        min-width: 74px !important;
+
+        max-width: 74px !important;
+
+        font-size: 12px !important;
+
+    }
+
+
+    .coach-table tbody td,
+    .coach-table tbody th {
+
+        width: 74px !important;
+
+        min-width: 74px !important;
+
+        max-width: 74px !important;
+
+        height: 74px !important;
+
+    }
+
+
+    .coach-table .coach-card {
 
         width: 68px !important;
+
         min-width: 68px !important;
+
         max-width: 68px !important;
 
-        height: 72px !important;
+        height: 66px !important;
+
+        min-height: 66px !important;
+
+    }
+
+
+    .coach-table .coach-number {
+
+        font-size: 13px !important;
+
     }
 
 }
@@ -247,17 +446,28 @@
 
 /* =========================================================
    IMPORTANT:
-   PREVENT BOOTSTRAP / OTHER CSS FROM CHANGING CELL SIZE
+   DO NOT SQUEEZE SCR / CR TABLE
+   HORIZONTAL SCROLL IS REQUIRED
 ========================================================= */
 
-.board-table th,
-.board-table td,
-#coachBoard th,
-#coachBoard td {
+.coach-table th,
+.coach-table td {
 
-    box-sizing: border-box !important;
+    white-space: nowrap !important;
 
-    word-break: normal !important;
+}
 
-    overflow-wrap: normal !important;
+
+/* =========================================================
+   TOUCH
+========================================================= */
+
+.coach-table td,
+.coach-table .coach-card {
+
+    touch-action: manipulation !important;
+
+    -webkit-tap-highlight-color:
+        rgba(13,110,253,.12);
+
 }
