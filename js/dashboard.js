@@ -1,34 +1,12 @@
 /* =========================================================
    MR CO-ORDINATION DASHBOARD
    DASHBOARD.JS
-   VERSION 11.2 FINAL
+   VERSION 13.0
    ---------------------------------------------------------
+   FIREBASE REALTIME DATABASE
    COMPATIBLE WITH:
-   firebase-config.js VERSION 11.1
+   firebase-config.js VERSION 11.x
    firebase-board.js VERSION 10.0
-   board.js VERSION 10.0
-   dashboard.html VERSION 11.2
-
-   FEATURES
-   ---------------------------------------------------------
-   TOTAL COACHES
-   N SHOP TOTAL
-   M SHOP TOTAL
-   MR / SCR TOTAL
-   LIFTING BAY TOTAL
-   J SHOP TOTAL
-   CR SHOP TOTAL
-
-   N SHOP COACH NUMBERS
-   N SHOP SEARCH
-
-   REALTIME FIREBASE
-   DATABASE STATUS
-   REFRESH
-   LIVE DATE / TIME
-
-   IPHONE / SAFARI
-   GITHUB PAGES
 ========================================================= */
 
 
@@ -37,59 +15,93 @@
 ========================================================= */
 
 import {
-    database
-} from "./firebase-config.js";
-
-import {
     ref,
-    get,
     onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-
-/* =========================================================
-   DATABASE PATH
-========================================================= */
-
-const BOARD_PATH =
-    "coachBoard";
-
-const CONNECTION_PATH =
-    ".info/connected";
+import {
+    database
+} from "./firebase-config.js";
 
 
 /* =========================================================
-   GLOBAL VARIABLES
+   SHOPS
 ========================================================= */
 
-let dashboardBoardData = {};
+const dashboardShops = [
 
-let boardUnsubscribe = null;
+    "N SHOP",
+    "M SHOP",
+    "SCR SHOP",
+    "CR SHOP",
+    "LIFTING BAY",
+    "J SHOP"
 
-let connectionUnsubscribe = null;
-
-let nShopCoachesCache = [];
+];
 
 
 /* =========================================================
-   BASIC HELPERS
+   STATUS
+   SAME AS BOARD.JS
 ========================================================= */
 
-function $(id) {
+const dashboardStatuses = [
 
-    return document.getElementById(id);
+    "PO",
+    "S",
+    "LM",
+    "MED",
+    "RL",
+    "R1",
+    "RS",
+    "L",
+    "HVY"
+
+];
+
+
+/* =========================================================
+   SAFE ELEMENT UPDATE
+========================================================= */
+
+function setValue(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+    if (!element) {
+
+        console.warn(
+            "Dashboard element not found:",
+            id
+        );
+
+        return;
+
+    }
+
+    element.textContent = value;
 
 }
 
+
+/* =========================================================
+   SAFE STRING
+========================================================= */
 
 function clean(value) {
 
     return String(
         value ?? ""
-    ).trim();
+    )
+    .trim();
 
 }
 
+
+/* =========================================================
+   UPPERCASE
+========================================================= */
 
 function upper(value) {
 
@@ -100,300 +112,117 @@ function upper(value) {
 
 
 /* =========================================================
-   NORMALIZE TEXT
+   GET SHOP
 ========================================================= */
 
-function normalizeText(value) {
+function getShop(coach) {
 
-    return upper(value)
-        .replace(/[_-]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
+    return upper(
+        coach?.shop
+    );
 
 }
 
 
 /* =========================================================
-   SHOP DETECTION
+   GET STATUS
 ========================================================= */
 
-function detectShop(
-    coach,
-    line
-) {
-
-    const storedShop =
-        normalizeText(
-            coach?.shop
-        );
-
-    const storedLine =
-        normalizeText(
-            coach?.line
-        );
-
-    const actualLine =
-        storedLine ||
-        normalizeText(line);
-
-
-    /* =====================================================
-       1. STORED SHOP
-       STORED SHOP HAS HIGHEST PRIORITY
-    ===================================================== */
-
-
-    /* LIFTING BAY */
-
-    if (
-        storedShop.includes("LIFTING")
-    ) {
-
-        return "LIFTING BAY";
-
-    }
-
-
-    /* N SHOP */
-
-    if (
-        storedShop === "N" ||
-        storedShop === "N SHOP" ||
-        storedShop.includes("N SHOP")
-    ) {
-
-        return "N SHOP";
-
-    }
-
-
-    /* M SHOP */
-
-    if (
-        storedShop === "M" ||
-        storedShop === "M SHOP" ||
-        storedShop.includes("M SHOP")
-    ) {
-
-        return "M SHOP";
-
-    }
-
-
-    /* MR / SCR */
-
-    if (
-        storedShop === "SCR" ||
-        storedShop === "MR" ||
-        storedShop === "MR SCR" ||
-        storedShop === "MR/SCR" ||
-        storedShop === "MR / SCR" ||
-        storedShop.includes("MR / SCR") ||
-        storedShop.includes("MR/SCR") ||
-        storedShop.includes("MR SCR") ||
-        storedShop.includes("SCR SHOP")
-    ) {
-
-        return "MR SCR SHOP";
-
-    }
-
-
-    /* J SHOP */
-
-    if (
-        storedShop === "J" ||
-        storedShop === "J SHOP" ||
-        storedShop.includes("J SHOP")
-    ) {
-
-        return "J SHOP";
-
-    }
-
-
-    /* CR SHOP */
-
-    if (
-        storedShop === "CR" ||
-        storedShop === "CR SHOP" ||
-        storedShop.includes("CR SHOP")
-    ) {
-
-        return "CR SHOP";
-
-    }
-
-
-    /* =====================================================
-       2. DETECT FROM LINE
-    ===================================================== */
-
-
-    /* =====================================================
-       N SHOP
-    ===================================================== */
-
-    if (
-        /^N(?:\s|[-_]|SHOP|[0-9])/.test(
-            actualLine
-        )
-    ) {
-
-        return "N SHOP";
-
-    }
-
-    if (
-        actualLine === "N"
-    ) {
-
-        return "N SHOP";
-
-    }
-
-
-    /* =====================================================
-       M SHOP
-    ===================================================== */
-
-    if (
-        /^M(?:\s|[-_]|SHOP|[0-9])/.test(
-            actualLine
-        )
-    ) {
-
-        return "M SHOP";
-
-    }
-
-    if (
-        actualLine === "M"
-    ) {
-
-        return "M SHOP";
-
-    }
-
-
-    /* =====================================================
-       MR / SCR
-    ===================================================== */
-
-    if (
-        actualLine.startsWith("SCR") ||
-        actualLine.startsWith("MR") ||
-        actualLine.includes("MR SCR")
-    ) {
-
-        return "MR SCR SHOP";
-
-    }
-
-
-    /* =====================================================
-       LIFTING BAY
-    ===================================================== */
-
-    if (
-        actualLine.includes("LIFT")
-    ) {
-
-        return "LIFTING BAY";
-
-    }
-
-
-    /* =====================================================
-       J SHOP
-    ===================================================== */
-
-    if (
-        /^J(?:\s|[-_]|SHOP|[0-9])/.test(
-            actualLine
-        )
-    ) {
-
-        return "J SHOP";
-
-    }
-
-    if (
-        actualLine === "J"
-    ) {
-
-        return "J SHOP";
-
-    }
-
-
-    /* =====================================================
-       CR SHOP
-    ===================================================== */
-
-    if (
-        actualLine.startsWith("CR") ||
-        actualLine.startsWith("F")
-    ) {
-
-        return "CR SHOP";
-
-    }
-
-
-    /* =====================================================
-       UNKNOWN
-    ===================================================== */
-
-    return "";
+function getStatus(coach) {
+
+    return upper(
+        coach?.status
+    );
 
 }
 
 
 /* =========================================================
-   GET ALL BOARD COACHES
+   LOAD FIREBASE DASHBOARD
 ========================================================= */
 
-function getAllBoardCoaches(
-    data
-) {
+function loadFirebaseDashboard() {
 
-    const coaches = [];
+    console.log(
+        "================================="
+    );
+
+    console.log(
+        "MR DASHBOARD STARTING..."
+    );
+
+    console.log(
+        "DATABASE:",
+        database
+    );
+
+    console.log(
+        "================================="
+    );
 
 
-    if (
-        !data ||
-        typeof data !== "object"
-    ) {
-
-        return coaches;
-
-    }
+    const boardRef =
+        ref(
+            database,
+            "coachBoard"
+        );
 
 
-    Object.entries(
-        data
-    ).forEach(
-        ([line, positions]) => {
+    onValue(
+
+        boardRef,
+
+        snapshot => {
+
+            const coaches = [];
+
 
             if (
-                !positions ||
-                typeof positions !== "object"
+                !snapshot.exists()
             ) {
+
+                console.log(
+                    "coachBoard is empty."
+                );
+
+                updateDashboardCount(
+                    []
+                );
+
+                updateShopCount(
+                    []
+                );
+
+                updateStatusCount(
+                    []
+                );
 
                 return;
 
             }
 
 
+            const board =
+                snapshot.val();
+
+
+            /*
+             * coachBoard
+             *     LINE
+             *         POSITION
+             *             COACH
+             */
+
             Object.entries(
-                positions
-            ).forEach(
-                ([position, coach]) => {
+                board
+            )
+            .forEach(
+                ([lineKey, positions]) => {
 
                     if (
-                        !coach ||
-                        typeof coach !== "object"
+                        !positions ||
+                        typeof positions !==
+                        "object"
                     ) {
 
                         return;
@@ -401,1555 +230,518 @@ function getAllBoardCoaches(
                     }
 
 
-                    const coachNo =
-                        clean(
-                            coach.coachNo
-                        );
+                    Object.entries(
+                        positions
+                    )
+                    .forEach(
+                        ([positionKey, coach]) => {
+
+                            if (
+                                !coach ||
+                                typeof coach !==
+                                "object"
+                            ) {
+
+                                return;
+
+                            }
 
 
-                    /* Ignore empty cells */
+                            /*
+                             * Empty cell বাদ
+                             */
 
-                    if (!coachNo) {
+                            if (
+                                !clean(
+                                    coach.coachNo
+                                )
+                            ) {
 
-                        return;
+                                return;
 
-                    }
-
-
-                    const finalLine =
-                        clean(
-                            coach.line
-                        ) ||
-                        clean(line);
-
-
-                    const finalPosition =
-                        clean(
-                            coach.position
-                        ) ||
-                        clean(position);
+                            }
 
 
-                    const finalShop =
-                        detectShop(
-                            coach,
-                            finalLine
-                        );
+                            coaches.push({
 
+                                ...coach,
 
-                    coaches.push({
+                                line:
+                                    coach.line ||
+                                    lineKey,
 
-                        ...coach,
+                                position:
+                                    coach.position ||
+                                    positionKey
 
-                        coachNo,
+                            });
 
-                        line:
-                            finalLine,
-
-                        position:
-                            finalPosition,
-
-                        shop:
-                            finalShop
-
-                    });
+                        }
+                    );
 
                 }
             );
 
-        }
-    );
+
+            console.log(
+                "DASHBOARD COACHES:",
+                coaches
+            );
 
 
-    return coaches;
-
-}
-
-
-/* =========================================================
-   CALCULATE DASHBOARD
-========================================================= */
-
-function calculateDashboard(
-    data
-) {
-
-    const coaches =
-        getAllBoardCoaches(
-            data
-        );
+            console.log(
+                "TOTAL OCCUPIED:",
+                coaches.length
+            );
 
 
-    const result = {
-
-        total:
-            coaches.length,
-
-        nShop: [],
-
-        mShop: [],
-
-        mrScr: [],
-
-        liftingBay: [],
-
-        jShop: [],
-
-        crShop: []
-
-    };
+            updateDashboardCount(
+                coaches
+            );
 
 
-    coaches.forEach(
-        coach => {
-
-            /* N SHOP */
-
-            if (
-                coach.shop ===
-                "N SHOP"
-            ) {
-
-                result.nShop.push(
-                    coach
-                );
-
-            }
+            updateShopCount(
+                coaches
+            );
 
 
-            /* M SHOP */
+            updateStatusCount(
+                coaches
+            );
 
-            else if (
-                coach.shop ===
-                "M SHOP"
-            ) {
+        },
 
-                result.mShop.push(
-                    coach
-                );
+        error => {
 
-            }
-
-
-            /* MR / SCR */
-
-            else if (
-                coach.shop ===
-                "MR SCR SHOP"
-            ) {
-
-                result.mrScr.push(
-                    coach
-                );
-
-            }
-
-
-            /* LIFTING BAY */
-
-            else if (
-                coach.shop ===
-                "LIFTING BAY"
-            ) {
-
-                result.liftingBay.push(
-                    coach
-                );
-
-            }
-
-
-            /* J SHOP */
-
-            else if (
-                coach.shop ===
-                "J SHOP"
-            ) {
-
-                result.jShop.push(
-                    coach
-                );
-
-            }
-
-
-            /* CR SHOP */
-
-            else if (
-                coach.shop ===
-                "CR SHOP"
-            ) {
-
-                result.crShop.push(
-                    coach
-                );
-
-            }
+            console.error(
+                "DASHBOARD FIREBASE ERROR:",
+                error
+            );
 
         }
+
     );
-
-
-    return result;
 
 }
 
 
 /* =========================================================
-   SET TEXT
+   MAIN TOTAL
 ========================================================= */
 
-function setText(
-    id,
-    value
+function updateDashboardCount(
+    coaches
 ) {
 
-    const element =
-        $(id);
+    const total =
+        coaches.length;
 
 
-    if (element) {
-
-        element.textContent =
-            String(value);
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER GRAND TOTAL
-========================================================= */
-
-function renderTotal(
-    result
-) {
-
-    setText(
-        "grandTotal",
-        result.total
-    );
-
-
-    /* Compatibility IDs */
-
-    [
+    setValue(
         "totalCoach",
-        "totalCoaches",
-        "dashboardTotalCoach",
-        "totalCoachCount"
-    ].forEach(
-        id => {
-
-            setText(
-                id,
-                result.total
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   RENDER SHOP COUNTS
-========================================================= */
-
-function renderShopCounts(
-    result
-) {
-
-
-    /* =====================================================
-       N SHOP
-    ===================================================== */
-
-    [
-        "nShopTotal",
-        "nShopCount",
-        "nShopCoach",
-        "nShopCoaches"
-    ].forEach(
-        id => {
-
-            setText(
-                id,
-                result.nShop.length
-            );
-
-        }
+        total
     );
 
 
-    /* =====================================================
-       M SHOP
-    ===================================================== */
+    /*
+     * Your old dashboard IDs are kept.
+     *
+     * These are based on actual board statuses.
+     *
+     * If your HTML contains these IDs,
+     * they will be updated.
+     */
 
-    [
-        "mShopTotal",
-        "mShopCount",
-        "mShopCoach",
-        "mShopCoaches"
-    ].forEach(
-        id => {
 
-            setText(
-                id,
-                result.mShop.length
-            );
+    const po =
+        coaches.filter(
+            c =>
+                getStatus(c) === "PO"
+        ).length;
 
-        }
+
+    const s =
+        coaches.filter(
+            c =>
+                getStatus(c) === "S"
+        ).length;
+
+
+    const lm =
+        coaches.filter(
+            c =>
+                getStatus(c) === "LM"
+        ).length;
+
+
+    const med =
+        coaches.filter(
+            c =>
+                getStatus(c) === "MED"
+        ).length;
+
+
+    const rl =
+        coaches.filter(
+            c =>
+                getStatus(c) === "RL"
+        ).length;
+
+
+    const r1 =
+        coaches.filter(
+            c =>
+                getStatus(c) === "R1"
+        ).length;
+
+
+    const rs =
+        coaches.filter(
+            c =>
+                getStatus(c) === "RS"
+        ).length;
+
+
+    const l =
+        coaches.filter(
+            c =>
+                getStatus(c) === "L"
+        ).length;
+
+
+    const hvy =
+        coaches.filter(
+            c =>
+                getStatus(c) === "HVY"
+        ).length;
+
+
+    setValue(
+        "poCoach",
+        po
     );
 
-
-    /* =====================================================
-       MR / SCR
-    ===================================================== */
-
-    [
-        "mrScrTotal",
-        "mrScrCount",
-        "mrScrCoach",
-        "mrScrCoaches"
-    ].forEach(
-        id => {
-
-            setText(
-                id,
-                result.mrScr.length
-            );
-
-        }
+    setValue(
+        "sCoach",
+        s
     );
 
-
-    /* =====================================================
-       LIFTING BAY
-    ===================================================== */
-
-    [
-        "liftingBayTotal",
-        "liftingBayCount",
-        "liftingBayCoach",
-        "liftingBayCoaches"
-    ].forEach(
-        id => {
-
-            setText(
-                id,
-                result.liftingBay.length
-            );
-
-        }
+    setValue(
+        "lmCoach",
+        lm
     );
 
-
-    /* =====================================================
-       J SHOP
-    ===================================================== */
-
-    [
-        "jShopTotal",
-        "jShopCount",
-        "jShopCoach",
-        "jShopCoaches"
-    ].forEach(
-        id => {
-
-            setText(
-                id,
-                result.jShop.length
-            );
-
-        }
+    setValue(
+        "medCoach",
+        med
     );
 
-
-    /* =====================================================
-       CR SHOP
-    ===================================================== */
-
-    [
-        "crShopTotal",
-        "crShopCount",
-        "crShopCoach",
-        "crShopCoaches"
-    ].forEach(
-        id => {
-
-            setText(
-                id,
-                result.crShop.length
-            );
-
-        }
+    setValue(
+        "rlCoach",
+        rl
     );
 
-}
-
-
-/* =========================================================
-   SORT COACH NUMBERS
-========================================================= */
-
-function sortCoachNumbers(
-    coaches
-) {
-
-    return [
-        ...coaches
-    ].sort(
-        (a, b) => {
-
-            const aNo =
-                clean(
-                    a.coachNo
-                );
-
-            const bNo =
-                clean(
-                    b.coachNo
-                );
-
-
-            const aNum =
-                Number(aNo);
-
-            const bNum =
-                Number(bNo);
-
-
-            if (
-                Number.isFinite(aNum) &&
-                Number.isFinite(bNum)
-            ) {
-
-                return aNum - bNum;
-
-            }
-
-
-            return aNo.localeCompare(
-                bNo,
-                undefined,
-                {
-                    numeric:
-                        true
-                }
-            );
-
-        }
+    setValue(
+        "r1Coach",
+        r1
     );
 
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHTML(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-    .replaceAll(
-        "&",
-        "&amp;"
-    )
-    .replaceAll(
-        "<",
-        "&lt;"
-    )
-    .replaceAll(
-        ">",
-        "&gt;"
-    )
-    .replaceAll(
-        '"',
-        "&quot;"
-    )
-    .replaceAll(
-        "'",
-        "&#039;"
+    setValue(
+        "rsCoach",
+        rs
     );
 
-}
-
-
-/* =========================================================
-   RENDER N SHOP COACH NUMBERS
-========================================================= */
-
-function renderNShopCoachNumbers(
-    coaches
-) {
-
-    const sorted =
-        sortCoachNumbers(
-            coaches
-        );
-
-
-    const unique = [];
-
-    const seen =
-        new Set();
-
-
-    sorted.forEach(
-        coach => {
-
-            const number =
-                clean(
-                    coach.coachNo
-                );
-
-
-            if (
-                number &&
-                !seen.has(number)
-            ) {
-
-                seen.add(
-                    number
-                );
-
-                unique.push(
-                    coach
-                );
-
-            }
-
-        }
+    setValue(
+        "lCoach",
+        l
     );
 
-
-    nShopCoachesCache =
-        unique;
-
-
-    setText(
-        "nShopNewTotal",
-        unique.length
-    );
-
-
-    const container =
-        $("nShopCoachList");
-
-
-    if (!container) {
-
-        console.warn(
-            "nShopCoachList not found."
-        );
-
-        return;
-
-    }
-
-
-    renderFilteredNShop(
-        ""
-    );
-
-}
-
-
-/* =========================================================
-   RENDER FILTERED N SHOP
-========================================================= */
-
-function renderFilteredNShop(
-    keyword
-) {
-
-    const container =
-        $("nShopCoachList");
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    const search =
-        upper(
-            keyword
-        );
-
-
-    const filtered =
-        nShopCoachesCache.filter(
-            coach => {
-
-                const coachNo =
-                    upper(
-                        coach.coachNo
-                    );
-
-                const line =
-                    upper(
-                        coach.line
-                    );
-
-                const position =
-                    upper(
-                        coach.position
-                    );
-
-
-                return (
-                    coachNo.includes(search) ||
-                    line.includes(search) ||
-                    position.includes(search)
-                );
-
-            }
-        );
-
-
-    if (
-        filtered.length === 0
-    ) {
-
-        container.innerHTML = `
-
-            <div class="no-coach">
-
-                ${
-                    search
-                        ? "No matching N Shop coach found"
-                        : "No N Shop coaches"
-                }
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        filtered
-            .map(
-                coach => `
-
-                    <div
-                        class="coach-item"
-                        title="
-                            Line: ${escapeHTML(
-                                coach.line
-                            )}
-                            |
-                            Position: ${escapeHTML(
-                                coach.position
-                            )}
-                        "
-                    >
-
-                        ${escapeHTML(
-                            coach.coachNo
-                        )}
-
-                    </div>
-
-                `
-            )
-            .join("");
-
-}
-
-
-/* =========================================================
-   N SHOP SEARCH
-========================================================= */
-
-function setupNShopSearch() {
-
-    const search =
-        $("nShopSearch");
-
-
-    if (!search) {
-
-        console.warn(
-            "N Shop search box not found."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        search.dataset.dashboardReady ===
-        "true"
-    ) {
-
-        return;
-
-    }
-
-
-    search.dataset.dashboardReady =
-        "true";
-
-
-    search.addEventListener(
-        "input",
-        event => {
-
-            renderFilteredNShop(
-                event.target.value
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE DASHBOARD
-========================================================= */
-
-function updateDashboard(
-    data
-) {
-
-    dashboardBoardData =
-        data || {};
-
-
-    const result =
-        calculateDashboard(
-            dashboardBoardData
-        );
-
-
-    /* =====================================================
-       CONSOLE DEBUG
-    ===================================================== */
-
-    console.log(
-        "======================================"
-    );
-
-    console.log(
-        "MR CO-ORDINATION DASHBOARD"
-    );
-
-    console.log(
-        "TOTAL COACHES:",
-        result.total
-    );
-
-    console.log(
-        "N SHOP:",
-        result.nShop.length
-    );
-
-    console.log(
-        "M SHOP:",
-        result.mShop.length
-    );
-
-    console.log(
-        "MR / SCR:",
-        result.mrScr.length
-    );
-
-    console.log(
-        "LIFTING BAY:",
-        result.liftingBay.length
-    );
-
-    console.log(
-        "J SHOP:",
-        result.jShop.length
-    );
-
-    console.log(
-        "CR SHOP:",
-        result.crShop.length
-    );
-
-    console.log(
-        "======================================"
-    );
-
-
-    /* =====================================================
-       RENDER
-    ===================================================== */
-
-    renderTotal(
-        result
-    );
-
-
-    renderShopCounts(
-        result
-    );
-
-
-    renderNShopCoachNumbers(
-        result.nShop
-    );
-
-
-    updateLastUpdate();
-
-}
-
-
-/* =========================================================
-   DATABASE STATUS ELEMENTS
-========================================================= */
-
-function getDatabaseStatusElements() {
-
-    const ids = [
-
-        "databaseStatus",
-
-        "dbStatus",
-
-        "dashboardDatabaseStatus",
-
-        "databaseStatusText",
-
-        "dbStatusText",
-
-        "databaseConnectionStatus",
-
-        "connectionStatus"
-
-    ];
-
-
-    return ids
-        .map(
-            id => $(id)
-        )
-        .filter(
-            element => element
-        );
-
-}
-
-
-/* =========================================================
-   DATABASE STATUS
-========================================================= */
-
-function updateDatabaseStatus(
-    status
-) {
-
-    const elements =
-        getDatabaseStatusElements();
-
-
-    elements.forEach(
-        element => {
-
-            element.classList.remove(
-                "text-success",
-                "text-danger",
-                "text-warning"
-            );
-
-
-            if (
-                status ===
-                "connected"
-            ) {
-
-                element.textContent =
-                    "Connected";
-
-                element.classList.add(
-                    "text-success"
-                );
-
-            }
-
-            else if (
-                status ===
-                "offline"
-            ) {
-
-                element.textContent =
-                    "Offline";
-
-                element.classList.add(
-                    "text-danger"
-                );
-
-            }
-
-            else {
-
-                element.textContent =
-                    "Connecting...";
-
-                element.classList.add(
-                    "text-warning"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   FIREBASE CONNECTION LISTENER
-========================================================= */
-
-function startDatabaseStatusListener() {
-
-    if (
-        typeof connectionUnsubscribe ===
-        "function"
-    ) {
-
-        try {
-
-            connectionUnsubscribe();
-
-        }
-        catch (error) {
-
-            console.warn(
-                error
-            );
-
-        }
-
-    }
-
-
-    const connectionRef =
-        ref(
-            database,
-            CONNECTION_PATH
-        );
-
-
-    updateDatabaseStatus(
-        "connecting"
-    );
-
-
-    connectionUnsubscribe =
-        onValue(
-
-            connectionRef,
-
-            snapshot => {
-
-                const connected =
-                    snapshot.val() === true;
-
-
-                console.log(
-                    "Firebase connected:",
-                    connected
-                );
-
-
-                updateDatabaseStatus(
-                    connected
-                        ? "connected"
-                        : "offline"
-                );
-
-            },
-
-            error => {
-
-                console.error(
-                    "Firebase connection error:",
-                    error
-                );
-
-
-                updateDatabaseStatus(
-                    "offline"
-                );
-
-            }
-
-        );
-
-}
-
-
-/* =========================================================
-   REALTIME BOARD LISTENER
-========================================================= */
-
-function startDashboardListener() {
-
-    if (
-        typeof boardUnsubscribe ===
-        "function"
-    ) {
-
-        try {
-
-            boardUnsubscribe();
-
-        }
-        catch (error) {
-
-            console.warn(
-                error
-            );
-
-        }
-
-    }
-
-
-    console.log(
-        "Starting coachBoard realtime listener..."
-    );
-
-
-    const boardRef =
-        ref(
-            database,
-            BOARD_PATH
-        );
-
-
-    boardUnsubscribe =
-        onValue(
-
-            boardRef,
-
-            snapshot => {
-
-                console.log(
-                    "coachBoard realtime update received."
-                );
-
-
-                const data =
-                    snapshot.exists()
-                        ? snapshot.val()
-                        : {};
-
-
-                updateDashboard(
-                    data
-                );
-
-            },
-
-            error => {
-
-                console.error(
-                    "coachBoard listener error:",
-                    error
-                );
-
-
-                updateDatabaseStatus(
-                    "offline"
-                );
-
-            }
-
-        );
-
-}
-
-
-/* =========================================================
-   INITIAL LOAD
-========================================================= */
-
-async function loadDashboard() {
-
-    console.log(
-        "Loading coachBoard..."
-    );
-
-
-    try {
-
-        const boardRef =
-            ref(
-                database,
-                BOARD_PATH
-            );
-
-
-        const snapshot =
-            await get(
-                boardRef
-            );
-
-
-        const data =
-            snapshot.exists()
-                ? snapshot.val()
-                : {};
-
-
-        console.log(
-            "Initial coachBoard data:",
-            data
-        );
-
-
-        updateDashboard(
-            data
-        );
-
-
-        return data;
-
-    }
-    catch (error) {
-
-        console.error(
-            "Dashboard initial load error:",
-            error
-        );
-
-
-        updateDatabaseStatus(
-            "offline"
-        );
-
-
-        return dashboardBoardData;
-
-    }
-
-}
-
-
-/* =========================================================
-   REFRESH DASHBOARD
-========================================================= */
-
-async function refreshDashboard() {
-
-    const button =
-        $("refreshDashboardBtn") ||
-        $("dashboardRefreshBtn") ||
-        $("refreshBtn");
-
-
-    if (button) {
-
-        button.disabled =
-            true;
-
-        button.textContent =
-            "↻ LOADING...";
-
-    }
-
-
-    try {
-
-        updateDatabaseStatus(
-            "connecting"
-        );
-
-
-        const data =
-            await loadDashboard();
-
-
-        if (data) {
-
-            updateDashboard(
-                data
-            );
-
-        }
-
-    }
-    catch (error) {
-
-        console.error(
-            "Refresh dashboard error:",
-            error
-        );
-
-    }
-    finally {
-
-        if (button) {
-
-            button.disabled =
-                false;
-
-            button.textContent =
-                "↻ REFRESH DASHBOARD";
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   LAST UPDATE
-========================================================= */
-
-function updateLastUpdate() {
-
-    const now =
-        new Date();
-
-
-    const time =
-        now.toLocaleTimeString(
-            "en-IN",
-            {
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit",
-
-                hour12:
-                    true
-
-            }
-        );
-
-
-    [
-        "lastUpdate",
-        "lastUpdateTime",
-        "dashboardLastUpdate"
-    ]
-    .forEach(
-        id => {
-
-            const element =
-                $(id);
-
-
-            if (element) {
-
-                element.textContent =
-                    `Last Update: ${time}`;
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   LIVE DATE / TIME
-========================================================= */
-
-function updateClock() {
-
-    const now =
-        new Date();
-
-
-    const date =
-        now.toLocaleDateString(
-            "en-IN",
-            {
-
-                day:
-                    "2-digit",
-
-                month:
-                    "2-digit",
-
-                year:
-                    "numeric"
-
-            }
-        );
-
-
-    const time =
-        now.toLocaleTimeString(
-            "en-IN",
-            {
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit",
-
-                hour12:
-                    true
-
-            }
-        );
-
-
-    const combined =
-        `${date} | ${time}`;
-
-
-    /* Current HTML */
-
-    const currentDateTime =
-        $("currentDateTime");
-
-
-    if (currentDateTime) {
-
-        currentDateTime.textContent =
-            combined;
-
-    }
-
-
-    /* Compatibility */
-
-    const liveDate =
-        $("liveDate");
-
-
-    if (liveDate) {
-
-        liveDate.textContent =
-            `Date: ${date}`;
-
-    }
-
-
-    const liveTime =
-        $("liveTime");
-
-
-    if (liveTime) {
-
-        liveTime.textContent =
-            `Time: ${time}`;
-
-    }
-
-
-    const liveDateTime =
-        $("liveDateTime");
-
-
-    if (liveDateTime) {
-
-        liveDateTime.textContent =
-            combined;
-
-    }
-
-}
-
-
-/* =========================================================
-   REFRESH BUTTON SETUP
-========================================================= */
-
-function setupRefreshButton() {
-
-    const button =
-        $("refreshDashboardBtn") ||
-        $("dashboardRefreshBtn") ||
-        $("refreshBtn");
-
-
-    if (!button) {
-
-        console.warn(
-            "Refresh button not found."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        button.dataset.dashboardReady ===
-        "true"
-    ) {
-
-        return;
-
-    }
-
-
-    button.dataset.dashboardReady =
-        "true";
-
-
-    button.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-
-            refreshDashboard();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   START DASHBOARD
-========================================================= */
-
-async function startDashboard() {
-
-    console.log(
-        "=========================================="
-    );
-
-    console.log(
-        "MR CO-ORDINATION DASHBOARD"
-    );
-
-    console.log(
-        "VERSION 11.2 FINAL - CR SHOP FIX"
-    );
-
-    console.log(
-        "Firebase coachBoard:"
-    );
-
-    console.log(
-        "https://mr-coordi-coach-default-rtdb.firebaseio.com"
-    );
-
-    console.log(
-        "=========================================="
-    );
-
-
-    /* Initial UI */
-
-    updateDatabaseStatus(
-        "connecting"
-    );
-
-
-    updateClock();
-
-
-    /* Firebase connection */
-
-    startDatabaseStatusListener();
-
-
-    /* Initial board load */
-
-    await loadDashboard();
-
-
-    /* Realtime listener */
-
-    startDashboardListener();
-
-
-    /* N Shop search */
-
-    setupNShopSearch();
-
-
-    /* Refresh */
-
-    setupRefreshButton();
-
-
-    /* Clock */
-
-    setInterval(
-        updateClock,
-        1000
+    setValue(
+        "hvyCoach",
+        hvy
     );
 
 
     console.log(
-        "=========================================="
-    );
-
-    console.log(
-        "DASHBOARD INITIALIZATION COMPLETE"
-    );
-
-    console.log(
-        "=========================================="
-    );
-
-}
-
-
-/* =========================================================
-   DOM READY
-========================================================= */
-
-if (
-    document.readyState ===
-    "loading"
-) {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        startDashboard,
+        "STATUS COUNT:",
         {
-            once:
-                true
+            PO: po,
+            S: s,
+            LM: lm,
+            MED: med,
+            RL: rl,
+            R1: r1,
+            RS: rs,
+            L: l,
+            HVY: hvy
         }
     );
-
-}
-else {
-
-    startDashboard();
 
 }
 
 
 /* =========================================================
-   GLOBAL REFRESH
+   STATUS COUNT
 ========================================================= */
 
-window.refreshDashboard =
-    refreshDashboard;
+function updateStatusCount(
+    coaches
+) {
+
+    dashboardStatuses.forEach(
+        status => {
+
+            const count =
+                coaches.filter(
+                    coach =>
+                        getStatus(
+                            coach
+                        ) === status
+                ).length;
+
+
+            const id =
+                status
+                    .toLowerCase()
+                    .replace(
+                        " ",
+                        ""
+                    ) +
+                "Coach";
+
+
+            setValue(
+                id,
+                count
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SHOP COUNT
+========================================================= */
+
+function updateShopCount(
+    coaches
+) {
+
+    dashboardShops.forEach(
+        shop => {
+
+
+            const shopCoaches =
+                coaches.filter(
+                    coach =>
+                        getShop(
+                            coach
+                        ) === shop
+                );
+
+
+            const total =
+                shopCoaches.length;
+
+
+            const po =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "PO"
+                ).length;
+
+
+            const s =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "S"
+                ).length;
+
+
+            const lm =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "LM"
+                ).length;
+
+
+            const med =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "MED"
+                ).length;
+
+
+            const rl =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "RL"
+                ).length;
+
+
+            const r1 =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "R1"
+                ).length;
+
+
+            const rs =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "RS"
+                ).length;
+
+
+            const l =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "L"
+                ).length;
+
+
+            const hvy =
+                shopCoaches.filter(
+                    c =>
+                        getStatus(c)
+                        === "HVY"
+                ).length;
+
+
+            let prefix = "";
+
+
+            switch (shop) {
+
+                case "N SHOP":
+                    prefix = "n";
+                    break;
+
+                case "M SHOP":
+                    prefix = "m";
+                    break;
+
+                case "SCR SHOP":
+                    prefix = "scr";
+                    break;
+
+                case "CR SHOP":
+                    prefix = "cr";
+                    break;
+
+                case "LIFTING BAY":
+                    prefix = "lift";
+                    break;
+
+                case "J SHOP":
+                    prefix = "j";
+                    break;
+
+            }
+
+
+            if (!prefix) {
+                return;
+            }
+
+
+            /*
+             * TOTAL
+             */
+
+            setValue(
+                prefix + "Total",
+                total
+            );
+
+
+            /*
+             * STATUS
+             */
+
+            setValue(
+                prefix + "PO",
+                po
+            );
+
+            setValue(
+                prefix + "S",
+                s
+            );
+
+            setValue(
+                prefix + "LM",
+                lm
+            );
+
+            setValue(
+                prefix + "MED",
+                med
+            );
+
+            setValue(
+                prefix + "RL",
+                rl
+            );
+
+            setValue(
+                prefix + "R1",
+                r1
+            );
+
+            setValue(
+                prefix + "RS",
+                rs
+            );
+
+            setValue(
+                prefix + "L",
+                l
+            );
+
+            setValue(
+                prefix + "HVY",
+                hvy
+            );
+
+
+            console.log(
+                shop,
+                {
+                    total,
+                    PO: po,
+                    S: s,
+                    LM: lm,
+                    MED: med,
+                    RL: rl,
+                    R1: r1,
+                    RS: rs,
+                    L: l,
+                    HVY: hvy
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+loadFirebaseDashboard();
 
 
 /* =========================================================
@@ -1957,5 +749,13 @@ window.refreshDashboard =
 ========================================================= */
 
 console.log(
-    "MR CO-ORDINATION DASHBOARD.JS VERSION 11.2 FINAL - CR SHOP FIX"
+    "MR CO-ORDINATION DASHBOARD"
+);
+
+console.log(
+    "DASHBOARD.JS VERSION 13.0"
+);
+
+console.log(
+    "REALTIME DATABASE CONNECTED"
 );
