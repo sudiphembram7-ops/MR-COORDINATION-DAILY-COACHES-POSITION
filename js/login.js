@@ -1,15 +1,12 @@
 /* =====================================================
    MR CO-ORDINATION
    FIREBASE ADMIN LOGIN
-   VERSION 12.0
-   EMAIL BASED ADMIN
-   NO CUSTOM CLAIM REQUIRED
+   VERSION 12.0 FINAL
 ===================================================== */
 
 import {
     signInWithEmailAndPassword,
-    onAuthStateChanged,
-    signOut
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 import {
@@ -18,11 +15,14 @@ import {
 
 
 /* =====================================================
-   ADMIN EMAIL
+   DEBUG
 ===================================================== */
 
-const ADMIN_EMAIL =
-    "Sudiphembram7@gmail.com";
+console.log("=================================");
+console.log("MR CO-ORDINATION LOGIN");
+console.log("LOGIN.JS VERSION 12.0");
+console.log("AUTH OBJECT:", auth);
+console.log("=================================");
 
 
 /* =====================================================
@@ -38,12 +38,36 @@ const passwordInput =
 const loginBtn =
     document.getElementById("loginBtn");
 
+const loginForm =
+    document.getElementById("loginForm");
+
 const message =
     document.getElementById("message");
 
 
 /* =====================================================
-   SHOW MESSAGE
+   CHECK ELEMENTS
+===================================================== */
+
+if (!emailInput) {
+    console.error("LOGIN ERROR: #email not found");
+}
+
+if (!passwordInput) {
+    console.error("LOGIN ERROR: #password not found");
+}
+
+if (!loginBtn) {
+    console.error("LOGIN ERROR: #loginBtn not found");
+}
+
+if (!loginForm) {
+    console.error("LOGIN ERROR: #loginForm not found");
+}
+
+
+/* =====================================================
+   MESSAGE
 ===================================================== */
 
 function showMessage(
@@ -51,7 +75,9 @@ function showMessage(
     type = "danger"
 ) {
 
-    if (!message) return;
+    if (!message) {
+        return;
+    }
 
     message.textContent = text;
 
@@ -62,21 +88,99 @@ function showMessage(
 
 
 /* =====================================================
-   CHECK ADMIN EMAIL
+   BUTTON STATE
 ===================================================== */
 
-function isAdmin(user) {
+function setLoading(
+    loading
+) {
 
-    if (!user || !user.email) {
-
-        return false;
-
+    if (!loginBtn) {
+        return;
     }
 
-    return (
-        user.email.trim().toLowerCase() ===
-        ADMIN_EMAIL.toLowerCase()
+
+    loginBtn.disabled =
+        loading;
+
+
+    loginBtn.textContent =
+        loading
+            ? "LOGIN..."
+            : "LOGIN";
+
+}
+
+
+/* =====================================================
+   FIREBASE ERROR MESSAGE
+===================================================== */
+
+function getFirebaseErrorMessage(
+    error
+) {
+
+    console.error(
+        "Firebase Error:",
+        error
     );
+
+
+    switch (error?.code) {
+
+        case "auth/invalid-email":
+
+            return "Invalid Email Address.";
+
+
+        case "auth/user-not-found":
+
+            return "User Not Found.";
+
+
+        case "auth/wrong-password":
+
+            return "Wrong Password.";
+
+
+        case "auth/invalid-credential":
+
+            return "Invalid Email or Password.";
+
+
+        case "auth/user-disabled":
+
+            return "This user account is disabled.";
+
+
+        case "auth/too-many-requests":
+
+            return "Too many login attempts. Please try again later.";
+
+
+        case "auth/network-request-failed":
+
+            return "Network Error. Check your Internet connection.";
+
+
+        case "auth/operation-not-allowed":
+
+            return "Email/Password Login is disabled in Firebase.";
+
+
+        case "auth/internal-error":
+
+            return "Firebase internal error. Please try again.";
+
+
+        default:
+
+            return (
+                error?.message ||
+                "Login Failed."
+            );
+
+    }
 
 }
 
@@ -85,12 +189,30 @@ function isAdmin(user) {
    LOGIN
 ===================================================== */
 
-async function login() {
+async function login(
+    event = null
+) {
 
-    if (!emailInput || !passwordInput) {
+    if (event) {
+
+        event.preventDefault();
+
+    }
+
+
+    console.log(
+        "LOGIN STARTED"
+    );
+
+
+    if (
+        !emailInput ||
+        !passwordInput ||
+        !loginBtn
+    ) {
 
         console.error(
-            "LOGIN INPUT ELEMENTS NOT FOUND"
+            "Login elements missing."
         );
 
         return;
@@ -99,7 +221,10 @@ async function login() {
 
 
     const email =
-        emailInput.value.trim();
+        emailInput.value
+            .trim()
+            .toLowerCase();
+
 
     const password =
         passwordInput.value;
@@ -112,7 +237,7 @@ async function login() {
     if (!email) {
 
         showMessage(
-            "Please enter Email",
+            "Please enter Email.",
             "danger"
         );
 
@@ -126,7 +251,7 @@ async function login() {
     if (!password) {
 
         showMessage(
-            "Please enter Password",
+            "Please enter Password.",
             "danger"
         );
 
@@ -138,49 +263,28 @@ async function login() {
 
 
     /* =================================================
-       ADMIN EMAIL CHECK
+       LOADING
     ================================================= */
 
-    if (
-        email.toLowerCase() !==
-        ADMIN_EMAIL.toLowerCase()
-    ) {
-
-        showMessage(
-            "Access Denied. Admin email only.",
-            "danger"
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       BUTTON LOADING
-    ================================================= */
-
-    if (loginBtn) {
-
-        loginBtn.disabled = true;
-
-        loginBtn.textContent =
-            "LOGIN...";
-
-    }
+    setLoading(true);
 
 
     showMessage(
-        "Checking Admin login...",
+        "Checking login...",
         "primary"
     );
 
 
     try {
 
-        /* =================================================
+        console.log(
+            "Firebase authentication starting..."
+        );
+
+
+        /* =============================================
            FIREBASE AUTH
-        ================================================= */
+        ============================================= */
 
         const result =
             await signInWithEmailAndPassword(
@@ -195,155 +299,78 @@ async function login() {
 
 
         console.log(
-            "Firebase Login:",
-            user.email
-        );
-
-
-        /* =================================================
-           SECOND ADMIN CHECK
-        ================================================= */
-
-        if (!isAdmin(user)) {
-
-            await signOut(auth);
-
-            showMessage(
-                "Access Denied. This account is not Admin.",
-                "danger"
-            );
-
-            return;
-
-        }
-
-
-        /* =================================================
-           ADMIN LOGIN SUCCESS
-        ================================================= */
-
-        showMessage(
-            "Admin Login Successful...",
-            "success"
+            "LOGIN SUCCESS"
         );
 
 
         console.log(
-            "ADMIN LOGIN SUCCESS:",
+            "USER UID:",
+            user.uid
+        );
+
+
+        console.log(
+            "USER EMAIL:",
             user.email
         );
 
 
-        /* =================================================
+        showMessage(
+            "Login Successful. Opening Admin...",
+            "success"
+        );
+
+
+        /* =============================================
            REDIRECT
-        ================================================= */
+        ============================================= */
 
-        setTimeout(() => {
+        setTimeout(
+            () => {
 
-            window.location.replace(
-                "admin.html"
-            );
+                window.location.replace(
+                    "./admin.html"
+                );
 
-        }, 500);
-
+            },
+            500
+        );
 
     }
     catch (error) {
 
         console.error(
-            "FIREBASE LOGIN ERROR:",
-            error
+            "================================="
+        );
+
+        console.error(
+            "FIREBASE LOGIN ERROR"
+        );
+
+        console.error(
+            "CODE:",
+            error?.code
+        );
+
+        console.error(
+            "MESSAGE:",
+            error?.message
+        );
+
+        console.error(
+            "================================="
         );
 
 
-        let errorMessage =
-            "Login Failed";
-
-
-        switch (error.code) {
-
-            case "auth/invalid-credential":
-
-                errorMessage =
-                    "Invalid Email or Password";
-
-                break;
-
-
-            case "auth/invalid-email":
-
-                errorMessage =
-                    "Invalid Email Address";
-
-                break;
-
-
-            case "auth/user-not-found":
-
-                errorMessage =
-                    "Admin account not found";
-
-                break;
-
-
-            case "auth/wrong-password":
-
-                errorMessage =
-                    "Wrong Password";
-
-                break;
-
-
-            case "auth/too-many-requests":
-
-                errorMessage =
-                    "Too many attempts. Please try again later.";
-
-                break;
-
-
-            case "auth/network-request-failed":
-
-                errorMessage =
-                    "Network Error. Check Internet.";
-
-                break;
-
-
-            case "auth/user-disabled":
-
-                errorMessage =
-                    "Admin account is disabled.";
-
-                break;
-
-
-            default:
-
-                errorMessage =
-                    error.message ||
-                    "Login Failed";
-
-        }
-
-
         showMessage(
-            errorMessage,
+            getFirebaseErrorMessage(
+                error
+            ),
             "danger"
         );
 
 
-    }
-    finally {
-
-        if (loginBtn) {
-
-            loginBtn.disabled = false;
-
-            loginBtn.textContent =
-                "LOGIN";
-
-        }
+        setLoading(false);
 
     }
 
@@ -351,10 +378,27 @@ async function login() {
 
 
 /* =====================================================
-   LOGIN BUTTON
+   FORM SUBMIT
 ===================================================== */
 
-if (loginBtn) {
+if (loginForm) {
+
+    loginForm.addEventListener(
+        "submit",
+        login
+    );
+
+}
+
+
+/* =====================================================
+   LOGIN BUTTON FALLBACK
+===================================================== */
+
+if (
+    loginBtn &&
+    !loginForm
+) {
 
     loginBtn.addEventListener(
         "click",
@@ -365,22 +409,46 @@ if (loginBtn) {
 
 
 /* =====================================================
-   ENTER KEY
+   AUTO AUTH CHECK
 ===================================================== */
 
-if (passwordInput) {
+if (auth) {
 
-    passwordInput.addEventListener(
-        "keydown",
-        event => {
+    onAuthStateChanged(
+        auth,
+        user => {
 
-            if (
-                event.key === "Enter"
-            ) {
+            console.log(
+                "AUTH STATE:",
+                user
+                    ? user.email
+                    : "NOT LOGGED IN"
+            );
 
-                event.preventDefault();
 
-                login();
+            /*
+               If already logged in,
+               open admin automatically.
+            */
+
+            if (user) {
+
+                showMessage(
+                    "Already logged in. Opening Admin...",
+                    "success"
+                );
+
+
+                setTimeout(
+                    () => {
+
+                        window.location.replace(
+                            "./admin.html"
+                        );
+
+                    },
+                    300
+                );
 
             }
 
@@ -391,37 +459,7 @@ if (passwordInput) {
 
 
 /* =====================================================
-   EMAIL ENTER
-===================================================== */
-
-if (emailInput) {
-
-    emailInput.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                event.preventDefault();
-
-                if (passwordInput) {
-
-                    passwordInput.focus();
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   GLOBAL LOGIN
+   GLOBAL
 ===================================================== */
 
 window.login =
@@ -429,111 +467,9 @@ window.login =
 
 
 /* =====================================================
-   AUTO CHECK
-   If already logged in, open admin
-===================================================== */
-
-onAuthStateChanged(
-    auth,
-    user => {
-
-        if (!user) {
-
-            console.log(
-                "No user logged in."
-            );
-
-            return;
-
-        }
-
-
-        console.log(
-            "Existing Firebase User:",
-            user.email
-        );
-
-
-        /* =============================================
-           ONLY ADMIN CAN CONTINUE
-        ============================================= */
-
-        if (
-            isAdmin(user)
-        ) {
-
-            console.log(
-                "Existing Admin Session Found"
-            );
-
-            /*
-               Don't redirect if already
-               on admin.html.
-            */
-
-            if (
-                !window.location.pathname
-                    .toLowerCase()
-                    .endsWith(
-                        "admin.html"
-                    )
-            ) {
-
-                window.location.replace(
-                    "admin.html"
-                );
-
-            }
-
-        }
-        else {
-
-            /*
-               Any non-admin account
-               is immediately signed out.
-            */
-
-            console.log(
-                "Non-admin account detected."
-            );
-
-            signOut(auth);
-
-        }
-
-    }
-);
-
-
-/* =====================================================
    READY
 ===================================================== */
 
 console.log(
-    "========================================="
-);
-
-console.log(
-    "MR CO-ORDINATION ADMIN LOGIN"
-);
-
-console.log(
-    "LOGIN SYSTEM VERSION 12.0"
-);
-
-console.log(
-    "ADMIN EMAIL:",
-    ADMIN_EMAIL
-);
-
-console.log(
-    "EMAIL BASED ADMIN"
-);
-
-console.log(
-    "NO CUSTOM CLAIM REQUIRED"
-);
-
-console.log(
-    "========================================="
+    "LOGIN SYSTEM READY"
 );
