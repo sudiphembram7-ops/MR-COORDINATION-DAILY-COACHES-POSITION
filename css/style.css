@@ -1,7 +1,7 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    STYLE.CSS
-   VERSION 9.1 FINAL
+   VERSION 9.2 FINAL FIXED
 
    FEATURES
    ---------------------------------------------------------
@@ -19,6 +19,13 @@
    MODAL
    PRINT / A4
    FULL SCREEN
+
+   FIXES
+   ---------------------------------------------------------
+   H3 / D3 DOUBLE BORDER FIX
+   TABLE BORDER CLEAN
+   A4 LANDSCAPE PRINT FIX
+   EMPTY CELL FIX
 ========================================================= */
 
 
@@ -30,7 +37,6 @@
     box-sizing: border-box;
 }
 
-
 html,
 body {
     margin: 0;
@@ -39,17 +45,10 @@ body {
     min-height: 100%;
 }
 
-
 body {
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    font-family: Arial, Helvetica, sans-serif;
     background: #f4f6f9;
-
     color: #212529;
-
     overflow-x: auto;
 }
 
@@ -60,17 +59,11 @@ body {
 
 .board-header {
     width: 100%;
-
     background: #0b3d91;
-
     color: #ffffff;
-
     padding: 10px 15px;
-
-    border-bottom:
-        4px solid #ffc107;
+    border-bottom: 4px solid #ffc107;
 }
-
 
 .board-header h1,
 .board-header h2,
@@ -79,36 +72,24 @@ body {
     margin: 0;
 }
 
-
 .board-title {
     font-size: 24px;
-
     font-weight: 800;
-
     text-align: center;
-
     letter-spacing: .5px;
 }
 
-
 .board-subtitle {
     text-align: center;
-
     font-size: 15px;
-
     margin-top: 3px;
 }
 
-
 .board-header-row {
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     gap: 10px;
-
     flex-wrap: wrap;
 }
 
@@ -121,10 +102,8 @@ body {
 #liveTime,
 #lastUpdate {
     font-weight: 600;
-
     white-space: nowrap;
 }
-
 
 #liveDate,
 #liveTime {
@@ -136,15 +115,10 @@ body {
    DATABASE STATUS
 ========================================================= */
 
-#databaseStatus {
-    font-weight: 700;
-
-    white-space: nowrap;
-}
-
-
+#databaseStatus,
 #footerDatabase {
     font-weight: 700;
+    white-space: nowrap;
 }
 
 
@@ -154,32 +128,22 @@ body {
 
 .board-toolbar {
     background: #ffffff;
-
     border-bottom: 1px solid #dee2e6;
-
     padding: 8px 10px;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     flex-wrap: wrap;
-
     gap: 6px;
 
     position: sticky;
-
     top: 0;
-
     z-index: 1000;
 }
 
-
 .board-toolbar .btn {
     font-weight: 600;
-
     white-space: nowrap;
 }
 
@@ -190,31 +154,21 @@ body {
 
 .search-wrapper {
     position: relative;
-
     min-width: 230px;
-
     max-width: 360px;
-
     flex: 1;
 }
 
-
 #searchBox {
     width: 100%;
-
     min-height: 38px;
 
     border: 1px solid #adb5bd;
-
     border-radius: 6px;
 
-    padding:
-        7px
-        12px;
-
+    padding: 7px 12px;
     outline: none;
 }
-
 
 #searchBox:focus {
     border-color: #0d6efd;
@@ -224,20 +178,16 @@ body {
         rgba(13, 110, 253, .12);
 }
 
-
 #searchResult {
     position: absolute;
 
     top: calc(100% + 4px);
-
     left: 0;
-
     right: 0;
 
     background: #ffffff;
 
     border: 1px solid #ced4da;
-
     border-radius: 6px;
 
     box-shadow:
@@ -245,49 +195,38 @@ body {
         rgba(0, 0, 0, .15);
 
     max-height: 350px;
-
     overflow-y: auto;
 
     z-index: 5000;
 }
 
-
 .search-item {
     display: flex;
-
     flex-direction: column;
-
     gap: 2px;
 
     padding: 9px 11px;
 
-    border-bottom:
-        1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
 
     cursor: pointer;
-
     background: #ffffff;
 }
-
 
 .search-item:hover {
     background: #f1f5ff;
 }
 
-
 .search-item b {
     font-size: 15px;
 }
-
 
 .search-item span {
     font-size: 12px;
 }
 
-
 .search-item small {
     color: #6c757d;
-
     font-size: 11px;
 }
 
@@ -298,27 +237,21 @@ body {
 
 .counter-container {
     display: flex;
-
     justify-content: center;
-
     align-items: stretch;
 
     gap: 8px;
-
     flex-wrap: wrap;
 
     padding: 8px;
 }
-
 
 .counter-box {
     min-width: 120px;
 
     background: #ffffff;
 
-    border:
-        1px solid #dee2e6;
-
+    border: 1px solid #dee2e6;
     border-radius: 7px;
 
     padding: 7px 12px;
@@ -330,21 +263,16 @@ body {
         rgba(0, 0, 0, .08);
 }
 
-
 .counter-box .counter-title {
     font-size: 11px;
-
     color: #6c757d;
 
     text-transform: uppercase;
-
     font-weight: 700;
 }
 
-
 .counter-box .counter-value {
     font-size: 21px;
-
     font-weight: 800;
 }
 
@@ -357,12 +285,10 @@ body {
     width: 100%;
 
     overflow-x: auto;
-
     overflow-y: visible;
 
     padding: 8px;
 }
-
 
 .board-wrapper {
     width: 100%;
@@ -380,12 +306,10 @@ body {
 #coachBoard,
 .coach-board,
 .board-table {
-    border-collapse: collapse;
-
-    border-spacing: 0;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
 
     width: 100%;
-
     min-width: 900px;
 
     table-layout: fixed;
@@ -394,23 +318,43 @@ body {
 }
 
 
+/* =========================================================
+   IMPORTANT TABLE BORDER FIX
+   ---------------------------------------------------------
+   Only TD/TH controls the visible borders.
+   TR border removed to prevent double lines.
+========================================================= */
+
+#coachBoard tr,
+.coach-board tr,
+.board-table tr,
+.coach-table tr {
+    border: 0 !important;
+}
+
+
+/* =========================================================
+   TABLE CELLS
+========================================================= */
+
 #coachBoard th,
 #coachBoard td,
 .coach-board th,
 .coach-board td,
 .board-table th,
 .board-table td {
-    border:
-        1px solid #343a40;
+    border: 1px solid #343a40;
 
     padding: 2px;
 
     text-align: center;
-
     vertical-align: middle;
 }
+
+
 /* =========================================================
-   H3 / D3 ROW BORDER FIX
+   N SHOP COACH TABLE
+   H3 / D3 BORDER FIX
 ========================================================= */
 
 .coach-table {
@@ -418,18 +362,41 @@ body {
     border-spacing: 0 !important;
 }
 
+/*
+   Remove all row borders.
+   This prevents H3 + D3 double line.
+*/
 .coach-table tr {
-    border-top: 0 !important;
-    border-bottom: 1px solid #d5d9dc !important;
+    border: 0 !important;
 }
 
-.coach-table tr + tr {
-    border-top: 0 !important;
-}
-
+/*
+   Normal coach-table cell border.
+*/
 .coach-table th,
 .coach-table td {
     border: 1px solid #d5d9dc !important;
+}
+
+
+/*
+   H3 ROW
+   Keep ONE bottom border.
+*/
+.coach-table tbody tr:nth-child(3) th,
+.coach-table tbody tr:nth-child(3) td {
+    border-bottom: 1px solid #d5d9dc !important;
+}
+
+
+/*
+   D3 ROW
+   Remove TOP border so H3/D3 does NOT create
+   two horizontal lines.
+*/
+.coach-table tbody tr:nth-child(4) th,
+.coach-table tbody tr:nth-child(4) td {
+    border-top: 0 !important;
 }
 
 
@@ -441,11 +408,9 @@ body {
 .coach-board th,
 .board-table th {
     background: #212529;
-
     color: #ffffff;
 
     font-size: 12px;
-
     font-weight: 800;
 
     height: 32px;
@@ -462,7 +427,6 @@ body {
 .coach-board td,
 .board-table td {
     height: 62px;
-
     min-height: 62px;
 
     background: #ffffff;
@@ -477,7 +441,6 @@ body {
         background-color .15s ease,
         box-shadow .15s ease;
 }
-
 
 #coachBoard td:hover,
 .coach-board td:hover,
@@ -498,22 +461,13 @@ body {
 .coach-board td[data-occupied="false"],
 .board-table td[data-occupied="false"] {
     background: #ffffff;
-
     color: transparent;
 }
 
-
-/*
-   IMPORTANT:
-   Empty cell must remain visually blank.
-*/
-
 .empty-cell {
     background: #ffffff !important;
-
     color: transparent !important;
 }
-
 
 .empty-cell::before,
 .empty-cell::after {
@@ -536,9 +490,7 @@ body {
 
 .coach-card {
     width: 100%;
-
     height: 100%;
-
     min-height: 55px;
 
     display: flex;
@@ -546,7 +498,6 @@ body {
     flex-direction: column;
 
     justify-content: center;
-
     align-items: center;
 
     gap: 1px;
@@ -556,7 +507,6 @@ body {
     padding: 2px;
 
     user-select: none;
-
     -webkit-user-select: none;
 
     cursor: grab;
@@ -564,15 +514,12 @@ body {
     overflow: hidden;
 }
 
-
 .coach-card:active {
     cursor: grabbing;
 }
 
-
 .coach-number {
     font-size: 18px;
-
     line-height: 20px;
 
     font-weight: 900;
@@ -582,10 +529,8 @@ body {
     white-space: nowrap;
 }
 
-
 .coach-type {
     font-size: 10px;
-
     line-height: 12px;
 
     font-weight: 700;
@@ -593,16 +538,13 @@ body {
     white-space: nowrap;
 
     overflow: hidden;
-
     text-overflow: ellipsis;
 
     max-width: 100%;
 }
 
-
 .coach-status {
     font-size: 10px;
-
     line-height: 12px;
 
     font-weight: 900;
@@ -617,70 +559,51 @@ body {
 
 .status-empty {
     background: #ffffff;
-
     color: #212529;
 }
 
-
 .status-po {
     background: #ffc107;
-
     color: #000000;
 }
-
 
 .status-s {
     background: #dc3545;
-
     color: #ffffff;
 }
-
 
 .status-lm {
     background: #0dcaf0;
-
     color: #000000;
 }
-
 
 .status-med {
     background: #6f42c1;
-
     color: #ffffff;
 }
-
 
 .status-rl {
     background: #198754;
-
     color: #ffffff;
 }
-
 
 .status-r1 {
     background: #20c997;
-
     color: #000000;
 }
-
 
 .status-rs {
     background: #fd7e14;
-
     color: #000000;
 }
 
-
 .status-l {
     background: #0d6efd;
-
     color: #ffffff;
 }
 
-
 .status-hvy {
     background: #343a40;
-
     color: #ffffff;
 }
 
@@ -723,7 +646,6 @@ body {
     cursor: crosshair;
 }
 
-
 .return-mode-active td[data-occupied="false"] {
     background: #e8f5e9 !important;
 
@@ -733,13 +655,10 @@ body {
     outline-offset: -2px;
 }
 
-
 .return-mode-active td[data-occupied="true"] {
     cursor: not-allowed;
-
     opacity: .85;
 }
-
 
 #returnModeIndicator {
     white-space: nowrap;
@@ -747,7 +666,6 @@ body {
     max-width: calc(100vw - 20px);
 
     overflow: hidden;
-
     text-overflow: ellipsis;
 }
 
@@ -761,9 +679,7 @@ body {
 
     background: #ffffff;
 
-    border:
-        1px solid #dee2e6;
-
+    border: 1px solid #dee2e6;
     border-radius: 8px;
 
     overflow: hidden;
@@ -772,7 +688,6 @@ body {
         0 2px 7px
         rgba(0, 0, 0, .08);
 }
-
 
 .pulled-out-header {
     background: #dc3545;
@@ -786,17 +701,14 @@ body {
     font-weight: 800;
 }
 
-
 #pulledOutList,
 #pulledOutCoaches {
     padding: 8px;
 }
 
-
 #pulledOutTableBody {
     background: #ffffff;
 }
-
 
 .pulled-out-item {
     display: flex;
@@ -807,24 +719,19 @@ body {
 
     padding: 7px;
 
-    border-bottom:
-        1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
 
     flex-wrap: wrap;
 }
-
 
 .pulled-out-item strong {
     font-size: 16px;
 }
 
-
 .pulled-out-item span {
     font-size: 12px;
-
     font-weight: 600;
 }
-
 
 .pulled-out-item small {
     color: #6c757d;
@@ -833,7 +740,6 @@ body {
 
     min-width: 160px;
 }
-
 
 #pulledOutTableBody td {
     padding: 6px;
@@ -850,35 +756,27 @@ body {
 
 #coachModal .modal-content {
     border-radius: 10px;
-
     overflow: hidden;
 }
 
-
 #coachModal .modal-header {
     background: #0b3d91;
-
     color: #ffffff;
 }
-
 
 #coachModal .modal-title {
     font-weight: 800;
 }
 
-
 #coachModal .form-label {
     font-weight: 700;
-
     font-size: 13px;
 }
-
 
 #coachModal input,
 #coachModal select {
     min-height: 38px;
 }
-
 
 #coachModal input:read-only {
     background: #f1f3f5;
@@ -893,26 +791,12 @@ body {
     font-weight: 600;
 }
 
-
-#saveCoachBtn {
-    min-width: 80px;
-}
-
-
-#updateCoachBtn {
-    min-width: 80px;
-}
-
-
-#deleteCoachBtn {
-    min-width: 80px;
-}
-
-
+#saveCoachBtn,
+#updateCoachBtn,
+#deleteCoachBtn,
 #pullOutBtn {
     min-width: 80px;
 }
-
 
 #returnToBoardBtn {
     min-width: 100px;
@@ -927,13 +811,11 @@ body {
     position: fixed !important;
 
     top: 20px !important;
-
     right: 20px !important;
 
     z-index: 99999 !important;
 
     min-width: 250px;
-
     max-width: 420px;
 
     box-shadow:
@@ -977,10 +859,8 @@ body {
     background: #ffffff;
 }
 
-
 :fullscreen .board-toolbar {
     position: sticky;
-
     top: 0;
 }
 
@@ -995,16 +875,13 @@ body {
         font-size: 18px;
     }
 
-
     .board-subtitle {
         font-size: 12px;
     }
 
-
     .board-header {
         padding: 7px;
     }
-
 
     .board-toolbar {
         justify-content: flex-start;
@@ -1016,21 +893,17 @@ body {
         -webkit-overflow-scrolling: touch;
     }
 
-
     .board-toolbar .btn {
         font-size: 12px;
 
-        padding:
-            6px 9px;
+        padding: 6px 9px;
     }
-
 
     .search-wrapper {
         min-width: 180px;
 
         flex: 0 0 180px;
     }
-
 
     .counter-container {
         justify-content: flex-start;
@@ -1042,13 +915,11 @@ body {
         padding: 6px;
     }
 
-
     .counter-box {
         min-width: 100px;
 
         flex: 0 0 100px;
     }
-
 
     #coachBoard,
     .coach-board,
@@ -1056,32 +927,25 @@ body {
         min-width: 760px;
     }
 
-
     #coachBoard td,
     .coach-board td,
     .board-table td {
         height: 55px;
-
         min-height: 55px;
     }
 
-
     .coach-number {
         font-size: 15px;
-
         line-height: 17px;
     }
-
 
     .coach-type {
         font-size: 9px;
     }
 
-
     .coach-status {
         font-size: 9px;
     }
-
 
     #returnModeIndicator {
         top: 5px !important;
@@ -1091,25 +955,20 @@ body {
         padding: 7px 9px !important;
     }
 
-
     .pulled-out-item {
         align-items: flex-start;
-
         flex-direction: column;
     }
-
 
     .pulled-out-item small {
         min-width: 0;
     }
-
 
     .board-footer {
         justify-content: center;
 
         text-align: center;
     }
-
 }
 
 
@@ -1123,18 +982,15 @@ body {
         font-size: 16px;
     }
 
-
     .board-subtitle {
         font-size: 10px;
     }
-
 
     #liveDate,
     #liveTime,
     #lastUpdate {
         font-size: 10px;
     }
-
 
     .counter-box {
         min-width: 90px;
@@ -1144,18 +1000,15 @@ body {
         padding: 5px;
     }
 
-
     .counter-box .counter-value {
         font-size: 17px;
     }
-
 
     #coachBoard,
     .coach-board,
     .board-table {
         min-width: 700px;
     }
-
 
     #coachBoard th,
     #coachBoard td,
@@ -1166,24 +1019,20 @@ body {
         font-size: 10px;
     }
 
-
     #coachBoard td,
     .coach-board td,
     .board-table td {
         height: 50px;
     }
 
-
     .coach-number {
         font-size: 13px;
     }
-
 
     .coach-type,
     .coach-status {
         font-size: 8px;
     }
-
 }
 
 
@@ -1199,45 +1048,42 @@ body {
         touch-action: manipulation;
     }
 
-
     #coachBoard td,
     .coach-board td,
     .board-table td {
         touch-action: manipulation;
     }
-
 }
 
 
 /* =========================================================
-   PRINT / A4
+   PRINT / A4 LANDSCAPE
 ========================================================= */
 
 @media print {
 
     @page {
         size: A4 landscape;
-
         margin: 5mm;
     }
-
 
     html,
     body {
         width: 100%;
+        height: auto;
 
         margin: 0;
-
         padding: 0;
 
         background: #ffffff !important;
+
+        overflow: visible !important;
     }
 
 
-    /*
-       Hide everything that should not
-       appear on printed board.
-    */
+    /* -----------------------------------------------------
+       HIDE NON-PRINT ELEMENTS
+    ----------------------------------------------------- */
 
     .board-toolbar,
     .counter-container,
@@ -1255,6 +1101,10 @@ body {
     }
 
 
+    /* -----------------------------------------------------
+       HEADER
+    ----------------------------------------------------- */
+
     .board-header {
         background: #ffffff !important;
 
@@ -1263,26 +1113,32 @@ body {
         border: 0 !important;
 
         padding: 2mm 0 !important;
-    }
 
+        width: 100% !important;
+    }
 
     .board-title {
-        font-size: 16pt;
+        font-size: 16pt !important;
 
         color: #000000 !important;
     }
-
 
     .board-subtitle {
-        font-size: 9pt;
+        font-size: 9pt !important;
 
         color: #000000 !important;
     }
 
+
+    /* -----------------------------------------------------
+       BOARD CONTAINER
+    ----------------------------------------------------- */
 
     .board-container,
     .board-wrapper {
-        width: 100%;
+        width: 100% !important;
+
+        max-width: 100% !important;
 
         overflow: visible !important;
 
@@ -1292,16 +1148,34 @@ body {
     }
 
 
+    /* -----------------------------------------------------
+       TABLE
+    ----------------------------------------------------- */
+
     #coachBoard,
     .coach-board,
     .board-table {
         width: 100% !important;
+
+        max-width: 100% !important;
 
         min-width: 0 !important;
 
         table-layout: fixed !important;
 
         border-collapse: collapse !important;
+
+        border-spacing: 0 !important;
+
+        margin: 0 !important;
+    }
+
+
+    #coachBoard tr,
+    .coach-board tr,
+    .board-table tr,
+    .coach-table tr {
+        border: 0 !important;
     }
 
 
@@ -1311,11 +1185,9 @@ body {
     .coach-board td,
     .board-table th,
     .board-table td {
-        border:
-            .3mm solid #000000 !important;
+        border: .3mm solid #000000 !important;
 
-        padding:
-            1mm !important;
+        padding: 1mm !important;
 
         height: auto !important;
 
@@ -1326,6 +1198,10 @@ body {
         color: #000000 !important;
     }
 
+
+    /* -----------------------------------------------------
+       PRINT TABLE HEADER
+    ----------------------------------------------------- */
 
     #coachBoard th,
     .coach-board th,
@@ -1338,6 +1214,10 @@ body {
     }
 
 
+    /* -----------------------------------------------------
+       PRINT COACH CARD
+    ----------------------------------------------------- */
+
     .coach-card {
         min-height: 0 !important;
 
@@ -1348,16 +1228,15 @@ body {
         background: transparent !important;
 
         color: #000000 !important;
+
+        border-radius: 0 !important;
     }
 
 
-    /*
-       PRINT:
-       Coach number only.
-    */
-
     .coach-number {
         font-size: 10pt !important;
+
+        line-height: normal !important;
 
         font-weight: 900 !important;
 
@@ -1371,10 +1250,9 @@ body {
     }
 
 
-    /*
-       Keep status background visible
-       where browser supports background printing.
-    */
+    /* -----------------------------------------------------
+       PRINT STATUS COLOUR
+    ----------------------------------------------------- */
 
     .status-po,
     .status-s,
@@ -1385,15 +1263,16 @@ body {
     .status-rs,
     .status-l,
     .status-hvy {
-        -webkit-print-color-adjust: exact;
 
-        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact !important;
+
+        print-color-adjust: exact !important;
     }
 
 
-    /*
-       Empty cells stay blank.
-    */
+    /* -----------------------------------------------------
+       EMPTY CELL
+    ----------------------------------------------------- */
 
     .empty-cell {
         background: #ffffff !important;
@@ -1402,48 +1281,43 @@ body {
     }
 
 
-    /*
-       Prevent unnecessary page break.
-    */
+    /* -----------------------------------------------------
+       PAGE BREAK
+    ----------------------------------------------------- */
 
     tr,
     td,
     th {
         page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
-
 
     table {
-        page-break-inside: auto;
+        page-break-inside: auto !important;
     }
-
 }
 
 
 /* =========================================================
-   PRINT PORTRAIT SAFETY
+   PRINT PORTRAIT
 ========================================================= */
 
 @media print and (orientation: portrait) {
 
     @page {
         size: A4 portrait;
-
         margin: 5mm;
     }
-
 
     #coachBoard,
     .coach-board,
     .board-table {
-        font-size: 7pt;
+        font-size: 7pt !important;
     }
-
 
     .coach-number {
         font-size: 9pt !important;
     }
-
 }
 
 
@@ -1455,10 +1329,8 @@ body {
 .board-wrapper::-webkit-scrollbar,
 #searchResult::-webkit-scrollbar {
     height: 8px;
-
     width: 8px;
 }
-
 
 .board-container::-webkit-scrollbar-thumb,
 .board-wrapper::-webkit-scrollbar-thumb,
@@ -1467,7 +1339,6 @@ body {
 
     border-radius: 10px;
 }
-
 
 .board-container::-webkit-scrollbar-track,
 .board-wrapper::-webkit-scrollbar-track,
@@ -1490,29 +1361,10 @@ td:focus-visible {
 
     outline-offset: 2px;
 }
-/* =========================================================
-   N SHOP H3 - D3 BORDER FIX
-========================================================= */
 
-.coach-table {
-    border-collapse: collapse !important;
-    border-spacing: 0 !important;
-}
-
-/* H3 row bottom border */
-.coach-table tbody tr:nth-child(3) th,
-.coach-table tbody tr:nth-child(3) td {
-    border-bottom: 1px solid #d5d9dc !important;
-}
-
-/* D3 row top border remove */
-.coach-table tbody tr:nth-child(4) th,
-.coach-table tbody tr:nth-child(4) td {
-    border-top: 0 !important;
-}
 
 /* =========================================================
    END
 ========================================================= */
 
-console.log("MR CO-ORDINATION style.css VERSION 9.1 LOADED");
+console.log("MR CO-ORDINATION style.css VERSION 9.2 FINAL FIXED");
