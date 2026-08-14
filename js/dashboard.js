@@ -1,14 +1,13 @@
 /* =========================================================
    MR CO-ORDINATION DASHBOARD
    DASHBOARD.JS
-   VERSION 11.1 FINAL FIXED
-
-   COMPATIBLE WITH:
+   VERSION 11.2 FINAL
    ---------------------------------------------------------
+   COMPATIBLE WITH:
    firebase-config.js VERSION 11.1
    firebase-board.js VERSION 10.0
    board.js VERSION 10.0
-   dashboard.html
+   dashboard.html VERSION 11.2
 
    FEATURES
    ---------------------------------------------------------
@@ -18,6 +17,7 @@
    MR / SCR TOTAL
    LIFTING BAY TOTAL
    J SHOP TOTAL
+   CR SHOP TOTAL
 
    N SHOP COACH NUMBERS
    N SHOP SEARCH
@@ -39,7 +39,6 @@
 import {
     database
 } from "./firebase-config.js";
-
 
 import {
     ref,
@@ -128,12 +127,10 @@ function detectShop(
             coach?.shop
         );
 
-
     const storedLine =
         normalizeText(
             coach?.line
         );
-
 
     const actualLine =
         storedLine ||
@@ -141,8 +138,12 @@ function detectShop(
 
 
     /* =====================================================
-       1. STORED SHOP HAS HIGHEST PRIORITY
+       1. STORED SHOP
+       STORED SHOP HAS HIGHEST PRIORITY
     ===================================================== */
+
+
+    /* LIFTING BAY */
 
     if (
         storedShop.includes("LIFTING")
@@ -153,9 +154,11 @@ function detectShop(
     }
 
 
+    /* N SHOP */
+
     if (
-        storedShop === "N SHOP" ||
         storedShop === "N" ||
+        storedShop === "N SHOP" ||
         storedShop.includes("N SHOP")
     ) {
 
@@ -164,9 +167,11 @@ function detectShop(
     }
 
 
+    /* M SHOP */
+
     if (
-        storedShop === "M SHOP" ||
         storedShop === "M" ||
+        storedShop === "M SHOP" ||
         storedShop.includes("M SHOP")
     ) {
 
@@ -175,11 +180,17 @@ function detectShop(
     }
 
 
+    /* MR / SCR */
+
     if (
+        storedShop === "SCR" ||
+        storedShop === "MR" ||
+        storedShop === "MR SCR" ||
+        storedShop === "MR/SCR" ||
+        storedShop === "MR / SCR" ||
         storedShop.includes("MR / SCR") ||
         storedShop.includes("MR/SCR") ||
         storedShop.includes("MR SCR") ||
-        storedShop === "SCR" ||
         storedShop.includes("SCR SHOP")
     ) {
 
@@ -187,6 +198,8 @@ function detectShop(
 
     }
 
+
+    /* J SHOP */
 
     if (
         storedShop === "J" ||
@@ -198,6 +211,8 @@ function detectShop(
 
     }
 
+
+    /* CR SHOP */
 
     if (
         storedShop === "CR" ||
@@ -214,15 +229,10 @@ function detectShop(
        2. DETECT FROM LINE
     ===================================================== */
 
-    /*
+
+    /* =====================================================
        N SHOP
-       Examples:
-       N1
-       N2
-       N-1
-       N SHOP
-       NSHOP
-    */
+    ===================================================== */
 
     if (
         /^N(?:\s|[-_]|SHOP|[0-9])/.test(
@@ -233,7 +243,6 @@ function detectShop(
         return "N SHOP";
 
     }
-
 
     if (
         actualLine === "N"
@@ -257,7 +266,6 @@ function detectShop(
         return "M SHOP";
 
     }
-
 
     if (
         actualLine === "M"
@@ -284,7 +292,7 @@ function detectShop(
 
 
     /* =====================================================
-       LIFTING
+       LIFTING BAY
     ===================================================== */
 
     if (
@@ -310,7 +318,6 @@ function detectShop(
 
     }
 
-
     if (
         actualLine === "J"
     ) {
@@ -333,6 +340,10 @@ function detectShop(
 
     }
 
+
+    /* =====================================================
+       UNKNOWN
+    ===================================================== */
 
     return "";
 
@@ -396,9 +407,7 @@ function getAllBoardCoaches(
                         );
 
 
-                    /*
-                       Ignore empty cells
-                    */
+                    /* Ignore empty cells */
 
                     if (!coachNo) {
 
@@ -494,6 +503,8 @@ function calculateDashboard(
     coaches.forEach(
         coach => {
 
+            /* N SHOP */
+
             if (
                 coach.shop ===
                 "N SHOP"
@@ -504,6 +515,9 @@ function calculateDashboard(
                 );
 
             }
+
+
+            /* M SHOP */
 
             else if (
                 coach.shop ===
@@ -516,6 +530,9 @@ function calculateDashboard(
 
             }
 
+
+            /* MR / SCR */
+
             else if (
                 coach.shop ===
                 "MR SCR SHOP"
@@ -526,6 +543,9 @@ function calculateDashboard(
                 );
 
             }
+
+
+            /* LIFTING BAY */
 
             else if (
                 coach.shop ===
@@ -538,6 +558,9 @@ function calculateDashboard(
 
             }
 
+
+            /* J SHOP */
+
             else if (
                 coach.shop ===
                 "J SHOP"
@@ -548,6 +571,9 @@ function calculateDashboard(
                 );
 
             }
+
+
+            /* CR SHOP */
 
             else if (
                 coach.shop ===
@@ -593,17 +619,12 @@ function setText(
 
 
 /* =========================================================
-   RENDER TOTAL
+   RENDER GRAND TOTAL
 ========================================================= */
 
 function renderTotal(
     result
 ) {
-
-    /*
-       Your dashboard.html uses:
-       #grandTotal
-    */
 
     setText(
         "grandTotal",
@@ -611,9 +632,7 @@ function renderTotal(
     );
 
 
-    /*
-       Compatibility with other dashboard HTML
-    */
+    /* Compatibility IDs */
 
     [
         "totalCoach",
@@ -642,7 +661,10 @@ function renderShopCounts(
     result
 ) {
 
-    /* N SHOP */
+
+    /* =====================================================
+       N SHOP
+    ===================================================== */
 
     [
         "nShopTotal",
@@ -661,7 +683,9 @@ function renderShopCounts(
     );
 
 
-    /* M SHOP */
+    /* =====================================================
+       M SHOP
+    ===================================================== */
 
     [
         "mShopTotal",
@@ -680,7 +704,9 @@ function renderShopCounts(
     );
 
 
-    /* MR / SCR */
+    /* =====================================================
+       MR / SCR
+    ===================================================== */
 
     [
         "mrScrTotal",
@@ -699,7 +725,9 @@ function renderShopCounts(
     );
 
 
-    /* LIFTING BAY */
+    /* =====================================================
+       LIFTING BAY
+    ===================================================== */
 
     [
         "liftingBayTotal",
@@ -718,7 +746,9 @@ function renderShopCounts(
     );
 
 
-    /* J SHOP */
+    /* =====================================================
+       J SHOP
+    ===================================================== */
 
     [
         "jShopTotal",
@@ -731,6 +761,27 @@ function renderShopCounts(
             setText(
                 id,
                 result.jShop.length
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       CR SHOP
+    ===================================================== */
+
+    [
+        "crShopTotal",
+        "crShopCount",
+        "crShopCoach",
+        "crShopCoaches"
+    ].forEach(
+        id => {
+
+            setText(
+                id,
+                result.crShop.length
             );
 
         }
@@ -764,14 +815,10 @@ function sortCoachNumbers(
 
 
             const aNum =
-                Number(
-                    aNo
-                );
+                Number(aNo);
 
             const bNum =
-                Number(
-                    bNo
-                );
+                Number(bNo);
 
 
             if (
@@ -835,7 +882,7 @@ function escapeHTML(
 
 
 /* =========================================================
-   RENDER N SHOP COACHES
+   RENDER N SHOP COACH NUMBERS
 ========================================================= */
 
 function renderNShopCoachNumbers(
@@ -849,7 +896,6 @@ function renderNShopCoachNumbers(
 
 
     const unique = [];
-
 
     const seen =
         new Set();
@@ -869,7 +915,9 @@ function renderNShopCoachNumbers(
                 !seen.has(number)
             ) {
 
-                seen.add(number);
+                seen.add(
+                    number
+                );
 
                 unique.push(
                     coach
@@ -881,27 +929,15 @@ function renderNShopCoachNumbers(
     );
 
 
-    /*
-       Cache for search
-    */
-
     nShopCoachesCache =
         unique;
 
-
-    /*
-       Total N SHOP NEW
-    */
 
     setText(
         "nShopNewTotal",
         unique.length
     );
 
-
-    /*
-       Main container
-    */
 
     const container =
         $("nShopCoachList");
@@ -959,12 +995,10 @@ function renderFilteredNShop(
                         coach.coachNo
                     );
 
-
                 const line =
                     upper(
                         coach.line
                     );
-
 
                 const position =
                     upper(
@@ -1057,6 +1091,20 @@ function setupNShopSearch() {
     }
 
 
+    if (
+        search.dataset.dashboardReady ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    search.dataset.dashboardReady =
+        "true";
+
+
     search.addEventListener(
         "input",
         event => {
@@ -1088,6 +1136,10 @@ function updateDashboard(
             dashboardBoardData
         );
 
+
+    /* =====================================================
+       CONSOLE DEBUG
+    ===================================================== */
 
     console.log(
         "======================================"
@@ -1128,9 +1180,18 @@ function updateDashboard(
     );
 
     console.log(
+        "CR SHOP:",
+        result.crShop.length
+    );
+
+    console.log(
         "======================================"
     );
 
+
+    /* =====================================================
+       RENDER
+    ===================================================== */
 
     renderTotal(
         result
@@ -1153,7 +1214,7 @@ function updateDashboard(
 
 
 /* =========================================================
-   DATABASE STATUS ELEMENT
+   DATABASE STATUS ELEMENTS
 ========================================================= */
 
 function getDatabaseStatusElements() {
@@ -1659,14 +1720,11 @@ function updateClock() {
         );
 
 
-    /*
-       Your HTML:
-       #currentDateTime
-    */
-
     const combined =
         `${date} | ${time}`;
 
+
+    /* Current HTML */
 
     const currentDateTime =
         $("currentDateTime");
@@ -1680,9 +1738,7 @@ function updateClock() {
     }
 
 
-    /*
-       Compatibility
-    */
+    /* Compatibility */
 
     const liveDate =
         $("liveDate");
@@ -1728,11 +1784,6 @@ function updateClock() {
 
 function setupRefreshButton() {
 
-    /*
-       Your HTML uses:
-       refreshDashboardBtn
-    */
-
     const button =
         $("refreshDashboardBtn") ||
         $("dashboardRefreshBtn") ||
@@ -1749,10 +1800,6 @@ function setupRefreshButton() {
 
     }
 
-
-    /*
-       Prevent duplicate event
-    */
 
     if (
         button.dataset.dashboardReady ===
@@ -1797,7 +1844,7 @@ async function startDashboard() {
     );
 
     console.log(
-        "VERSION 11.1 FINAL FIXED"
+        "VERSION 11.2 FINAL - CR SHOP FIX"
     );
 
     console.log(
@@ -1813,9 +1860,7 @@ async function startDashboard() {
     );
 
 
-    /*
-       Initial UI
-    */
+    /* Initial UI */
 
     updateDatabaseStatus(
         "connecting"
@@ -1825,44 +1870,32 @@ async function startDashboard() {
     updateClock();
 
 
-    /*
-       Firebase connection
-    */
+    /* Firebase connection */
 
     startDatabaseStatusListener();
 
 
-    /*
-       Initial board load
-    */
+    /* Initial board load */
 
     await loadDashboard();
 
 
-    /*
-       Realtime listener
-    */
+    /* Realtime listener */
 
     startDashboardListener();
 
 
-    /*
-       N Shop search
-    */
+    /* N Shop search */
 
     setupNShopSearch();
 
 
-    /*
-       Refresh
-    */
+    /* Refresh */
 
     setupRefreshButton();
 
 
-    /*
-       Clock
-    */
+    /* Clock */
 
     setInterval(
         updateClock,
@@ -1924,5 +1957,5 @@ window.refreshDashboard =
 ========================================================= */
 
 console.log(
-    "MR CO-ORDINATION DASHBOARD.JS VERSION 11.1 FINAL FIXED"
+    "MR CO-ORDINATION DASHBOARD.JS VERSION 11.2 FINAL - CR SHOP FIX"
 );
