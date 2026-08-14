@@ -1,7 +1,9 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    BOARD.JS
-   VERSION 10.0 FINAL
+   VERSION 11.0 FINAL
+
+   BOARD + PULL OUT + RETURN + SEARCH + DASHBOARD COMPATIBILITY
 
    FEATURES
    ---------------------------------------------------------
@@ -11,6 +13,7 @@
    DELETE
    PULL OUT
    RETURN
+   RETURN TO ORIGINAL CELL
    RETURN TO ANY EMPTY CELL
    MOVE
    SWAP
@@ -25,10 +28,9 @@
    FULL SCREEN
    LIVE DATE / TIME
    MOBILE LONG PRESS
-   PULLED OUT REALTIME LIST
-   RETURN TO ORIGINAL CELL
-   RETURN TO ANY EMPTY CELL
+   REALTIME PULLED-OUT LIST
    DUPLICATE EVENT PROTECTION
+   DASHBOARD COMPATIBILITY
 ========================================================= */
 
 
@@ -63,13 +65,12 @@ import {
 
 
 /* =========================================================
-   GLOBAL VARIABLES
+   GLOBAL STATE
 ========================================================= */
 
 let boardData = {};
 
 let currentCell = null;
-
 let currentCoach = null;
 
 let currentPulledCoach = null;
@@ -77,27 +78,26 @@ let currentPulledCoach = null;
 let draggedCell = null;
 
 let realtimeUnsubscribe = null;
-
 let pulledOutUnsubscribe = null;
+
+let databaseUnsubscribe = null;
 
 let bootstrapModal = null;
 
 let longPressTimer = null;
-
 let longPressTriggered = false;
 
+let returnMode = false;
 let returnProcessing = false;
+
+let moveProcessing = false;
 
 let allPulledOutCoaches = [];
 
 let pulledOutSearchKeyword = "";
 
-
-/* =========================================================
-   RETURN MODE
-========================================================= */
-
-let returnMode = false;
+let boardSearchTimer = null;
+let pulledSearchTimer = null;
 
 
 /* =========================================================
@@ -113,26 +113,21 @@ function $(id) {
 
 function clean(value) {
 
-    return String(
-        value ?? ""
-    ).trim();
+    return String(value ?? "").trim();
 
 }
 
 
 function upper(value) {
 
-    return clean(value)
-        .toUpperCase();
+    return clean(value).toUpperCase();
 
 }
 
 
 function escapeHTML(value) {
 
-    return String(
-        value ?? ""
-    )
+    return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -143,7 +138,7 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   SHOP
+   SHOP DETECTION
 ========================================================= */
 
 function getShopFromLine(line) {
@@ -183,29 +178,19 @@ function getShopFromLine(line) {
 
 
 /* =========================================================
-   GET CELL
+   CELL HELPERS
 ========================================================= */
 
-function getCell(
-    line,
-    position
-) {
+function getCell(line, position) {
 
     return $(
-        `${line}_${position}`
+        `${clean(line)}_${clean(position)}`
     );
 
 }
 
 
-/* =========================================================
-   GET BOARD COACH
-========================================================= */
-
-function getBoardCoach(
-    line,
-    position
-) {
+function getBoardCoach(line, position) {
 
     return (
         boardData?.[line]?.[position] ||
@@ -221,9 +206,7 @@ function getBoardCoach(
 
 function getStatusClass(status) {
 
-    status = upper(status);
-
-    switch (status) {
+    switch (upper(status)) {
 
         case "PO":
             return "status-po";
@@ -272,68 +255,53 @@ function renderEmptyCell(cell) {
 
     cell.innerHTML = "";
 
-    cell.textContent = "";
-
     cell.dataset.occupied = "false";
 
     cell.classList.remove(
         "occupied-cell",
-        "occupied-coach"
+        "occupied-coach",
+        "status-po",
+        "status-s",
+        "status-lm",
+        "status-med",
+        "status-rl",
+        "status-r1",
+        "status-rs",
+        "status-l",
+        "status-hvy"
     );
 
-    cell.classList.add(
-        "empty-cell"
-    );
+    cell.classList.add("empty-cell");
 
 }
 
 
 /* =========================================================
-   RENDER COACH CARD
+   COACH CARD
 ========================================================= */
 
-function renderCoachCard(
-    cell,
-    coach
-) {
+function renderCoachCard(cell, coach) {
 
     if (!cell || !coach) {
         return;
     }
 
-
     const coachNo =
-        escapeHTML(
-            coach.coachNo
-        );
-
+        escapeHTML(coach.coachNo || "");
 
     const coachType =
-        escapeHTML(
-            coach.coachType
-        );
-
+        escapeHTML(coach.coachType || "");
 
     const status =
-        upper(
-            coach.status
-        ) || "--";
-
+        upper(coach.status) || "--";
 
     const statusClass =
-        getStatusClass(
-            status
-        );
-
+        getStatusClass(status);
 
     cell.innerHTML = `
 
         <div
-            class="
-                coach-card
-                occupied-coach
-                ${statusClass}
-            "
+            class="coach-card occupied-coach ${statusClass}"
             draggable="true"
         >
 
@@ -359,19 +327,11 @@ function renderCoachCard(
 
     `;
 
+    cell.dataset.occupied = "true";
 
-    cell.dataset.occupied =
-        "true";
+    cell.classList.remove("empty-cell");
 
-
-    cell.classList.remove(
-        "empty-cell"
-    );
-
-
-    cell.classList.add(
-        "occupied-cell"
-    );
+    cell.classList.add("occupied-cell");
 
 }
 
@@ -380,29 +340,17 @@ function renderCoachCard(
    RENDER CELL
 ========================================================= */
 
-function renderCell(
-    line,
-    position
-) {
+function renderCell(line, position) {
 
     const cell =
-        getCell(
-            line,
-            position
-        );
-
+        getCell(line, position);
 
     if (!cell) {
         return;
     }
 
-
     const coach =
-        getBoardCoach(
-            line,
-            position
-        );
-
+        getBoardCoach(line, position);
 
     if (coach) {
 
@@ -420,7 +368,6 @@ function renderCell(
 
     }
 
-
     attachCellEvents(
         cell,
         line,
@@ -434,63 +381,42 @@ function renderCell(
    RENDER BOARD
 ========================================================= */
 
-export function renderBoard(
-    data = {}
-) {
+export function renderBoard(data = {}) {
 
     boardData =
         data || {};
 
-
     const cells =
-        document.querySelectorAll(
-            "td[id]"
+        document.querySelectorAll("td[id]");
+
+    cells.forEach(cell => {
+
+        const id =
+            clean(cell.id);
+
+        if (!id.includes("_")) {
+            return;
+        }
+
+        const index =
+            id.lastIndexOf("_");
+
+        const line =
+            id.substring(0, index);
+
+        const position =
+            id.substring(index + 1);
+
+        renderCell(
+            line,
+            position
         );
 
-
-    cells.forEach(
-        cell => {
-
-            const id =
-                clean(
-                    cell.id
-                );
-
-
-            if (
-                !id.includes("_")
-            ) {
-                return;
-            }
-
-
-            const index =
-                id.lastIndexOf("_");
-
-
-            const line =
-                id.substring(
-                    0,
-                    index
-                );
-
-
-            const position =
-                id.substring(
-                    index + 1
-                );
-
-
-            renderCell(
-                line,
-                position
-            );
-
-        }
-    );
-
+    });
 
     updateCounters();
+
+    updateDashboardCounters();
 
 }
 
@@ -509,19 +435,14 @@ function attachCellEvents(
         return;
     }
 
-
     /*
-       Clone removes old listeners.
-       This prevents duplicate events after realtime render.
+       Remove previous listeners safely.
     */
 
     const cell =
         oldCell.cloneNode(true);
 
-
-    oldCell.replaceWith(
-        cell
-    );
+    oldCell.replaceWith(cell);
 
 
     /* =====================================================
@@ -534,25 +455,17 @@ function attachCellEvents(
 
             event.preventDefault();
 
+            if (longPressTriggered) {
 
-            if (
-                longPressTriggered
-            ) {
-
-                longPressTriggered =
-                    false;
+                longPressTriggered = false;
 
                 return;
 
             }
 
-
-            if (
-                draggedCell
-            ) {
+            if (moveProcessing) {
                 return;
             }
-
 
             /*
                RETURN MODE
@@ -571,7 +484,6 @@ function attachCellEvents(
                 return;
 
             }
-
 
             /*
                NORMAL MODE
@@ -602,13 +514,11 @@ function attachCellEvents(
 
             }
 
-
             const coach =
                 getBoardCoach(
                     line,
                     position
                 );
-
 
             if (!coach) {
 
@@ -618,27 +528,19 @@ function attachCellEvents(
 
             }
 
-
             draggedCell = {
-
                 line,
                 position
-
             };
-
 
             cell.classList.add(
                 "drag-source"
             );
 
-
-            if (
-                event.dataTransfer
-            ) {
+            if (event.dataTransfer) {
 
                 event.dataTransfer.effectAllowed =
                     "move";
-
 
                 event.dataTransfer.setData(
                     "text/plain",
@@ -679,9 +581,7 @@ function attachCellEvents(
                 return;
             }
 
-
             event.preventDefault();
-
 
             cell.classList.add(
                 "drag-over"
@@ -719,18 +619,14 @@ function attachCellEvents(
                 return;
             }
 
-
             event.preventDefault();
-
 
             cell.classList.remove(
                 "drag-over"
             );
 
-
             let source =
                 draggedCell;
-
 
             if (
                 !source &&
@@ -748,19 +644,15 @@ function attachCellEvents(
                         );
 
                 }
-                catch (error) {
-
+                catch {
                     source = null;
-
                 }
 
             }
 
-
             if (!source) {
                 return;
             }
-
 
             if (
                 source.line === line &&
@@ -773,58 +665,16 @@ function attachCellEvents(
 
             }
 
-
-            try {
-
-                const result =
-                    await updateCoachPosition(
-
-                        source.line,
-                        source.position,
-
-                        line,
-                        position
-
-                    );
-
-
-                if (
-                    result?.action ===
-                    "SWAP"
-                ) {
-
-                    showMessage(
-                        "Coaches swapped successfully.",
-                        "success"
-                    );
-
-                }
-                else {
-
-                    showMessage(
-                        "Coach moved successfully.",
-                        "success"
-                    );
-
-                }
-
-            }
-            catch (error) {
-
-                console.error(
-                    "MOVE ERROR:",
-                    error
-                );
-
-
-                showMessage(
-                    error?.message ||
-                    "Move failed.",
-                    "danger"
-                );
-
+            if (moveProcessing) {
+                return;
             }
 
+            await moveCoach(
+                source.line,
+                source.position,
+                line,
+                position
+            );
 
             clearDragState();
 
@@ -844,13 +694,11 @@ function attachCellEvents(
                 return;
             }
 
-
             if (
                 event.touches.length !== 1
             ) {
                 return;
             }
-
 
             const coach =
                 getBoardCoach(
@@ -858,15 +706,12 @@ function attachCellEvents(
                     position
                 );
 
-
             if (!coach) {
                 return;
             }
 
-
             longPressTriggered =
                 false;
-
 
             if (longPressTimer) {
 
@@ -876,7 +721,6 @@ function attachCellEvents(
 
             }
 
-
             longPressTimer =
                 setTimeout(
                     () => {
@@ -884,19 +728,14 @@ function attachCellEvents(
                         longPressTriggered =
                             true;
 
-
                         draggedCell = {
-
                             line,
                             position
-
                         };
-
 
                         cell.classList.add(
                             "drag-source"
                         );
-
 
                         showMessage(
                             "Coach selected. Touch an empty cell to move it.",
@@ -959,12 +798,138 @@ function attachCellEvents(
 
 
 /* =========================================================
+   MOVE COACH
+========================================================= */
+
+async function moveCoach(
+    fromLine,
+    fromPosition,
+    toLine,
+    toPosition
+) {
+
+    if (moveProcessing) {
+        return;
+    }
+
+    const sourceCoach =
+        getBoardCoach(
+            fromLine,
+            fromPosition
+        );
+
+    if (!sourceCoach) {
+
+        showMessage(
+            "Source coach not found.",
+            "warning"
+        );
+
+        return;
+
+    }
+
+    const targetCoach =
+        getBoardCoach(
+            toLine,
+            toPosition
+        );
+
+    const action =
+        targetCoach
+            ? "SWAP"
+            : "MOVE";
+
+    try {
+
+        moveProcessing = true;
+
+        const result =
+            await updateCoachPosition(
+                fromLine,
+                fromPosition,
+                toLine,
+                toPosition
+            );
+
+        if (
+            result?.action === "SWAP" ||
+            action === "SWAP"
+        ) {
+
+            showMessage(
+                "Coaches swapped successfully.",
+                "success"
+            );
+
+        }
+        else {
+
+            showMessage(
+                "Coach moved successfully.",
+                "success"
+            );
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "MOVE ERROR:",
+            error
+        );
+
+        showMessage(
+            error?.message ||
+            "Move failed.",
+            "danger"
+        );
+
+    }
+    finally {
+
+        moveProcessing = false;
+
+        clearDragState();
+
+    }
+
+}
+
+
+/* =========================================================
+   CLEAR DRAG
+========================================================= */
+
+function clearDragState() {
+
+    draggedCell = null;
+
+    document
+        .querySelectorAll(
+            ".drag-source,.drag-over"
+        )
+        .forEach(element => {
+
+            element.classList.remove(
+                "drag-source"
+            );
+
+            element.classList.remove(
+                "drag-over"
+            );
+
+        });
+
+}
+
+
+/* =========================================================
    RETURN MODE
 ========================================================= */
 
-function startReturnMode(
-    coach
-) {
+function startReturnMode(coach) {
 
     if (!coach) {
 
@@ -977,12 +942,7 @@ function startReturnMode(
 
     }
 
-
-    if (
-        !clean(
-            coach.id
-        )
-    ) {
+    if (!clean(coach.id)) {
 
         showMessage(
             "Invalid pulled-out coach ID.",
@@ -993,41 +953,28 @@ function startReturnMode(
 
     }
 
-
     currentPulledCoach =
         coach;
 
+    returnMode = true;
 
-    returnMode =
-        true;
-
-
-    currentCell =
-        null;
-
-
-    currentCoach =
-        null;
-
+    currentCell = null;
+    currentCoach = null;
 
     clearDragState();
-
 
     document.body.classList.add(
         "return-mode-active"
     );
 
-
     showReturnModeIndicator(
         coach
     );
 
-
     showMessage(
-        `Return mode active: select ANY EMPTY CELL for coach ${coach.coachNo}.`,
+        `Return mode active: select ANY EMPTY CELL for coach ${coach.coachNo || ""}.`,
         "info"
     );
-
 
     return true;
 
@@ -1040,38 +987,24 @@ function startReturnMode(
 
 function stopReturnMode() {
 
-    returnMode =
-        false;
+    returnMode = false;
 
+    currentPulledCoach = null;
 
-    currentPulledCoach =
-        null;
+    currentCell = null;
+    currentCoach = null;
 
-
-    currentCell =
-        null;
-
-
-    currentCoach =
-        null;
-
-
-    returnProcessing =
-        false;
-
+    returnProcessing = false;
 
     document.body.classList.remove(
         "return-mode-active"
     );
 
-
     document.body.classList.remove(
         "return-processing"
     );
 
-
     removeReturnModeIndicator();
-
 
     clearDragState();
 
@@ -1082,22 +1015,15 @@ function stopReturnMode() {
    RETURN MODE INDICATOR
 ========================================================= */
 
-function showReturnModeIndicator(
-    coach
-) {
+function showReturnModeIndicator(coach) {
 
     removeReturnModeIndicator();
 
-
     const indicator =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     indicator.id =
         "returnModeIndicator";
-
 
     indicator.style.cssText = `
         position:fixed;
@@ -1115,14 +1041,11 @@ function showReturnModeIndicator(
         text-align:center;
     `;
 
-
     indicator.innerHTML = `
 
         RETURN MODE:
         <strong>
-            ${escapeHTML(
-                coach?.coachNo || ""
-            )}
+            ${escapeHTML(coach?.coachNo || "")}
         </strong>
 
         — Select ANY EMPTY CELL
@@ -1143,11 +1066,9 @@ function showReturnModeIndicator(
 
     `;
 
-
     document.body.appendChild(
         indicator
     );
-
 
     $("cancelReturnModeBtn")
         ?.addEventListener(
@@ -1178,18 +1099,15 @@ function removeReturnModeIndicator() {
     const indicator =
         $("returnModeIndicator");
 
-
     if (indicator) {
-
         indicator.remove();
-
     }
 
 }
 
 
 /* =========================================================
-   HANDLE RETURN CELL CLICK
+   RETURN TO ANY EMPTY CELL
 ========================================================= */
 
 async function handleReturnCellClick(
@@ -1204,22 +1122,15 @@ async function handleReturnCellClick(
         return;
     }
 
-
     if (returnProcessing) {
         return;
     }
 
-
-    line =
-        clean(line);
-
-
-    position =
-        clean(position);
-
+    line = clean(line);
+    position = clean(position);
 
     /*
-       ALWAYS CHECK LATEST boardData
+       Check latest local realtime board.
     */
 
     const existingCoach =
@@ -1227,7 +1138,6 @@ async function handleReturnCellClick(
             line,
             position
         );
-
 
     if (existingCoach) {
 
@@ -1240,60 +1150,38 @@ async function handleReturnCellClick(
 
     }
 
-
     const coachNo =
         clean(
             currentPulledCoach.coachNo
-        ) ||
-        "Coach";
-
+        ) || "Coach";
 
     const yes =
         window.confirm(
             `Return coach ${coachNo} to ${line}/${position}?`
         );
 
-
     if (!yes) {
         return;
     }
 
-
     try {
 
-        returnProcessing =
-            true;
-
+        returnProcessing = true;
 
         document.body.classList.add(
             "return-processing"
         );
 
-
         const selectedCoach =
             currentPulledCoach;
 
-
-        const result =
-            await firebaseReturnCoachToBoard(
-
-                selectedCoach.id,
-
-                line,
-
-                position
-
-            );
-
-
-        console.log(
-            "RETURN SUCCESS:",
-            result
+        await firebaseReturnCoachToBoard(
+            selectedCoach.id,
+            line,
+            position
         );
 
-
         stopReturnMode();
-
 
         showMessage(
             `${coachNo} returned successfully to ${line}/${position}.`,
@@ -1304,10 +1192,9 @@ async function handleReturnCellClick(
     catch (error) {
 
         console.error(
-            "RETURN TO BOARD ERROR:",
+            "RETURN ERROR:",
             error
         );
-
 
         showMessage(
             error?.message ||
@@ -1318,9 +1205,7 @@ async function handleReturnCellClick(
     }
     finally {
 
-        returnProcessing =
-            false;
-
+        returnProcessing = false;
 
         document.body.classList.remove(
             "return-processing"
@@ -1335,9 +1220,7 @@ async function handleReturnCellClick(
    SELECT PULLED OUT COACH
 ========================================================= */
 
-export function selectPulledOutCoach(
-    coach
-) {
+export function selectPulledOutCoach(coach) {
 
     return startReturnMode(
         coach
@@ -1347,7 +1230,7 @@ export function selectPulledOutCoach(
 
 
 /* =========================================================
-   RETURN SELECTED TO ORIGINAL
+   RETURN TO ORIGINAL CELL
 ========================================================= */
 
 async function returnSelectedCoachToOriginal() {
@@ -1363,15 +1246,12 @@ async function returnSelectedCoachToOriginal() {
 
     }
 
-
     if (returnProcessing) {
         return;
     }
 
-
     const coach =
         currentPulledCoach;
-
 
     const originalLine =
         clean(
@@ -1379,13 +1259,11 @@ async function returnSelectedCoachToOriginal() {
             coach.line
         );
 
-
     const originalPosition =
         clean(
             coach.originalPosition ||
             coach.position
         );
-
 
     if (
         !originalLine ||
@@ -1401,17 +1279,11 @@ async function returnSelectedCoachToOriginal() {
 
     }
 
-
-    /*
-       Check original cell before returning
-    */
-
     const existingCoach =
         getBoardCoach(
             originalLine,
             originalPosition
         );
-
 
     if (existingCoach) {
 
@@ -1424,38 +1296,24 @@ async function returnSelectedCoachToOriginal() {
 
     }
 
-
     const yes =
         window.confirm(
             `Return ${coach.coachNo} to its original cell ${originalLine}/${originalPosition}?`
         );
 
-
     if (!yes) {
         return;
     }
 
-
     try {
 
-        returnProcessing =
-            true;
+        returnProcessing = true;
 
-
-        const result =
-            await returnPulledOutToOriginal(
-                coach.id
-            );
-
-
-        console.log(
-            "RETURN ORIGINAL SUCCESS:",
-            result
+        await returnPulledOutToOriginal(
+            coach.id
         );
 
-
         stopReturnMode();
-
 
         showMessage(
             `${coach.coachNo} returned to its original cell.`,
@@ -1470,7 +1328,6 @@ async function returnSelectedCoachToOriginal() {
             error
         );
 
-
         showMessage(
             error?.message ||
             "Return failed.",
@@ -1480,42 +1337,9 @@ async function returnSelectedCoachToOriginal() {
     }
     finally {
 
-        returnProcessing =
-            false;
+        returnProcessing = false;
 
     }
-
-}
-
-
-/* =========================================================
-   CLEAR DRAG
-========================================================= */
-
-function clearDragState() {
-
-    draggedCell =
-        null;
-
-
-    document
-        .querySelectorAll(
-            ".drag-source,.drag-over"
-        )
-        .forEach(
-            element => {
-
-                element.classList.remove(
-                    "drag-source"
-                );
-
-
-                element.classList.remove(
-                    "drag-over"
-                );
-
-            }
-        );
 
 }
 
@@ -1531,15 +1355,14 @@ export async function loadBoard() {
         const data =
             await getBoard();
 
-
         boardData =
             data || {};
-
 
         renderBoard(
             boardData
         );
 
+        updateLastUpdate();
 
         return boardData;
 
@@ -1551,12 +1374,10 @@ export async function loadBoard() {
             error
         );
 
-
         showMessage(
             "Unable to load board.",
             "danger"
         );
-
 
         return {};
 
@@ -1574,25 +1395,20 @@ export async function refreshBoard() {
     const button =
         $("refreshBtn");
 
-
     if (button) {
 
-        button.disabled =
-            true;
-
+        button.disabled = true;
 
         button.textContent =
             "Loading...";
 
     }
 
-
     try {
 
         await loadBoard();
 
         await loadPulledOutCoaches();
-
 
         showMessage(
             "Board refreshed successfully.",
@@ -1612,9 +1428,7 @@ export async function refreshBoard() {
 
         if (button) {
 
-            button.disabled =
-                false;
-
+            button.disabled = false;
 
             button.textContent =
                 "Refresh";
@@ -1627,7 +1441,7 @@ export async function refreshBoard() {
 
 
 /* =========================================================
-   START REALTIME BOARD
+   REALTIME BOARD LISTENER
 ========================================================= */
 
 export function startBoardListener() {
@@ -1638,14 +1452,11 @@ export function startBoardListener() {
     ) {
 
         try {
-
             realtimeUnsubscribe();
-
         }
-        catch (error) {}
+        catch {}
 
     }
-
 
     realtimeUnsubscribe =
         listenBoard(
@@ -1654,17 +1465,14 @@ export function startBoardListener() {
                 boardData =
                     data || {};
 
-
                 renderBoard(
                     boardData
                 );
-
 
                 updateLastUpdate();
 
             }
         );
-
 
     return realtimeUnsubscribe;
 
@@ -1672,7 +1480,7 @@ export function startBoardListener() {
 
 
 /* =========================================================
-   START PULLED OUT LISTENER
+   REALTIME PULLED OUT LISTENER
 ========================================================= */
 
 export function startPulledOutListener() {
@@ -1683,34 +1491,23 @@ export function startPulledOutListener() {
     ) {
 
         try {
-
             pulledOutUnsubscribe();
-
         }
-        catch (error) {}
+        catch {}
 
     }
-
 
     pulledOutUnsubscribe =
         listenPulledOutCoaches(
             data => {
-
-                console.log(
-                    "PULLED OUT REALTIME DATA:",
-                    data
-                );
-
 
                 const coaches =
                     normalizePulledOutData(
                         data
                     );
 
-
                 allPulledOutCoaches =
                     coaches;
-
 
                 renderPulledOutList(
                     coaches
@@ -1719,26 +1516,18 @@ export function startPulledOutListener() {
             }
         );
 
-
     return pulledOutUnsubscribe;
 
 }
 
 
 /* =========================================================
-   NORMALIZE PULLED OUT DATA
+   NORMALIZE PULLED OUT
 ========================================================= */
 
-function normalizePulledOutData(
-    data
-) {
+function normalizePulledOutData(data) {
 
     let coaches = [];
-
-
-    /*
-       Firebase OBJECT
-    */
 
     if (
         data &&
@@ -1750,24 +1539,13 @@ function normalizePulledOutData(
             Object.entries(data)
                 .map(
                     ([id, coach]) => ({
-
                         id,
-
                         ...(coach || {})
-
                     })
                 );
 
     }
-
-
-    /*
-       ARRAY
-    */
-
-    else if (
-        Array.isArray(data)
-    ) {
+    else if (Array.isArray(data)) {
 
         coaches =
             data.map(
@@ -1777,11 +1555,6 @@ function normalizePulledOutData(
             );
 
     }
-
-
-    /*
-       Remove invalid records
-    */
 
     coaches =
         coaches.filter(
@@ -1793,15 +1566,9 @@ function normalizePulledOutData(
                 )
         );
 
-
-    /*
-       Ensure ID
-    */
-
     coaches =
         coaches.map(
             coach => ({
-
                 ...coach,
 
                 id:
@@ -1813,11 +1580,6 @@ function normalizePulledOutData(
 
             })
         );
-
-
-    /*
-       Sort newest first
-    */
 
     coaches.sort(
         (a, b) => {
@@ -1831,7 +1593,6 @@ function normalizePulledOutData(
                     0
                 );
 
-
             const timeB =
                 Number(
                     b.pulledOutAt ||
@@ -1841,12 +1602,10 @@ function normalizePulledOutData(
                     0
                 );
 
-
             return timeB - timeA;
 
         }
     );
-
 
     return coaches;
 
@@ -1854,7 +1613,7 @@ function normalizePulledOutData(
 
 
 /* =========================================================
-   FILTER PULLED OUT COACHES
+   PULLED OUT FILTER
 ========================================================= */
 
 function filterPulledOutCoaches(
@@ -1865,7 +1624,6 @@ function filterPulledOutCoaches(
     keyword =
         upper(keyword);
 
-
     if (!keyword) {
 
         return [
@@ -1873,7 +1631,6 @@ function filterPulledOutCoaches(
         ];
 
     }
-
 
     return coaches.filter(
         coach => {
@@ -1900,11 +1657,9 @@ function filterPulledOutCoaches(
                 )
                 .join(" ");
 
-
-            return searchableText
-                .includes(
-                    keyword
-                );
+            return searchableText.includes(
+                keyword
+            );
 
         }
     );
@@ -1916,47 +1671,24 @@ function filterPulledOutCoaches(
    RENDER PULLED OUT LIST
 ========================================================= */
 
-function renderPulledOutList(
-    data = []
-) {
+function renderPulledOutList(data = []) {
 
     const container =
         $("pulledOutTableBody") ||
         $("pulledOutList") ||
         $("pulledOutCoaches");
 
-
     if (!container) {
-
-        console.warn(
-            "Pulled-out container not found."
-        );
-
         return;
-
     }
-
-
-    /*
-       Accept both raw Firebase object
-       and normalized array.
-    */
 
     const coaches =
         Array.isArray(data)
             ? data
-            : normalizePulledOutData(
-                data
-            );
-
+            : normalizePulledOutData(data);
 
     allPulledOutCoaches =
         coaches;
-
-
-    /*
-       Search filter
-    */
 
     const filtered =
         filterPulledOutCoaches(
@@ -1965,168 +1697,91 @@ function renderPulledOutList(
         );
 
 
-    /*
-       TOTAL
-    */
+    /* TOTAL */
 
-    const totalElements = [
-
+    [
         $("pulledOutTotal"),
         $("pulledOutCount")
-
-    ];
-
-
-    totalElements.forEach(
-        element => {
+    ]
+        .forEach(element => {
 
             if (element) {
-
                 element.textContent =
                     coaches.length;
-
             }
 
-        }
-    );
+        });
 
 
-    /*
-       SEARCH RESULT COUNT
-    */
+    /* SEARCH COUNT */
 
     const searchCount =
         $("pulledOutSearchCount");
 
-
     if (searchCount) {
 
-        if (
+        searchCount.textContent =
             pulledOutSearchKeyword
-        ) {
-
-            searchCount.textContent =
-                `${filtered.length} found`;
-
-        }
-        else {
-
-            searchCount.textContent =
-                `${coaches.length} coaches`;
-
-        }
+                ? `${filtered.length} found`
+                : `${coaches.length} coaches`;
 
     }
 
 
-    /*
-       EMPTY RESULT
-    */
+    /* EMPTY */
 
     if (!filtered.length) {
 
         if (
-            pulledOutSearchKeyword &&
-            coaches.length
+            container.tagName ===
+            "TBODY"
         ) {
 
-            if (
-                container.tagName ===
-                "TBODY"
-            ) {
+            container.innerHTML = `
 
-                container.innerHTML = `
-
-                    <tr>
-
-                        <td
-                            colspan="7"
-                            class="text-center text-warning"
-                            style="padding:18px;"
-                        >
-                            No pulled-out coach found for
-                            "${escapeHTML(
-                                pulledOutSearchKeyword
-                            )}"
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-            else {
-
-                container.innerHTML = `
-
-                    <div
-                        class="
-                            text-warning
-                            text-center
-                            p-3
-                        "
+                <tr>
+                    <td
+                        colspan="7"
+                        class="text-center text-muted"
+                        style="padding:18px;"
                     >
-                        No pulled-out coach found.
-                    </div>
+                        ${
+                            pulledOutSearchKeyword
+                                ? "No pulled-out coach found."
+                                : "No pulled-out coaches."
+                        }
+                    </td>
+                </tr>
 
-                `;
-
-            }
+            `;
 
         }
         else {
 
-            if (
-                container.tagName ===
-                "TBODY"
-            ) {
+            container.innerHTML = `
 
-                container.innerHTML = `
+                <div
+                    class="text-muted text-center p-3"
+                >
+                    ${
+                        pulledOutSearchKeyword
+                            ? "No pulled-out coach found."
+                            : "No pulled-out coaches."
+                    }
+                </div>
 
-                    <tr>
-
-                        <td
-                            colspan="7"
-                            class="text-center text-muted"
-                            style="padding:18px;"
-                        >
-                            No pulled-out coaches.
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-            else {
-
-                container.innerHTML = `
-
-                    <div
-                        class="
-                            text-muted
-                            text-center
-                            p-3
-                        "
-                    >
-                        No pulled-out coaches.
-                    </div>
-
-                `;
-
-            }
+            `;
 
         }
-
 
         return;
 
     }
 
 
-    /*
+    /* =====================================================
        TABLE
-    */
+    ===================================================== */
 
     if (
         container.tagName ===
@@ -2135,248 +1790,116 @@ function renderPulledOutList(
 
         container.innerHTML =
             filtered
-                .map(
-                    coach => {
+                .map(coach => {
 
-                        const id =
-                            clean(
-                                coach.id
+                    const id =
+                        clean(coach.id);
+
+                    const coachNo =
+                        escapeHTML(
+                            coach.coachNo ||
+                            "--"
+                        );
+
+                    const coachType =
+                        escapeHTML(
+                            coach.coachType ||
+                            "--"
+                        );
+
+                    const status =
+                        escapeHTML(
+                            upper(
+                                coach.status
+                            ) ||
+                            "--"
+                        );
+
+                    const shop =
+                        escapeHTML(
+                            coach.originalShop ||
+                            coach.shop ||
+                            "--"
+                        );
+
+                    const line =
+                        escapeHTML(
+                            coach.originalLine ||
+                            coach.line ||
+                            "--"
+                        );
+
+                    const position =
+                        escapeHTML(
+                            coach.originalPosition ||
+                            coach.position ||
+                            "--"
+                        );
+
+                    const pullTime =
+                        coach.pulledOutAt ||
+                        coach.pullOutTime ||
+                        coach.timestamp ||
+                        coach.time ||
+                        null;
+
+                    let timeText =
+                        "--";
+
+                    if (pullTime) {
+
+                        const date =
+                            new Date(
+                                Number(pullTime)
                             );
 
+                        if (
+                            !Number.isNaN(
+                                date.getTime()
+                            )
+                        ) {
 
-                        const coachNo =
-                            escapeHTML(
-                                coach.coachNo ||
-                                "--"
-                            );
-
-
-                        const coachType =
-                            escapeHTML(
-                                coach.coachType ||
-                                "--"
-                            );
-
-
-                        const status =
-                            escapeHTML(
-                                upper(
-                                    coach.status
-                                ) ||
-                                "--"
-                            );
-
-
-                        const originalShop =
-                            escapeHTML(
-                                coach.originalShop ||
-                                coach.shop ||
-                                "--"
-                            );
-
-
-                        const originalLine =
-                            escapeHTML(
-                                coach.originalLine ||
-                                coach.line ||
-                                "--"
-                            );
-
-
-                        const originalPosition =
-                            escapeHTML(
-                                coach.originalPosition ||
-                                coach.position ||
-                                "--"
-                            );
-
-
-                        const pullOutTime =
-                            coach.pulledOutAt ||
-                            coach.pullOutTime ||
-                            coach.timestamp ||
-                            coach.time ||
-                            null;
-
-
-                        let timeText =
-                            "--";
-
-
-                        if (pullOutTime) {
-
-                            const numericTime =
-                                Number(
-                                    pullOutTime
+                            timeText =
+                                date.toLocaleString(
+                                    "en-IN"
                                 );
-
-
-                            const date =
-                                new Date(
-                                    numericTime
-                                );
-
-
-                            if (
-                                !Number.isNaN(
-                                    date.getTime()
-                                )
-                            ) {
-
-                                timeText =
-                                    date.toLocaleString(
-                                        "en-IN"
-                                    );
-
-                            }
 
                         }
 
-
-                        return `
-
-                            <tr
-                                class="pulled-out-row"
-                                data-pulled-id="${escapeHTML(id)}"
-                            >
-
-                                <td>
-                                    ${coachNo}
-                                </td>
-
-                                <td>
-                                    ${coachType}
-                                </td>
-
-                                <td>
-                                    ${status}
-                                </td>
-
-                                <td>
-                                    ${originalShop}
-                                </td>
-
-                                <td>
-                                    ${originalLine}/${originalPosition}
-                                </td>
-
-                                <td>
-                                    ${escapeHTML(
-                                        timeText
-                                    )}
-                                </td>
-
-                                <td>
-
-                                    <button
-                                        type="button"
-                                        class="
-                                            btn
-                                            btn-sm
-                                            btn-primary
-                                            pulled-return-btn
-                                        "
-                                        data-pulled-id="${escapeHTML(id)}"
-                                    >
-                                        Return
-                                    </button>
-
-                                </td>
-
-                            </tr>
-
-                        `;
-
                     }
-                )
-                .join("");
 
-    }
+                    return `
 
+                        <tr
+                            class="pulled-out-row"
+                            data-pulled-id="${escapeHTML(id)}"
+                        >
 
-    /*
-       NON-TABLE CONTAINER
-    */
+                            <td>
+                                ${coachNo}
+                            </td>
 
-    else {
+                            <td>
+                                ${coachType}
+                            </td>
 
-        container.innerHTML =
-            filtered
-                .map(
-                    coach => {
+                            <td>
+                                ${status}
+                            </td>
 
-                        const id =
-                            clean(
-                                coach.id
-                            );
+                            <td>
+                                ${shop}
+                            </td>
 
+                            <td>
+                                ${line}/${position}
+                            </td>
 
-                        const originalShop =
-                            coach.originalShop ||
-                            coach.shop ||
-                            "";
+                            <td>
+                                ${escapeHTML(timeText)}
+                            </td>
 
-
-                        const originalLine =
-                            coach.originalLine ||
-                            coach.line ||
-                            "";
-
-
-                        const originalPosition =
-                            coach.originalPosition ||
-                            coach.position ||
-                            "";
-
-
-                        return `
-
-                            <div
-                                class="pulled-out-item"
-                                data-pulled-id="${escapeHTML(id)}"
-                            >
-
-                                <strong>
-                                    ${escapeHTML(
-                                        coach.coachNo ||
-                                        "--"
-                                    )}
-                                </strong>
-
-                                <span>
-                                    ${escapeHTML(
-                                        coach.coachType ||
-                                        "--"
-                                    )}
-                                </span>
-
-                                <span>
-                                    ${escapeHTML(
-                                        upper(
-                                            coach.status
-                                        ) ||
-                                        "--"
-                                    )}
-                                </span>
-
-                                <small>
-
-                                    Original:
-                                    ${escapeHTML(
-                                        originalShop
-                                    )}
-
-                                    /
-                                    ${escapeHTML(
-                                        originalLine
-                                    )}
-
-                                    /
-                                    ${escapeHTML(
-                                        originalPosition
-                                    )}
-
-                                </small>
+                            <td>
 
                                 <button
                                     type="button"
@@ -2391,86 +1914,160 @@ function renderPulledOutList(
                                     Return
                                 </button>
 
-                            </div>
+                            </td>
 
-                        `;
+                        </tr>
 
-                    }
-                )
+                    `;
+
+                })
                 .join("");
 
     }
 
 
-    /*
-       RETURN BUTTON EVENTS
-    */
+    /* =====================================================
+       NON TABLE
+    ===================================================== */
+
+    else {
+
+        container.innerHTML =
+            filtered
+                .map(coach => {
+
+                    const id =
+                        clean(coach.id);
+
+                    return `
+
+                        <div
+                            class="pulled-out-item"
+                            data-pulled-id="${escapeHTML(id)}"
+                        >
+
+                            <strong>
+                                ${escapeHTML(
+                                    coach.coachNo ||
+                                    "--"
+                                )}
+                            </strong>
+
+                            <span>
+                                ${escapeHTML(
+                                    coach.coachType ||
+                                    "--"
+                                )}
+                            </span>
+
+                            <span>
+                                ${escapeHTML(
+                                    upper(
+                                        coach.status
+                                    ) ||
+                                    "--"
+                                )}
+                            </span>
+
+                            <small>
+
+                                Original:
+                                ${escapeHTML(
+                                    coach.originalShop ||
+                                    coach.shop ||
+                                    ""
+                                )}
+
+                                /
+                                ${escapeHTML(
+                                    coach.originalLine ||
+                                    coach.line ||
+                                    ""
+                                )}
+
+                                /
+                                ${escapeHTML(
+                                    coach.originalPosition ||
+                                    coach.position ||
+                                    ""
+                                )}
+
+                            </small>
+
+                            <button
+                                type="button"
+                                class="
+                                    btn
+                                    btn-sm
+                                    btn-primary
+                                    pulled-return-btn
+                                "
+                                data-pulled-id="${escapeHTML(id)}"
+                            >
+                                Return
+                            </button>
+
+                        </div>
+
+                    `;
+
+                })
+                .join("");
+
+    }
+
+
+    /* =====================================================
+       RETURN BUTTONS
+    ===================================================== */
 
     container
         .querySelectorAll(
             ".pulled-return-btn"
         )
-        .forEach(
-            button => {
+        .forEach(button => {
 
-                button.addEventListener(
-                    "click",
-                    event => {
+            button.addEventListener(
+                "click",
+                event => {
 
-                        event.preventDefault();
+                    event.preventDefault();
 
-                        event.stopPropagation();
+                    event.stopPropagation();
 
+                    if (returnProcessing) {
+                        return;
+                    }
 
-                        if (
-                            returnProcessing
-                        ) {
-                            return;
-                        }
+                    const id =
+                        button.dataset.pulledId;
 
-
-                        const id =
-                            button.dataset
-                                .pulledId;
-
-
-                        const coach =
-                            allPulledOutCoaches.find(
-                                item =>
-                                    String(
-                                        item.id
-                                    ) ===
-                                    String(id)
-                            );
-
-
-                        if (!coach) {
-
-                            showMessage(
-                                "Pulled-out coach not found.",
-                                "danger"
-                            );
-
-                            return;
-
-                        }
-
-
-                        console.log(
-                            "SELECTED PULLED OUT COACH:",
-                            coach
+                    const coach =
+                        allPulledOutCoaches.find(
+                            item =>
+                                String(item.id) ===
+                                String(id)
                         );
 
+                    if (!coach) {
 
-                        selectPulledOutCoach(
-                            coach
+                        showMessage(
+                            "Pulled-out coach not found.",
+                            "danger"
                         );
+
+                        return;
 
                     }
-                );
 
-            }
-        );
+                    selectPulledOutCoach(
+                        coach
+                    );
+
+                }
+            );
+
+        });
 
 }
 
@@ -2479,13 +2076,10 @@ function renderPulledOutList(
    PULLED OUT SEARCH
 ========================================================= */
 
-function performPulledOutSearch(
-    keyword
-) {
+function performPulledOutSearch(keyword) {
 
     pulledOutSearchKeyword =
         clean(keyword);
-
 
     renderPulledOutList(
         allPulledOutCoaches
@@ -2495,7 +2089,7 @@ function performPulledOutSearch(
 
 
 /* =========================================================
-   LOAD PULLED OUT COACHES
+   LOAD PULLED OUT
 ========================================================= */
 
 export async function loadPulledOutCoaches() {
@@ -2505,27 +2099,17 @@ export async function loadPulledOutCoaches() {
         const data =
             await getPulledOutCoaches();
 
-
-        console.log(
-            "MANUAL PULLED OUT DATA:",
-            data
-        );
-
-
         const coaches =
             normalizePulledOutData(
                 data
             );
 
-
         allPulledOutCoaches =
             coaches;
-
 
         renderPulledOutList(
             coaches
         );
-
 
         return coaches;
 
@@ -2537,12 +2121,10 @@ export async function loadPulledOutCoaches() {
             error
         );
 
-
         showMessage(
             "Unable to load pulled-out coaches.",
             "danger"
         );
-
 
         return [];
 
@@ -2552,7 +2134,7 @@ export async function loadPulledOutCoaches() {
 
 
 /* =========================================================
-   COUNTERS
+   BOARD COUNTERS
 ========================================================= */
 
 function updateCounters() {
@@ -2562,40 +2144,27 @@ function updateCounters() {
             "td[id]"
         );
 
+    let total = 0;
+    let occupied = 0;
 
-    let total =
-        0;
+    cells.forEach(cell => {
 
+        if (!cell.id.includes("_")) {
+            return;
+        }
 
-    let occupied =
-        0;
+        total++;
 
+        if (
+            cell.dataset.occupied ===
+            "true"
+        ) {
 
-    cells.forEach(
-        cell => {
-
-            if (
-                !cell.id.includes("_")
-            ) {
-                return;
-            }
-
-
-            total++;
-
-
-            if (
-                cell.dataset.occupied ===
-                "true"
-            ) {
-
-                occupied++;
-
-            }
+            occupied++;
 
         }
-    );
 
+    });
 
     const free =
         Math.max(
@@ -2603,41 +2172,297 @@ function updateCounters() {
             total - occupied
         );
 
-
-    const totalEl =
-        $("totalCoach");
-
-
-    const occupiedEl =
-        $("occupiedCoach");
-
-
-    const freeEl =
-        $("freeCoach");
-
-
-    if (totalEl) {
-
-        totalEl.textContent =
+    if ($("totalCoach")) {
+        $("totalCoach").textContent =
             total;
-
     }
 
-
-    if (occupiedEl) {
-
-        occupiedEl.textContent =
+    if ($("occupiedCoach")) {
+        $("occupiedCoach").textContent =
             occupied;
-
     }
 
-
-    if (freeEl) {
-
-        freeEl.textContent =
+    if ($("freeCoach")) {
+        $("freeCoach").textContent =
             free;
+    }
+
+}
+
+
+/* =========================================================
+   DASHBOARD COMPATIBILITY
+========================================================= */
+
+function updateDashboardCounters() {
+
+    const coaches = [];
+
+    Object.entries(
+        boardData || {}
+    )
+        .forEach(
+            ([line, positions]) => {
+
+                if (
+                    !positions ||
+                    typeof positions !==
+                    "object"
+                ) {
+                    return;
+                }
+
+                Object.entries(
+                    positions
+                )
+                    .forEach(
+                        ([position, coach]) => {
+
+                            if (!coach) {
+                                return;
+                            }
+
+                            coaches.push({
+                                ...coach,
+                                line:
+                                    coach.line ||
+                                    line,
+                                position:
+                                    coach.position ||
+                                    position,
+                                shop:
+                                    coach.shop ||
+                                    getShopFromLine(
+                                        coach.line ||
+                                        line
+                                    )
+                            });
+
+                        }
+                    );
+
+            }
+        );
+
+
+    const shopNames = {
+
+        n:
+            [
+                "N SHOP",
+                "N"
+            ],
+
+        m:
+            [
+                "M SHOP",
+                "M"
+            ],
+
+        scr:
+            [
+                "MR SCR SHOP",
+                "SCR SHOP",
+                "SCR"
+            ],
+
+        cr:
+            [
+                "CR SHOP",
+                "CR"
+            ],
+
+        lifting:
+            [
+                "LIFTING BAY",
+                "L"
+            ],
+
+        j:
+            [
+                "J SHOP",
+                "J"
+            ]
+
+    };
+
+
+    function shopMatch(coach, names) {
+
+        const shop =
+            upper(
+                coach.shop ||
+                getShopFromLine(
+                    coach.line
+                )
+            );
+
+        return names.some(
+            name =>
+                shop === upper(name) ||
+                shop.includes(
+                    upper(name)
+                )
+        );
 
     }
+
+
+    const counters = {
+
+        total:
+            coaches.length,
+
+        n:
+            coaches.filter(
+                coach =>
+                    shopMatch(
+                        coach,
+                        shopNames.n
+                    )
+            ).length,
+
+        m:
+            coaches.filter(
+                coach =>
+                    shopMatch(
+                        coach,
+                        shopNames.m
+                    )
+            ).length,
+
+        scr:
+            coaches.filter(
+                coach =>
+                    shopMatch(
+                        coach,
+                        shopNames.scr
+                    )
+            ).length,
+
+        cr:
+            coaches.filter(
+                coach =>
+                    shopMatch(
+                        coach,
+                        shopNames.cr
+                    )
+            ).length,
+
+        lifting:
+            coaches.filter(
+                coach =>
+                    shopMatch(
+                        coach,
+                        shopNames.lifting
+                    )
+            ).length,
+
+        j:
+            coaches.filter(
+                coach =>
+                    shopMatch(
+                        coach,
+                        shopNames.j
+                    )
+            ).length
+
+    };
+
+
+    /*
+       Support common dashboard IDs.
+    */
+
+    const idMap = {
+
+        total: [
+            "dashboardTotal",
+            "totalCoaches",
+            "totalCoachDashboard"
+        ],
+
+        n: [
+            "nShopTotal",
+            "nShopCount"
+        ],
+
+        m: [
+            "mShopTotal",
+            "mShopCount"
+        ],
+
+        scr: [
+            "scrShopTotal",
+            "scrTotal",
+            "mrScrTotal"
+        ],
+
+        cr: [
+            "crShopTotal",
+            "crTotal"
+        ],
+
+        lifting: [
+            "liftingBayTotal",
+            "liftingTotal"
+        ],
+
+        j: [
+            "jShopTotal",
+            "jShopCount"
+        ]
+
+    };
+
+
+    Object.entries(
+        idMap
+    )
+        .forEach(
+            ([key, ids]) => {
+
+                ids.forEach(id => {
+
+                    const element =
+                        $(id);
+
+                    if (element) {
+
+                        element.textContent =
+                            counters[key];
+
+                    }
+
+                });
+
+            }
+        );
+
+
+    /*
+       Global dashboard object
+       for existing dashboard scripts.
+    */
+
+    window.boardDashboardData = {
+
+        ...counters,
+
+        coaches
+
+    };
+
+
+    document.dispatchEvent(
+        new CustomEvent(
+            "boardDashboardUpdated",
+            {
+                detail:
+                    window.boardDashboardData
+            }
+        )
+    );
 
 }
 
@@ -2653,81 +2478,81 @@ function startDatabaseStatus() {
         "function"
     ) {
 
-        console.warn(
-            "listenDatabaseStatus() not available."
-        );
-
         return;
 
     }
 
+    if (
+        typeof databaseUnsubscribe ===
+        "function"
+    ) {
 
-    listenDatabaseStatus(
-        connected => {
-
-            const status =
-                $("databaseStatus");
-
-
-            const footer =
-                $("footerDatabase");
-
-
-            if (connected) {
-
-                if (status) {
-
-                    status.textContent =
-                        "Connected";
-
-
-                    status.className =
-                        "text-success";
-
-                }
-
-
-                if (footer) {
-
-                    footer.textContent =
-                        "Connected";
-
-
-                    footer.className =
-                        "text-success";
-
-                }
-
-            }
-            else {
-
-                if (status) {
-
-                    status.textContent =
-                        "Offline";
-
-
-                    status.className =
-                        "text-danger";
-
-                }
-
-
-                if (footer) {
-
-                    footer.textContent =
-                        "Offline";
-
-
-                    footer.className =
-                        "text-danger";
-
-                }
-
-            }
-
+        try {
+            databaseUnsubscribe();
         }
-    );
+        catch {}
+
+    }
+
+    databaseUnsubscribe =
+        listenDatabaseStatus(
+            connected => {
+
+                const status =
+                    $("databaseStatus");
+
+                const footer =
+                    $("footerDatabase");
+
+                if (connected) {
+
+                    if (status) {
+
+                        status.textContent =
+                            "Connected";
+
+                        status.className =
+                            "text-success";
+
+                    }
+
+                    if (footer) {
+
+                        footer.textContent =
+                            "Connected";
+
+                        footer.className =
+                            "text-success";
+
+                    }
+
+                }
+                else {
+
+                    if (status) {
+
+                        status.textContent =
+                            "Offline";
+
+                        status.className =
+                            "text-danger";
+
+                    }
+
+                    if (footer) {
+
+                        footer.textContent =
+                            "Offline";
+
+                        footer.className =
+                            "text-danger";
+
+                    }
+
+                }
+
+            }
+        );
 
 }
 
@@ -2741,21 +2566,15 @@ function getModal() {
     const element =
         $("coachModal");
 
-
     if (
         !element ||
         typeof bootstrap ===
         "undefined"
     ) {
 
-        console.warn(
-            "Bootstrap modal not available."
-        );
-
         return null;
 
     }
-
 
     if (!bootstrapModal) {
 
@@ -2765,7 +2584,6 @@ function getModal() {
             );
 
     }
-
 
     return bootstrapModal;
 
@@ -2781,13 +2599,8 @@ export function openCoachModal(
     position
 ) {
 
-    line =
-        clean(line);
-
-
-    position =
-        clean(position);
-
+    line = clean(line);
+    position = clean(position);
 
     if (
         returnMode &&
@@ -2803,14 +2616,10 @@ export function openCoachModal(
 
     }
 
-
     currentCell = {
-
         line,
         position
-
     };
-
 
     currentCoach =
         getBoardCoach(
@@ -2818,100 +2627,50 @@ export function openCoachModal(
             position
         );
 
-
     const shop =
         currentCoach?.shop ||
-        getShopFromLine(
-            line
-        );
+        getShopFromLine(line);
 
-
-    const shopInput =
-        $("modalShop");
-
-
-    const lineInput =
-        $("modalLine");
-
-
-    const positionInput =
-        $("modalPosition");
-
-
-    const coachInput =
-        $("modalCoachNo");
-
-
-    const typeInput =
-        $("modalCoachType");
-
-
-    const statusInput =
-        $("modalStatus");
-
-
-    if (shopInput) {
-
-        shopInput.value =
+    if ($("modalShop")) {
+        $("modalShop").value =
             shop;
-
     }
 
-
-    if (lineInput) {
-
-        lineInput.value =
+    if ($("modalLine")) {
+        $("modalLine").value =
             line;
-
     }
 
-
-    if (positionInput) {
-
-        positionInput.value =
+    if ($("modalPosition")) {
+        $("modalPosition").value =
             position;
-
     }
 
-
-    if (coachInput) {
-
-        coachInput.value =
+    if ($("modalCoachNo")) {
+        $("modalCoachNo").value =
             currentCoach?.coachNo ||
             "";
-
     }
 
-
-    if (typeInput) {
-
-        typeInput.value =
+    if ($("modalCoachType")) {
+        $("modalCoachType").value =
             currentCoach?.coachType ||
             "";
-
     }
 
-
-    if (statusInput) {
-
-        statusInput.value =
+    if ($("modalStatus")) {
+        $("modalStatus").value =
             currentCoach?.status ||
             "";
-
     }
 
-
     updateModalButtons();
-
 
     const modal =
         getModal();
 
-
     if (modal) {
-
         modal.show();
-
     }
 
 }
@@ -2923,73 +2682,40 @@ export function openCoachModal(
 
 function updateModalButtons() {
 
-    const save =
-        $("saveCoachBtn");
-
-
-    const updateBtn =
-        $("updateCoachBtn");
-
-
-    const deleteBtn =
-        $("deleteCoachBtn");
-
-
-    const pull =
-        $("pullOutBtn");
-
-
-    const returnBtn =
-        $("returnToBoardBtn");
-
-
     const occupied =
         !!currentCoach;
 
+    if ($("saveCoachBtn")) {
 
-    if (save) {
-
-        save.style.display =
-            occupied
-                ? "none"
-                : "";
+        $("saveCoachBtn").style.display =
+            occupied ? "none" : "";
 
     }
 
+    if ($("updateCoachBtn")) {
 
-    if (updateBtn) {
-
-        updateBtn.style.display =
-            occupied
-                ? ""
-                : "none";
+        $("updateCoachBtn").style.display =
+            occupied ? "" : "none";
 
     }
 
+    if ($("deleteCoachBtn")) {
 
-    if (deleteBtn) {
-
-        deleteBtn.style.display =
-            occupied
-                ? ""
-                : "none";
+        $("deleteCoachBtn").style.display =
+            occupied ? "" : "none";
 
     }
 
+    if ($("pullOutBtn")) {
 
-    if (pull) {
-
-        pull.style.display =
-            occupied
-                ? ""
-                : "none";
+        $("pullOutBtn").style.display =
+            occupied ? "" : "none";
 
     }
 
+    if ($("returnToBoardBtn")) {
 
-    if (returnBtn) {
-
-        returnBtn.style.display =
+        $("returnToBoardBtn").style.display =
             currentPulledCoach
                 ? ""
                 : "none";
@@ -3013,24 +2739,20 @@ function getModalData() {
 
     }
 
-
     const coachNo =
         clean(
             $("modalCoachNo")?.value
         );
-
 
     const coachType =
         clean(
             $("modalCoachType")?.value
         );
 
-
     const status =
         upper(
             $("modalStatus")?.value
         );
-
 
     if (!coachNo) {
 
@@ -3039,7 +2761,6 @@ function getModalData() {
         );
 
     }
-
 
     return {
 
@@ -3080,7 +2801,6 @@ async function saveFromModal() {
         const coach =
             getModalData();
 
-
         if (currentCoach) {
 
             throw new Error(
@@ -3089,14 +2809,11 @@ async function saveFromModal() {
 
         }
 
-
         await saveCoach(
             coach
         );
 
-
         closeModal();
-
 
         showMessage(
             "Coach saved successfully.",
@@ -3110,7 +2827,6 @@ async function saveFromModal() {
             "SAVE ERROR:",
             error
         );
-
 
         showMessage(
             error?.message ||
@@ -3134,14 +2850,11 @@ async function updateFromModal() {
         const coach =
             getModalData();
 
-
         await updateCoach(
             coach
         );
 
-
         closeModal();
-
 
         showMessage(
             "Coach updated successfully.",
@@ -3155,7 +2868,6 @@ async function updateFromModal() {
             "UPDATE ERROR:",
             error
         );
-
 
         showMessage(
             error?.message ||
@@ -3181,30 +2893,23 @@ async function deleteFromModal() {
         return;
     }
 
-
     const yes =
         window.confirm(
             `Delete coach ${currentCoach.coachNo}?`
         );
 
-
     if (!yes) {
         return;
     }
 
-
     try {
 
         await firebaseDeleteCoach(
-
             currentCell.line,
             currentCell.position
-
         );
 
-
         closeModal();
-
 
         showMessage(
             "Coach deleted successfully.",
@@ -3218,7 +2923,6 @@ async function deleteFromModal() {
             "DELETE ERROR:",
             error
         );
-
 
         showMessage(
             error?.message ||
@@ -3244,30 +2948,23 @@ async function pullOutFromModal() {
         return;
     }
 
-
     const yes =
         window.confirm(
             `Pull out coach ${currentCoach.coachNo}?`
         );
 
-
     if (!yes) {
         return;
     }
 
-
     try {
 
         await firebasePullOutCoach(
-
             currentCell.line,
             currentCell.position
-
         );
 
-
         closeModal();
-
 
         showMessage(
             "Coach pulled out successfully.",
@@ -3281,7 +2978,6 @@ async function pullOutFromModal() {
             "PULL OUT ERROR:",
             error
         );
-
 
         showMessage(
             error?.message ||
@@ -3303,20 +2999,12 @@ function closeModal() {
     const modal =
         getModal();
 
-
     if (modal) {
-
         modal.hide();
-
     }
 
-
-    currentCell =
-        null;
-
-
-    currentCoach =
-        null;
+    currentCell = null;
+    currentCoach = null;
 
 }
 
@@ -3332,19 +3020,15 @@ function handleReturnButton() {
         const coach =
             currentPulledCoach;
 
-
         closeModal();
-
 
         startReturnMode(
             coach
         );
 
-
         return;
 
     }
-
 
     showMessage(
         "Please select a pulled-out coach first.",
@@ -3358,32 +3042,25 @@ function handleReturnButton() {
    BOARD SEARCH
 ========================================================= */
 
-async function performSearch(
-    keyword
-) {
+async function performSearch(keyword) {
 
     keyword =
         clean(keyword);
 
-
     const resultBox =
         $("searchResult");
-
 
     if (!resultBox) {
         return;
     }
 
-
     if (!keyword) {
 
-        resultBox.innerHTML =
-            "";
+        resultBox.innerHTML = "";
 
         return;
 
     }
-
 
     try {
 
@@ -3392,7 +3069,6 @@ async function performSearch(
                 keyword
             );
 
-
         if (
             !results ||
             !results.length
@@ -3400,13 +3076,7 @@ async function performSearch(
 
             resultBox.innerHTML = `
 
-                <div
-                    class="
-                        alert
-                        alert-warning
-                        mt-2
-                    "
-                >
+                <div class="alert alert-warning mt-2">
                     No coach found.
                 </div>
 
@@ -3416,88 +3086,81 @@ async function performSearch(
 
         }
 
-
         resultBox.innerHTML =
             results
                 .map(
                     coach => `
 
-                    <div
-                        class="search-item"
-                        data-line="${escapeHTML(
-                            coach.line
-                        )}"
-                        data-position="${escapeHTML(
-                            coach.position
-                        )}"
-                    >
-
-                        <b>
-                            ${escapeHTML(
-                                coach.coachNo
-                            )}
-                        </b>
-
-                        <span>
-                            ${escapeHTML(
-                                coach.coachType ||
-                                ""
-                            )}
-                        </span>
-
-                        <span>
-                            ${escapeHTML(
-                                coach.status ||
-                                ""
-                            )}
-                        </span>
-
-                        <small>
-                            ${escapeHTML(
-                                coach.shop ||
-                                ""
-                            )}
-                            -
-                            ${escapeHTML(
+                        <div
+                            class="search-item"
+                            data-line="${escapeHTML(
                                 coach.line
-                            )}
-                            /
-                            ${escapeHTML(
+                            )}"
+                            data-position="${escapeHTML(
                                 coach.position
-                            )}
-                        </small>
+                            )}"
+                        >
 
-                    </div>
+                            <b>
+                                ${escapeHTML(
+                                    coach.coachNo
+                                )}
+                            </b>
 
-                `
+                            <span>
+                                ${escapeHTML(
+                                    coach.coachType ||
+                                    ""
+                                )}
+                            </span>
+
+                            <span>
+                                ${escapeHTML(
+                                    coach.status ||
+                                    ""
+                                )}
+                            </span>
+
+                            <small>
+                                ${escapeHTML(
+                                    coach.shop ||
+                                    ""
+                                )}
+                                -
+                                ${escapeHTML(
+                                    coach.line
+                                )}
+                                /
+                                ${escapeHTML(
+                                    coach.position
+                                )}
+                            </small>
+
+                        </div>
+
+                    `
                 )
                 .join("");
-
 
         resultBox
             .querySelectorAll(
                 ".search-item"
             )
-            .forEach(
-                item => {
+            .forEach(item => {
 
-                    item.addEventListener(
-                        "click",
-                        () => {
+                item.addEventListener(
+                    "click",
+                    () => {
 
-                            openCoachModal(
+                        openCoachModal(
+                            item.dataset.line,
+                            item.dataset.position
+                        );
 
-                                item.dataset.line,
+                    }
+                );
 
-                                item.dataset.position
-
-                            );
-
-                        }
-                    );
-
-                }
-            );
+            });
 
     }
     catch (error) {
@@ -3507,15 +3170,9 @@ async function performSearch(
             error
         );
 
-
         resultBox.innerHTML = `
 
-            <div
-                class="
-                    alert
-                    alert-danger
-                "
-            >
+            <div class="alert alert-danger">
                 Search failed.
             </div>
 
@@ -3527,7 +3184,7 @@ async function performSearch(
 
 
 /* =========================================================
-   EXCEL / CSV EXPORT
+   CSV / EXCEL
 ========================================================= */
 
 async function exportExcel() {
@@ -3536,7 +3193,6 @@ async function exportExcel() {
 
         const coaches =
             await getAllCoaches();
-
 
         if (
             !coaches ||
@@ -3552,10 +3208,8 @@ async function exportExcel() {
 
         }
 
-
         let csv =
             "Coach Number,Coach Type,Status,Shop,Line,Position\n";
-
 
         coaches.forEach(
             coach => {
@@ -3586,7 +3240,6 @@ async function exportExcel() {
             }
         );
 
-
         const blob =
             new Blob(
                 [csv],
@@ -3596,42 +3249,32 @@ async function exportExcel() {
                 }
             );
 
-
         const url =
             URL.createObjectURL(
                 blob
             );
-
 
         const link =
             document.createElement(
                 "a"
             );
 
-
-        link.href =
-            url;
-
+        link.href = url;
 
         link.download =
             `MR-COORDINATION-${Date.now()}.csv`;
-
 
         document.body.appendChild(
             link
         );
 
-
         link.click();
 
-
         link.remove();
-
 
         URL.revokeObjectURL(
             url
         );
-
 
         showMessage(
             "Excel-compatible CSV exported.",
@@ -3645,7 +3288,6 @@ async function exportExcel() {
             "EXCEL ERROR:",
             error
         );
-
 
         showMessage(
             "Excel export failed.",
@@ -3713,47 +3355,27 @@ function updateLastUpdate() {
     const now =
         new Date();
 
-
     const time =
         now.toLocaleTimeString(
             "en-IN",
             {
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit",
-
-                hour12:
-                    true
-
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
             }
         );
 
+    if ($("lastUpdate")) {
 
-    const header =
-        $("lastUpdate");
-
-
-    const footer =
-        $("lastUpdateTime");
-
-
-    if (header) {
-
-        header.textContent =
+        $("lastUpdate").textContent =
             `Last Update: ${time}`;
 
     }
 
+    if ($("lastUpdateTime")) {
 
-    if (footer) {
-
-        footer.textContent =
+        $("lastUpdateTime").textContent =
             time;
 
     }
@@ -3770,65 +3392,37 @@ function updateClock() {
     const now =
         new Date();
 
-
     const date =
         now.toLocaleDateString(
             "en-IN",
             {
-
-                day:
-                    "2-digit",
-
-                month:
-                    "2-digit",
-
-                year:
-                    "numeric"
-
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
             }
         );
-
 
     const time =
         now.toLocaleTimeString(
             "en-IN",
             {
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit",
-
-                hour12:
-                    true
-
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
             }
         );
 
+    if ($("liveDate")) {
 
-    const dateElement =
-        $("liveDate");
-
-
-    const timeElement =
-        $("liveTime");
-
-
-    if (dateElement) {
-
-        dateElement.textContent =
+        $("liveDate").textContent =
             `Date: ${date}`;
 
     }
 
+    if ($("liveTime")) {
 
-    if (timeElement) {
-
-        timeElement.textContent =
+        $("liveTime").textContent =
             `Time: ${time}`;
 
     }
@@ -3854,16 +3448,13 @@ function showMessage(
                 element.remove()
         );
 
-
     const alert =
         document.createElement(
             "div"
         );
 
-
     alert.className =
         `alert alert-${type} board-alert`;
-
 
     alert.style.cssText = `
         position:fixed;
@@ -3875,25 +3466,18 @@ function showMessage(
         box-shadow:0 4px 15px rgba(0,0,0,.2);
     `;
 
-
     alert.textContent =
         clean(message);
-
 
     document.body.appendChild(
         alert
     );
 
-
     setTimeout(
         () => {
 
-            if (
-                alert.parentNode
-            ) {
-
+            if (alert.parentNode) {
                 alert.remove();
-
             }
 
         },
@@ -3904,7 +3488,7 @@ function showMessage(
 
 
 /* =========================================================
-   INITIALIZE BOARD SEARCH
+   BOARD SEARCH INITIALIZE
 ========================================================= */
 
 function initializeBoardSearch() {
@@ -3912,26 +3496,19 @@ function initializeBoardSearch() {
     const searchBox =
         $("searchBox");
 
-
     if (!searchBox) {
         return;
     }
-
-
-    let searchTimer =
-        null;
-
 
     searchBox.addEventListener(
         "input",
         () => {
 
             clearTimeout(
-                searchTimer
+                boardSearchTimer
             );
 
-
-            searchTimer =
+            boardSearchTimer =
                 setTimeout(
                     () => {
 
@@ -3950,7 +3527,7 @@ function initializeBoardSearch() {
 
 
 /* =========================================================
-   INITIALIZE PULLED OUT SEARCH
+   PULLED OUT SEARCH INITIALIZE
 ========================================================= */
 
 function initializePulledOutSearch() {
@@ -3958,32 +3535,19 @@ function initializePulledOutSearch() {
     const searchBox =
         $("pulledOutSearchBox");
 
-
     if (!searchBox) {
-
-        console.warn(
-            "pulledOutSearchBox not found."
-        );
-
         return;
-
     }
-
-
-    let searchTimer =
-        null;
-
 
     searchBox.addEventListener(
         "input",
         () => {
 
             clearTimeout(
-                searchTimer
+                pulledSearchTimer
             );
 
-
-            searchTimer =
+            pulledSearchTimer =
                 setTimeout(
                     () => {
 
@@ -3998,11 +3562,6 @@ function initializePulledOutSearch() {
         }
     );
 
-
-    /*
-       Clear search when ESC pressed
-    */
-
     searchBox.addEventListener(
         "keydown",
         event => {
@@ -4012,9 +3571,7 @@ function initializePulledOutSearch() {
                 "Escape"
             ) {
 
-                searchBox.value =
-                    "";
-
+                searchBox.value = "";
 
                 performPulledOutSearch(
                     ""
@@ -4040,26 +3597,21 @@ document.addEventListener(
             "=========================================="
         );
 
-
         console.log(
             "MR CO-ORDINATION BOARD"
         );
 
-
         console.log(
-            "BOARD.JS VERSION 10.0 FINAL"
+            "BOARD.JS VERSION 11.0 FINAL"
         );
 
-
         console.log(
-            "PULLED-OUT SEARCH ENABLED"
+            "BOARD + PULL OUT + RETURN + SEARCH"
         );
 
-
         console.log(
-            "RETURN TO ANY EMPTY CELL ENABLED"
+            "DASHBOARD COMPATIBILITY ENABLED"
         );
-
 
         console.log(
             "=========================================="
@@ -4067,12 +3619,10 @@ document.addEventListener(
 
 
         /*
-           Initial empty render
+           Initial render
         */
 
-        renderBoard(
-            {}
-        );
+        renderBoard({});
 
 
         /*
@@ -4090,21 +3640,21 @@ document.addEventListener(
 
 
         /*
-           Realtime pulled-out list
+           Realtime pulled-out
         */
 
         startPulledOutListener();
 
 
         /*
-           Initial pulled-out load
+           Initial pulled-out
         */
 
         await loadPulledOutCoaches();
 
 
         /*
-           Database status
+           Database
         */
 
         startDatabaseStatus();
@@ -4116,30 +3666,24 @@ document.addEventListener(
 
         updateClock();
 
-
         setInterval(
             updateClock,
             1000
         );
 
 
-        /* =====================================
-           BOARD SEARCH
-        ===================================== */
+        /*
+           Search
+        */
 
         initializeBoardSearch();
-
-
-        /* =====================================
-           PULLED OUT SEARCH
-        ===================================== */
 
         initializePulledOutSearch();
 
 
-        /* =====================================
+        /* =================================================
            REFRESH
-        ===================================== */
+        ================================================= */
 
         $("refreshBtn")
             ?.addEventListener(
@@ -4154,9 +3698,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
+        /* =================================================
            SAVE
-        ===================================== */
+        ================================================= */
 
         $("saveCoachBtn")
             ?.addEventListener(
@@ -4171,9 +3715,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
+        /* =================================================
            UPDATE
-        ===================================== */
+        ================================================= */
 
         $("updateCoachBtn")
             ?.addEventListener(
@@ -4188,9 +3732,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
+        /* =================================================
            DELETE
-        ===================================== */
+        ================================================= */
 
         $("deleteCoachBtn")
             ?.addEventListener(
@@ -4205,9 +3749,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
+        /* =================================================
            PULL OUT
-        ===================================== */
+        ================================================= */
 
         $("pullOutBtn")
             ?.addEventListener(
@@ -4222,9 +3766,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
-           RETURN TO BOARD
-        ===================================== */
+        /* =================================================
+           RETURN
+        ================================================= */
 
         $("returnToBoardBtn")
             ?.addEventListener(
@@ -4239,9 +3783,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
+        /* =================================================
            EXCEL
-        ===================================== */
+        ================================================= */
 
         $("excelBtn")
             ?.addEventListener(
@@ -4256,9 +3800,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
-           PDF
-        ===================================== */
+        /* =================================================
+           PDF / PRINT
+        ================================================= */
 
         $("pdfBtn")
             ?.addEventListener(
@@ -4273,9 +3817,9 @@ document.addEventListener(
             );
 
 
-        /* =====================================
+        /* =================================================
            FULLSCREEN
-        ===================================== */
+        ================================================= */
 
         $("fullscreenBtn")
             ?.addEventListener(
@@ -4291,18 +3835,7 @@ document.addEventListener(
 
 
         console.log(
-            "=========================================="
-        );
-
-
-        console.log(
-            "BOARD.JS VERSION 10.0 INITIALIZATION COMPLETE"
-        );
-
-
-        console.log(
-            "=========================================="
-
+            "BOARD.JS VERSION 11.0 INITIALIZATION COMPLETE"
         );
 
     }
@@ -4316,41 +3849,112 @@ document.addEventListener(
 window.refreshBoard =
     refreshBoard;
 
-
 window.renderBoard =
     renderBoard;
-
 
 window.openCoachModal =
     openCoachModal;
 
-
 window.selectPulledOutCoach =
     selectPulledOutCoach;
 
-
 window.loadPulledOutCoaches =
     loadPulledOutCoaches;
-
 
 window.performPulledOutSearch =
     performPulledOutSearch;
 
 
 /* =========================================================
-   READY
+   GLOBAL DASHBOARD DATA ACCESS
+========================================================= */
+
+window.getBoardData =
+    function () {
+
+        return boardData;
+
+    };
+
+
+window.getBoardCoaches =
+    function () {
+
+        const coaches = [];
+
+        Object.entries(
+            boardData || {}
+        )
+            .forEach(
+                ([line, positions]) => {
+
+                    if (
+                        !positions ||
+                        typeof positions !==
+                        "object"
+                    ) {
+                        return;
+                    }
+
+                    Object.entries(
+                        positions
+                    )
+                        .forEach(
+                            ([position, coach]) => {
+
+                                if (!coach) {
+                                    return;
+                                }
+
+                                coaches.push({
+                                    ...coach,
+                                    line:
+                                        coach.line ||
+                                        line,
+                                    position:
+                                        coach.position ||
+                                        position
+                                });
+
+                            }
+                        );
+
+                }
+            );
+
+        return coaches;
+
+    };
+
+
+/* =========================================================
+   FINAL READY
 ========================================================= */
 
 console.log(
-    "MR CO-ORDINATION BOARD VERSION 10.0 FINAL READY"
+    "MR CO-ORDINATION BOARD VERSION 11.0 FINAL READY"
 );
 
-
 console.log(
-    "PULLED-OUT SEARCH READY"
+    "REALTIME BOARD READY"
 );
 
+console.log(
+    "PULL OUT READY"
+);
 
 console.log(
-    "RETURN-TO-ANY-EMPTY-CELL SYSTEM READY"
+    "RETURN TO ORIGINAL READY"
+);
+
+console.log(
+    "RETURN TO ANY EMPTY CELL READY"
+);
+
+console.log(
+    "SEARCH READY"
+);
+
+console.log(
+    "DASHBOARD COMPATIBILITY READY"
 );
