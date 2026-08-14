@@ -1,11 +1,15 @@
 /* =====================================================
    MR CO-ORDINATION
    FIREBASE ADMIN LOGIN
-   FINAL PRODUCTION VERSION
+   VERSION 12.0
+   EMAIL BASED ADMIN
+   NO CUSTOM CLAIM REQUIRED
 ===================================================== */
 
 import {
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 import {
@@ -13,10 +17,12 @@ import {
 } from "./firebase-config.js";
 
 
-console.log("=================================");
-console.log("LOGIN JS LOADED");
-console.log("AUTH OBJECT:", auth);
-console.log("=================================");
+/* =====================================================
+   ADMIN EMAIL
+===================================================== */
+
+const ADMIN_EMAIL =
+    "Sudiphembram7@gmail.com";
 
 
 /* =====================================================
@@ -34,23 +40,6 @@ const loginBtn =
 
 const message =
     document.getElementById("message");
-
-
-/* =====================================================
-   CHECK ELEMENTS
-===================================================== */
-
-if (!emailInput) {
-    console.error("ERROR: #email not found");
-}
-
-if (!passwordInput) {
-    console.error("ERROR: #password not found");
-}
-
-if (!loginBtn) {
-    console.error("ERROR: #loginBtn not found");
-}
 
 
 /* =====================================================
@@ -73,12 +62,40 @@ function showMessage(
 
 
 /* =====================================================
+   CHECK ADMIN EMAIL
+===================================================== */
+
+function isAdmin(user) {
+
+    if (!user || !user.email) {
+
+        return false;
+
+    }
+
+    return (
+        user.email.trim().toLowerCase() ===
+        ADMIN_EMAIL.toLowerCase()
+    );
+
+}
+
+
+/* =====================================================
    LOGIN
 ===================================================== */
 
 async function login() {
 
-    console.log("LOGIN BUTTON CLICKED");
+    if (!emailInput || !passwordInput) {
+
+        console.error(
+            "LOGIN INPUT ELEMENTS NOT FOUND"
+        );
+
+        return;
+
+    }
 
 
     const email =
@@ -88,9 +105,9 @@ async function login() {
         passwordInput.value;
 
 
-    /* ==========================
+    /* =================================================
        VALIDATION
-    ========================== */
+    ================================================= */
 
     if (!email) {
 
@@ -102,6 +119,7 @@ async function login() {
         emailInput.focus();
 
         return;
+
     }
 
 
@@ -115,35 +133,54 @@ async function login() {
         passwordInput.focus();
 
         return;
+
     }
 
 
-    /* ==========================
+    /* =================================================
+       ADMIN EMAIL CHECK
+    ================================================= */
+
+    if (
+        email.toLowerCase() !==
+        ADMIN_EMAIL.toLowerCase()
+    ) {
+
+        showMessage(
+            "Access Denied. Admin email only.",
+            "danger"
+        );
+
+        return;
+
+    }
+
+
+    /* =================================================
        BUTTON LOADING
-    ========================== */
+    ================================================= */
 
-    loginBtn.disabled = true;
+    if (loginBtn) {
 
-    loginBtn.textContent =
-        "LOGIN...";
+        loginBtn.disabled = true;
+
+        loginBtn.textContent =
+            "LOGIN...";
+
+    }
 
 
     showMessage(
-        "Checking login...",
+        "Checking Admin login...",
         "primary"
     );
 
 
     try {
 
-        console.log(
-            "Firebase authentication starting..."
-        );
-
-
-        /* ==========================
-           FIREBASE LOGIN
-        ========================== */
+        /* =================================================
+           FIREBASE AUTH
+        ================================================= */
 
         const result =
             await signInWithEmailAndPassword(
@@ -153,52 +190,69 @@ async function login() {
             );
 
 
+        const user =
+            result.user;
+
+
         console.log(
-            "LOGIN SUCCESS:",
-            result.user.email
+            "Firebase Login:",
+            user.email
         );
 
 
+        /* =================================================
+           SECOND ADMIN CHECK
+        ================================================= */
+
+        if (!isAdmin(user)) {
+
+            await signOut(auth);
+
+            showMessage(
+                "Access Denied. This account is not Admin.",
+                "danger"
+            );
+
+            return;
+
+        }
+
+
+        /* =================================================
+           ADMIN LOGIN SUCCESS
+        ================================================= */
+
         showMessage(
-            "Login Successful. Opening Admin...",
+            "Admin Login Successful...",
             "success"
         );
 
 
-        /* ==========================
+        console.log(
+            "ADMIN LOGIN SUCCESS:",
+            user.email
+        );
+
+
+        /* =================================================
            REDIRECT
-        ========================== */
+        ================================================= */
 
         setTimeout(() => {
 
-            window.location.href =
-                "admin.html";
+            window.location.replace(
+                "admin.html"
+            );
 
         }, 500);
 
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "================================="
-        );
-
-        console.error(
-            "FIREBASE LOGIN ERROR"
-        );
-
-        console.error(
-            "CODE:",
-            error.code
-        );
-
-        console.error(
-            "MESSAGE:",
-            error.message
-        );
-
-        console.error(
-            "================================="
+            "FIREBASE LOGIN ERROR:",
+            error
         );
 
 
@@ -207,7 +261,6 @@ async function login() {
 
 
         switch (error.code) {
-
 
             case "auth/invalid-credential":
 
@@ -228,7 +281,7 @@ async function login() {
             case "auth/user-not-found":
 
                 errorMessage =
-                    "User Not Found";
+                    "Admin account not found";
 
                 break;
 
@@ -260,7 +313,7 @@ async function login() {
             case "auth/user-disabled":
 
                 errorMessage =
-                    "This user account is disabled.";
+                    "Admin account is disabled.";
 
                 break;
 
@@ -280,12 +333,17 @@ async function login() {
         );
 
 
-    } finally {
+    }
+    finally {
 
-        loginBtn.disabled = false;
+        if (loginBtn) {
 
-        loginBtn.textContent =
-            "LOGIN";
+            loginBtn.disabled = false;
+
+            loginBtn.textContent =
+                "LOGIN";
+
+        }
 
     }
 
@@ -303,10 +361,6 @@ if (loginBtn) {
         login
     );
 
-    console.log(
-        "LOGIN BUTTON EVENT ATTACHED"
-    );
-
 }
 
 
@@ -318,9 +372,11 @@ if (passwordInput) {
 
     passwordInput.addEventListener(
         "keydown",
-        (event) => {
+        event => {
 
-            if (event.key === "Enter") {
+            if (
+                event.key === "Enter"
+            ) {
 
                 event.preventDefault();
 
@@ -342,13 +398,19 @@ if (emailInput) {
 
     emailInput.addEventListener(
         "keydown",
-        (event) => {
+        event => {
 
-            if (event.key === "Enter") {
+            if (
+                event.key === "Enter"
+            ) {
 
                 event.preventDefault();
 
-                passwordInput.focus();
+                if (passwordInput) {
+
+                    passwordInput.focus();
+
+                }
 
             }
 
@@ -359,12 +421,119 @@ if (emailInput) {
 
 
 /* =====================================================
-   GLOBAL
+   GLOBAL LOGIN
 ===================================================== */
 
-window.login = login;
+window.login =
+    login;
 
+
+/* =====================================================
+   AUTO CHECK
+   If already logged in, open admin
+===================================================== */
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if (!user) {
+
+            console.log(
+                "No user logged in."
+            );
+
+            return;
+
+        }
+
+
+        console.log(
+            "Existing Firebase User:",
+            user.email
+        );
+
+
+        /* =============================================
+           ONLY ADMIN CAN CONTINUE
+        ============================================= */
+
+        if (
+            isAdmin(user)
+        ) {
+
+            console.log(
+                "Existing Admin Session Found"
+            );
+
+            /*
+               Don't redirect if already
+               on admin.html.
+            */
+
+            if (
+                !window.location.pathname
+                    .toLowerCase()
+                    .endsWith(
+                        "admin.html"
+                    )
+            ) {
+
+                window.location.replace(
+                    "admin.html"
+                );
+
+            }
+
+        }
+        else {
+
+            /*
+               Any non-admin account
+               is immediately signed out.
+            */
+
+            console.log(
+                "Non-admin account detected."
+            );
+
+            signOut(auth);
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   READY
+===================================================== */
 
 console.log(
-    "LOGIN SYSTEM READY"
+    "========================================="
+);
+
+console.log(
+    "MR CO-ORDINATION ADMIN LOGIN"
+);
+
+console.log(
+    "LOGIN SYSTEM VERSION 12.0"
+);
+
+console.log(
+    "ADMIN EMAIL:",
+    ADMIN_EMAIL
+);
+
+console.log(
+    "EMAIL BASED ADMIN"
+);
+
+console.log(
+    "NO CUSTOM CLAIM REQUIRED"
+);
+
+console.log(
+    "========================================="
 );
