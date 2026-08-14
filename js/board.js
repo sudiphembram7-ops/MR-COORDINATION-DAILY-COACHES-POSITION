@@ -1,18 +1,15 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    BOARD.JS
-   VERSION 12.0 FINAL
+   VERSION 12.1 FINAL
    ---------------------------------------------------------
-   COMPATIBLE WITH PROVIDED board.html
+   FIREBASE REALTIME DATABASE
    ---------------------------------------------------------
-   FEATURES
-   ✔ FIREBASE REALTIME DATABASE
    ✔ LIVE BOARD
    ✔ SAVE
    ✔ UPDATE
    ✔ DELETE
    ✔ PULL OUT
-   ✔ RETURN
    ✔ RETURN TO ANY EMPTY CELL
    ✔ MOVE
    ✔ SWAP
@@ -22,12 +19,13 @@
    ✔ STATUS COLOUR
    ✔ TOTAL / OCCUPIED / FREE
    ✔ 145 CAPACITY
-   ✔ EXCEL / CSV
+   ✔ CSV / EXCEL
    ✔ PRINT / PDF
    ✔ FULL SCREEN
    ✔ LIVE CLOCK
    ✔ DATABASE STATUS
    ✔ HISTORY
+   ✔ ATOMIC MOVE / SWAP
 ========================================================= */
 
 import {
@@ -47,15 +45,13 @@ import {
 
 
 /* =========================================================
-   CONFIGURATION
+   CONFIG
 ========================================================= */
 
 const MAX_CAPACITY = 145;
 
 const BOARD_ROOT = "coachBoard";
-
 const PULLED_ROOT = "pulledOut";
-
 const HISTORY_ROOT = "history";
 
 
@@ -135,37 +131,31 @@ const BOARD_STRUCTURE = {
 ========================================================= */
 
 let boardData = {};
-
 let pulledOutData = {};
 
 let selectedCell = null;
-
 let selectedCoach = null;
 
 let dragSource = null;
 
 let moveMode = false;
-
 let swapMode = false;
 
 let boardListenerStarted = false;
-
 let pulledListenerStarted = false;
 
 
 /* =========================================================
-   DOM HELPERS
+   DOM
 ========================================================= */
 
 function $(id) {
-
     return document.getElementById(id);
-
 }
 
 
 /* =========================================================
-   AUTH USER
+   CURRENT USER
 ========================================================= */
 
 function currentUser() {
@@ -179,7 +169,7 @@ function currentUser() {
 
 
 /* =========================================================
-   INITIALIZATION
+   DOM READY
 ========================================================= */
 
 document.addEventListener(
@@ -187,17 +177,11 @@ document.addEventListener(
     () => {
 
         initializeBoard();
-
         initializeClock();
-
         initializeButtons();
-
         initializeSearch();
-
         initializePulledOutSearch();
-
         initializeFullscreen();
-
         initializePrint();
 
         startFirebaseListeners();
@@ -212,45 +196,55 @@ document.addEventListener(
 
 function initializeBoard() {
 
-    Object.values(BOARD_STRUCTURE).forEach(shop => {
+    Object.values(BOARD_STRUCTURE).forEach(
+        shop => {
 
-        shop.lines.forEach(line => {
+            shop.lines.forEach(
+                line => {
 
-            shop.positions.forEach(position => {
+                    shop.positions.forEach(
+                        position => {
 
-                const cell =
-                    document.getElementById(
-                        `${line}_${position}`
+                            const cell =
+                                document.getElementById(
+                                    `${line}_${position}`
+                                );
+
+                            if (!cell) return;
+
+                            cell.dataset.line =
+                                line;
+
+                            cell.dataset.position =
+                                position;
+
+                            cell.dataset.empty =
+                                "true";
+
+                            cell.addEventListener(
+                                "click",
+                                () =>
+                                    handleCellClick(cell)
+                            );
+
+                            cell.addEventListener(
+                                "dragover",
+                                handleDragOver
+                            );
+
+                            cell.addEventListener(
+                                "drop",
+                                handleDrop
+                            );
+
+                        }
                     );
 
-                if (!cell) return;
+                }
+            );
 
-                cell.dataset.line = line;
-
-                cell.dataset.position = position;
-
-                cell.dataset.empty = "true";
-
-                cell.addEventListener(
-                    "click",
-                    () => handleCellClick(cell)
-                );
-
-                cell.addEventListener(
-                    "dragover",
-                    handleDragOver
-                );
-
-                cell.addEventListener(
-                    "drop",
-                    handleDrop
-                );
-
-            });
-
-        });
-
-    });
+        }
+    );
 
 }
 
@@ -265,8 +259,13 @@ function startFirebaseListeners() {
 
     boardListenerStarted = true;
 
+
     const boardRef =
-        ref(database, BOARD_ROOT);
+        ref(
+            database,
+            BOARD_ROOT
+        );
+
 
     onValue(
         boardRef,
@@ -301,8 +300,13 @@ function startFirebaseListeners() {
 
         pulledListenerStarted = true;
 
+
         const pulledRef =
-            ref(database, PULLED_ROOT);
+            ref(
+                database,
+                PULLED_ROOT
+            );
+
 
         onValue(
             pulledRef,
@@ -337,22 +341,31 @@ function renderBoard() {
 
     clearAllCells();
 
-    Object.entries(boardData).forEach(
+
+    Object.entries(
+        boardData || {}
+    ).forEach(
         ([line, positions]) => {
 
             if (!positions) return;
 
-            Object.entries(positions).forEach(
+
+            Object.entries(
+                positions
+            ).forEach(
                 ([position, coach]) => {
 
                     if (!coach) return;
+
 
                     const cell =
                         document.getElementById(
                             `${line}_${position}`
                         );
 
+
                     if (!cell) return;
+
 
                     renderCoach(
                         cell,
@@ -369,7 +382,7 @@ function renderBoard() {
 
 
 /* =========================================================
-   CLEAR BOARD
+   CLEAR CELLS
 ========================================================= */
 
 function clearAllCells() {
@@ -378,26 +391,29 @@ function clearAllCells() {
         .querySelectorAll(
             ".coach-table td[id]"
         )
-        .forEach(cell => {
+        .forEach(
+            cell => {
 
-            cell.innerHTML =
-                `<div class="coach-card"></div>`;
+                cell.innerHTML =
+                    `<div class="coach-card"></div>`;
 
-            cell.dataset.empty = "true";
+                cell.dataset.empty =
+                    "true";
 
-            cell.removeAttribute(
-                "data-coach-no"
-            );
+                cell.removeAttribute(
+                    "data-coach-no"
+                );
 
-            cell.removeAttribute(
-                "data-status"
-            );
+                cell.removeAttribute(
+                    "data-status"
+                );
 
-            cell.classList.remove(
-                "occupied-cell"
-            );
+                cell.classList.remove(
+                    "occupied-cell"
+                );
 
-        });
+            }
+        );
 
 }
 
@@ -414,16 +430,21 @@ function renderCoach(
     const card =
         document.createElement("div");
 
+
     card.className =
         "coach-card occupied";
 
+
     card.draggable = true;
+
 
     card.dataset.coachNo =
         coach.coachNo || "";
 
+
     card.dataset.status =
         coach.status || "";
+
 
     card.innerHTML = `
 
@@ -474,13 +495,21 @@ function renderCoach(
         event => {
 
             dragSource = {
-                line: cell.dataset.line,
-                position: cell.dataset.position,
+
+                line:
+                    cell.dataset.line,
+
+                position:
+                    cell.dataset.position,
+
                 coach
+
             };
+
 
             event.dataTransfer.effectAllowed =
                 "move";
+
 
             event.dataTransfer.setData(
                 "text/plain",
@@ -488,6 +517,7 @@ function renderCoach(
                     dragSource
                 )
             );
+
 
             card.classList.add(
                 "dragging"
@@ -515,13 +545,18 @@ function renderCoach(
 
     cell.appendChild(card);
 
-    cell.dataset.empty = "false";
+
+    cell.dataset.empty =
+        "false";
+
 
     cell.dataset.coachNo =
         coach.coachNo || "";
 
+
     cell.dataset.status =
         coach.status || "";
+
 
     cell.classList.add(
         "occupied-cell"
@@ -540,6 +575,7 @@ function applyStatusColour(
 ) {
 
     element.classList.remove(
+
         "status-po",
         "status-s",
         "status-lm",
@@ -549,6 +585,7 @@ function applyStatusColour(
         "status-rs",
         "status-l",
         "status-hvy"
+
     );
 
 
@@ -560,15 +597,15 @@ function applyStatusColour(
 
     const map = {
 
-        "PO": "status-po",
-        "S": "status-s",
-        "LM": "status-lm",
-        "MED": "status-med",
-        "RL": "status-rl",
-        "R1": "status-r1",
-        "RS": "status-rs",
-        "L": "status-l",
-        "HVY": "status-hvy"
+        PO: "status-po",
+        S: "status-s",
+        LM: "status-lm",
+        MED: "status-med",
+        RL: "status-rl",
+        R1: "status-r1",
+        RS: "status-rs",
+        L: "status-l",
+        HVY: "status-hvy"
 
     };
 
@@ -592,9 +629,7 @@ function handleCellClick(cell) {
 
     if (moveMode) {
 
-        handleMoveDestination(
-            cell
-        );
+        handleMoveDestination(cell);
 
         return;
 
@@ -603,9 +638,7 @@ function handleCellClick(cell) {
 
     if (swapMode) {
 
-        handleSwapDestination(
-            cell
-        );
+        handleSwapDestination(cell);
 
         return;
 
@@ -625,6 +658,7 @@ function handleCellClick(cell) {
 
     const coach =
         getCoachFromCell(cell);
+
 
     if (coach) {
 
@@ -649,9 +683,7 @@ function handleCoachClick(
 
     if (moveMode) {
 
-        handleMoveDestination(
-            cell
-        );
+        handleMoveDestination(cell);
 
         return;
 
@@ -660,9 +692,7 @@ function handleCoachClick(
 
     if (swapMode) {
 
-        handleSwapDestination(
-            cell
-        );
+        handleSwapDestination(cell);
 
         return;
 
@@ -678,35 +708,38 @@ function handleCoachClick(
 
 
 /* =========================================================
-   GET COACH FROM CELL
+   GET COACH
 ========================================================= */
 
 function getCoachFromCell(cell) {
 
-    const line =
-        cell.dataset.line;
-
-    const position =
-        cell.dataset.position;
-
     return (
-        boardData?.[line]?.[position] ||
-        null
+        boardData?.[
+            cell.dataset.line
+        ]?.[
+            cell.dataset.position
+        ] || null
     );
 
 }
 
 
 /* =========================================================
-   OPEN NEW COACH MODAL
+   NEW COACH MODAL
 ========================================================= */
 
 function openNewCoachModal(cell) {
 
     selectedCell = {
-        line: cell.dataset.line,
-        position: cell.dataset.position
+
+        line:
+            cell.dataset.line,
+
+        position:
+            cell.dataset.position
+
     };
+
 
     selectedCoach = null;
 
@@ -718,10 +751,12 @@ function openNewCoachModal(cell) {
         )
     );
 
+
     setValue(
         "modalLine",
         cell.dataset.line
     );
+
 
     setValue(
         "modalPosition",
@@ -734,10 +769,12 @@ function openNewCoachModal(cell) {
         ""
     );
 
+
     setValue(
         "modalCoachType",
         ""
     );
+
 
     setValue(
         "modalStatus",
@@ -747,16 +784,13 @@ function openNewCoachModal(cell) {
 
     showModal();
 
-
-    toggleModalButtons(
-        true
-    );
+    toggleModalButtons(true);
 
 }
 
 
 /* =========================================================
-   OPEN EXISTING COACH MODAL
+   EXISTING COACH MODAL
 ========================================================= */
 
 function openCoachModal(
@@ -765,9 +799,15 @@ function openCoachModal(
 ) {
 
     selectedCell = {
-        line: cell.dataset.line,
-        position: cell.dataset.position
+
+        line:
+            cell.dataset.line,
+
+        position:
+            cell.dataset.position
+
     };
+
 
     selectedCoach = coach;
 
@@ -780,25 +820,30 @@ function openCoachModal(
         )
     );
 
+
     setValue(
         "modalLine",
         cell.dataset.line
     );
+
 
     setValue(
         "modalPosition",
         cell.dataset.position
     );
 
+
     setValue(
         "modalCoachNo",
         coach.coachNo || ""
     );
 
+
     setValue(
         "modalCoachType",
         coach.coachType || ""
     );
+
 
     setValue(
         "modalStatus",
@@ -808,10 +853,7 @@ function openCoachModal(
 
     showModal();
 
-
-    toggleModalButtons(
-        false
-    );
+    toggleModalButtons(false);
 
 }
 
@@ -825,14 +867,26 @@ function showModal() {
     const element =
         $("coachModal");
 
+
     if (!element) return;
 
-    const modal =
-        bootstrap.Modal.getOrCreateInstance(
-            element
+
+    if (
+        typeof bootstrap === "undefined"
+    ) {
+
+        console.error(
+            "Bootstrap JS not loaded."
         );
 
-    modal.show();
+        return;
+
+    }
+
+
+    bootstrap.Modal
+        .getOrCreateInstance(element)
+        .show();
 
 }
 
@@ -842,20 +896,24 @@ function hideModal() {
     const element =
         $("coachModal");
 
+
     if (!element) return;
 
-    const modal =
-        bootstrap.Modal.getOrCreateInstance(
-            element
-        );
 
-    modal.hide();
+    if (
+        typeof bootstrap === "undefined"
+    ) return;
+
+
+    bootstrap.Modal
+        .getOrCreateInstance(element)
+        .hide();
 
 }
 
 
 /* =========================================================
-   MODAL BUTTON STATE
+   MODAL BUTTONS
 ========================================================= */
 
 function toggleModalButtons(
@@ -882,17 +940,21 @@ function toggleModalButtons(
         save.style.display =
             newCoach ? "" : "none";
 
+
     if (updateBtn)
         updateBtn.style.display =
             newCoach ? "none" : "";
+
 
     if (pull)
         pull.style.display =
             newCoach ? "none" : "";
 
+
     if (returnBtn)
         returnBtn.style.display =
-            newCoach ? "none" : "";
+            newCoach ? "none" : "none";
+
 
     if (deleteBtn)
         deleteBtn.style.display =
@@ -923,10 +985,12 @@ async function saveCoach() {
             "modalCoachNo"
         ).trim();
 
+
     const coachType =
         getValue(
             "modalCoachType"
         ).trim();
+
 
     const status =
         getValue(
@@ -1048,7 +1112,7 @@ async function saveCoach() {
 
 
 /* =========================================================
-   UPDATE COACH
+   UPDATE
 ========================================================= */
 
 async function updateCoach() {
@@ -1056,11 +1120,7 @@ async function updateCoach() {
     if (
         !selectedCell ||
         !selectedCoach
-    ) {
-
-        return;
-
-    }
+    ) return;
 
 
     const coachNo =
@@ -1068,10 +1128,12 @@ async function updateCoach() {
             "modalCoachNo"
         ).trim();
 
+
     const coachType =
         getValue(
             "modalCoachType"
         ).trim();
+
 
     const status =
         getValue(
@@ -1090,15 +1152,9 @@ async function updateCoach() {
     }
 
 
-    const oldCoachNo =
-        selectedCoach.coachNo;
-
-
     if (
-        coachNo !== oldCoachNo &&
-        isCoachAlreadyOnBoard(
-            coachNo
-        )
+        coachNo !== selectedCoach.coachNo &&
+        isCoachAlreadyOnBoard(coachNo)
     ) {
 
         alert(
@@ -1121,7 +1177,6 @@ async function updateCoach() {
         status,
 
         shop:
-            selectedCoach.shop ||
             findShopByLine(
                 selectedCell.line
             ),
@@ -1176,7 +1231,7 @@ async function updateCoach() {
 
 
 /* =========================================================
-   DELETE COACH
+   DELETE
 ========================================================= */
 
 async function deleteCoach() {
@@ -1184,20 +1239,14 @@ async function deleteCoach() {
     if (
         !selectedCell ||
         !selectedCoach
-    ) {
-
-        return;
-
-    }
+    ) return;
 
 
-    const yes =
-        confirm(
+    if (
+        !confirm(
             `Delete Coach ${selectedCoach.coachNo}?`
-        );
-
-
-    if (!yes) return;
+        )
+    ) return;
 
 
     try {
@@ -1242,20 +1291,14 @@ async function pullOutCoach() {
     if (
         !selectedCell ||
         !selectedCoach
-    ) {
-
-        return;
-
-    }
+    ) return;
 
 
-    const yes =
-        confirm(
+    if (
+        !confirm(
             `Pull out Coach ${selectedCoach.coachNo}?`
-        );
-
-
-    if (!yes) return;
+        )
+    ) return;
 
 
     const pulledCoach = {
@@ -1332,7 +1375,8 @@ async function pullOutCoach() {
 
 
 /* =========================================================
-   RETURN TO BOARD
+   RETURN PULLED COACH
+   ✔ ANY EMPTY CELL
 ========================================================= */
 
 async function returnPulledCoach(
@@ -1350,7 +1394,8 @@ async function returnPulledCoach(
     if (!target) {
 
         alert(
-            "No empty board cell available."
+            "No empty board cell available.\n" +
+            `Capacity: ${MAX_CAPACITY}`
         );
 
         return;
@@ -1363,9 +1408,7 @@ async function returnPulledCoach(
         ...pulledCoach,
 
         shop:
-            findShopByLine(
-                target.line
-            ),
+            target.shop,
 
         line:
             target.line,
@@ -1383,8 +1426,19 @@ async function returnPulledCoach(
 
 
     delete returnedCoach.originalShop;
+    delete returnedCoach.originalLine;
+    delete returnedCoach.originalPosition;
+    delete returnedCoach.pullOutTime;
+    delete returnedCoach.pulledOutBy;
+
 
     try {
+
+        /*
+         * IMPORTANT:
+         * Write returned coach first,
+         * then remove pulled-out record.
+         */
 
         await writeCoach(
             target.line,
@@ -1406,6 +1460,9 @@ async function returnPulledCoach(
             returnedCoach
         );
 
+
+        renderPulledOut();
+
     } catch (error) {
 
         console.error(
@@ -1424,37 +1481,7 @@ async function returnPulledCoach(
 
 
 /* =========================================================
-   RETURN BUTTON FROM MODAL
-========================================================= */
-
-async function returnSelectedCoach() {
-
-    if (
-        !selectedCoach
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !selectedCoach.pulledOut
-    ) {
-
-        alert(
-            "This coach is already on the board."
-        );
-
-        return;
-
-    }
-
-}
-
-
-/* =========================================================
-   FIND FIRST EMPTY CELL
+   FIND EMPTY CELL
 ========================================================= */
 
 function findFirstEmptyCell() {
@@ -1491,9 +1518,14 @@ function findFirstEmptyCell() {
                 ) {
 
                     return {
-                        shop: shopName,
+
+                        shop:
+                            shopName,
+
                         line,
+
                         position
+
                     };
 
                 }
@@ -1504,13 +1536,35 @@ function findFirstEmptyCell() {
 
     }
 
+
     return null;
 
 }
 
 
 /* =========================================================
-   MOVE MODE
+   RETURN BUTTON
+========================================================= */
+
+async function returnSelectedCoach() {
+
+    /*
+     * Board coach cannot be returned because
+     * it is already on the board.
+     */
+
+    if (!selectedCoach) return;
+
+
+    alert(
+        "This coach is already on the board."
+    );
+
+}
+
+
+/* =========================================================
+   MOVE
 ========================================================= */
 
 function startMove(
@@ -1521,8 +1575,6 @@ function startMove(
     if (!coach) return;
 
 
-    selectedCoach = coach;
-
     selectedCell = {
 
         line:
@@ -1532,6 +1584,9 @@ function startMove(
             cell.dataset.position
 
     };
+
+
+    selectedCoach = coach;
 
 
     moveMode = true;
@@ -1547,7 +1602,7 @@ function startMove(
     alert(
         `MOVE MODE\n\n` +
         `Coach: ${coach.coachNo}\n\n` +
-        `Click an empty cell to move.`
+        `Click an EMPTY cell.`
     );
 
 }
@@ -1569,12 +1624,14 @@ async function handleMoveDestination(
     const sourceLine =
         selectedCell.line;
 
+
     const sourcePosition =
         selectedCell.position;
 
 
     const targetLine =
         targetCell.dataset.line;
+
 
     const targetPosition =
         targetCell.dataset.position;
@@ -1598,7 +1655,7 @@ async function handleMoveDestination(
     ) {
 
         alert(
-            "MOVE requires an empty cell.\n" +
+            "MOVE requires an EMPTY cell.\n" +
             "Use SWAP for an occupied cell."
         );
 
@@ -1607,7 +1664,7 @@ async function handleMoveDestination(
     }
 
 
-    const coach =
+    const sourceCoach =
         boardData?.[
             sourceLine
         ]?.[
@@ -1615,7 +1672,7 @@ async function handleMoveDestination(
         ];
 
 
-    if (!coach) {
+    if (!sourceCoach) {
 
         cancelModes();
 
@@ -1626,7 +1683,7 @@ async function handleMoveDestination(
 
     const movedCoach = {
 
-        ...coach,
+        ...sourceCoach,
 
         shop:
             findShopByLine(
@@ -1650,16 +1707,29 @@ async function handleMoveDestination(
 
     try {
 
-        await removeCoach(
-            sourceLine,
-            sourcePosition
-        );
+        /*
+         * ATOMIC MOVE
+         */
+
+        const updates = {};
 
 
-        await writeCoach(
-            targetLine,
-            targetPosition,
-            movedCoach
+        updates[
+            `${sourceLine}/${sourcePosition}`
+        ] = null;
+
+
+        updates[
+            `${targetLine}/${targetPosition}`
+        ] = movedCoach;
+
+
+        await update(
+            ref(
+                database,
+                BOARD_ROOT
+            ),
+            updates
         );
 
 
@@ -1689,7 +1759,7 @@ async function handleMoveDestination(
 
 
 /* =========================================================
-   SWAP MODE
+   SWAP
 ========================================================= */
 
 function startSwap(
@@ -1700,8 +1770,6 @@ function startSwap(
     if (!coach) return;
 
 
-    selectedCoach = coach;
-
     selectedCell = {
 
         line:
@@ -1711,6 +1779,9 @@ function startSwap(
             cell.dataset.position
 
     };
+
+
+    selectedCoach = coach;
 
 
     swapMode = true;
@@ -1726,7 +1797,7 @@ function startSwap(
     alert(
         `SWAP MODE\n\n` +
         `Coach: ${coach.coachNo}\n\n` +
-        `Click another coach cell to swap.`
+        `Click another OCCUPIED cell.`
     );
 
 }
@@ -1748,12 +1819,14 @@ async function handleSwapDestination(
     const sourceLine =
         selectedCell.line;
 
+
     const sourcePosition =
         selectedCell.position;
 
 
     const targetLine =
         targetCell.dataset.line;
+
 
     const targetPosition =
         targetCell.dataset.position;
@@ -1851,19 +1924,25 @@ async function handleSwapDestination(
 
     try {
 
+        /*
+         * ATOMIC SWAP
+         *
+         * No temporary empty state.
+         */
+
         const updates = {};
 
 
         updates[
             `${sourceLine}/${sourcePosition}`
         ] =
-            null;
+            targetUpdated;
 
 
         updates[
             `${targetLine}/${targetPosition}`
         ] =
-            null;
+            sourceUpdated;
 
 
         await update(
@@ -1875,29 +1954,22 @@ async function handleSwapDestination(
         );
 
 
-        await writeCoach(
-            targetLine,
-            targetPosition,
-            sourceUpdated
-        );
-
-
-        await writeCoach(
-            sourceLine,
-            sourcePosition,
-            targetUpdated
-        );
-
-
         await writeHistory(
             "SWAP",
             {
+
                 sourceCoach,
+
                 targetCoach,
+
                 sourceLine,
+
                 sourcePosition,
+
                 targetLine,
+
                 targetPosition
+
             }
         );
 
@@ -1922,7 +1994,7 @@ async function handleSwapDestination(
 
 
 /* =========================================================
-   CANCEL MOVE / SWAP
+   CANCEL MODES
 ========================================================= */
 
 function cancelModes() {
@@ -1934,6 +2006,9 @@ function cancelModes() {
     selectedCoach = null;
 
     selectedCell = null;
+
+    dragSource = null;
+
 
     document.body.classList.remove(
         "move-mode",
@@ -1958,7 +2033,7 @@ function handleDragOver(event) {
 
 
 /* =========================================================
-   DROP
+   DRAG DROP
 ========================================================= */
 
 async function handleDrop(event) {
@@ -1976,12 +2051,14 @@ async function handleDrop(event) {
     const sourceLine =
         dragSource.line;
 
+
     const sourcePosition =
         dragSource.position;
 
 
     const targetLine =
         targetCell.dataset.line;
+
 
     const targetPosition =
         targetCell.dataset.position;
@@ -1991,6 +2068,8 @@ async function handleDrop(event) {
         sourceLine === targetLine &&
         sourcePosition === targetPosition
     ) {
+
+        dragSource = null;
 
         return;
 
@@ -2005,7 +2084,13 @@ async function handleDrop(event) {
         ];
 
 
-    if (!sourceCoach) return;
+    if (!sourceCoach) {
+
+        dragSource = null;
+
+        return;
+
+    }
 
 
     const targetCoach =
@@ -2049,8 +2134,13 @@ async function handleDrop(event) {
         );
 
         alert(
-            "Drag & Drop failed."
+            "Drag & Drop failed.\n" +
+            error.message
         );
+
+    } finally {
+
+        dragSource = null;
 
     }
 
@@ -2059,6 +2149,7 @@ async function handleDrop(event) {
 
 /* =========================================================
    DIRECT MOVE
+   ATOMIC
 ========================================================= */
 
 async function moveCoachDirect(
@@ -2093,16 +2184,26 @@ async function moveCoachDirect(
     };
 
 
-    await removeCoach(
-        sourceLine,
-        sourcePosition
-    );
+    const updates = {};
 
 
-    await writeCoach(
-        targetLine,
-        targetPosition,
-        movedCoach
+    updates[
+        `${sourceLine}/${sourcePosition}`
+    ] = null;
+
+
+    updates[
+        `${targetLine}/${targetPosition}`
+    ] =
+        movedCoach;
+
+
+    await update(
+        ref(
+            database,
+            BOARD_ROOT
+        ),
+        updates
     );
 
 
@@ -2116,6 +2217,7 @@ async function moveCoachDirect(
 
 /* =========================================================
    DIRECT SWAP
+   ATOMIC
 ========================================================= */
 
 async function swapCoachDirect(
@@ -2175,37 +2277,46 @@ async function swapCoachDirect(
     };
 
 
-    await removeCoach(
-        sourceLine,
-        sourcePosition
-    );
+    const updates = {};
 
 
-    await removeCoach(
-        targetLine,
-        targetPosition
-    );
+    updates[
+        `${sourceLine}/${sourcePosition}`
+    ] =
+        newSource;
 
 
-    await writeCoach(
-        sourceLine,
-        sourcePosition,
-        newSource
-    );
+    updates[
+        `${targetLine}/${targetPosition}`
+    ] =
+        newTarget;
 
 
-    await writeCoach(
-        targetLine,
-        targetPosition,
-        newTarget
+    await update(
+        ref(
+            database,
+            BOARD_ROOT
+        ),
+        updates
     );
 
 
     await writeHistory(
         "SWAP",
         {
+
             sourceCoach,
-            targetCoach
+
+            targetCoach,
+
+            sourceLine,
+
+            sourcePosition,
+
+            targetLine,
+
+            targetPosition
+
         }
     );
 
@@ -2320,31 +2431,35 @@ function updateCounters() {
 
     Object.values(
         BOARD_STRUCTURE
-    ).forEach(shop => {
+    ).forEach(
+        shop => {
 
-        shop.lines.forEach(line => {
+            shop.lines.forEach(
+                line => {
 
-            shop.positions.forEach(
-                position => {
+                    shop.positions.forEach(
+                        position => {
 
-                    if (
-                        boardData?.[
-                            line
-                        ]?.[
-                            position
-                        ]
-                    ) {
+                            if (
+                                boardData?.[
+                                    line
+                                ]?.[
+                                    position
+                                ]
+                            ) {
 
-                        occupied++;
+                                occupied++;
 
-                    }
+                            }
+
+                        }
+                    );
 
                 }
             );
 
-        });
-
-    });
+        }
+    );
 
 
     const total =
@@ -2363,10 +2478,12 @@ function updateCounters() {
         total
     );
 
+
     setText(
         "occupiedCoach",
         occupied
     );
+
 
     setText(
         "freeCoach",
@@ -2391,13 +2508,14 @@ function updateCounters() {
 
 
 /* =========================================================
-   PULLED OUT RENDER
+   PULLED OUT
 ========================================================= */
 
 function renderPulledOut() {
 
     const tbody =
         $("pulledOutList");
+
 
     if (!tbody) return;
 
@@ -2407,7 +2525,7 @@ function renderPulledOut() {
 
     const entries =
         Object.entries(
-            pulledOutData
+            pulledOutData || {}
         );
 
 
@@ -2450,6 +2568,9 @@ function renderPulledOut() {
 
     entries.forEach(
         ([id, coach]) => {
+
+            if (!coach) return;
+
 
             const text = [
 
@@ -2523,8 +2644,8 @@ function renderPulledOut() {
                 <td>
 
                     <button
+                        type="button"
                         class="btn btn-sm btn-success return-pulled-btn"
-                        data-id="${escapeHTML(id)}"
                     >
                         ↩ RETURN
                     </button>
@@ -2542,14 +2663,11 @@ function renderPulledOut() {
 
             button.addEventListener(
                 "click",
-                () => {
-
+                () =>
                     returnPulledCoach(
                         id,
                         coach
-                    );
-
-                }
+                    )
             );
 
 
@@ -2599,6 +2717,7 @@ function initializeSearch() {
     const searchBox =
         $("searchBox");
 
+
     if (!searchBox) return;
 
 
@@ -2615,8 +2734,10 @@ function performSearch() {
     const box =
         $("searchBox");
 
+
     const result =
         $("searchResult");
+
 
     if (!box || !result) return;
 
@@ -2637,7 +2758,7 @@ function performSearch() {
 
 
     Object.entries(
-        boardData
+        boardData || {}
     ).forEach(
         ([line, positions]) => {
 
@@ -2732,17 +2853,23 @@ function performSearch() {
                 <br>
 
                 <small>
+
                     ${escapeHTML(
                         item.coach.shop || ""
                     )}
+
                     /
+
                     ${escapeHTML(
                         item.line
                     )}
+
                     /
+
                     ${escapeHTML(
                         item.position
                     )}
+
                 </small>
 
             `;
@@ -2758,31 +2885,35 @@ function performSearch() {
                         );
 
 
-                    if (cell) {
-
-                        cell.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center"
-                        });
+                    if (!cell) return;
 
 
-                        cell.classList.add(
-                            "search-highlight"
-                        );
+                    cell.scrollIntoView({
+
+                        behavior:
+                            "smooth",
+
+                        block:
+                            "center"
+
+                    });
 
 
-                        setTimeout(
-                            () => {
+                    cell.classList.add(
+                        "search-highlight"
+                    );
 
-                                cell.classList.remove(
-                                    "search-highlight"
-                                );
 
-                            },
-                            2000
-                        );
+                    setTimeout(
+                        () => {
 
-                    }
+                            cell.classList.remove(
+                                "search-highlight"
+                            );
+
+                        },
+                        2000
+                    );
 
                 }
             );
@@ -2804,6 +2935,7 @@ function initializePulledOutSearch() {
 
     const input =
         $("pulledOutSearchBox");
+
 
     if (!input) return;
 
@@ -2853,11 +2985,7 @@ function initializeButtons() {
     $("refreshBtn")
         ?.addEventListener(
             "click",
-            () => {
-
-                location.reload();
-
-            }
+            () => location.reload()
         );
 
 
@@ -2885,13 +3013,14 @@ function initializeButtons() {
 
 
 /* =========================================================
-   FULL SCREEN
+   FULLSCREEN
 ========================================================= */
 
 function initializeFullscreen() {
 
     const button =
         $("fullscreenBtn");
+
 
     if (!button) return;
 
@@ -2970,7 +3099,7 @@ function printBoard() {
 
 
 /* =========================================================
-   CSV / EXCEL EXPORT
+   CSV EXPORT
 ========================================================= */
 
 function exportCSV() {
@@ -2979,17 +3108,19 @@ function exportCSV() {
 
 
     rows.push([
+
         "Shop",
         "Line",
         "Position",
         "Coach No",
         "Coach Type",
         "Status"
+
     ]);
 
 
     Object.entries(
-        boardData
+        boardData || {}
     ).forEach(
         ([line, positions]) => {
 
@@ -3061,6 +3192,7 @@ function exportCSV() {
 
     a.href = url;
 
+
     a.download =
         `MR-Co-ordination-${dateFileName()}.csv`;
 
@@ -3072,9 +3204,7 @@ function exportCSV() {
     a.remove();
 
 
-    URL.revokeObjectURL(
-        url
-    );
+    URL.revokeObjectURL(url);
 
 }
 
@@ -3086,6 +3216,7 @@ function exportCSV() {
 function initializeClock() {
 
     updateClock();
+
 
     setInterval(
         updateClock,
@@ -3242,6 +3373,7 @@ function findShopByLine(line) {
 
     }
 
+
     return "";
 
 }
@@ -3256,7 +3388,9 @@ function isCoachAlreadyOnBoard(
 ) {
 
     const target =
-        String(coachNo)
+        String(
+            coachNo
+        )
             .trim()
             .toLowerCase();
 
@@ -3265,11 +3399,12 @@ function isCoachAlreadyOnBoard(
 
 
     Object.values(
-        boardData
+        boardData || {}
     ).forEach(
         positions => {
 
             if (found) return;
+
 
             Object.values(
                 positions || {}
@@ -3281,8 +3416,8 @@ function isCoachAlreadyOnBoard(
                         String(
                             coach.coachNo || ""
                         )
-                        .trim()
-                        .toLowerCase() ===
+                            .trim()
+                            .toLowerCase() ===
                         target
                     ) {
 
@@ -3314,6 +3449,7 @@ function setText(
     const element =
         $(id);
 
+
     if (element) {
 
         element.textContent =
@@ -3331,6 +3467,7 @@ function setValue(
 
     const element =
         $(id);
+
 
     if (element) {
 
@@ -3352,6 +3489,10 @@ function getValue(
 
 }
 
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
 
 function escapeHTML(
     value
@@ -3384,6 +3525,10 @@ function escapeHTML(
 }
 
 
+/* =========================================================
+   CSV ESCAPE
+========================================================= */
+
 function csvEscape(
     value
 ) {
@@ -3412,6 +3557,10 @@ function csvEscape(
 
 }
 
+
+/* =========================================================
+   DATE TIME
+========================================================= */
 
 function formatDateTime(
     timestamp
@@ -3442,6 +3591,10 @@ function formatDateTime(
 }
 
 
+/* =========================================================
+   FILE NAME
+========================================================= */
+
 function dateFileName() {
 
     const now =
@@ -3449,6 +3602,7 @@ function dateFileName() {
 
 
     return [
+
         now.getFullYear(),
 
         String(
@@ -3485,29 +3639,35 @@ function dateFileName() {
 
 
 /* =========================================================
-   GLOBAL DEBUG / OPTIONAL CONTROLS
+   GLOBAL API
 ========================================================= */
 
 window.MRBoard = {
 
     startMove,
+
     startSwap,
+
     cancelModes,
-    refresh: () => location.reload(),
+
+    refresh:
+        () => location.reload(),
+
     exportCSV,
+
     printBoard,
 
-    getBoardData: () =>
-        boardData,
+    getBoardData:
+        () => boardData,
 
-    getPulledOutData: () =>
-        pulledOutData
+    getPulledOutData:
+        () => pulledOutData
 
 };
 
 
 /* =========================================================
-   KEYBOARD SHORTCUTS
+   KEYBOARD
 ========================================================= */
 
 document.addEventListener(
@@ -3538,6 +3698,10 @@ document.addEventListener(
 );
 
 
+/* =========================================================
+   CONSOLE
+========================================================= */
+
 console.log(
-    "MR CO-ORDINATION BOARD.JS VERSION 12.0 LOADED"
+    "MR CO-ORDINATION BOARD.JS VERSION 12.1 FINAL LOADED"
 );
