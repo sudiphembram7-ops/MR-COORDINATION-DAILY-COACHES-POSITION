@@ -1,167 +1,3089 @@
-/* =====================================================
+/* =========================================================
    MR CO-ORDINATION BOARD
-   PRODUCTION BOARD.JS
-   VERSION 8.0
-   FINAL STABLE
-   DESKTOP + MOBILE + FIREBASE + SEARCH
-===================================================== */
-
-
-/* =====================================================
-   FIREBASE IMPORTS
-===================================================== */
-
-import {
-    ref,
-    get,
-    push,
-    onValue,
-    update
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
-import {
-    firebaseSaveCoach,
-    firebaseUpdateCoach,
-    firebaseDeleteCoach
-} from "./firebase-board.js";
+   BOARD.JS
+   VERSION 12.0 FINAL
+   ---------------------------------------------------------
+   COMPATIBLE WITH PROVIDED board.html
+   ---------------------------------------------------------
+   FEATURES
+   ✔ FIREBASE REALTIME DATABASE
+   ✔ LIVE BOARD
+   ✔ SAVE
+   ✔ UPDATE
+   ✔ DELETE
+   ✔ PULL OUT
+   ✔ RETURN
+   ✔ RETURN TO ANY EMPTY CELL
+   ✔ MOVE
+   ✔ SWAP
+   ✔ DRAG & DROP
+   ✔ SEARCH
+   ✔ PULLED OUT SEARCH
+   ✔ STATUS COLOUR
+   ✔ TOTAL / OCCUPIED / FREE
+   ✔ 145 CAPACITY
+   ✔ EXCEL / CSV
+   ✔ PRINT / PDF
+   ✔ FULL SCREEN
+   ✔ LIVE CLOCK
+   ✔ DATABASE STATUS
+   ✔ HISTORY
+========================================================= */
 
 import {
     database,
     auth
 } from "./firebase-config.js";
 
+import {
+    ref,
+    onValue,
+    get,
+    set,
+    update,
+    remove,
+    push
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* =====================================================
-   GLOBALS
-===================================================== */
 
-console.log("BOARD JS V8.0 LOADED");
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const MAX_CAPACITY = 145;
+
+const BOARD_ROOT = "coachBoard";
+
+const PULLED_ROOT = "pulledOut";
+
+const HISTORY_ROOT = "history";
+
+
+/* =========================================================
+   BOARD STRUCTURE
+========================================================= */
+
+const BOARD_STRUCTURE = {
+
+    "N SHOP": {
+        lines: ["N2", "N3", "N5", "N7", "N8"],
+        positions: ["H1", "H2", "H3", "D3", "D2", "D1"]
+    },
+
+    "M SHOP": {
+        lines: ["M2", "M3", "M4", "M5", "M6"],
+        positions: ["H", "C", "D"]
+    },
+
+    "LIFTING BAY": {
+        lines: ["L9", "L10"],
+        positions: ["H", "C", "D"]
+    },
+
+    "MR SCR SHOP": {
+        lines: [
+            "SCR9",
+            "SCR10",
+            "SCR11",
+            "SCR12",
+            "SCR13",
+            "SCR14",
+            "SCR15",
+            "SCR16",
+            "SCR18",
+            "SCR19",
+            "SCR21",
+            "SCR22"
+        ],
+        positions: ["H1", "H2", "D2", "D1"]
+    },
+
+    "CR SHOP": {
+        lines: [
+            "F1",
+            "F2",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "F7",
+            "F8",
+            "F9",
+            "F10",
+            "F11"
+        ],
+        positions: ["H", "D"]
+    },
+
+    "J SHOP": {
+        lines: [
+            "J1",
+            "J2",
+            "J3",
+            "J4",
+            "J5",
+            "J6"
+        ],
+        positions: ["H1", "H2", "D2", "D1"]
+    }
+
+};
+
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
 
 let boardData = {};
-let currentCell = null;
-let dragCell = null;
-let lastMove = null;
 
-let coachModal = null;
+let pulledOutData = {};
+
+let selectedCell = null;
+
+let selectedCoach = null;
+
+let dragSource = null;
+
+let moveMode = false;
+
+let swapMode = false;
 
 let boardListenerStarted = false;
-let boardUnsubscribe = null;
 
-let mobileLongPressTimer = null;
-let mobileDragCell = null;
-
-const LONG_PRESS_DELAY = 350;
+let pulledListenerStarted = false;
 
 
-/* =====================================================
-   ADMIN STATUS
-===================================================== */
+/* =========================================================
+   DOM HELPERS
+========================================================= */
 
-let adminLoggedIn = false;
+function $(id) {
+
+    return document.getElementById(id);
+
+}
 
 
-/* =====================================================
-   FIREBASE AUTH
-===================================================== */
+/* =========================================================
+   AUTH USER
+========================================================= */
 
-onAuthStateChanged(auth, (user) => {
+function currentUser() {
 
-    adminLoggedIn = !!user;
-
-    console.log(
-        "Admin Status:",
-        adminLoggedIn
+    return (
+        auth?.currentUser?.email ||
+        "Admin"
     );
 
-    updateAdminUI();
-
-});
+}
 
 
-/* =====================================================
-   ADMIN CHECK
-===================================================== */
+/* =========================================================
+   INITIALIZATION
+========================================================= */
 
-function checkAdmin() {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    if (!adminLoggedIn) {
+        initializeBoard();
 
-        alert("Please login as Admin");
+        initializeClock();
 
-        return false;
+        initializeButtons();
+
+        initializeSearch();
+
+        initializePulledOutSearch();
+
+        initializeFullscreen();
+
+        initializePrint();
+
+        startFirebaseListeners();
 
     }
+);
 
-    return true;
+
+/* =========================================================
+   INITIALIZE BOARD
+========================================================= */
+
+function initializeBoard() {
+
+    Object.values(BOARD_STRUCTURE).forEach(shop => {
+
+        shop.lines.forEach(line => {
+
+            shop.positions.forEach(position => {
+
+                const cell =
+                    document.getElementById(
+                        `${line}_${position}`
+                    );
+
+                if (!cell) return;
+
+                cell.dataset.line = line;
+
+                cell.dataset.position = position;
+
+                cell.dataset.empty = "true";
+
+                cell.addEventListener(
+                    "click",
+                    () => handleCellClick(cell)
+                );
+
+                cell.addEventListener(
+                    "dragover",
+                    handleDragOver
+                );
+
+                cell.addEventListener(
+                    "drop",
+                    handleDrop
+                );
+
+            });
+
+        });
+
+    });
 
 }
 
 
-/* =====================================================
-   ADMIN UI
-===================================================== */
+/* =========================================================
+   FIREBASE LISTENERS
+========================================================= */
 
-function updateAdminUI() {
+function startFirebaseListeners() {
 
-    document.body.classList.toggle(
-        "admin-logged-in",
-        adminLoggedIn
-    );
+    if (boardListenerStarted) return;
 
-}
+    boardListenerStarted = true;
 
+    const boardRef =
+        ref(database, BOARD_ROOT);
 
-/* =====================================================
-   DOM READY
-===================================================== */
+    onValue(
+        boardRef,
+        snapshot => {
 
-document.addEventListener("DOMContentLoaded", () => {
+            boardData =
+                snapshot.val() || {};
 
-    const modalElement =
-        document.getElementById("coachModal");
+            renderBoard();
 
-    if (
-        modalElement &&
-        typeof bootstrap !== "undefined"
-    ) {
+            updateCounters();
 
-        coachModal =
-            new bootstrap.Modal(
-                modalElement
+            setDatabaseStatus(true);
+
+            updateLastUpdate();
+
+        },
+        error => {
+
+            console.error(
+                "BOARD FIREBASE ERROR:",
+                error
             );
 
+            setDatabaseStatus(false);
+
+        }
+    );
+
+
+    if (!pulledListenerStarted) {
+
+        pulledListenerStarted = true;
+
+        const pulledRef =
+            ref(database, PULLED_ROOT);
+
+        onValue(
+            pulledRef,
+            snapshot => {
+
+                pulledOutData =
+                    snapshot.val() || {};
+
+                renderPulledOut();
+
+            },
+            error => {
+
+                console.error(
+                    "PULLED OUT ERROR:",
+                    error
+                );
+
+            }
+        );
+
     }
 
-    startClock();
-
-    loadBoard();
-
-    enableCellClick();
-
-    initializeButtons();
-
-    initializeSearch();
-
-    enableDragDrop();
-
-    enableMobileDrag();
-
-    initializeKeyboard();
-
-    initializeFirebaseStatus();
-
-});
+}
 
 
-/* =====================================================
-   LIVE CLOCK
-===================================================== */
+/* =========================================================
+   RENDER BOARD
+========================================================= */
 
-function startClock() {
+function renderBoard() {
+
+    clearAllCells();
+
+    Object.entries(boardData).forEach(
+        ([line, positions]) => {
+
+            if (!positions) return;
+
+            Object.entries(positions).forEach(
+                ([position, coach]) => {
+
+                    if (!coach) return;
+
+                    const cell =
+                        document.getElementById(
+                            `${line}_${position}`
+                        );
+
+                    if (!cell) return;
+
+                    renderCoach(
+                        cell,
+                        coach
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CLEAR BOARD
+========================================================= */
+
+function clearAllCells() {
+
+    document
+        .querySelectorAll(
+            ".coach-table td[id]"
+        )
+        .forEach(cell => {
+
+            cell.innerHTML =
+                `<div class="coach-card"></div>`;
+
+            cell.dataset.empty = "true";
+
+            cell.removeAttribute(
+                "data-coach-no"
+            );
+
+            cell.removeAttribute(
+                "data-status"
+            );
+
+            cell.classList.remove(
+                "occupied-cell"
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   RENDER COACH
+========================================================= */
+
+function renderCoach(
+    cell,
+    coach
+) {
+
+    const card =
+        document.createElement("div");
+
+    card.className =
+        "coach-card occupied";
+
+    card.draggable = true;
+
+    card.dataset.coachNo =
+        coach.coachNo || "";
+
+    card.dataset.status =
+        coach.status || "";
+
+    card.innerHTML = `
+
+        <div class="coach-number">
+            ${escapeHTML(
+                coach.coachNo || "--"
+            )}
+        </div>
+
+        <div class="coach-type">
+            ${escapeHTML(
+                coach.coachType || ""
+            )}
+        </div>
+
+        <div class="coach-status">
+            ${escapeHTML(
+                coach.status || "--"
+            )}
+        </div>
+
+    `;
+
+
+    applyStatusColour(
+        card,
+        coach.status
+    );
+
+
+    card.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            handleCoachClick(
+                cell,
+                coach
+            );
+
+        }
+    );
+
+
+    card.addEventListener(
+        "dragstart",
+        event => {
+
+            dragSource = {
+                line: cell.dataset.line,
+                position: cell.dataset.position,
+                coach
+            };
+
+            event.dataTransfer.effectAllowed =
+                "move";
+
+            event.dataTransfer.setData(
+                "text/plain",
+                JSON.stringify(
+                    dragSource
+                )
+            );
+
+            card.classList.add(
+                "dragging"
+            );
+
+        }
+    );
+
+
+    card.addEventListener(
+        "dragend",
+        () => {
+
+            card.classList.remove(
+                "dragging"
+            );
+
+            dragSource = null;
+
+        }
+    );
+
+
+    cell.innerHTML = "";
+
+    cell.appendChild(card);
+
+    cell.dataset.empty = "false";
+
+    cell.dataset.coachNo =
+        coach.coachNo || "";
+
+    cell.dataset.status =
+        coach.status || "";
+
+    cell.classList.add(
+        "occupied-cell"
+    );
+
+}
+
+
+/* =========================================================
+   STATUS COLOUR
+========================================================= */
+
+function applyStatusColour(
+    element,
+    status
+) {
+
+    element.classList.remove(
+        "status-po",
+        "status-s",
+        "status-lm",
+        "status-med",
+        "status-rl",
+        "status-r1",
+        "status-rs",
+        "status-l",
+        "status-hvy"
+    );
+
+
+    const s =
+        String(status || "")
+            .trim()
+            .toUpperCase();
+
+
+    const map = {
+
+        "PO": "status-po",
+        "S": "status-s",
+        "LM": "status-lm",
+        "MED": "status-med",
+        "RL": "status-rl",
+        "R1": "status-r1",
+        "RS": "status-rs",
+        "L": "status-l",
+        "HVY": "status-hvy"
+
+    };
+
+
+    if (map[s]) {
+
+        element.classList.add(
+            map[s]
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CELL CLICK
+========================================================= */
+
+function handleCellClick(cell) {
+
+    if (moveMode) {
+
+        handleMoveDestination(
+            cell
+        );
+
+        return;
+
+    }
+
+
+    if (swapMode) {
+
+        handleSwapDestination(
+            cell
+        );
+
+        return;
+
+    }
+
+
+    if (
+        cell.dataset.empty === "true"
+    ) {
+
+        openNewCoachModal(cell);
+
+        return;
+
+    }
+
+
+    const coach =
+        getCoachFromCell(cell);
+
+    if (coach) {
+
+        openCoachModal(
+            cell,
+            coach
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   COACH CLICK
+========================================================= */
+
+function handleCoachClick(
+    cell,
+    coach
+) {
+
+    if (moveMode) {
+
+        handleMoveDestination(
+            cell
+        );
+
+        return;
+
+    }
+
+
+    if (swapMode) {
+
+        handleSwapDestination(
+            cell
+        );
+
+        return;
+
+    }
+
+
+    openCoachModal(
+        cell,
+        coach
+    );
+
+}
+
+
+/* =========================================================
+   GET COACH FROM CELL
+========================================================= */
+
+function getCoachFromCell(cell) {
+
+    const line =
+        cell.dataset.line;
+
+    const position =
+        cell.dataset.position;
+
+    return (
+        boardData?.[line]?.[position] ||
+        null
+    );
+
+}
+
+
+/* =========================================================
+   OPEN NEW COACH MODAL
+========================================================= */
+
+function openNewCoachModal(cell) {
+
+    selectedCell = {
+        line: cell.dataset.line,
+        position: cell.dataset.position
+    };
+
+    selectedCoach = null;
+
+
+    setValue(
+        "modalShop",
+        findShopByLine(
+            cell.dataset.line
+        )
+    );
+
+    setValue(
+        "modalLine",
+        cell.dataset.line
+    );
+
+    setValue(
+        "modalPosition",
+        cell.dataset.position
+    );
+
+
+    setValue(
+        "modalCoachNo",
+        ""
+    );
+
+    setValue(
+        "modalCoachType",
+        ""
+    );
+
+    setValue(
+        "modalStatus",
+        ""
+    );
+
+
+    showModal();
+
+
+    toggleModalButtons(
+        true
+    );
+
+}
+
+
+/* =========================================================
+   OPEN EXISTING COACH MODAL
+========================================================= */
+
+function openCoachModal(
+    cell,
+    coach
+) {
+
+    selectedCell = {
+        line: cell.dataset.line,
+        position: cell.dataset.position
+    };
+
+    selectedCoach = coach;
+
+
+    setValue(
+        "modalShop",
+        coach.shop ||
+        findShopByLine(
+            cell.dataset.line
+        )
+    );
+
+    setValue(
+        "modalLine",
+        cell.dataset.line
+    );
+
+    setValue(
+        "modalPosition",
+        cell.dataset.position
+    );
+
+    setValue(
+        "modalCoachNo",
+        coach.coachNo || ""
+    );
+
+    setValue(
+        "modalCoachType",
+        coach.coachType || ""
+    );
+
+    setValue(
+        "modalStatus",
+        coach.status || ""
+    );
+
+
+    showModal();
+
+
+    toggleModalButtons(
+        false
+    );
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function showModal() {
+
+    const element =
+        $("coachModal");
+
+    if (!element) return;
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            element
+        );
+
+    modal.show();
+
+}
+
+
+function hideModal() {
+
+    const element =
+        $("coachModal");
+
+    if (!element) return;
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            element
+        );
+
+    modal.hide();
+
+}
+
+
+/* =========================================================
+   MODAL BUTTON STATE
+========================================================= */
+
+function toggleModalButtons(
+    newCoach
+) {
+
+    const save =
+        $("saveCoachBtn");
+
+    const updateBtn =
+        $("updateCoachBtn");
+
+    const pull =
+        $("pullOutBtn");
+
+    const returnBtn =
+        $("returnToBoardBtn");
+
+    const deleteBtn =
+        $("deleteCoachBtn");
+
+
+    if (save)
+        save.style.display =
+            newCoach ? "" : "none";
+
+    if (updateBtn)
+        updateBtn.style.display =
+            newCoach ? "none" : "";
+
+    if (pull)
+        pull.style.display =
+            newCoach ? "none" : "";
+
+    if (returnBtn)
+        returnBtn.style.display =
+            newCoach ? "none" : "";
+
+    if (deleteBtn)
+        deleteBtn.style.display =
+            newCoach ? "none" : "";
+
+}
+
+
+/* =========================================================
+   SAVE COACH
+========================================================= */
+
+async function saveCoach() {
+
+    if (!selectedCell) {
+
+        alert(
+            "Please select a board cell."
+        );
+
+        return;
+
+    }
+
+
+    const coachNo =
+        getValue(
+            "modalCoachNo"
+        ).trim();
+
+    const coachType =
+        getValue(
+            "modalCoachType"
+        ).trim();
+
+    const status =
+        getValue(
+            "modalStatus"
+        ).trim();
+
+
+    if (!coachNo) {
+
+        alert(
+            "Enter Coach Number."
+        );
+
+        return;
+
+    }
+
+
+    if (!coachType) {
+
+        alert(
+            "Select Coach Type."
+        );
+
+        return;
+
+    }
+
+
+    if (!status) {
+
+        alert(
+            "Select Status."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        isCoachAlreadyOnBoard(
+            coachNo
+        )
+    ) {
+
+        alert(
+            "This coach is already on the board."
+        );
+
+        return;
+
+    }
+
+
+    const coach = {
+
+        coachNo,
+
+        coachType,
+
+        status,
+
+        shop:
+            findShopByLine(
+                selectedCell.line
+            ),
+
+        line:
+            selectedCell.line,
+
+        position:
+            selectedCell.position,
+
+        createdAt:
+            Date.now(),
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    try {
+
+        await writeCoach(
+            selectedCell.line,
+            selectedCell.position,
+            coach
+        );
+
+
+        await writeHistory(
+            "SAVE",
+            coach
+        );
+
+
+        hideModal();
+
+    } catch (error) {
+
+        console.error(
+            "SAVE ERROR:",
+            error
+        );
+
+        alert(
+            "Save failed.\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE COACH
+========================================================= */
+
+async function updateCoach() {
+
+    if (
+        !selectedCell ||
+        !selectedCoach
+    ) {
+
+        return;
+
+    }
+
+
+    const coachNo =
+        getValue(
+            "modalCoachNo"
+        ).trim();
+
+    const coachType =
+        getValue(
+            "modalCoachType"
+        ).trim();
+
+    const status =
+        getValue(
+            "modalStatus"
+        ).trim();
+
+
+    if (!coachNo) {
+
+        alert(
+            "Enter Coach Number."
+        );
+
+        return;
+
+    }
+
+
+    const oldCoachNo =
+        selectedCoach.coachNo;
+
+
+    if (
+        coachNo !== oldCoachNo &&
+        isCoachAlreadyOnBoard(
+            coachNo
+        )
+    ) {
+
+        alert(
+            "This coach is already on the board."
+        );
+
+        return;
+
+    }
+
+
+    const updatedCoach = {
+
+        ...selectedCoach,
+
+        coachNo,
+
+        coachType,
+
+        status,
+
+        shop:
+            selectedCoach.shop ||
+            findShopByLine(
+                selectedCell.line
+            ),
+
+        line:
+            selectedCell.line,
+
+        position:
+            selectedCell.position,
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    try {
+
+        await writeCoach(
+            selectedCell.line,
+            selectedCell.position,
+            updatedCoach
+        );
+
+
+        await writeHistory(
+            "UPDATE",
+            updatedCoach
+        );
+
+
+        hideModal();
+
+    } catch (error) {
+
+        console.error(
+            "UPDATE ERROR:",
+            error
+        );
+
+        alert(
+            "Update failed.\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DELETE COACH
+========================================================= */
+
+async function deleteCoach() {
+
+    if (
+        !selectedCell ||
+        !selectedCoach
+    ) {
+
+        return;
+
+    }
+
+
+    const yes =
+        confirm(
+            `Delete Coach ${selectedCoach.coachNo}?`
+        );
+
+
+    if (!yes) return;
+
+
+    try {
+
+        await removeCoach(
+            selectedCell.line,
+            selectedCell.position
+        );
+
+
+        await writeHistory(
+            "DELETE",
+            selectedCoach
+        );
+
+
+        hideModal();
+
+    } catch (error) {
+
+        console.error(
+            "DELETE ERROR:",
+            error
+        );
+
+        alert(
+            "Delete failed.\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PULL OUT
+========================================================= */
+
+async function pullOutCoach() {
+
+    if (
+        !selectedCell ||
+        !selectedCoach
+    ) {
+
+        return;
+
+    }
+
+
+    const yes =
+        confirm(
+            `Pull out Coach ${selectedCoach.coachNo}?`
+        );
+
+
+    if (!yes) return;
+
+
+    const pulledCoach = {
+
+        ...selectedCoach,
+
+        originalShop:
+            selectedCoach.shop ||
+            findShopByLine(
+                selectedCell.line
+            ),
+
+        originalLine:
+            selectedCell.line,
+
+        originalPosition:
+            selectedCell.position,
+
+        pullOutTime:
+            Date.now(),
+
+        pulledOutBy:
+            currentUser()
+
+    };
+
+
+    try {
+
+        const pulledRef =
+            push(
+                ref(
+                    database,
+                    PULLED_ROOT
+                )
+            );
+
+
+        await set(
+            pulledRef,
+            pulledCoach
+        );
+
+
+        await removeCoach(
+            selectedCell.line,
+            selectedCell.position
+        );
+
+
+        await writeHistory(
+            "PULL OUT",
+            pulledCoach
+        );
+
+
+        hideModal();
+
+    } catch (error) {
+
+        console.error(
+            "PULL OUT ERROR:",
+            error
+        );
+
+        alert(
+            "Pull out failed.\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RETURN TO BOARD
+========================================================= */
+
+async function returnPulledCoach(
+    pulledId,
+    pulledCoach
+) {
+
+    if (!pulledCoach) return;
+
+
+    const target =
+        findFirstEmptyCell();
+
+
+    if (!target) {
+
+        alert(
+            "No empty board cell available."
+        );
+
+        return;
+
+    }
+
+
+    const returnedCoach = {
+
+        ...pulledCoach,
+
+        shop:
+            findShopByLine(
+                target.line
+            ),
+
+        line:
+            target.line,
+
+        position:
+            target.position,
+
+        returnedAt:
+            Date.now(),
+
+        returnedBy:
+            currentUser()
+
+    };
+
+
+    delete returnedCoach.originalShop;
+
+    try {
+
+        await writeCoach(
+            target.line,
+            target.position,
+            returnedCoach
+        );
+
+
+        await remove(
+            ref(
+                database,
+                `${PULLED_ROOT}/${pulledId}`
+            )
+        );
+
+
+        await writeHistory(
+            "RETURN",
+            returnedCoach
+        );
+
+    } catch (error) {
+
+        console.error(
+            "RETURN ERROR:",
+            error
+        );
+
+        alert(
+            "Return failed.\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RETURN BUTTON FROM MODAL
+========================================================= */
+
+async function returnSelectedCoach() {
+
+    if (
+        !selectedCoach
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !selectedCoach.pulledOut
+    ) {
+
+        alert(
+            "This coach is already on the board."
+        );
+
+        return;
+
+    }
+
+}
+
+
+/* =========================================================
+   FIND FIRST EMPTY CELL
+========================================================= */
+
+function findFirstEmptyCell() {
+
+    for (
+        const shopName
+        of Object.keys(
+            BOARD_STRUCTURE
+        )
+    ) {
+
+        const shop =
+            BOARD_STRUCTURE[
+                shopName
+            ];
+
+
+        for (
+            const line
+            of shop.lines
+        ) {
+
+            for (
+                const position
+                of shop.positions
+            ) {
+
+                if (
+                    !boardData?.[
+                        line
+                    ]?.[
+                        position
+                    ]
+                ) {
+
+                    return {
+                        shop: shopName,
+                        line,
+                        position
+                    };
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return null;
+
+}
+
+
+/* =========================================================
+   MOVE MODE
+========================================================= */
+
+function startMove(
+    cell,
+    coach
+) {
+
+    if (!coach) return;
+
+
+    selectedCoach = coach;
+
+    selectedCell = {
+
+        line:
+            cell.dataset.line,
+
+        position:
+            cell.dataset.position
+
+    };
+
+
+    moveMode = true;
+
+    swapMode = false;
+
+
+    document.body.classList.add(
+        "move-mode"
+    );
+
+
+    alert(
+        `MOVE MODE\n\n` +
+        `Coach: ${coach.coachNo}\n\n` +
+        `Click an empty cell to move.`
+    );
+
+}
+
+
+/* =========================================================
+   MOVE DESTINATION
+========================================================= */
+
+async function handleMoveDestination(
+    targetCell
+) {
+
+    if (!moveMode) return;
+
+    if (!selectedCell) return;
+
+
+    const sourceLine =
+        selectedCell.line;
+
+    const sourcePosition =
+        selectedCell.position;
+
+
+    const targetLine =
+        targetCell.dataset.line;
+
+    const targetPosition =
+        targetCell.dataset.position;
+
+
+    if (
+        sourceLine === targetLine &&
+        sourcePosition === targetPosition
+    ) {
+
+        cancelModes();
+
+        return;
+
+    }
+
+
+    if (
+        targetCell.dataset.empty !==
+        "true"
+    ) {
+
+        alert(
+            "MOVE requires an empty cell.\n" +
+            "Use SWAP for an occupied cell."
+        );
+
+        return;
+
+    }
+
+
+    const coach =
+        boardData?.[
+            sourceLine
+        ]?.[
+            sourcePosition
+        ];
+
+
+    if (!coach) {
+
+        cancelModes();
+
+        return;
+
+    }
+
+
+    const movedCoach = {
+
+        ...coach,
+
+        shop:
+            findShopByLine(
+                targetLine
+            ),
+
+        line:
+            targetLine,
+
+        position:
+            targetPosition,
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    try {
+
+        await removeCoach(
+            sourceLine,
+            sourcePosition
+        );
+
+
+        await writeCoach(
+            targetLine,
+            targetPosition,
+            movedCoach
+        );
+
+
+        await writeHistory(
+            "MOVE",
+            movedCoach
+        );
+
+
+        cancelModes();
+
+    } catch (error) {
+
+        console.error(
+            "MOVE ERROR:",
+            error
+        );
+
+        alert(
+            "Move failed.\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SWAP MODE
+========================================================= */
+
+function startSwap(
+    cell,
+    coach
+) {
+
+    if (!coach) return;
+
+
+    selectedCoach = coach;
+
+    selectedCell = {
+
+        line:
+            cell.dataset.line,
+
+        position:
+            cell.dataset.position
+
+    };
+
+
+    swapMode = true;
+
+    moveMode = false;
+
+
+    document.body.classList.add(
+        "swap-mode"
+    );
+
+
+    alert(
+        `SWAP MODE\n\n` +
+        `Coach: ${coach.coachNo}\n\n` +
+        `Click another coach cell to swap.`
+    );
+
+}
+
+
+/* =========================================================
+   SWAP DESTINATION
+========================================================= */
+
+async function handleSwapDestination(
+    targetCell
+) {
+
+    if (!swapMode) return;
+
+    if (!selectedCell) return;
+
+
+    const sourceLine =
+        selectedCell.line;
+
+    const sourcePosition =
+        selectedCell.position;
+
+
+    const targetLine =
+        targetCell.dataset.line;
+
+    const targetPosition =
+        targetCell.dataset.position;
+
+
+    if (
+        sourceLine === targetLine &&
+        sourcePosition === targetPosition
+    ) {
+
+        cancelModes();
+
+        return;
+
+    }
+
+
+    const sourceCoach =
+        boardData?.[
+            sourceLine
+        ]?.[
+            sourcePosition
+        ];
+
+
+    const targetCoach =
+        boardData?.[
+            targetLine
+        ]?.[
+            targetPosition
+        ];
+
+
+    if (
+        !sourceCoach ||
+        !targetCoach
+    ) {
+
+        alert(
+            "SWAP requires two occupied cells."
+        );
+
+        return;
+
+    }
+
+
+    const sourceUpdated = {
+
+        ...sourceCoach,
+
+        shop:
+            findShopByLine(
+                targetLine
+            ),
+
+        line:
+            targetLine,
+
+        position:
+            targetPosition,
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    const targetUpdated = {
+
+        ...targetCoach,
+
+        shop:
+            findShopByLine(
+                sourceLine
+            ),
+
+        line:
+            sourceLine,
+
+        position:
+            sourcePosition,
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    try {
+
+        const updates = {};
+
+
+        updates[
+            `${sourceLine}/${sourcePosition}`
+        ] =
+            null;
+
+
+        updates[
+            `${targetLine}/${targetPosition}`
+        ] =
+            null;
+
+
+        await update(
+            ref(
+                database,
+                BOARD_ROOT
+            ),
+            updates
+        );
+
+
+        await writeCoach(
+            targetLine,
+            targetPosition,
+            sourceUpdated
+        );
+
+
+        await writeCoach(
+            sourceLine,
+            sourcePosition,
+            targetUpdated
+        );
+
+
+        await writeHistory(
+            "SWAP",
+            {
+                sourceCoach,
+                targetCoach,
+                sourceLine,
+                sourcePosition,
+                targetLine,
+                targetPosition
+            }
+        );
+
+
+        cancelModes();
+
+    } catch (error) {
+
+        console.error(
+            "SWAP ERROR:",
+            error
+        );
+
+        alert(
+            "Swap failed.\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CANCEL MOVE / SWAP
+========================================================= */
+
+function cancelModes() {
+
+    moveMode = false;
+
+    swapMode = false;
+
+    selectedCoach = null;
+
+    selectedCell = null;
+
+    document.body.classList.remove(
+        "move-mode",
+        "swap-mode"
+    );
+
+}
+
+
+/* =========================================================
+   DRAG OVER
+========================================================= */
+
+function handleDragOver(event) {
+
+    event.preventDefault();
+
+    event.dataTransfer.dropEffect =
+        "move";
+
+}
+
+
+/* =========================================================
+   DROP
+========================================================= */
+
+async function handleDrop(event) {
+
+    event.preventDefault();
+
+
+    const targetCell =
+        event.currentTarget;
+
+
+    if (!dragSource) return;
+
+
+    const sourceLine =
+        dragSource.line;
+
+    const sourcePosition =
+        dragSource.position;
+
+
+    const targetLine =
+        targetCell.dataset.line;
+
+    const targetPosition =
+        targetCell.dataset.position;
+
+
+    if (
+        sourceLine === targetLine &&
+        sourcePosition === targetPosition
+    ) {
+
+        return;
+
+    }
+
+
+    const sourceCoach =
+        boardData?.[
+            sourceLine
+        ]?.[
+            sourcePosition
+        ];
+
+
+    if (!sourceCoach) return;
+
+
+    const targetCoach =
+        boardData?.[
+            targetLine
+        ]?.[
+            targetPosition
+        ];
+
+
+    try {
+
+        if (!targetCoach) {
+
+            await moveCoachDirect(
+                sourceLine,
+                sourcePosition,
+                targetLine,
+                targetPosition,
+                sourceCoach
+            );
+
+        } else {
+
+            await swapCoachDirect(
+                sourceLine,
+                sourcePosition,
+                targetLine,
+                targetPosition,
+                sourceCoach,
+                targetCoach
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "DRAG DROP ERROR:",
+            error
+        );
+
+        alert(
+            "Drag & Drop failed."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DIRECT MOVE
+========================================================= */
+
+async function moveCoachDirect(
+    sourceLine,
+    sourcePosition,
+    targetLine,
+    targetPosition,
+    coach
+) {
+
+    const movedCoach = {
+
+        ...coach,
+
+        shop:
+            findShopByLine(
+                targetLine
+            ),
+
+        line:
+            targetLine,
+
+        position:
+            targetPosition,
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    await removeCoach(
+        sourceLine,
+        sourcePosition
+    );
+
+
+    await writeCoach(
+        targetLine,
+        targetPosition,
+        movedCoach
+    );
+
+
+    await writeHistory(
+        "MOVE",
+        movedCoach
+    );
+
+}
+
+
+/* =========================================================
+   DIRECT SWAP
+========================================================= */
+
+async function swapCoachDirect(
+    sourceLine,
+    sourcePosition,
+    targetLine,
+    targetPosition,
+    sourceCoach,
+    targetCoach
+) {
+
+    const newSource = {
+
+        ...targetCoach,
+
+        shop:
+            findShopByLine(
+                sourceLine
+            ),
+
+        line:
+            sourceLine,
+
+        position:
+            sourcePosition,
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    const newTarget = {
+
+        ...sourceCoach,
+
+        shop:
+            findShopByLine(
+                targetLine
+            ),
+
+        line:
+            targetLine,
+
+        position:
+            targetPosition,
+
+        updatedAt:
+            Date.now(),
+
+        user:
+            currentUser()
+
+    };
+
+
+    await removeCoach(
+        sourceLine,
+        sourcePosition
+    );
+
+
+    await removeCoach(
+        targetLine,
+        targetPosition
+    );
+
+
+    await writeCoach(
+        sourceLine,
+        sourcePosition,
+        newSource
+    );
+
+
+    await writeCoach(
+        targetLine,
+        targetPosition,
+        newTarget
+    );
+
+
+    await writeHistory(
+        "SWAP",
+        {
+            sourceCoach,
+            targetCoach
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FIREBASE WRITE
+========================================================= */
+
+async function writeCoach(
+    line,
+    position,
+    coach
+) {
+
+    const coachRef =
+        ref(
+            database,
+            `${BOARD_ROOT}/${line}/${position}`
+        );
+
+
+    await set(
+        coachRef,
+        coach
+    );
+
+}
+
+
+/* =========================================================
+   FIREBASE REMOVE
+========================================================= */
+
+async function removeCoach(
+    line,
+    position
+) {
+
+    const coachRef =
+        ref(
+            database,
+            `${BOARD_ROOT}/${line}/${position}`
+        );
+
+
+    await remove(
+        coachRef
+    );
+
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+async function writeHistory(
+    action,
+    coach
+) {
+
+    try {
+
+        const historyRef =
+            push(
+                ref(
+                    database,
+                    HISTORY_ROOT
+                )
+            );
+
+
+        await set(
+            historyRef,
+            {
+
+                action,
+
+                coach,
+
+                user:
+                    currentUser(),
+
+                time:
+                    Date.now()
+
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "HISTORY ERROR:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   COUNTERS
+========================================================= */
+
+function updateCounters() {
+
+    let occupied = 0;
+
+
+    Object.values(
+        BOARD_STRUCTURE
+    ).forEach(shop => {
+
+        shop.lines.forEach(line => {
+
+            shop.positions.forEach(
+                position => {
+
+                    if (
+                        boardData?.[
+                            line
+                        ]?.[
+                            position
+                        ]
+                    ) {
+
+                        occupied++;
+
+                    }
+
+                }
+            );
+
+        });
+
+    });
+
+
+    const total =
+        MAX_CAPACITY;
+
+
+    const free =
+        Math.max(
+            total - occupied,
+            0
+        );
+
+
+    setText(
+        "totalCoach",
+        total
+    );
+
+    setText(
+        "occupiedCoach",
+        occupied
+    );
+
+    setText(
+        "freeCoach",
+        free
+    );
+
+
+    const counter =
+        $("databaseStatus");
+
+
+    if (counter) {
+
+        counter.title =
+            `Capacity: ${total}\n` +
+            `Occupied: ${occupied}\n` +
+            `Free: ${free}`;
+
+    }
+
+}
+
+
+/* =========================================================
+   PULLED OUT RENDER
+========================================================= */
+
+function renderPulledOut() {
+
+    const tbody =
+        $("pulledOutList");
+
+    if (!tbody) return;
+
+
+    tbody.innerHTML = "";
+
+
+    const entries =
+        Object.entries(
+            pulledOutData
+        );
+
+
+    setText(
+        "pulledOutCount",
+        entries.length
+    );
+
+
+    if (!entries.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+                <td
+                    colspan="7"
+                    class="text-center text-muted"
+                >
+                    No pulled-out coaches.
+                </td>
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    const search =
+        getValue(
+            "pulledOutSearchBox"
+        )
+        .trim()
+        .toLowerCase();
+
+
+    let visibleCount = 0;
+
+
+    entries.forEach(
+        ([id, coach]) => {
+
+            const text = [
+
+                coach.coachNo,
+                coach.coachType,
+                coach.status,
+                coach.originalShop,
+                coach.originalLine,
+                coach.originalPosition
+
+            ]
+                .join(" ")
+                .toLowerCase();
+
+
+            if (
+                search &&
+                !text.includes(search)
+            ) {
+
+                return;
+
+            }
+
+
+            visibleCount++;
+
+
+            const tr =
+                document.createElement("tr");
+
+
+            tr.innerHTML = `
+
+                <td>
+                    ${escapeHTML(
+                        coach.coachNo || "--"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        coach.coachType || "--"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        coach.status || "--"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        coach.originalShop || "--"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        `${coach.originalLine || ""}_${coach.originalPosition || ""}`
+                    )}
+                </td>
+
+                <td>
+                    ${formatDateTime(
+                        coach.pullOutTime
+                    )}
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn btn-sm btn-success return-pulled-btn"
+                        data-id="${escapeHTML(id)}"
+                    >
+                        ↩ RETURN
+                    </button>
+
+                </td>
+
+            `;
+
+
+            const button =
+                tr.querySelector(
+                    ".return-pulled-btn"
+                );
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    returnPulledCoach(
+                        id,
+                        coach
+                    );
+
+                }
+            );
+
+
+            tbody.appendChild(tr);
+
+        }
+    );
+
+
+    setText(
+        "pulledOutSearchCount",
+        search
+            ? `${visibleCount} found`
+            : ""
+    );
+
+
+    if (
+        search &&
+        visibleCount === 0
+    ) {
+
+        tbody.innerHTML = `
+
+            <tr>
+                <td
+                    colspan="7"
+                    class="text-center text-muted"
+                >
+                    No matching coach found.
+                </td>
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function initializeSearch() {
+
+    const searchBox =
+        $("searchBox");
+
+    if (!searchBox) return;
+
+
+    searchBox.addEventListener(
+        "input",
+        performSearch
+    );
+
+}
+
+
+function performSearch() {
+
+    const box =
+        $("searchBox");
+
+    const result =
+        $("searchResult");
+
+    if (!box || !result) return;
+
+
+    const query =
+        box.value
+            .trim()
+            .toLowerCase();
+
+
+    result.innerHTML = "";
+
+
+    if (!query) return;
+
+
+    const results = [];
+
+
+    Object.entries(
+        boardData
+    ).forEach(
+        ([line, positions]) => {
+
+            if (!positions) return;
+
+
+            Object.entries(
+                positions
+            ).forEach(
+                ([position, coach]) => {
+
+                    if (!coach) return;
+
+
+                    const text = [
+
+                        coach.coachNo,
+                        coach.coachType,
+                        coach.status,
+                        coach.shop,
+                        line,
+                        position
+
+                    ]
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    if (
+                        text.includes(query)
+                    ) {
+
+                        results.push({
+                            line,
+                            position,
+                            coach
+                        });
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    if (!results.length) {
+
+        result.innerHTML = `
+
+            <div class="alert alert-warning">
+                No coach found.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    results.forEach(
+        item => {
+
+            const div =
+                document.createElement("div");
+
+
+            div.className =
+                "search-result-item";
+
+
+            div.innerHTML = `
+
+                <strong>
+                    ${escapeHTML(
+                        item.coach.coachNo || "--"
+                    )}
+                </strong>
+
+                -
+                ${escapeHTML(
+                    item.coach.coachType || ""
+                )}
+
+                -
+                ${escapeHTML(
+                    item.coach.status || ""
+                )}
+
+                <br>
+
+                <small>
+                    ${escapeHTML(
+                        item.coach.shop || ""
+                    )}
+                    /
+                    ${escapeHTML(
+                        item.line
+                    )}
+                    /
+                    ${escapeHTML(
+                        item.position
+                    )}
+                </small>
+
+            `;
+
+
+            div.addEventListener(
+                "click",
+                () => {
+
+                    const cell =
+                        document.getElementById(
+                            `${item.line}_${item.position}`
+                        );
+
+
+                    if (cell) {
+
+                        cell.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center"
+                        });
+
+
+                        cell.classList.add(
+                            "search-highlight"
+                        );
+
+
+                        setTimeout(
+                            () => {
+
+                                cell.classList.remove(
+                                    "search-highlight"
+                                );
+
+                            },
+                            2000
+                        );
+
+                    }
+
+                }
+            );
+
+
+            result.appendChild(div);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PULLED SEARCH
+========================================================= */
+
+function initializePulledOutSearch() {
+
+    const input =
+        $("pulledOutSearchBox");
+
+    if (!input) return;
+
+
+    input.addEventListener(
+        "input",
+        renderPulledOut
+    );
+
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+function initializeButtons() {
+
+    $("saveCoachBtn")
+        ?.addEventListener(
+            "click",
+            saveCoach
+        );
+
+
+    $("updateCoachBtn")
+        ?.addEventListener(
+            "click",
+            updateCoach
+        );
+
+
+    $("deleteCoachBtn")
+        ?.addEventListener(
+            "click",
+            deleteCoach
+        );
+
+
+    $("pullOutBtn")
+        ?.addEventListener(
+            "click",
+            pullOutCoach
+        );
+
+
+    $("refreshBtn")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                location.reload();
+
+            }
+        );
+
+
+    $("excelBtn")
+        ?.addEventListener(
+            "click",
+            exportCSV
+        );
+
+
+    $("pdfBtn")
+        ?.addEventListener(
+            "click",
+            printBoard
+        );
+
+
+    $("returnToBoardBtn")
+        ?.addEventListener(
+            "click",
+            returnSelectedCoach
+        );
+
+}
+
+
+/* =========================================================
+   FULL SCREEN
+========================================================= */
+
+function initializeFullscreen() {
+
+    const button =
+        $("fullscreenBtn");
+
+    if (!button) return;
+
+
+    button.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                if (
+                    !document.fullscreenElement
+                ) {
+
+                    await document.documentElement
+                        .requestFullscreen();
+
+                } else {
+
+                    await document.exitFullscreen();
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "FULLSCREEN ERROR:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+function initializePrint() {
+
+    window.addEventListener(
+        "beforeprint",
+        () => {
+
+            document.body.classList.add(
+                "printing"
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "afterprint",
+        () => {
+
+            document.body.classList.remove(
+                "printing"
+            );
+
+        }
+    );
+
+}
+
+
+function printBoard() {
+
+    window.print();
+
+}
+
+
+/* =========================================================
+   CSV / EXCEL EXPORT
+========================================================= */
+
+function exportCSV() {
+
+    const rows = [];
+
+
+    rows.push([
+        "Shop",
+        "Line",
+        "Position",
+        "Coach No",
+        "Coach Type",
+        "Status"
+    ]);
+
+
+    Object.entries(
+        boardData
+    ).forEach(
+        ([line, positions]) => {
+
+            if (!positions) return;
+
+
+            Object.entries(
+                positions
+            ).forEach(
+                ([position, coach]) => {
+
+                    if (!coach) return;
+
+
+                    rows.push([
+
+                        coach.shop ||
+                        findShopByLine(line),
+
+                        line,
+
+                        position,
+
+                        coach.coachNo || "",
+
+                        coach.coachType || "",
+
+                        coach.status || ""
+
+                    ]);
+
+                }
+            );
+
+        }
+    );
+
+
+    const csv =
+        rows
+            .map(
+                row =>
+                    row
+                        .map(csvEscape)
+                        .join(",")
+            )
+            .join("\n");
+
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const a =
+        document.createElement("a");
+
+
+    a.href = url;
+
+    a.download =
+        `MR-Co-ordination-${dateFileName()}.csv`;
+
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+function initializeClock() {
 
     updateClock();
 
@@ -175,440 +3097,240 @@ function startClock() {
 
 function updateClock() {
 
-    const now = new Date();
-
-    const date =
-        document.getElementById("liveDate");
-
-    const time =
-        document.getElementById("liveTime");
-
-    if (date) {
-
-        date.textContent =
-            now.toLocaleDateString(
-                "en-IN"
-            );
-
-    }
-
-    if (time) {
-
-        time.textContent =
-            now.toLocaleTimeString(
-                "en-IN"
-            );
-
-    }
-
-}
+    const now =
+        new Date();
 
 
-/* =====================================================
-   LOAD BOARD
-   FIXED:
-   PREVENT MULTIPLE onValue LISTENERS
-===================================================== */
-
-function loadBoard() {
-
-    if (boardListenerStarted) {
-
-        console.log(
-            "Firebase board listener already active"
-        );
-
-        return;
-
-    }
-
-    boardListenerStarted = true;
-
-    const boardRef =
-        ref(database, "coachBoard");
-
-    boardUnsubscribe =
-        onValue(
-            boardRef,
-
-            (snapshot) => {
-
-                boardData =
-                    snapshot.exists()
-                        ? snapshot.val()
-                        : {};
-
-                console.log(
-                    "BOARD DATA UPDATED",
-                    boardData
-                );
-
-                drawBoard();
-
-                updateLastUpdate();
-
-            },
-
-            (error) => {
-
-                console.error(
-                    "Firebase Sync Error:",
-                    error
-                );
-
-                showDatabaseError(
-                    error
-                );
-
+    setText(
+        "liveDate",
+        now.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
             }
-        );
+        )
+    );
+
+
+    setText(
+        "liveTime",
+        now.toLocaleTimeString(
+            "en-IN",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        )
+    );
 
 }
 
 
-/* =====================================================
-   MANUAL REFRESH
-===================================================== */
-
-async function refreshBoard() {
-
-    try {
-
-        const snapshot =
-            await get(
-                ref(
-                    database,
-                    "coachBoard"
-                )
-            );
-
-        boardData =
-            snapshot.exists()
-                ? snapshot.val()
-                : {};
-
-        drawBoard();
-
-        updateLastUpdate();
-
-        console.log(
-            "Board refreshed successfully"
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Refresh Error:",
-            error
-        );
-
-        alert(
-            "Refresh Failed: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   DRAW BOARD
-===================================================== */
-
-function drawBoard() {
-
-    const cells =
-        document.querySelectorAll(
-            ".coach-table td"
-        );
-
-    cells.forEach(cell => {
-
-        cell.innerHTML = "";
-
-        cell.dataset.shop = "";
-        cell.dataset.line = "";
-        cell.dataset.position = "";
-        cell.dataset.coach = "";
-        cell.dataset.type = "";
-        cell.dataset.status = "";
-
-        cell.classList.remove(
-            "status-po",
-            "status-s",
-            "status-lm",
-            "status-med",
-            "status-rl",
-            "status-r1",
-            "status-rs",
-            "status-l",
-            "status-hvy",
-            "table-info",
-            "mobile-drag-source",
-            "mobile-drag-target"
-        );
-
-    });
-
-
-    Object.keys(boardData || {})
-        .forEach(line => {
-
-            if (!boardData[line]) return;
-
-            Object.keys(
-                boardData[line]
-            ).forEach(position => {
-
-                const coach =
-                    boardData[line][position];
-
-                if (!coach) return;
-
-                const cell =
-                    document.getElementById(
-                        `${line}_${position}`
-                    );
-
-                if (!cell) return;
-
-
-                const coachNo =
-                    coach.coachNo || "";
-
-                const coachType =
-                    coach.coachType || "";
-
-                const status =
-                    coach.status || "";
-
-
-                const html = `
-                    <div class="coach-no">
-                        ${escapeHTML(coachNo)}
-                    </div>
-
-                    <div class="coach-type">
-                        ${escapeHTML(coachType)}
-                    </div>
-
-                    <div class="coach-status">
-                        ${escapeHTML(status)}
-                    </div>
-                `;
-
-
-                const existingCard =
-                    cell.querySelector(
-                        ".coach-card"
-                    );
-
-
-                if (existingCard) {
-
-                    existingCard.innerHTML =
-                        html;
-
-                } else {
-
-                    cell.innerHTML = `
-                        <div class="coach-card">
-                            ${html}
-                        </div>
-                    `;
-
-                }
-
-
-                cell.dataset.shop =
-                    coach.shop || getShop(line);
-
-                cell.dataset.line =
-                    line;
-
-                cell.dataset.position =
-                    position;
-
-                cell.dataset.coach =
-                    coachNo;
-
-                cell.dataset.type =
-                    coachType;
-
-                cell.dataset.status =
-                    status;
-
-            });
-
-        });
-
-
-    applyStatusColours();
-
-    updateCounters();
-
-    enableDragDrop();
-
-    enableMobileDrag();
-
-}
-
-
-/* =====================================================
-   ESCAPE HTML
-===================================================== */
-
-function escapeHTML(value) {
-
-    return String(value ?? "")
-        .replace(
-            /[&<>"']/g,
-            char => ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#039;"
-            }[char])
-        );
-
-}
-
-
-/* =====================================================
+/* =========================================================
    LAST UPDATE
-===================================================== */
+========================================================= */
 
 function updateLastUpdate() {
 
-    const last =
-        document.getElementById(
-            "lastUpdate"
-        );
+    const now =
+        Date.now();
 
-    if (!last) return;
 
-    last.textContent =
-        "Updated : " +
-        new Date().toLocaleTimeString(
-            "en-IN"
-        );
+    setText(
+        "lastUpdate",
+        formatDateTime(now)
+    );
+
+
+    setText(
+        "lastUpdateTime",
+        formatDateTime(now)
+    );
 
 }
 
 
-/* =====================================================
-   CELL CLICK
-===================================================== */
+/* =========================================================
+   DATABASE STATUS
+========================================================= */
 
-function enableCellClick() {
+function setDatabaseStatus(
+    connected
+) {
 
-    document.addEventListener(
-        "click",
-        (event) => {
+    const status =
+        $("databaseStatus");
 
-            const td =
-                event.target.closest(
-                    ".coach-table td"
-                );
 
-            if (!td) return;
+    const footer =
+        $("footerDatabase");
 
-            if (
-                event.target.closest(
-                    ".coach-card"
-                )
-            ) {
 
-                currentCell = td;
+    if (connected) {
 
-                openModal(td);
+        if (status) {
 
-                return;
+            status.innerHTML =
+                `<span class="badge bg-success">
+                    ● Connected
+                </span>`;
 
-            }
+        }
 
-            currentCell = td;
 
-            openModal(td);
+        if (footer) {
+
+            footer.innerHTML =
+                `<span class="text-success">
+                    ● Connected
+                </span>`;
+
+        }
+
+    } else {
+
+        if (status) {
+
+            status.innerHTML =
+                `<span class="badge bg-danger">
+                    ● Disconnected
+                </span>`;
+
+        }
+
+
+        if (footer) {
+
+            footer.innerHTML =
+                `<span class="text-danger">
+                    ● Disconnected
+                </span>`;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   FIND SHOP
+========================================================= */
+
+function findShopByLine(line) {
+
+    for (
+        const [
+            shopName,
+            shop
+        ]
+        of Object.entries(
+            BOARD_STRUCTURE
+        )
+    ) {
+
+        if (
+            shop.lines.includes(line)
+        ) {
+
+            return shopName;
+
+        }
+
+    }
+
+    return "";
+
+}
+
+
+/* =========================================================
+   DUPLICATE CHECK
+========================================================= */
+
+function isCoachAlreadyOnBoard(
+    coachNo
+) {
+
+    const target =
+        String(coachNo)
+            .trim()
+            .toLowerCase();
+
+
+    let found = false;
+
+
+    Object.values(
+        boardData
+    ).forEach(
+        positions => {
+
+            if (found) return;
+
+            Object.values(
+                positions || {}
+            ).forEach(
+                coach => {
+
+                    if (
+                        coach &&
+                        String(
+                            coach.coachNo || ""
+                        )
+                        .trim()
+                        .toLowerCase() ===
+                        target
+                    ) {
+
+                        found = true;
+
+                    }
+
+                }
+            );
 
         }
     );
 
+
+    return found;
+
 }
 
 
-/* =====================================================
-   OPEN MODAL
-===================================================== */
+/* =========================================================
+   HELPERS
+========================================================= */
 
-function openModal(cell) {
+function setText(
+    id,
+    value
+) {
 
-    if (!cell) return;
+    const element =
+        $(id);
 
-    const parts =
-        cell.id.split("_");
+    if (element) {
 
-    const line =
-        parts.shift();
-
-    const position =
-        parts.join("_");
-
-
-    const shop =
-        getShop(line);
-
-
-    setValue(
-        "modalShop",
-        cell.dataset.shop || shop
-    );
-
-    setValue(
-        "modalLine",
-        line
-    );
-
-    setValue(
-        "modalPosition",
-        position
-    );
-
-    setValue(
-        "modalCoachNo",
-        cell.dataset.coach || ""
-    );
-
-    setValue(
-        "modalCoachType",
-        cell.dataset.type || ""
-    );
-
-    setValue(
-        "modalStatus",
-        cell.dataset.status || "PO"
-    );
-
-
-    if (coachModal) {
-
-        coachModal.show();
+        element.textContent =
+            value ?? "";
 
     }
 
 }
 
 
-/* =====================================================
-   SET VALUE
-===================================================== */
-
-function setValue(id, value) {
+function setValue(
+    id,
+    value
+) {
 
     const element =
-        document.getElementById(id);
+        $(id);
 
     if (element) {
 
@@ -620,937 +3342,202 @@ function setValue(id, value) {
 }
 
 
-/* =====================================================
-   GET SHOP
-===================================================== */
+function getValue(
+    id
+) {
 
-function getShop(line) {
-
-    line =
-        String(line || "")
-            .toUpperCase();
-
-
-    if (line.startsWith("SCR"))
-        return "MR SCR SHOP";
-
-    if (line.startsWith("N"))
-        return "N SHOP";
-
-    if (line.startsWith("M"))
-        return "M SHOP";
-
-    if (line.startsWith("F"))
-        return "CR SHOP";
-
-    if (line.startsWith("J"))
-        return "J SHOP";
-
-    if (line.startsWith("L"))
-        return "LIFTING BAY";
-
-
-    return "";
+    return (
+        $(id)?.value || ""
+    );
 
 }
 
 
-/* =====================================================
-   GET MODAL DATA
-===================================================== */
+function escapeHTML(
+    value
+) {
 
-function getModalData() {
-
-    return {
-
-        shop:
-            document.getElementById(
-                "modalShop"
-            )?.value || "",
-
-        line:
-            document.getElementById(
-                "modalLine"
-            )?.value || "",
-
-        position:
-            document.getElementById(
-                "modalPosition"
-            )?.value || "",
-
-        coachNo:
-            document.getElementById(
-                "modalCoachNo"
-            )?.value
-                ?.trim() || "",
-
-        coachType:
-            document.getElementById(
-                "modalCoachType"
-            )?.value || "",
-
-        status:
-            document.getElementById(
-                "modalStatus"
-            )?.value || "PO",
-
-        updatedAt:
-            new Date().toISOString()
-
-    };
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
-/* =====================================================
-   DUPLICATE COACH CHECK
-===================================================== */
+function csvEscape(
+    value
+) {
 
-function duplicateCoach(coachNo) {
-
-    if (!coachNo) return false;
-
-    const searchNo =
-        String(coachNo)
-            .trim()
-            .toUpperCase();
+    const text =
+        String(
+            value ?? ""
+        );
 
 
-    for (
-        const line in boardData || {}
+    if (
+        text.includes(",") ||
+        text.includes('"') ||
+        text.includes("\n")
     ) {
 
-        if (!boardData[line])
-            continue;
+        return `"${text.replace(
+            /"/g,
+            '""'
+        )}"`;
+
+    }
 
 
-        for (
-            const position in boardData[line]
+    return text;
+
+}
+
+
+function formatDateTime(
+    timestamp
+) {
+
+    if (!timestamp) {
+
+        return "--";
+
+    }
+
+
+    return new Date(
+        timestamp
+    )
+        .toLocaleString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
+
+}
+
+
+function dateFileName() {
+
+    const now =
+        new Date();
+
+
+    return [
+        now.getFullYear(),
+
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            now.getHours()
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            now.getMinutes()
+        ).padStart(
+            2,
+            "0"
+        )
+
+    ].join("-");
+
+}
+
+
+/* =========================================================
+   GLOBAL DEBUG / OPTIONAL CONTROLS
+========================================================= */
+
+window.MRBoard = {
+
+    startMove,
+    startSwap,
+    cancelModes,
+    refresh: () => location.reload(),
+    exportCSV,
+    printBoard,
+
+    getBoardData: () =>
+        boardData,
+
+    getPulledOutData: () =>
+        pulledOutData
+
+};
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape"
         ) {
 
-            const coach =
-                boardData[line][position];
-
-            if (!coach)
-                continue;
-
-
-            const existingNo =
-                String(
-                    coach.coachNo || ""
-                )
-                    .trim()
-                    .toUpperCase();
-
-
-            if (
-                existingNo === searchNo &&
-                currentCell &&
-                !(
-                    line ===
-                    currentCell.dataset.line &&
-                    position ===
-                    currentCell.dataset.position
-                )
-            ) {
-
-                return true;
-
-            }
+            cancelModes();
 
         }
 
-    }
 
+        if (
+            event.ctrlKey &&
+            event.key.toLowerCase() === "p"
+        ) {
 
-    return false;
+            event.preventDefault();
 
-}
+            printBoard();
 
-
-/* =====================================================
-   BUTTON INITIALIZATION
-===================================================== */
-
-function initializeButtons() {
-
-    document
-        .getElementById(
-            "saveCoachBtn"
-        )
-        ?.addEventListener(
-            "click",
-            saveCoach
-        );
-
-
-    document
-        .getElementById(
-            "updateCoachBtn"
-        )
-        ?.addEventListener(
-            "click",
-            updateCoach
-        );
-
-
-    document
-        .getElementById(
-            "deleteCoachBtn"
-        )
-        ?.addEventListener(
-            "click",
-            deleteCoach
-        );
-
-
-    document
-        .getElementById(
-            "refreshBtn"
-        )
-        ?.addEventListener(
-            "click",
-            refreshBoard
-        );
-
-
-    document
-        .getElementById(
-            "pdfBtn"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                window.print();
-
-            }
-        );
-
-
-    document
-        .getElementById(
-            "excelBtn"
-        )
-        ?.addEventListener(
-            "click",
-            exportCSV
-        );
-
-
-    document
-        .getElementById(
-            "fullscreenBtn"
-        )
-        ?.addEventListener(
-            "click",
-            toggleFullscreen
-        );
-
-}
-
-
-/* =====================================================
-   SAVE COACH
-===================================================== */
-
-async function saveCoach() {
-
-    if (!checkAdmin())
-        return;
-
-
-    const coach =
-        getModalData();
-
-
-    if (!coach.line ||
-        !coach.position) {
-
-        alert(
-            "Line and Position Required"
-        );
-
-        return;
-
-    }
-
-
-    if (!coach.coachNo) {
-
-        alert(
-            "Coach Number Required"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        duplicateCoach(
-            coach.coachNo
-        )
-    ) {
-
-        alert(
-            "Coach Already Exists"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        await firebaseSaveCoach(
-            coach
-        );
-
-        alert(
-            "Coach Saved Successfully"
-        );
-
-        if (coachModal)
-            coachModal.hide();
-
-
-    } catch (error) {
-
-        console.error(
-            "Save Error:",
-            error
-        );
-
-        alert(
-            "Save Failed: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   UPDATE COACH
-===================================================== */
-
-async function updateCoach() {
-
-    if (!checkAdmin())
-        return;
-
-
-    const coach =
-        getModalData();
-
-
-    if (!coach.coachNo) {
-
-        alert(
-            "Coach Number Required"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        duplicateCoach(
-            coach.coachNo
-        )
-    ) {
-
-        alert(
-            "Another Coach With Same Number Already Exists"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        await firebaseUpdateCoach(
-            coach
-        );
-
-        alert(
-            "Coach Updated Successfully"
-        );
-
-        if (coachModal)
-            coachModal.hide();
-
-
-    } catch (error) {
-
-        console.error(
-            "Update Error:",
-            error
-        );
-
-        alert(
-            "Update Failed: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   DELETE COACH
-===================================================== */
-
-async function deleteCoach() {
-
-    if (!checkAdmin())
-        return;
-
-
-    const line =
-        document.getElementById(
-            "modalLine"
-        )?.value;
-
-
-    const position =
-        document.getElementById(
-            "modalPosition"
-        )?.value;
-
-
-    if (!line || !position) {
-
-        alert(
-            "Line / Position Missing"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !confirm(
-            "Are you sure you want to delete this coach?"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        await firebaseDeleteCoach(
-            line,
-            position
-        );
-
-        alert(
-            "Coach Deleted Successfully"
-        );
-
-        if (coachModal)
-            coachModal.hide();
-
-
-    } catch (error) {
-
-        console.error(
-            "Delete Error:",
-            error
-        );
-
-        alert(
-            "Delete Failed: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   HISTORY LOGGER
-   FIX FOR writeHistory() ERROR
-===================================================== */
-
-async function writeHistory(
-    action,
-    coach,
-    extra = {}
-) {
-
-    try {
-
-        const historyRef =
-            ref(
-                database,
-                "history"
-            );
-
-
-        await push(
-            historyRef,
-            {
-
-                action:
-                    action || "",
-
-                coachNo:
-                    coach?.coachNo || "",
-
-                coachType:
-                    coach?.coachType || "",
-
-                status:
-                    coach?.status || "",
-
-                shop:
-                    coach?.shop || "",
-
-                line:
-                    coach?.line || "",
-
-                position:
-                    coach?.position || "",
-
-                timestamp:
-                    new Date().toISOString(),
-
-                ...extra
-
-            }
-        );
-
-
-        console.log(
-            "History written:",
-            action
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "History Write Error:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   DESKTOP DRAG & DROP
-===================================================== */
-
-function enableDragDrop() {
-
-    const cells =
-        document.querySelectorAll(
-            ".coach-table td"
-        );
-
-
-    cells.forEach(cell => {
-
-        cell.draggable =
-            !!cell.dataset.coach;
-
-
-        cell.removeEventListener(
-            "dragstart",
-            dragStart
-        );
-
-        cell.removeEventListener(
-            "dragover",
-            dragOver
-        );
-
-        cell.removeEventListener(
-            "drop",
-            dropCoach
-        );
-
-
-        cell.addEventListener(
-            "dragstart",
-            dragStart
-        );
-
-        cell.addEventListener(
-            "dragover",
-            dragOver
-        );
-
-        cell.addEventListener(
-            "drop",
-            dropCoach
-        );
-
-    });
-
-}
-
-
-/* =====================================================
-   DRAG START
-===================================================== */
-
-function dragStart(event) {
-
-    if (!adminLoggedIn) {
-
-        event.preventDefault();
-
-        alert(
-            "Login required for movement"
-        );
-
-        return;
-
-    }
-
-
-    if (!this.dataset.coach) {
-
-        event.preventDefault();
-
-        return;
-
-    }
-
-
-    dragCell = this;
-
-
-    this.classList.add(
-        "mobile-drag-source"
-    );
-
-
-    if (
-        event.dataTransfer
-    ) {
-
-        event.dataTransfer.effectAllowed =
-            "move";
-
-        event.dataTransfer.setData(
-            "text/plain",
-            this.id
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   DRAG OVER
-===================================================== */
-
-function dragOver(event) {
-
-    if (!adminLoggedIn)
-        return;
-
-
-    event.preventDefault();
-
-
-    if (
-        event.dataTransfer
-    ) {
-
-        event.dataTransfer.dropEffect =
-            "move";
-
-    }
-
-
-    this.classList.add(
-        "table-info"
-    );
-
-}
-
-
-/* =====================================================
-   DROP
-===================================================== */
-
-async function dropCoach(event) {
-
-    event.preventDefault();
-
-
-    this.classList.remove(
-        "table-info"
-    );
-
-
-    if (!adminLoggedIn) {
-
-        dragCell = null;
-
-        return;
-
-    }
-
-
-    if (
-        !dragCell ||
-        dragCell === this
-    ) {
-
-        dragCell = null;
-
-        return;
-
-    }
-
-
-    const fromLine =
-        dragCell.dataset.line;
-
-
-    const fromPos =
-        dragCell.dataset.position;
-
-
-    const toLine =
-        this.dataset.line;
-
-
-    const toPos =
-        this.dataset.position;
-
-
-    if (
-        !fromLine ||
-        !fromPos ||
-        !toLine ||
-        !toPos
-    ) {
-
-        dragCell = null;
-
-        return;
-
-    }
-
-
-    const fromCoach =
-        boardData[
-            fromLine
-        ]?.[
-            fromPos
-        ];
-
-
-    if (!fromCoach) {
-
-        dragCell = null;
-
-        return;
-
-    }
-
-
-    const toCoach =
-        boardData[
-            toLine
-        ]?.[
-            toPos
-        ] || null;
-
-
-    lastMove = {
-
-        fromLine,
-        fromPos,
-
-        toLine,
-        toPos,
-
-        fromCoach:
-            structuredClone(
-                fromCoach
-            ),
-
-        toCoach:
-            toCoach
-                ? structuredClone(
-                    toCoach
-                )
-                : null
-
-    };
-
-
-    const updates = {};
-
-
-    updates[
-        `coachBoard/${toLine}/${toPos}`
-    ] = {
-
-        ...fromCoach,
-
-        line:
-            toLine,
-
-        position:
-            toPos
-
-    };
-
-
-    if (toCoach) {
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = {
-
-            ...toCoach,
-
-            line:
-                fromLine,
-
-            position:
-                fromPos
-
-        };
-
-    } else {
-
-        updates[
-            `coachBoard/${fromLine}/${fromPos}`
-        ] = null;
-
-    }
-
-
-    try {
-
-        await update(
-            ref(database),
-            updates
-        );
-
-
-        await writeHistory(
-            "MOVE",
-            fromCoach,
-            {
-
-                fromLine,
-                fromPos,
-
-                toLine,
-                toPos
-
-            }
-        );
-
-
-        console.log(
-            "MOVE SUCCESS"
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Drag & Drop Error:",
-            error
-        );
-
-
-        alert(
-            "Drag & Drop Failed: " +
-            error.message
-        );
-
-
-        lastMove = null;
-
-    }
-
-
-    dragCell.classList.remove(
-        "mobile-drag-source"
-    );
-
-
-    dragCell = null;
-
-}
-
-
-/* =====================================================
-   REMOVE DRAG HIGHLIGHT
-===================================================== */
-
-document.addEventListener(
-    "dragend",
-    () => {
-
-        document
-            .querySelectorAll(
-                ".coach-table td"
-            )
-            .forEach(td => {
-
-                td.classList.remove(
-                    "table-info",
-                    "mobile-drag-source"
-                );
-
-            });
-
-        dragCell = null;
+        }
 
     }
 );
 
 
-/* =====================================================
-   MOBILE LONG PRESS DRAG
-===================================================== */
-
-function enableMobileDrag() {
-
-    const cells =
-        document.querySelectorAll(
-            ".coach-table td"
-        );
-
-
-    cells.forEach(cell => {
-
-        cell.removeEventListener(
-            "touchstart",
-            mobileTouchStart
-        );
-
-        cell.removeEventListener(
-            "touchmove",
-            mobileTouchMove
-        );
-
-       
+console.log(
+    "MR CO-ORDINATION BOARD.JS VERSION 12.0 LOADED"
+);
