@@ -1490,7 +1490,26 @@ td:focus-visible {
 
     outline-offset: 2px;
 }
+/* =========================================================
+   N SHOP H3 - D3 BORDER FIX
+========================================================= */
 
+.coach-table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+
+/* H3 row bottom border */
+.coach-table tbody tr:nth-child(3) th,
+.coach-table tbody tr:nth-child(3) td {
+    border-bottom: 1px solid #d5d9dc !important;
+}
+
+/* D3 row top border remove */
+.coach-table tbody tr:nth-child(4) th,
+.coach-table tbody tr:nth-child(4) td {
+    border-top: 0 !important;
+}
 
 /* =========================================================
    END
