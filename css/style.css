@@ -409,6 +409,28 @@ body {
 
     vertical-align: middle;
 }
+/* =========================================================
+   H3 / D3 ROW BORDER FIX
+========================================================= */
+
+.coach-table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+
+.coach-table tr {
+    border-top: 0 !important;
+    border-bottom: 1px solid #d5d9dc !important;
+}
+
+.coach-table tr + tr {
+    border-top: 0 !important;
+}
+
+.coach-table th,
+.coach-table td {
+    border: 1px solid #d5d9dc !important;
+}
 
 
 /* =========================================================
