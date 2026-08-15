@@ -1,15 +1,10 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    STYLE.CSS
-   VERSION 13.0
+   VERSION 13.0 FINAL
    ---------------------------------------------------------
-   PULL OUT + RETURN TO BOARD
-   PULLED OUT COACHES LIST
-   MOBILE / iPHONE / SAFARI
-   DESKTOP
-   145 CAPACITY BOARD
-   STATUS COLOURS
-   A4 PRINT
+   BOARD + PULLED OUT + RETURN
+   DESKTOP + MOBILE RESPONSIVE
 ========================================================= */
 
 
@@ -22,58 +17,34 @@
 }
 
 html {
-    width: 100%;
-    min-height: 100%;
     scroll-behavior: smooth;
 }
 
 body {
     margin: 0;
     padding: 0;
-    width: 100%;
-    min-height: 100vh;
-
+    background: #f4f6f8;
+    color: #151515;
     font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
         Arial,
+        Helvetica,
         sans-serif;
-
-    background: #f1f3f6;
-    color: #212529;
-
-    overflow-x: hidden;
+    font-size: 16px;
 }
 
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-header,
-.navbar,
-.top-header {
-    width: 100%;
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
 }
 
-.navbar {
-    background: #212529 !important;
+button {
+    cursor: pointer;
 }
 
-.navbar-brand {
-    color: #fff !important;
-    font-weight: 700;
-}
-
-.navbar-toggler {
-    border: 2px solid #555 !important;
-    border-radius: 10px;
-}
-
-.navbar-toggler-icon {
-    filter: brightness(0) invert(1);
+img {
+    max-width: 100%;
 }
 
 
@@ -82,72 +53,237 @@ header,
 ========================================================= */
 
 .container,
-.container-fluid {
-    max-width: 100%;
-}
-
-main {
+.board-container,
+.main-container {
     width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 15px;
 }
 
 
 /* =========================================================
-   BOARD
+   HEADER
 ========================================================= */
 
-.board-wrapper {
+header,
+.main-header,
+.board-header {
+    background: #212529;
+    color: #ffffff;
+    padding: 18px 22px;
+    border-radius: 0 0 8px 8px;
+    margin-bottom: 15px;
+}
+
+header h1,
+.main-header h1,
+.board-header h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+header h2,
+.main-header h2,
+.board-header h2 {
+    margin: 5px 0 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.navbar {
+    background: #212529 !important;
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 25px;
+}
+
+.navbar-toggler {
+    border: 2px solid #555;
+}
+
+.navbar-toggler-icon {
+    filter: invert(1);
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn {
+    border-radius: 10px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: #336df3;
+    border-color: #336df3;
+}
+
+.btn-danger {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-success {
+    background: #198754;
+    border-color: #198754;
+}
+
+.btn-warning {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #111;
+}
+
+
+/* =========================================================
+   COUNTERS
+========================================================= */
+
+.counter-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.counter-card {
+    flex: 1 1 180px;
+    background: #ffffff;
+    border: 1px solid #d7dce1;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.counter-card .counter-number {
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.counter-card .counter-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #666;
+}
+
+
+/* =========================================================
+   DATABASE STATUS
+========================================================= */
+
+#databaseStatus {
+    font-weight: 800;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+#searchBox,
+#pulledOutSearch,
+#pulledOutSearchBox,
+#searchPulledOut {
+    width: 100%;
+    min-height: 58px;
+    padding: 10px 18px;
+    border: 2px solid #d8dde2;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #333;
+    font-size: 20px;
+    outline: none;
+}
+
+#searchBox:focus,
+#pulledOutSearch:focus,
+#pulledOutSearchBox:focus,
+#searchPulledOut:focus {
+    border-color: #336df3;
+    box-shadow:
+        0 0 0 3px rgba(51, 109, 243, 0.12);
+}
+
+
+/* =========================================================
+   BOARD TABLE WRAPPER
+========================================================= */
+
+.board-table-wrapper {
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-
     -webkit-overflow-scrolling: touch;
-
-    background: #f1f3f6;
+    background: #ffffff;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
+
+
+/* =========================================================
+   MAIN BOARD TABLE
+========================================================= */
 
 .coach-table {
     width: 100%;
-    min-width: 900px;
-
+    min-width: 850px;
     border-collapse: collapse;
     table-layout: fixed;
-
-    background: #fff;
-}
-
-.coach-table th,
-.coach-table td {
-    border: 3px solid #343a40;
-
-    min-width: 80px;
-    height: 72px;
-
-    text-align: center;
-    vertical-align: middle;
-
-    padding: 5px;
-
-    font-weight: 600;
 }
 
 .coach-table th {
     background: #212529;
-    color: #fff;
-
-    font-size: 16px;
+    color: #ffffff;
+    border: 2px solid #454a4f;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
 }
 
 .coach-table td {
-    background: #fff;
-    cursor: pointer;
-
-    transition:
-        background .15s ease,
-        transform .15s ease;
+    min-height: 70px;
+    height: 70px;
+    border: 2px solid #d4d9de;
+    padding: 4px;
+    text-align: center;
+    vertical-align: middle;
+    background: #ffffff;
+    position: relative;
 }
 
-.coach-table td:hover {
-    background: #f8f9fa;
+.coach-table td:empty {
+    background: #ffffff;
 }
 
 
@@ -158,27 +294,22 @@ main {
 .coach-card {
     width: 100%;
     min-height: 58px;
-
     display: flex;
     flex-direction: column;
-
     justify-content: center;
     align-items: center;
-
-    gap: 2px;
-
-    padding: 4px;
+    line-height: 1.15;
+    user-select: none;
 }
 
 .coach-no {
-    font-size: 18px;
-    font-weight: 800;
-    line-height: 1.15;
+    font-size: 19px;
+    font-weight: 900;
 }
 
 .coach-type {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .coach-status {
@@ -192,514 +323,39 @@ main {
 ========================================================= */
 
 .status-po {
-    background: #409564 !important;
-    color: #fff !important;
+    background: #fff3cd !important;
 }
 
 .status-s {
-    background: #409564 !important;
-    color: #fff !important;
+    background: #d1e7dd !important;
 }
 
 .status-lm {
-    background: #f8c63e !important;
-    color: #212529 !important;
+    background: #cfe2ff !important;
 }
 
 .status-med {
-    background: #d4484e !important;
-    color: #fff !important;
+    background: #f8d7da !important;
 }
 
 .status-rl {
-    background: #356cf0 !important;
-    color: #fff !important;
+    background: #e2d9f3 !important;
 }
 
 .status-r1 {
-    background: #50b9dc !important;
-    color: #fff !important;
+    background: #d9f0ff !important;
 }
 
 .status-rs {
-    background: #727b84 !important;
-    color: #fff !important;
+    background: #fde2b8 !important;
 }
 
 .status-l {
-    background: #727b84 !important;
-    color: #fff !important;
+    background: #d7f9e9 !important;
 }
 
 .status-hvy {
-    background: #212529 !important;
-    color: #fff !important;
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-#searchBox,
-#pulledSearch,
-#pullOutSearch,
-#searchPulledOut {
-    width: 100%;
-
-    min-height: 55px;
-
-    border: 2px solid #d9dde2;
-    border-radius: 12px;
-
-    padding: 10px 16px;
-
-    font-size: 20px;
-
-    background: #fff;
-    color: #212529;
-
-    outline: none;
-}
-
-#searchBox:focus,
-#pulledSearch:focus,
-#pullOutSearch:focus,
-#searchPulledOut:focus {
-    border-color: #356cf0;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(53, 108, 240, .15);
-}
-
-
-/* =========================================================
-   PULLED OUT COACHES SECTION
-========================================================= */
-
-.pulled-out-section,
-#pulledOutSection,
-.pulled-coaches-section {
-
-    width: 100%;
-
-    margin-top: 30px;
-    margin-bottom: 30px;
-
-    background: #fff;
-
-    border: 1px solid #ced4da;
-    border-radius: 12px;
-
-    overflow: hidden;
-
-    box-shadow:
-        0 2px 7px
-        rgba(0, 0, 0, .15);
-}
-
-
-/* =========================================================
-   PULLED OUT HEADER
-========================================================= */
-
-.pulled-out-header,
-#pulledOutHeader {
-
-    min-height: 80px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 15px;
-
-    padding: 15px 30px;
-
-    background: #f8c63e;
-
-    border-bottom: 2px solid #d9a900;
-}
-
-.pulled-out-header h2,
-.pulled-out-header h3,
-#pulledOutHeader h2,
-#pulledOutHeader h3 {
-
-    margin: 0;
-
-    color: #212529;
-
-    font-size: 29px;
-    font-weight: 800;
-}
-
-
-/* =========================================================
-   PULLED OUT TOTAL
-========================================================= */
-
-.pulled-out-total,
-#pulledOutTotal {
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    min-width: 105px;
-    min-height: 42px;
-
-    padding: 7px 16px;
-
-    border-radius: 14px;
-
-    background: #212529;
-    color: #fff;
-
-    font-size: 18px;
-    font-weight: 800;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   PULLED OUT BODY
-========================================================= */
-
-.pulled-out-body,
-#pulledOutBody {
-
-    width: 100%;
-
-    padding: 18px;
-
-    background: #fff;
-}
-
-
-/* =========================================================
-   PULLED OUT TABLE WRAPPER
-========================================================= */
-
-.pulled-table-wrapper,
-#pulledTableWrapper {
-
-    width: 100%;
-
-    overflow-x: auto;
-    overflow-y: hidden;
-
-    -webkit-overflow-scrolling: touch;
-
-    margin-top: 15px;
-}
-
-
-/* =========================================================
-   PULLED OUT TABLE
-========================================================= */
-
-.pulled-out-table,
-#pulledOutTable {
-
-    width: 100%;
-
-    min-width: 850px;
-
-    border-collapse: collapse;
-
-    background: #fff;
-}
-
-.pulled-out-table th,
-#pulledOutTable th {
-
-    background: #212529;
-    color: #fff;
-
-    border: 2px solid #555;
-
-    padding: 12px 9px;
-
-    text-align: center;
-    vertical-align: middle;
-
-    font-size: 16px;
-    font-weight: 800;
-}
-
-.pulled-out-table td,
-#pulledOutTable td {
-
-    border: 1px solid #d5d8dc;
-
-    padding: 12px 9px;
-
-    text-align: center;
-    vertical-align: middle;
-
-    font-size: 15px;
-
-    background: #fff;
-}
-
-.pulled-out-table tbody tr:hover,
-#pulledOutTable tbody tr:hover {
-
-    background: #f5f7fa;
-}
-
-
-/* =========================================================
-   IMPORTANT:
-   PULLED OUT DATA
-   ========================================================= */
-
-.pulled-coach-number,
-.pulled-out-coach-number {
-
-    font-size: 18px;
-    font-weight: 800;
-
-    white-space: nowrap;
-}
-
-.original-shop,
-.original-cell {
-
-    font-weight: 600;
-}
-
-.pull-out-time {
-
-    white-space: nowrap;
-
-    font-size: 14px;
-}
-
-
-/* =========================================================
-   RETURN BUTTON
-========================================================= */
-
-.return-btn,
-.return-to-board-btn,
-.returnCoachBtn,
-button[data-action="return"] {
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    min-width: 105px;
-    min-height: 48px;
-
-    padding: 9px 18px;
-
-    border: none;
-    border-radius: 9px;
-
-    background: #356cf0;
-    color: #fff;
-
-    font-size: 18px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition:
-        background .15s ease,
-        transform .1s ease,
-        box-shadow .15s ease;
-}
-
-.return-btn:hover,
-.return-to-board-btn:hover,
-.returnCoachBtn:hover,
-button[data-action="return"]:hover {
-
-    background: #2458d8;
-
-    box-shadow:
-        0 3px 8px
-        rgba(0, 0, 0, .20);
-}
-
-.return-btn:active,
-.return-to-board-btn:active,
-.returnCoachBtn:active,
-button[data-action="return"]:active {
-
-    transform: scale(.97);
-}
-
-
-/* =========================================================
-   NO PULLED OUT COACHES
-========================================================= */
-
-.no-pulled-coaches,
-#noPulledCoaches {
-
-    width: 100%;
-
-    padding: 20px;
-
-    text-align: center;
-
-    color: #666;
-
-    font-size: 20px;
-
-    background: #fff;
-}
-
-
-/* =========================================================
-   PULLED OUT MOBILE CARD
-   If JS uses cards instead of table
-========================================================= */
-
-.pulled-coach-card {
-
-    width: 100%;
-
-    margin-bottom: 15px;
-
-    padding: 16px;
-
-    background: #fff;
-
-    border: 1px solid #d6d9dd;
-    border-radius: 12px;
-
-    box-shadow:
-        0 2px 6px
-        rgba(0, 0, 0, .10);
-}
-
-.pulled-coach-card .coach-no {
-
-    font-size: 21px;
-
-    margin-bottom: 8px;
-}
-
-.pulled-coach-card .coach-info {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
-    gap: 7px 12px;
-
-    font-size: 15px;
-}
-
-.pulled-coach-card .return-btn {
-
-    margin-top: 15px;
-}
-
-
-/* =========================================================
-   RETURN MODAL
-========================================================= */
-
-.return-modal .modal-content,
-#returnModal .modal-content {
-
-    border: none;
-    border-radius: 14px;
-
-    overflow: hidden;
-}
-
-.return-modal .modal-header,
-#returnModal .modal-header {
-
-    background: #212529;
-    color: #fff;
-}
-
-.return-modal .modal-title,
-#returnModal .modal-title {
-
-    font-weight: 800;
-}
-
-.return-modal select,
-#returnModal select {
-
-    width: 100%;
-
-    min-height: 50px;
-
-    border: 2px solid #ced4da;
-    border-radius: 8px;
-
-    padding: 8px 12px;
-
-    font-size: 17px;
-}
-
-
-/* =========================================================
-   RETURN CELL SELECTION
-========================================================= */
-
-.return-cell,
-.return-target-cell {
-
-    border: 3px solid #356cf0 !important;
-
-    background: #eaf0ff !important;
-
-    cursor: pointer;
-}
-
-.return-cell:hover,
-.return-target-cell:hover {
-
-    background: #dce6ff !important;
-}
-
-
-/* =========================================================
-   DRAG & DROP
-========================================================= */
-
-.table-info {
-
-    background: #dbe7ff !important;
-
-    outline: 3px dashed #356cf0;
-
-    outline-offset: -4px;
-}
-
-.mobile-drag-source {
-
-    opacity: .65;
-
-    outline: 3px solid #356cf0;
-
-    outline-offset: -3px;
-}
-
-.mobile-drag-target {
-
-    background: #dbe7ff !important;
-
-    outline: 3px dashed #356cf0;
-
-    outline-offset: -4px;
+    background: #ffcdd2 !important;
 }
 
 
@@ -708,166 +364,299 @@ button[data-action="return"]:active {
 ========================================================= */
 
 .search-match {
-
     outline: 4px solid #ff9800 !important;
-
     outline-offset: -4px;
-
-    animation:
-        searchPulse 1s ease-in-out infinite alternate;
-}
-
-@keyframes searchPulse {
-
-    from {
-        filter: brightness(1);
-    }
-
-    to {
-        filter: brightness(1.12);
-    }
+    box-shadow:
+        0 0 15px rgba(255, 152, 0, 0.65);
+    z-index: 5;
 }
 
 
 /* =========================================================
-   BUTTONS
+   DRAG & DROP
 ========================================================= */
 
-button {
-
-    font-family: inherit;
+.mobile-drag-source {
+    opacity: 0.55 !important;
+    outline: 4px dashed #0d6efd !important;
 }
 
-.btn {
-
-    font-weight: 600;
-
-    border-radius: 8px;
-}
-
-.btn-primary {
-
-    background: #356cf0;
-    border-color: #356cf0;
-}
-
-.btn-danger {
-
-    background: #d4484e;
-    border-color: #d4484e;
-}
-
-.btn-success {
-
-    background: #409564;
-    border-color: #409564;
+.mobile-drag-target,
+.table-info {
+    background: #cfe2ff !important;
+    outline: 4px dashed #0d6efd !important;
 }
 
 
 /* =========================================================
-   STATUS LEGEND
+   PULLED OUT SECTION
 ========================================================= */
 
-.status-legend,
-.railway-status-legend {
-
+.pulled-out-section {
     width: 100%;
-
-    margin-top: 25px;
-    margin-bottom: 25px;
-
-    background: #fff;
-
-    border: 1px solid #ced4da;
-    border-radius: 12px;
-
+    margin: 25px 0;
+    background: #ffffff;
+    border: 1px solid #d6dbe0;
+    border-radius: 14px;
     overflow: hidden;
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.10);
 }
 
-.status-legend-header,
-.railway-status-legend-header {
 
-    padding: 18px 30px;
+/* =========================================================
+   PULLED OUT HEADER
+========================================================= */
+
+.pulled-out-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    min-height: 80px;
+    padding: 15px 25px;
+
+    background: #f9c744;
+    color: #171717;
+
+    border-bottom: 2px solid #dda900;
+}
+
+.pulled-out-header h2,
+.pulled-out-header h3 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.pulled-out-total,
+#pulledOutCount,
+#pulledOutTotal,
+#pulledOutCoachCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 72px;
+    min-height: 40px;
+
+    padding: 5px 15px;
+
+    border-radius: 14px;
 
     background: #212529;
-    color: #fff;
+    color: #ffffff;
 
-    font-size: 25px;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   PULLED OUT SEARCH AREA
+========================================================= */
+
+.pulled-out-search {
+    padding: 15px 20px;
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   PULLED OUT TABLE WRAPPER
+========================================================= */
+
+.pulled-out-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    padding: 0 20px 20px;
+}
+
+
+/* =========================================================
+   PULLED OUT TABLE
+========================================================= */
+
+.pulled-out-table {
+    width: 100%;
+    min-width: 950px;
+    border-collapse: collapse;
+    table-layout: auto;
+    background: #ffffff;
+}
+
+.pulled-out-table th {
+    background: #212529;
+    color: #ffffff;
+
+    border: 2px solid #4b5054;
+
+    padding: 13px 10px;
+
+    text-align: center;
+    vertical-align: middle;
+
+    font-size: 18px;
+    font-weight: 900;
+
+    white-space: nowrap;
+}
+
+.pulled-out-table td {
+    border: 2px solid #d7dce1;
+
+    padding: 12px 10px;
+
+    text-align: center;
+    vertical-align: middle;
+
+    background: #ffffff;
+
+    font-size: 17px;
+    line-height: 1.3;
+}
+
+.pulled-out-table tbody tr:nth-child(even) td {
+    background: #f5f6f7;
+}
+
+.pulled-out-table tbody tr:hover td {
+    background: #eaf2ff;
+}
+
+
+/* =========================================================
+   PULLED OUT TABLE COLUMN WIDTH
+========================================================= */
+
+.pulled-out-table th:nth-child(1),
+.pulled-out-table td:nth-child(1) {
+    min-width: 125px;
     font-weight: 800;
 }
 
-.status-legend-body,
-.railway-status-legend-body {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 14px;
-
-    padding: 25px 35px;
+.pulled-out-table th:nth-child(2),
+.pulled-out-table td:nth-child(2) {
+    min-width: 90px;
 }
 
-.status-badge {
+.pulled-out-table th:nth-child(3),
+.pulled-out-table td:nth-child(3) {
+    min-width: 90px;
+}
 
-    min-width: 80px;
+.pulled-out-table th:nth-child(4),
+.pulled-out-table td:nth-child(4) {
+    min-width: 150px;
+}
 
-    padding: 8px 18px;
+.pulled-out-table th:nth-child(5),
+.pulled-out-table td:nth-child(5) {
+    min-width: 140px;
+}
 
+.pulled-out-table th:nth-child(6),
+.pulled-out-table td:nth-child(6) {
+    min-width: 180px;
+}
+
+.pulled-out-table th:nth-child(7),
+.pulled-out-table td:nth-child(7) {
+    min-width: 120px;
+}
+
+
+/* =========================================================
+   RETURN BUTTON
+========================================================= */
+
+.return-pulled-btn {
+    min-width: 100px;
+
+    padding: 10px 18px;
+
+    border: none;
     border-radius: 10px;
 
-    text-align: center;
+    background: #336df3;
+    color: #ffffff;
 
     font-size: 17px;
     font-weight: 800;
+
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.15);
+
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease;
+}
+
+.return-pulled-btn:hover {
+    background: #2458d8;
+    transform: translateY(-1px);
+}
+
+.return-pulled-btn:active {
+    transform: scale(0.96);
+}
+
+.return-pulled-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 
 /* =========================================================
-   FOOTER
+   PULLED OUT CARDS
+   Used when JS container is DIV
 ========================================================= */
 
-footer {
-
+.pulled-out-card {
     width: 100%;
+    background: #ffffff;
 
-    margin-top: 35px;
+    border: 1px solid #d8dde2;
+    border-radius: 12px;
 
-    padding: 35px 20px;
+    padding: 18px;
+    margin-bottom: 12px;
 
-    background: #212529;
-
-    color: #fff;
-
-    text-align: center;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-footer h2,
-footer h3 {
-
-    margin: 0 0 8px;
-
-    font-weight: 800;
+.pulled-out-card > div {
+    margin-bottom: 10px;
 }
 
-footer p {
+.pulled-out-card strong {
+    display: block;
+    margin-bottom: 3px;
 
-    margin: 6px 0;
-
-    font-size: 17px;
+    color: #555;
+    font-size: 13px;
+    text-transform: uppercase;
 }
 
-#databaseStatus.text-success {
-
-    color: #409564 !important;
-
-    font-weight: 700;
+.pulled-out-card > div > div {
+    font-size: 18px;
+    font-weight: 600;
 }
 
-#databaseStatus.text-danger {
 
-    color: #d4484e !important;
+/* =========================================================
+   NO DATA
+========================================================= */
 
+.pulled-out-table td.text-center,
+.pulled-out-card.text-center {
+    color: #666;
     font-weight: 700;
 }
 
@@ -877,40 +666,189 @@ footer p {
 ========================================================= */
 
 .modal-content {
-
-    border-radius: 14px;
-
     border: none;
-
+    border-radius: 15px;
     overflow: hidden;
 }
 
 .modal-header {
-
     background: #212529;
-    color: #fff;
+    color: #ffffff;
 }
 
 .modal-title {
-
     font-weight: 800;
 }
 
-.modal-body label {
-
-    font-weight: 700;
-
-    margin-bottom: 5px;
+.modal-body {
+    padding: 20px;
 }
 
-.modal-body input,
-.modal-body select {
+.modal-footer {
+    gap: 8px;
+}
 
-    min-height: 46px;
+.form-control,
+.form-select {
+    min-height: 48px;
+    border-radius: 9px;
+    border: 2px solid #d7dce1;
+}
 
-    border-radius: 8px;
+.form-control:focus,
+.form-select:focus {
+    border-color: #336df3;
+    box-shadow:
+        0 0 0 3px rgba(51, 109, 243, 0.12);
+}
 
-    border: 1px solid #ced4da;
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+#liveDate,
+#liveTime {
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   HISTORY TABLE
+========================================================= */
+
+.history-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.history-table {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: collapse;
+}
+
+.history-table th {
+    background: #212529;
+    color: #ffffff;
+    padding: 13px;
+    border: 2px solid #454a4f;
+    text-align: center;
+    font-weight: 800;
+}
+
+.history-table td {
+    padding: 11px;
+    border: 2px solid #d8dde2;
+    text-align: center;
+}
+
+.history-table tr:nth-child(even) td {
+    background: #f2f2f2;
+}
+
+
+/* =========================================================
+   REFRESH / ACTION AREA
+========================================================= */
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.action-bar button {
+    min-height: 45px;
+}
+
+
+/* =========================================================
+   FULL SCREEN
+========================================================= */
+
+:fullscreen {
+    background: #f4f6f8;
+}
+
+:fullscreen .board-container {
+    max-width: none;
+}
+
+
+/* =========================================================
+   PRINT / A4
+========================================================= */
+
+@media print {
+
+    @page {
+        size: A4 landscape;
+        margin: 8mm;
+    }
+
+    html,
+    body {
+        width: 100%;
+        background: #ffffff !important;
+    }
+
+    body {
+        font-size: 9px;
+    }
+
+    .no-print,
+    nav,
+    .navbar,
+    header,
+    .action-bar,
+    #searchBox,
+    .pulled-out-section,
+    .modal,
+    button {
+        display: none !important;
+    }
+
+    .board-container,
+    .container,
+    .main-container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .board-table-wrapper {
+        overflow: visible !important;
+    }
+
+    .coach-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    .coach-table th,
+    .coach-table td {
+        padding: 3px;
+        font-size: 8px;
+        border: 1px solid #000;
+    }
+
+    .coach-card {
+        min-height: 25px;
+    }
+
+    .coach-no {
+        font-size: 9px;
+    }
+
+    .coach-type,
+    .coach-status {
+        font-size: 7px;
+    }
 }
 
 
@@ -924,27 +862,84 @@ footer p {
         font-size: 15px;
     }
 
+    .container,
+    .board-container,
+    .main-container {
+        padding: 8px;
+    }
 
-    /* Board */
 
-    .board-wrapper {
-        margin: 0;
+    /* HEADER */
 
+    header,
+    .main-header,
+    .board-header {
+        padding: 14px;
+        border-radius: 0 0 8px 8px;
+    }
+
+    header h1,
+    .main-header h1,
+    .board-header h1 {
+        font-size: 23px;
+    }
+
+    header h2,
+    .main-header h2,
+    .board-header h2 {
+        font-size: 16px;
+    }
+
+
+    /* SEARCH */
+
+    #searchBox,
+    #pulledOutSearch,
+    #pulledOutSearchBox,
+    #searchPulledOut {
+        min-height: 52px;
+        font-size: 18px;
+    }
+
+
+    /* COUNTERS */
+
+    .counter-container {
+        gap: 8px;
+    }
+
+    .counter-card {
+        flex: 1 1 100px;
+        padding: 10px;
+    }
+
+    .counter-card .counter-number {
+        font-size: 24px;
+    }
+
+
+    /* BOARD */
+
+    .board-table-wrapper {
         overflow-x: auto;
+        overflow-y: hidden;
+        border-radius: 8px;
     }
 
     .coach-table {
         min-width: 760px;
     }
 
-    .coach-table th,
+    .coach-table th {
+        font-size: 13px;
+        padding: 8px 5px;
+        white-space: nowrap;
+    }
+
     .coach-table td {
-
-        min-width: 75px;
-
+        min-width: 85px;
         height: 65px;
-
-        border-width: 2px;
+        min-height: 65px;
     }
 
     .coach-no {
@@ -952,437 +947,195 @@ footer p {
     }
 
     .coach-type {
-        font-size: 13px;
-    }
-
-    .coach-status {
         font-size: 12px;
     }
 
+    .coach-status {
+        font-size: 11px;
+    }
 
-    /* Pulled Out */
 
-    .pulled-out-section,
-    #pulledOutSection,
-    .pulled-coaches-section {
+    /* PULLED OUT HEADER */
 
-        margin-top: 25px;
-
+    .pulled-out-section {
+        margin-top: 18px;
         border-radius: 10px;
     }
 
-
-    .pulled-out-header,
-    #pulledOutHeader {
-
-        min-height: 70px;
-
-        padding: 12px 18px;
+    .pulled-out-header {
+        min-height: 65px;
+        padding: 12px 15px;
     }
 
-
     .pulled-out-header h2,
-    .pulled-out-header h3,
-    #pulledOutHeader h2,
-    #pulledOutHeader h3 {
-
+    .pulled-out-header h3 {
         font-size: 21px;
     }
 
-
     .pulled-out-total,
-    #pulledOutTotal {
-
-        min-width: 80px;
-
-        min-height: 38px;
-
-        padding: 6px 11px;
-
+    #pulledOutCount,
+    #pulledOutTotal,
+    #pulledOutCoachCount {
+        min-width: 60px;
+        min-height: 36px;
         font-size: 15px;
+        padding: 4px 10px;
     }
 
 
-    .pulled-out-body,
-    #pulledOutBody {
+    /* PULLED OUT SEARCH */
 
-        padding: 12px;
+    .pulled-out-search {
+        padding: 10px;
     }
 
 
-    /* Search */
+    /* PULLED OUT TABLE */
 
-    #searchBox,
-    #pulledSearch,
-    #pullOutSearch,
-    #searchPulledOut {
-
-        min-height: 52px;
-
-        font-size: 18px;
-
-        border-radius: 10px;
-    }
-
-
-    /* Table */
-
-    .pulled-table-wrapper,
-    #pulledTableWrapper {
-
+    .pulled-out-table-wrapper {
+        padding: 0 10px 12px;
         overflow-x: auto;
-
         -webkit-overflow-scrolling: touch;
     }
 
-    .pulled-out-table,
-    #pulledOutTable {
-
-        min-width: 780px;
+    .pulled-out-table {
+        min-width: 950px;
     }
 
-    .pulled-out-table th,
-    #pulledOutTable th {
-
-        padding: 10px 7px;
-
+    .pulled-out-table th {
         font-size: 15px;
+        padding: 10px 8px;
     }
 
-    .pulled-out-table td,
-    #pulledOutTable td {
-
-        padding: 10px 7px;
-
-        font-size: 14px;
-    }
-
-
-    /* Return */
-
-    .return-btn,
-    .return-to-board-btn,
-    .returnCoachBtn,
-    button[data-action="return"] {
-
-        min-width: 105px;
-
-        min-height: 46px;
-
-        font-size: 17px;
-
-        padding: 8px 15px;
+    .pulled-out-table td {
+        font-size: 15px;
+        padding: 10px 8px;
     }
 
 
-    /* Legend */
+    /* RETURN */
 
-    .status-legend-header,
-    .railway-status-legend-header {
-
-        padding: 15px 20px;
-
-        font-size: 21px;
-    }
-
-    .status-legend-body,
-    .railway-status-legend-body {
-
-        gap: 10px;
-
-        padding: 20px;
-    }
-
-    .status-badge {
-
-        min-width: 70px;
-
+    .return-pulled-btn {
+        min-width: 85px;
+        padding: 9px 14px;
         font-size: 15px;
     }
 
 
-    /* Footer */
+    /* CARDS */
 
-    footer {
+    .pulled-out-card {
+        padding: 14px;
+    }
 
-        padding: 30px 15px;
+    .pulled-out-card > div > div {
+        font-size: 16px;
+    }
+
+
+    /* ACTION BUTTONS */
+
+    .action-bar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .action-bar button {
+        width: 100%;
+    }
+
+
+    /* MODAL */
+
+    .modal-dialog {
+        margin: 8px;
+    }
+
+    .modal-body {
+        padding: 15px;
     }
 
 }
 
 
 /* =========================================================
-   iPHONE / SMALL MOBILE
+   SMALL MOBILE
 ========================================================= */
 
 @media (max-width: 480px) {
+
+    .container,
+    .board-container,
+    .main-container {
+        padding: 5px;
+    }
+
+    .pulled-out-header {
+        padding: 10px 12px;
+    }
+
+    .pulled-out-header h2,
+    .pulled-out-header h3 {
+        font-size: 18px;
+    }
+
+    .pulled-out-total,
+    #pulledOutCount,
+    #pulledOutTotal,
+    #pulledOutCoachCount {
+        font-size: 14px;
+        min-width: 55px;
+    }
+
+    #pulledOutSearch,
+    #pulledOutSearchBox,
+    #searchPulledOut {
+        font-size: 16px;
+    }
 
     .coach-table {
         min-width: 700px;
     }
 
-
-    .pulled-out-header,
-    #pulledOutHeader {
-
-        align-items: center;
-
-        padding: 12px 15px;
-    }
-
-
-    .pulled-out-header h2,
-    .pulled-out-header h3,
-    #pulledOutHeader h2,
-    #pulledOutHeader h3 {
-
-        font-size: 18px;
-    }
-
-
-    .pulled-out-total,
-    #pulledOutTotal {
-
-        min-width: 72px;
-
-        padding: 5px 8px;
-
-        font-size: 14px;
-    }
-
-
-    .pulled-out-body,
-    #pulledOutBody {
-
-        padding: 10px;
-    }
-
-
-    .pulled-out-table,
-    #pulledOutTable {
-
-        min-width: 760px;
-    }
-
-
-    .pulled-out-table th,
-    #pulledOutTable th {
-
-        font-size: 14px;
-
-        padding: 9px 6px;
-    }
-
-
-    .pulled-out-table td,
-    #pulledOutTable td {
-
-        font-size: 14px;
-
-        padding: 10px 6px;
-    }
-
-
-    .return-btn,
-    .return-to-board-btn,
-    .returnCoachBtn,
-    button[data-action="return"] {
-
-        min-width: 100px;
-
-        min-height: 45px;
-
-        font-size: 16px;
-    }
-
-
-    .status-legend-body,
-    .railway-status-legend-body {
-
-        padding: 18px;
-
-        gap: 9px;
-    }
-
-
-    .status-badge {
-
-        min-width: 68px;
-
-        padding: 7px 12px;
-
-        font-size: 14px;
-    }
-
 }
 
 
 /* =========================================================
-   VERY SMALL iPHONE
-========================================================= */
-
-@media (max-width: 375px) {
-
-    .pulled-out-header h2,
-    .pulled-out-header h3,
-    #pulledOutHeader h2,
-    #pulledOutHeader h3 {
-
-        font-size: 17px;
-    }
-
-    .pulled-out-total,
-    #pulledOutTotal {
-
-        min-width: 68px;
-
-        font-size: 13px;
-    }
-
-}
-
-
-/* =========================================================
-   TOUCH
+   TOUCH DEVICES
 ========================================================= */
 
 @media (hover: none) and (pointer: coarse) {
 
     .coach-table td {
+        touch-action: pan-x;
+    }
 
-        -webkit-tap-highlight-color:
-            rgba(53, 108, 240, .15);
+    .return-pulled-btn {
+        min-height: 46px;
+        padding: 10px 16px;
     }
 
     button {
-
-        -webkit-tap-highlight-color:
-            transparent;
+        -webkit-tap-highlight-color: transparent;
     }
 
 }
 
 
 /* =========================================================
-   PRINT / A4
+   ADMIN
 ========================================================= */
 
-@media print {
-
-    @page {
-
-        size: A4 landscape;
-
-        margin: 8mm;
-    }
-
-
-    body {
-
-        background: #fff !important;
-
-        color: #000 !important;
-    }
-
-
-    .navbar,
-    nav,
-    .no-print,
-    button,
-    #refreshBtn,
-    #pdfBtn,
-    #excelBtn,
-    #fullscreenBtn,
-    #searchBox,
-    .pulled-out-section,
-    #pulledOutSection {
-
-        display: none !important;
-    }
-
-
-    .board-wrapper {
-
-        width: 100%;
-
-        overflow: visible !important;
-    }
-
-
-    .coach-table {
-
-        width: 100%;
-
-        min-width: 0;
-
-        font-size: 9px;
-    }
-
-
-    .coach-table th,
-    .coach-table td {
-
-        height: 35px;
-
-        padding: 2px;
-
-        border: 1px solid #000;
-    }
-
-
-    .coach-no {
-
-        font-size: 10px;
-    }
-
-
-    .coach-type,
-    .coach-status {
-
-        font-size: 8px;
-    }
-
-
-    footer {
-
-        margin-top: 10px;
-
-        padding: 10px;
-
-        background: #fff !important;
-
-        color: #000 !important;
-    }
-
-}
-
-
-/* =========================================================
-   PRINTING BOARD CLASS
-========================================================= */
-
-body.printing-board {
-
-    background: #fff;
-}
-
-body.printing-board .pulled-out-section {
-
-    display: none;
-}
-
-
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
-
-button:focus,
-input:focus,
-select:focus {
-
-    outline: 2px solid #356cf0;
-
-    outline-offset: 2px;
+body:not(.admin-logged-in)
+    #saveCoachBtn,
+body:not(.admin-logged-in)
+    #updateCoachBtn,
+body:not(.admin-logged-in)
+    #deleteCoachBtn,
+body:not(.admin-logged-in)
+    #pullOutCoachBtn {
+    opacity: 0.65;
 }
 
 
@@ -1390,34 +1143,27 @@ select:focus {
    SCROLLBAR
 ========================================================= */
 
-::-webkit-scrollbar {
-
-    width: 8px;
-    height: 8px;
+.board-table-wrapper::-webkit-scrollbar,
+.pulled-out-table-wrapper::-webkit-scrollbar,
+.history-wrapper::-webkit-scrollbar {
+    height: 9px;
 }
 
-::-webkit-scrollbar-track {
-
+.board-table-wrapper::-webkit-scrollbar-track,
+.pulled-out-table-wrapper::-webkit-scrollbar-track,
+.history-wrapper::-webkit-scrollbar-track {
     background: #e9ecef;
-}
-
-::-webkit-scrollbar-thumb {
-
-    background: #8b9299;
-
     border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-
-    background: #5d6369;
+.board-table-wrapper::-webkit-scrollbar-thumb,
+.pulled-out-table-wrapper::-webkit-scrollbar-thumb,
+.history-wrapper::-webkit-scrollbar-thumb {
+    background: #7d858d;
+    border-radius: 10px;
 }
 
 
 /* =========================================================
    END
 ========================================================= */
-
-console.log(
-    "MR CO-ORDINATION STYLE.CSS V13.0 LOADED"
-);
