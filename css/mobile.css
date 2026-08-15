@@ -1,271 +1,43 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
-   MOBILE CELL EQUAL WIDTH FIX
-   VERSION 10.0
-   IMPORTANT:
-   HTML TABLE CLASS = coach-table
+   MOBILE.CSS
+   VERSION 12.0 FINAL
+   ---------------------------------------------------------
+   MOBILE RESPONSIVE
+   TABLE SCROLL
+   COACH CARD
+   BUTTONS
+   MODAL
+   PULLED OUT
 ========================================================= */
 
 
 /* =========================================================
-   ALL SHOP TABLE WRAPPER
+   MOBILE TABLE CONTAINER
 ========================================================= */
 
 .table-responsive {
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    overflow-x: auto !important;
-
-    overflow-y: hidden !important;
-
-    -webkit-overflow-scrolling: touch !important;
-
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 
 /* =========================================================
-   ALL BOARD TABLES
+   TABLE
 ========================================================= */
 
 .coach-table {
-
-    width: max-content !important;
-
-    min-width: max-content !important;
-
-    table-layout: fixed !important;
-
-    border-collapse: collapse !important;
-
-    margin: 0 !important;
-
+    min-width: 700px;
+    width: 100%;
+    table-layout: fixed;
 }
-
-
-/* =========================================================
-   ALL CELLS EXACT SAME WIDTH
-========================================================= */
 
 .coach-table th,
 .coach-table td {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-    box-sizing: border-box !important;
-
-    padding: 4px !important;
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.coach-table thead th {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-    height: 48px !important;
-
-    padding: 4px 2px !important;
-
-    font-size: 14px !important;
-
-    font-weight: 800 !important;
-
-    line-height: 1.1 !important;
-
-    white-space: nowrap !important;
-
-    overflow: hidden !important;
-
-}
-
-
-/* =========================================================
-   POSITION COLUMN ALSO SAME WIDTH
-========================================================= */
-
-.coach-table th:first-child,
-.coach-table td:first-child {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-}
-
-
-/* =========================================================
-   BODY CELLS
-========================================================= */
-
-.coach-table tbody td,
-.coach-table tbody th {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-    height: 82px !important;
-
-    padding: 3px !important;
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-    overflow: hidden !important;
-
-}
-
-
-/* =========================================================
-   COACH CARD
-========================================================= */
-
-.coach-table .coach-card {
-
-    width: 100% !important;
-
-    min-width: 74px !important;
-
-    max-width: 74px !important;
-
-    min-height: 72px !important;
-
-    height: 72px !important;
-
-    margin: 0 auto !important;
-
-    padding: 3px 1px !important;
-
-    display: flex !important;
-
-    flex-direction: column !important;
-
-    justify-content: center !important;
-
-    align-items: center !important;
-
-    text-align: center !important;
-
-    box-sizing: border-box !important;
-
-    overflow: hidden !important;
-
-}
-
-
-/* =========================================================
-   COACH NUMBER
-========================================================= */
-
-.coach-table .coach-number {
-
-    display: block !important;
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    font-size: 15px !important;
-
-    font-weight: 900 !important;
-
-    line-height: 1.15 !important;
-
-    text-align: center !important;
-
-    white-space: nowrap !important;
-
-    overflow: visible !important;
-
-    text-overflow: clip !important;
-
-    word-break: normal !important;
-
-}
-
-
-/* =========================================================
-   COACH TYPE
-========================================================= */
-
-.coach-table .coach-type {
-
-    display: block !important;
-
-    width: 100% !important;
-
-    font-size: 9px !important;
-
-    line-height: 1.1 !important;
-
-    font-weight: 700 !important;
-
-    white-space: nowrap !important;
-
-    overflow: hidden !important;
-
-    text-overflow: ellipsis !important;
-
-}
-
-
-/* =========================================================
-   COACH STATUS
-========================================================= */
-
-.coach-table .coach-status {
-
-    display: block !important;
-
-    width: 100% !important;
-
-    font-size: 9px !important;
-
-    line-height: 1.1 !important;
-
-    font-weight: 800 !important;
-
-    white-space: nowrap !important;
-
-    overflow: hidden !important;
-
-    text-overflow: ellipsis !important;
-
-}
-
-
-/* =========================================================
-   EMPTY CELL
-========================================================= */
-
-.coach-table td:has(.coach-card:empty) {
-
-    height: 82px !important;
-
+    white-space: nowrap;
 }
 
 
@@ -273,201 +45,352 @@
    MOBILE
 ========================================================= */
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .header h3 {
+        font-size: 17px;
+        line-height: 1.3;
+    }
+
+    .header h5 {
+        font-size: 14px;
+    }
+
+    .header .d-flex {
+        font-size: 11px;
+    }
+
+
+    /* -----------------------------------------------------
+       NAVIGATION
+    ----------------------------------------------------- */
+
+    .navbar-brand {
+        font-size: 15px;
+    }
+
+    .navbar-toggler {
+        padding: 4px 7px;
+    }
+
+
+    /* -----------------------------------------------------
+       CONTROL AREA
+    ----------------------------------------------------- */
+
+    #searchBox {
+        width: 100%;
+        min-height: 42px;
+        font-size: 14px;
+    }
+
+    #searchResult {
+        font-size: 12px;
+    }
+
+    #excelBtn,
+    #pdfBtn,
+    #refreshBtn,
+    #fullscreenBtn {
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    #databaseStatus {
+        display: block;
+        margin: 8px 0 !important;
+    }
+
+
+    /* -----------------------------------------------------
+       SHOP
+    ----------------------------------------------------- */
+
+    .shop-card {
+        width: 100%;
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+
+    .shop-title {
+        font-size: 16px;
+        padding: 7px !important;
+    }
+
+
+    /* -----------------------------------------------------
+       BOARD
+    ----------------------------------------------------- */
 
     .coach-table {
-
-        width: max-content !important;
-
-        min-width: max-content !important;
-
-        table-layout: fixed !important;
-
+        min-width: 700px;
     }
-
-
-    .coach-table th,
-    .coach-table td {
-
-        width: 78px !important;
-
-        min-width: 78px !important;
-
-        max-width: 78px !important;
-
-    }
-
 
     .coach-table thead th {
-
-        width: 78px !important;
-
-        min-width: 78px !important;
-
-        max-width: 78px !important;
-
-        height: 46px !important;
-
-        font-size: 13px !important;
-
-        padding: 3px 1px !important;
-
+        height: 35px;
+        font-size: 11px;
+        padding: 3px !important;
     }
 
-
-    .coach-table tbody td,
     .coach-table tbody th {
+        width: 60px;
+        min-width: 60px;
+        font-size: 11px;
+        padding: 3px !important;
+    }
 
-        width: 78px !important;
-
-        min-width: 78px !important;
-
-        max-width: 78px !important;
-
-        height: 78px !important;
-
+    .coach-table td {
+        height: 60px;
+        min-height: 60px;
+        padding: 3px !important;
     }
 
 
-    .coach-table .coach-card {
+    /* -----------------------------------------------------
+       COACH CARD
+    ----------------------------------------------------- */
 
-        width: 72px !important;
+    .coach-card {
+        min-height: 50px;
+        padding: 3px 2px;
+    }
 
-        min-width: 72px !important;
+    .coach-no {
+        font-size: 15px;
+        line-height: 17px;
+    }
 
-        max-width: 72px !important;
+    .coach-type {
+        max-width: 95%;
+        font-size: 8px;
+        line-height: 10px;
+    }
 
-        height: 70px !important;
-
-        min-height: 70px !important;
-
+    .coach-status {
+        font-size: 8px;
+        line-height: 10px;
+        padding: 2px 5px;
     }
 
 
-    .coach-table .coach-number {
+    /* -----------------------------------------------------
+       PULLED OUT SEARCH
+    ----------------------------------------------------- */
 
-        font-size: 14px !important;
+    .pulled-out-search-row {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
 
-        font-weight: 900 !important;
+    #pulledOutSearchBox {
+        width: 100%;
+    }
 
-        line-height: 1.1 !important;
-
-        white-space: nowrap !important;
-
-        overflow: visible !important;
-
+    .pulled-out-search-count {
+        text-align: right;
+        width: 100%;
     }
 
 
-    .coach-table .coach-type {
+    /* -----------------------------------------------------
+       PULLED OUT TABLE
+    ----------------------------------------------------- */
 
-        font-size: 8px !important;
-
+    #pulledOutList td,
+    #pulledOutList th {
+        font-size: 11px;
+        white-space: nowrap;
     }
 
 
-    .coach-table .coach-status {
+    /* -----------------------------------------------------
+       MODAL
+    ----------------------------------------------------- */
 
-        font-size: 8px !important;
+    .modal-dialog {
+        margin: 8px;
+    }
 
+    .modal-content {
+        border-radius: 8px;
+    }
+
+    .modal-body {
+        padding: 12px;
+    }
+
+    .modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        margin: 0 !important;
+    }
+
+
+    /* -----------------------------------------------------
+       FOOTER
+    ----------------------------------------------------- */
+
+    footer {
+        font-size: 12px;
+    }
+
+    footer .row > div {
+        text-align: center !important;
+        margin-bottom: 7px;
     }
 
 }
 
 
 /* =========================================================
-   VERY SMALL PHONE
+   SMALL MOBILE
 ========================================================= */
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
 
-    .coach-table th,
-    .coach-table td {
-
-        width: 74px !important;
-
-        min-width: 74px !important;
-
-        max-width: 74px !important;
-
+    .header h3 {
+        font-size: 15px;
     }
 
+    .header h5 {
+        font-size: 12px;
+    }
+
+    .header .d-flex {
+        font-size: 10px;
+        gap: 5px !important;
+    }
+
+
+    .navbar-brand {
+        font-size: 14px;
+    }
+
+
+    .shop-title {
+        font-size: 14px;
+    }
+
+
+    .coach-table {
+        min-width: 660px;
+    }
 
     .coach-table thead th {
-
-        width: 74px !important;
-
-        min-width: 74px !important;
-
-        max-width: 74px !important;
-
-        font-size: 12px !important;
-
+        font-size: 10px;
     }
 
-
-    .coach-table tbody td,
     .coach-table tbody th {
+        width: 55px;
+        min-width: 55px;
+        font-size: 10px;
+    }
 
-        width: 74px !important;
-
-        min-width: 74px !important;
-
-        max-width: 74px !important;
-
-        height: 74px !important;
-
+    .coach-table td {
+        height: 55px;
     }
 
 
-    .coach-table .coach-card {
+    .coach-card {
+        min-height: 46px;
+    }
 
-        width: 68px !important;
+    .coach-no {
+        font-size: 14px;
+    }
 
-        min-width: 68px !important;
+    .coach-type {
+        font-size: 7px;
+    }
 
-        max-width: 68px !important;
-
-        height: 66px !important;
-
-        min-height: 66px !important;
-
+    .coach-status {
+        font-size: 7px;
+        padding: 1px 4px;
     }
 
 
-    .coach-table .coach-number {
-
-        font-size: 13px !important;
-
+    .modal-footer {
+        grid-template-columns: 1fr;
     }
 
 }
 
 
 /* =========================================================
-   IMPORTANT:
-   DO NOT SQUEEZE SCR / CR TABLE
-   HORIZONTAL SCROLL IS REQUIRED
+   LANDSCAPE MOBILE
 ========================================================= */
 
-.coach-table th,
-.coach-table td {
+@media (max-width: 900px) and (orientation: landscape) {
 
-    white-space: nowrap !important;
+    .header {
+        padding: 6px !important;
+    }
+
+    .header h3 {
+        font-size: 15px;
+    }
+
+    .header h5 {
+        font-size: 11px;
+        margin: 2px 0;
+    }
+
+    .header .d-flex {
+        font-size: 9px;
+    }
+
+    .coach-table {
+        min-width: 760px;
+    }
+
+    .coach-table td {
+        height: 55px;
+    }
+
+    .coach-card {
+        min-height: 45px;
+    }
 
 }
 
 
 /* =========================================================
-   TOUCH
+   TOUCH FRIENDLY
 ========================================================= */
 
-.coach-table td,
-.coach-table .coach-card {
+@media (hover: none) and (pointer: coarse) {
 
-    touch-action: manipulation !important;
+    .coach-table td {
+        cursor: pointer;
+    }
 
-    -webkit-tap-highlight-color:
-        rgba(13,110,253,.12);
+    .coach-card {
+        cursor: pointer;
+    }
+
+    button {
+        min-height: 40px;
+    }
+
+    input,
+    select {
+        min-height: 42px;
+    }
 
 }
+
+
+/* =========================================================
+   END MOBILE.CSS
+========================================================= */
