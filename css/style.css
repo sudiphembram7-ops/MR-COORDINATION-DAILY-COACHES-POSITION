@@ -3,21 +3,18 @@
    STYLE.CSS
    VERSION 12.0 FINAL
    ---------------------------------------------------------
-   Compatible with current board.html
-   ---------------------------------------------------------
-   ✔ Desktop
-   ✔ Mobile Responsive
-   ✔ Horizontal Scroll for Wide Tables
-   ✔ Coach Cards
-   ✔ Status Colours
-   ✔ Search Highlight
-   ✔ Pulled Out Table
-   ✔ Modal
-   ✔ Full Screen
-   ✔ A4 Print
-   ✔ Landscape Print
-   ✔ Clean Borders
-   ✔ H3 / D3 Position Visibility
+   DESKTOP
+   MOBILE
+   145 CELL BOARD
+   COACH CARD
+   STATUS COLOUR
+   MOVE / SWAP
+   SEARCH
+   COUNTERS
+   MODAL
+   PRINT / A4
+   FULL SCREEN
+   PULLED OUT
 ========================================================= */
 
 
@@ -36,39 +33,35 @@ html {
 body {
     margin: 0;
     padding: 0;
-    background: #f3f6f9;
+    background: #f4f6f9;
     color: #212529;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 14px;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
 
-
-/* =========================================================
-   HEADER
-========================================================= */
+button,
+input,
+select {
+    font-family: inherit;
+}
 
 .header {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 10;
 }
 
 .header h3 {
     margin: 0;
-    font-size: 24px;
+    font-size: 1.45rem;
     font-weight: 800;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
 }
 
 .header h5 {
-    margin: 5px 0 0;
-    font-size: 17px;
+    margin: 6px 0 0;
     font-weight: 700;
-}
-
-#liveDate,
-#liveTime,
-#lastUpdate {
-    font-weight: 600;
-    white-space: nowrap;
 }
 
 
@@ -77,11 +70,14 @@ body {
 ========================================================= */
 
 .navbar {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .navbar-brand {
     font-weight: 800;
+    letter-spacing: 0.5px;
 }
 
 .nav-link {
@@ -93,29 +89,305 @@ body {
    TOP CONTROL AREA
 ========================================================= */
 
-.container-fluid {
-    max-width: 100%;
-}
-
 #searchBox {
     min-height: 42px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 #searchResult {
-    min-height: 0;
-    position: relative;
-    z-index: 1000;
+    min-height: 22px;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 #databaseStatus {
+    display: inline-block;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 #totalCoach,
 #occupiedCoach,
 #freeCoach {
+    font-size: 16px;
     font-weight: 800;
+}
+
+#totalCoach {
+    color: #0d6efd;
+}
+
+#occupiedCoach {
+    color: #dc3545;
+}
+
+#freeCoach {
+    color: #198754;
+}
+
+
+/* =========================================================
+   SHOP CARD
+========================================================= */
+
+.shop-card {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 10px;
+}
+
+.shop-title {
+    margin: 0;
+    border-radius: 6px 6px 0 0;
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+}
+
+
+/* =========================================================
+   BOARD TABLE
+========================================================= */
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+}
+
+.coach-table {
+    width: 100%;
+    min-width: 760px;
+    margin-bottom: 0;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+.coach-table th,
+.coach-table td {
+    border: 2px solid #343a40 !important;
+    padding: 4px !important;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.coach-table thead th {
+    position: relative;
+    background: #212529 !important;
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 900;
+    white-space: nowrap;
+    height: 38px;
+}
+
+.coach-table tbody th {
+    width: 78px;
+    background: #e9ecef;
+    color: #212529;
+    font-size: 13px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.coach-table td {
+    height: 68px;
+    min-height: 68px;
+    background: #ffffff;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+}
+
+.coach-table td:hover {
+    background: #f1f7ff;
+}
+
+
+/* =========================================================
+   FIRST POSITION COLUMN
+========================================================= */
+
+.coach-table thead th:first-child,
+.coach-table tbody th:first-child {
+    min-width: 78px;
+    width: 78px;
+}
+
+
+/* =========================================================
+   EMPTY CELL
+========================================================= */
+
+.coach-table td:empty,
+.coach-table td .coach-card:empty {
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   COACH CARD
+========================================================= */
+
+.coach-card {
+    width: 100%;
+    min-height: 58px;
+    padding: 5px 3px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 5px;
+
+    line-height: 1.05;
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    cursor: grab;
+}
+
+.coach-card:active {
+    cursor: grabbing;
+}
+
+.coach-no {
+    font-size: 18px;
+    line-height: 20px;
+    font-weight: 900;
+    color: #000000;
+    white-space: nowrap;
+}
+
+.coach-type {
+    margin-top: 2px;
+    font-size: 10px;
+    line-height: 12px;
+    font-weight: 700;
+    color: #343a40;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.coach-status {
+    margin-top: 3px;
+    padding: 2px 7px;
+
+    border-radius: 10px;
+
+    font-size: 10px;
+    line-height: 12px;
+    font-weight: 900;
+
+    background: rgba(0, 0, 0, 0.08);
+    color: #000000;
+}
+
+
+/* =========================================================
+   STATUS COLOURS
+========================================================= */
+
+.status-po {
+    background: #d1e7dd !important;
+    border-color: #198754 !important;
+}
+
+.status-s {
+    background: #e2f0d9 !important;
+    border-color: #198754 !important;
+}
+
+.status-lm {
+    background: #fff3cd !important;
+    border-color: #ffc107 !important;
+}
+
+.status-med {
+    background: #f8d7da !important;
+    border-color: #dc3545 !important;
+}
+
+.status-rl {
+    background: #cfe2ff !important;
+    border-color: #0d6efd !important;
+}
+
+.status-r1 {
+    background: #cff4fc !important;
+    border-color: #0dcaf0 !important;
+}
+
+.status-rs {
+    background: #e2e3e5 !important;
+    border-color: #6c757d !important;
+}
+
+.status-l {
+    background: #dee2e6 !important;
+    border-color: #6c757d !important;
+}
+
+.status-hvy {
+    background: #343a40 !important;
+    border-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.status-hvy .coach-no,
+.status-hvy .coach-type,
+.status-hvy .coach-status {
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SEARCH MATCH
+========================================================= */
+
+.search-match {
+    outline: 4px solid #ffc107 !important;
+    outline-offset: -4px;
+    position: relative;
+    z-index: 5;
+}
+
+.search-match .coach-card {
+    box-shadow:
+        0 0 0 3px #ffc107 inset;
+}
+
+
+/* =========================================================
+   DRAG / MOVE
+========================================================= */
+
+.mobile-drag-source {
+    opacity: 0.55 !important;
+    transform: scale(0.96);
+    box-shadow:
+        0 0 0 4px #0d6efd inset !important;
+}
+
+.mobile-drag-target {
+    background: #cff4fc !important;
+    box-shadow:
+        0 0 0 4px #0dcaf0 inset !important;
+}
+
+.table-info {
+    background: #cff4fc !important;
+    box-shadow:
+        0 0 0 4px #0dcaf0 inset !important;
 }
 
 
@@ -127,334 +399,13 @@ body {
 #pdfBtn,
 #refreshBtn,
 #fullscreenBtn {
-    margin: 2px;
-    min-height: 38px;
+    margin-bottom: 3px;
     font-weight: 700;
 }
 
 
 /* =========================================================
-   SHOP CARD
-========================================================= */
-
-.shop-card {
-    margin-left: 8px;
-    margin-right: 8px;
-    margin-bottom: 20px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-    overflow: hidden;
-}
-
-.shop-title {
-    margin: 0;
-    padding: 9px 10px !important;
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-}
-
-
-/* =========================================================
-   TABLE WRAPPER
-========================================================= */
-
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-}
-
-
-/* =========================================================
-   COACH TABLE
-========================================================= */
-
-.coach-table {
-    width: 100%;
-    min-width: 650px;
-    margin-bottom: 0 !important;
-    table-layout: fixed;
-    border-collapse: collapse !important;
-    background: #ffffff;
-}
-
-.coach-table th,
-.coach-table td {
-    border: 2px solid #212529 !important;
-    vertical-align: middle !important;
-    text-align: center;
-    padding: 4px !important;
-}
-
-.coach-table thead th {
-    background: #212529 !important;
-    color: #ffffff !important;
-    font-size: 14px;
-    font-weight: 800;
-    white-space: nowrap;
-    height: 40px;
-}
-
-.coach-table tbody th {
-    background: #e9ecef !important;
-    color: #111111 !important;
-    font-weight: 800;
-    width: 85px;
-    min-width: 70px;
-    white-space: nowrap;
-}
-
-.coach-table td {
-    height: 82px;
-    min-height: 82px;
-    background: #ffffff;
-}
-
-
-/* =========================================================
-   POSITION COLUMN
-========================================================= */
-
-.coach-table th:first-child {
-    width: 90px;
-    min-width: 90px;
-    max-width: 90px;
-}
-
-
-/* =========================================================
-   COACH CARD
-========================================================= */
-
-.coach-card {
-    width: 100%;
-    min-height: 70px;
-    height: 70px;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 4px;
-
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-
-    background: #ffffff;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    transition:
-        transform 0.12s ease,
-        box-shadow 0.12s ease,
-        border-color 0.12s ease;
-
-    overflow: hidden;
-}
-
-.coach-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-    border-color: #0d6efd;
-}
-
-
-/* =========================================================
-   EMPTY CELL
-========================================================= */
-
-.coach-card:empty::after {
-    content: "+";
-    color: #adb5bd;
-    font-size: 20px;
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   COACH NUMBER
-========================================================= */
-
-.coach-number {
-    font-size: 18px;
-    line-height: 20px;
-    font-weight: 900;
-    color: #111111;
-    white-space: nowrap;
-}
-
-.coach-type {
-    margin-top: 2px;
-    font-size: 11px;
-    line-height: 14px;
-    font-weight: 700;
-    color: #343a40;
-    white-space: nowrap;
-}
-
-.coach-status {
-    display: inline-block;
-    margin-top: 3px;
-    padding: 2px 7px;
-    border-radius: 10px;
-    font-size: 10px;
-    line-height: 13px;
-    font-weight: 900;
-    color: #ffffff;
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   STATUS COLOURS
-========================================================= */
-
-.status-PO {
-    background: #198754 !important;
-    color: #ffffff !important;
-}
-
-.status-S {
-    background: #20c997 !important;
-    color: #ffffff !important;
-}
-
-.status-LM {
-    background: #ffc107 !important;
-    color: #000000 !important;
-}
-
-.status-MED {
-    background: #dc3545 !important;
-    color: #ffffff !important;
-}
-
-.status-RL {
-    background: #0d6efd !important;
-    color: #ffffff !important;
-}
-
-.status-R1 {
-    background: #0dcaf0 !important;
-    color: #000000 !important;
-}
-
-.status-RS {
-    background: #6c757d !important;
-    color: #ffffff !important;
-}
-
-.status-L {
-    background: #6c757d !important;
-    color: #ffffff !important;
-}
-
-.status-HVY {
-    background: #212529 !important;
-    color: #ffffff !important;
-}
-
-.status-empty {
-    background: #adb5bd !important;
-    color: #ffffff !important;
-}
-
-
-/* =========================================================
-   STATUS CELL BACKGROUND
-========================================================= */
-
-td.status-PO-cell {
-    background: rgba(25, 135, 84, 0.10) !important;
-}
-
-td.status-S-cell {
-    background: rgba(32, 201, 151, 0.10) !important;
-}
-
-td.status-LM-cell {
-    background: rgba(255, 193, 7, 0.15) !important;
-}
-
-td.status-MED-cell {
-    background: rgba(220, 53, 69, 0.10) !important;
-}
-
-td.status-RL-cell {
-    background: rgba(13, 110, 253, 0.10) !important;
-}
-
-td.status-R1-cell {
-    background: rgba(13, 202, 240, 0.12) !important;
-}
-
-td.status-RS-cell,
-td.status-L-cell {
-    background: rgba(108, 117, 125, 0.10) !important;
-}
-
-td.status-HVY-cell {
-    background: rgba(33, 37, 41, 0.08) !important;
-}
-
-
-/* =========================================================
-   DRAG & DROP
-========================================================= */
-
-.coach-card[draggable="true"] {
-    cursor: grab;
-}
-
-.coach-card.dragging {
-    opacity: 0.45;
-    transform: scale(0.96);
-}
-
-.coach-table td.drag-over {
-    outline: 3px dashed #0d6efd !important;
-    outline-offset: -4px;
-    background: rgba(13, 110, 253, 0.12) !important;
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-.search-match {
-    outline: 4px solid #ff9800 !important;
-    outline-offset: -3px;
-    box-shadow: 0 0 12px rgba(255, 152, 0, 0.55) !important;
-}
-
-.search-hidden {
-    opacity: 0.25;
-}
-
-.search-result-item {
-    background: #ffffff;
-    border: 1px solid #dee2e6;
-    border-radius: 5px;
-    padding: 8px 10px;
-    margin-bottom: 5px;
-    cursor: pointer;
-}
-
-.search-result-item:hover {
-    background: #e9ecef;
-}
-
-
-/* =========================================================
-   PULLED OUT SECTION
+   PULLED OUT
 ========================================================= */
 
 .pulled-out-search-area {
@@ -468,11 +419,13 @@ td.status-HVY-cell {
 }
 
 #pulledOutSearchBox {
-    min-height: 40px;
+    flex: 1;
+    min-width: 0;
 }
 
 .pulled-out-search-count {
-    min-width: 80px;
+    min-width: 55px;
+    font-size: 13px;
     font-weight: 800;
     white-space: nowrap;
 }
@@ -483,17 +436,51 @@ td.status-HVY-cell {
 }
 
 #pulledOutList .btn {
-    margin: 1px;
+    white-space: nowrap;
 }
 
 
 /* =========================================================
-   LEGEND
+   MODAL
 ========================================================= */
 
-.card {
-    border-radius: 8px;
+.modal-content {
+    border: 0;
+    border-radius: 10px;
+    overflow: hidden;
 }
+
+.modal-header {
+    font-weight: 800;
+}
+
+.modal-title {
+    font-weight: 900;
+}
+
+.modal-body label {
+    font-weight: 700;
+}
+
+.modal-body input,
+.modal-body select {
+    min-height: 42px;
+}
+
+.modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.modal-footer .btn {
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   STATUS LEGEND
+========================================================= */
 
 .card-header {
     font-weight: 800;
@@ -502,42 +489,7 @@ td.status-HVY-cell {
 .card-body .badge {
     margin-right: 5px;
     margin-bottom: 4px;
-    min-width: 35px;
-}
-
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-#coachModal .modal-content {
-    border: 0;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.30);
-}
-
-#coachModal .modal-header {
-    font-weight: 800;
-}
-
-#coachModal label {
-    font-weight: 700;
-}
-
-#coachModal input,
-#coachModal select {
-    min-height: 42px;
-}
-
-#coachModal .modal-footer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-#coachModal .modal-footer .btn {
-    margin: 0;
+    min-width: 38px;
 }
 
 
@@ -546,11 +498,7 @@ td.status-HVY-cell {
 ========================================================= */
 
 footer {
-    margin-top: 25px !important;
-}
-
-footer b {
-    font-weight: 800;
+    font-size: 14px;
 }
 
 #footerDatabase {
@@ -559,108 +507,20 @@ footer b {
 
 
 /* =========================================================
-   DATABASE STATUS
-========================================================= */
-
-.database-connected {
-    color: #198754 !important;
-    font-weight: 800;
-}
-
-.database-disconnected {
-    color: #dc3545 !important;
-    font-weight: 800;
-}
-
-.database-loading {
-    color: #ffc107 !important;
-    font-weight: 800;
-}
-
-
-/* =========================================================
    FULL SCREEN
 ========================================================= */
 
-body.fullscreen-board {
-    background: #ffffff;
+:fullscreen {
+    background: #f4f6f9;
 }
 
-body.fullscreen-board .navbar,
-body.fullscreen-board .header,
-body.fullscreen-board footer,
-body.fullscreen-board > .container-fluid:first-of-type,
-body.fullscreen-board .card:not(.shop-card) {
-    display: none !important;
+:fullscreen .navbar {
+    position: relative;
 }
 
-body.fullscreen-board .shop-card {
-    margin: 0 0 8px 0;
-    box-shadow: none;
-}
-
-body.fullscreen-board .shop-title {
-    padding: 4px !important;
-    font-size: 16px;
-}
-
-body.fullscreen-board .coach-table td {
-    height: 60px;
-}
-
-body.fullscreen-board .coach-card {
-    min-height: 52px;
-    height: 52px;
-}
-
-body.fullscreen-board .coach-number {
-    font-size: 15px;
-}
-
-body.fullscreen-board .coach-type {
-    font-size: 9px;
-}
-
-body.fullscreen-board .coach-status {
-    font-size: 8px;
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 992px) {
-
-    .header h3 {
-        font-size: 20px;
-    }
-
-    .header h5 {
-        font-size: 15px;
-    }
-
-    .coach-table {
-        min-width: 650px;
-    }
-
-    .coach-table td {
-        height: 76px;
-    }
-
-    .coach-card {
-        min-height: 64px;
-        height: 64px;
-    }
-
-    .coach-number {
-        font-size: 16px;
-    }
-
-    .coach-type {
-        font-size: 10px;
-    }
-
+:fullscreen .shop-card {
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 
@@ -671,7 +531,7 @@ body.fullscreen-board .coach-status {
 @media (max-width: 768px) {
 
     body {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .header {
@@ -679,87 +539,80 @@ body.fullscreen-board .coach-status {
     }
 
     .header h3 {
-        font-size: 17px;
-        line-height: 21px;
+        font-size: 1.05rem;
+        line-height: 1.3;
     }
 
     .header h5 {
-        font-size: 13px;
+        font-size: 0.9rem;
     }
 
     .header .d-flex {
-        gap: 8px !important;
         flex-wrap: wrap;
+        gap: 7px !important;
         font-size: 11px;
     }
 
-    .navbar-brand {
-        font-size: 16px;
+    .container-fluid.mt-3 {
+        margin-top: 10px !important;
+    }
+
+    #searchBox {
+        width: 100%;
     }
 
     .shop-card {
-        margin-left: 4px;
-        margin-right: 4px;
-        border-radius: 5px;
+        padding-left: 4px;
+        padding-right: 4px;
     }
 
     .shop-title {
-        font-size: 16px;
+        font-size: 1rem;
         padding: 7px !important;
     }
 
     .coach-table {
-        min-width: 620px;
+        min-width: 720px;
     }
 
     .coach-table th,
     .coach-table td {
-        border-width: 1px !important;
         padding: 3px !important;
     }
 
-    .coach-table thead th {
-        font-size: 11px;
-        height: 34px;
-    }
-
-    .coach-table tbody th {
-        font-size: 11px;
-        width: 60px;
-        min-width: 60px;
-    }
-
-    .coach-table th:first-child {
-        width: 65px;
-        min-width: 65px;
-        max-width: 65px;
-    }
-
     .coach-table td {
-        height: 68px;
-        min-height: 68px;
+        height: 62px;
     }
 
     .coach-card {
-        min-height: 60px;
-        height: 60px;
-        border-radius: 4px;
+        min-height: 52px;
+        padding: 3px 2px;
     }
 
-    .coach-number {
-        font-size: 14px;
-        line-height: 16px;
+    .coach-no {
+        font-size: 16px;
+        line-height: 18px;
     }
 
     .coach-type {
         font-size: 9px;
-        line-height: 11px;
+        line-height: 10px;
     }
 
     .coach-status {
-        font-size: 8px;
-        line-height: 11px;
-        padding: 1px 5px;
+        font-size: 9px;
+        line-height: 10px;
+        padding: 2px 5px;
+    }
+
+    .coach-table thead th {
+        font-size: 11px;
+    }
+
+    .coach-table tbody th {
+        width: 65px;
+        min-width: 65px;
+        font-size: 11px;
     }
 
     #excelBtn,
@@ -768,6 +621,11 @@ body.fullscreen-board .coach-status {
     #fullscreenBtn {
         width: 100%;
         margin-top: 4px;
+    }
+
+    #databaseStatus {
+        display: block;
+        margin: 8px 0 !important;
     }
 
     .pulled-out-search-row {
@@ -779,328 +637,278 @@ body.fullscreen-board .coach-status {
         text-align: right;
     }
 
-    #pulledOutList {
-        font-size: 11px;
+    .modal-dialog {
+        margin: 8px;
     }
 
-    footer {
-        text-align: center;
+    .modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+
+    footer .row > div {
+        text-align: center !important;
+        margin-bottom: 8px;
     }
 
 }
 
 
 /* =========================================================
-   SMALL MOBILE
+   VERY SMALL MOBILE
 ========================================================= */
 
 @media (max-width: 480px) {
 
-    .header h3 {
+    .navbar-brand {
         font-size: 15px;
     }
 
-    .header h5 {
-        font-size: 12px;
-    }
-
     .coach-table {
-        min-width: 580px;
+        min-width: 680px;
     }
 
-    .coach-table thead th {
-        font-size: 10px;
+    .coach-table td {
+        height: 58px;
     }
 
-    .coach-table tbody th {
-        font-size: 10px;
+    .coach-card {
+        min-height: 48px;
     }
 
-    .coach-number {
-        font-size: 13px;
+    .coach-no {
+        font-size: 15px;
     }
 
-    .coach-type {
-        font-size: 8px;
-    }
-
-    .coach-status {
-        font-size: 7px;
+    .modal-footer {
+        grid-template-columns: 1fr;
     }
 
 }
 
 
 /* =========================================================
-   PRINT — A4 LANDSCAPE
+   PRINT / A4
+   ---------------------------------------------------------
+   IMPORTANT:
+   Print only coach number.
+   Hide controls, menus, modal, pulled-out area, footer.
 ========================================================= */
 
 @page {
     size: A4 landscape;
-    margin: 8mm;
+    margin: 5mm;
 }
+
 
 @media print {
 
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     html,
     body {
-        width: 297mm;
-        min-height: 210mm;
+        width: 100%;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
+        overflow: visible !important;
     }
 
     body {
         font-size: 8px !important;
-        color: #000000 !important;
     }
 
-    /* Hide unnecessary controls */
+
+    /* Hide unwanted sections */
 
     .navbar,
-    .header,
-    body > .container-fluid:first-of-type,
+    .container-fluid.mt-3,
     footer,
-    .card:not(.shop-card),
-    #searchResult {
+    .card.mt-4,
+    .modal,
+    .modal-backdrop,
+    #pulledOutList,
+    .pulled-out-search-area {
         display: none !important;
     }
 
-    /* Hide pulled out section */
 
-    .card.mt-4.shadow-sm {
-        display: none !important;
+    /* Header */
+
+    .header {
+        display: block !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 2mm 0 !important;
+        margin: 0 !important;
+        border-bottom: 1px solid #000000;
     }
 
-    /* Shop */
+    .header h3 {
+        font-size: 14px !important;
+        margin: 0 !important;
+    }
+
+    .header h5 {
+        font-size: 10px !important;
+        margin: 1mm 0 !important;
+    }
+
+    .header .d-flex {
+        font-size: 7px !important;
+        gap: 8px !important;
+        margin-top: 1mm !important;
+    }
+
+
+    /* Shop cards */
 
     .shop-card {
         display: block !important;
-
         width: 100% !important;
-
-        margin: 0 0 4mm 0 !important;
-
+        margin: 2mm 0 0 0 !important;
         padding: 0 !important;
-
-        box-shadow: none !important;
-
-        border: 1px solid #000 !important;
-
-        border-radius: 0 !important;
-
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-
-    .shop-title {
-        padding: 2mm !important;
-        margin: 0 !important;
-
-        font-size: 11px !important;
-        line-height: 13px !important;
-
-        border-bottom: 1px solid #000 !important;
-    }
-
-    .table-responsive {
-        overflow: visible !important;
-        width: 100% !important;
-    }
-
-    .coach-table {
-        width: 100% !important;
-        min-width: 0 !important;
-
-        table-layout: fixed !important;
-
-        margin: 0 !important;
-
-        border-collapse: collapse !important;
-    }
-
-    .coach-table th,
-    .coach-table td {
-        border: 1px solid #000 !important;
-
-        padding: 1mm !important;
-
-        height: auto !important;
-
-        min-height: 0 !important;
-
-        font-size: 7px !important;
-
-        vertical-align: middle !important;
-    }
-
-    .coach-table thead th {
-        height: 8mm !important;
-
-        background: #eeeeee !important;
-
-        color: #000000 !important;
-
-        font-size: 7px !important;
-
-        font-weight: 900 !important;
-    }
-
-    .coach-table tbody th {
-        width: 12mm !important;
-
-        min-width: 12mm !important;
-
-        max-width: 12mm !important;
-
-        background: #eeeeee !important;
-
-        color: #000000 !important;
-
-        font-size: 7px !important;
-    }
-
-    .coach-table th:first-child {
-        width: 14mm !important;
-
-        min-width: 14mm !important;
-
-        max-width: 14mm !important;
-    }
-
-    .coach-card {
-        width: 100% !important;
-
-        min-height: 14mm !important;
-
-        height: 14mm !important;
-
-        padding: 1mm !important;
-
-        border: 0 !important;
-
-        border-radius: 0 !important;
-
-        box-shadow: none !important;
-
-        background: transparent !important;
-
-        transform: none !important;
-    }
-
-    .coach-number {
-        font-size: 9px !important;
-        line-height: 10px !important;
-        font-weight: 900 !important;
-    }
-
-    .coach-type {
-        font-size: 6px !important;
-        line-height: 7px !important;
-    }
-
-    .coach-status {
-        font-size: 5px !important;
-        line-height: 6px !important;
-        padding: 1px 3px !important;
-        border-radius: 3px !important;
-    }
-
-    /* Keep status colours when printing */
-
-    .status-PO {
-        background: #198754 !important;
-        color: #ffffff !important;
-    }
-
-    .status-S {
-        background: #20c997 !important;
-        color: #ffffff !important;
-    }
-
-    .status-LM {
-        background: #ffc107 !important;
-        color: #000000 !important;
-    }
-
-    .status-MED {
-        background: #dc3545 !important;
-        color: #ffffff !important;
-    }
-
-    .status-RL {
-        background: #0d6efd !important;
-        color: #ffffff !important;
-    }
-
-    .status-R1 {
-        background: #0dcaf0 !important;
-        color: #000000 !important;
-    }
-
-    .status-RS,
-    .status-L {
-        background: #6c757d !important;
-        color: #ffffff !important;
-    }
-
-    .status-HVY {
-        background: #212529 !important;
-        color: #ffffff !important;
-    }
-
-    /* Do not split shop table */
-
-    .shop-card,
-    table,
-    tr {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
     }
 
-    /* Remove hover effects */
+    .shop-title {
+        display: block !important;
+        margin: 0 !important;
+        padding: 1mm !important;
+        font-size: 9px !important;
+        line-height: 11px !important;
+        color: #000000 !important;
+        background: #ffffff !important;
+        border: 1px solid #000000 !important;
+    }
 
-    .coach-card:hover {
-        transform: none !important;
+
+    /* Tables */
+
+    .table-responsive {
+        display: block !important;
+        width: 100% !important;
+        overflow: visible !important;
+    }
+
+    .coach-table {
+        display: table !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed !important;
+        margin: 0 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .coach-table thead {
+        display: table-header-group !important;
+    }
+
+    .coach-table tbody {
+        display: table-row-group !important;
+    }
+
+    .coach-table tr {
+        display: table-row !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .coach-table th,
+    .coach-table td {
+        display: table-cell !important;
+        border: 1px solid #000000 !important;
+        padding: 1mm !important;
+        height: 8mm !important;
+        min-height: 0 !important;
+        line-height: 1 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        vertical-align: middle !important;
+    }
+
+    .coach-table thead th {
+        font-size: 7px !important;
+        font-weight: 900 !important;
+        height: 7mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .coach-table tbody th {
+        width: 10mm !important;
+        min-width: 10mm !important;
+        font-size: 7px !important;
+        font-weight: 900 !important;
+    }
+
+
+    /* Coach card */
+
+    .coach-card {
+        display: block !important;
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 0 !important;
+        background: transparent !important;
         box-shadow: none !important;
+        border: 0 !important;
+    }
+
+    /* PRINT ONLY COACH NUMBER */
+
+    .coach-no {
+        display: block !important;
+        font-size: 10px !important;
+        line-height: 11px !important;
+        font-weight: 900 !important;
+        color: #000000 !important;
+    }
+
+    .coach-type,
+    .coach-status {
+        display: none !important;
+    }
+
+
+    /* Remove screen highlighting */
+
+    .search-match,
+    .mobile-drag-source,
+    .mobile-drag-target,
+    .table-info {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+
+    /* Avoid unnecessary page breaks */
+
+    .shop-card:nth-of-type(n) {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
 }
 
 
 /* =========================================================
-   PRINT — A4 PORTRAIT FALLBACK
+   PRINT BOARD CLASS
 ========================================================= */
 
-@media print and (orientation: portrait) {
-
-    @page {
-        size: A4 portrait;
-        margin: 6mm;
-    }
-
-    .coach-table {
-        font-size: 6px !important;
-    }
-
-    .coach-table th,
-    .coach-table td {
-        font-size: 6px !important;
-    }
-
-    .coach-number {
-        font-size: 7px !important;
-    }
-
-    .coach-type {
-        font-size: 5px !important;
-    }
-
-    .coach-status {
-        font-size: 4px !important;
-    }
-
+.printing-board .navbar,
+.printing-board .container-fluid.mt-3,
+.printing-board footer {
+    display: none;
 }
 
 
@@ -1108,11 +916,12 @@ body.fullscreen-board .coach-status {
    ACCESSIBILITY
 ========================================================= */
 
-button:focus,
-input:focus,
-select:focus {
-    outline: 2px solid #0d6efd;
-    outline-offset: 1px;
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+td:focus-visible {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
 }
 
 
@@ -1121,7 +930,7 @@ select:focus {
 ========================================================= */
 
 .table-responsive::-webkit-scrollbar {
-    height: 9px;
+    height: 8px;
 }
 
 .table-responsive::-webkit-scrollbar-track {
