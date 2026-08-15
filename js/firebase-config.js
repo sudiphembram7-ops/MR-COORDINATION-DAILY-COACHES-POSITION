@@ -41,25 +41,25 @@ import {
 
 const firebaseConfig = {
 
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyDs7QAXYKv8SSVsrHPZr3Jh9iZ-1qHMEBs",
 
     authDomain:
-        "YOUR_PROJECT_ID.firebaseapp.com",
+        "mr-coordi-coach.firebaseapp.com",
 
     databaseURL:
-        "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+        "https://mr-coordi-coach-default-rtdb.firebaseio.com",
 
     projectId:
-        "YOUR_PROJECT_ID",
+        "mr-coordi-coach",
 
     storageBucket:
-        "YOUR_PROJECT_ID.firebasestorage.app",
+        "mr-coordi-coach.firebasestorage.app",
 
     messagingSenderId:
-        "YOUR_MESSAGING_SENDER_ID",
+        "955185707268",
 
     appId:
-        "YOUR_APP_ID"
+        "1:955185707268:web:706c031162f6152565f851"
 
 };
 
