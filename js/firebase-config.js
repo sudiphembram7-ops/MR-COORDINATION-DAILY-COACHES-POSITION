@@ -1,274 +1,118 @@
-/* ==========================================
-   firebase-config.js
-   MR CO-ORDINATION
-   FIREBASE CONFIGURATION
-   VERSION 11.2 FINAL
-
+/* =========================================================
+   MR CO-ORDINATION BOARD
+   FIREBASE-CONFIG.JS
+   VERSION 12.0 FINAL
+   ---------------------------------------------------------
+   FIREBASE REALTIME DATABASE
+   FIREBASE AUTH
    COMPATIBLE WITH:
-   ------------------------------------------------
-   board.js VERSION 10.0 FINAL
-   firebase-board.js VERSION 10.0 FINAL
-
-   SUPPORT:
-   ------------------------------------------------
-   GitHub Pages
-   iPhone / iPad
-   Safari
-   Chrome
-   Desktop
-   Firebase Realtime Database
-   Firebase Authentication
-========================================== */
+   ---------------------------------------------------------
+   board.html
+   board.js
+   firebase-board.js
+   firebase-admin.js
+========================================================= */
 
 
-/* ==========================================
-   FIREBASE APP
-========================================== */
+/* =========================================================
+   FIREBASE IMPORTS
+========================================================= */
 
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 
-
-/* ==========================================
-   FIREBASE REALTIME DATABASE
-========================================== */
-
 import {
-    getDatabase,
-    goOnline
+    getDatabase
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-
-/* ==========================================
-   FIREBASE AUTHENTICATION
-========================================== */
 
 import {
     getAuth
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 
-/* ==========================================
-   FIREBASE CONFIG
-========================================== */
+/* =========================================================
+   FIREBASE CONFIGURATION
+   ---------------------------------------------------------
+   IMPORTANT:
+   Replace ONLY the values below with your Firebase
+   project's actual configuration.
+========================================================= */
 
 const firebaseConfig = {
 
-    apiKey:
-        "AIzaSyDs7QAXYKov8SSVsrHPZr3Jh9iZ-1qHMEBs",
+    apiKey: "YOUR_API_KEY",
 
     authDomain:
-        "mr-coordi-coach.firebaseapp.com",
+        "YOUR_PROJECT_ID.firebaseapp.com",
 
     databaseURL:
-        "https://mr-coordi-coach-default-rtdb.firebaseio.com",
+        "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
 
     projectId:
-        "mr-coordi-coach",
+        "YOUR_PROJECT_ID",
 
     storageBucket:
-        "mr-coordi-coach.firebasestorage.app",
+        "YOUR_PROJECT_ID.firebasestorage.app",
 
     messagingSenderId:
-        "955185707268",
+        "YOUR_MESSAGING_SENDER_ID",
 
     appId:
-        "1:955185707268:web:706c031162f6152565f851",
-
-    measurementId:
-        "G-P6YEBEEWM3"
+        "YOUR_APP_ID"
 
 };
 
 
-/* ==========================================
-   INITIALIZE FIREBASE APP
-========================================== */
+/* =========================================================
+   INITIALIZE FIREBASE
+========================================================= */
 
-let app;
-
-try {
-
-    app =
-        initializeApp(
-            firebaseConfig
-        );
-
-}
-catch (error) {
-
-    console.error(
-        "FIREBASE APP INITIALIZATION ERROR:",
-        error
-    );
-
-    throw error;
-
-}
+const app =
+    initializeApp(firebaseConfig);
 
 
-/* ==========================================
-   INITIALIZE REALTIME DATABASE
-========================================== */
+/* =========================================================
+   REALTIME DATABASE
+========================================================= */
 
-let database;
-
-try {
-
-    database =
-        getDatabase(
-            app
-        );
-
-}
-catch (error) {
-
-    console.error(
-        "FIREBASE DATABASE INITIALIZATION ERROR:",
-        error
-    );
-
-    throw error;
-
-}
+const database =
+    getDatabase(app);
 
 
-/* ==========================================
-   FORCE DATABASE ONLINE
-========================================== */
+/* =========================================================
+   FIREBASE AUTHENTICATION
+========================================================= */
 
-try {
-
-    goOnline(
-        database
-    );
-
-}
-catch (error) {
-
-    console.error(
-        "FIREBASE GO ONLINE ERROR:",
-        error
-    );
-
-}
+const auth =
+    getAuth(app);
 
 
-/* ==========================================
-   INITIALIZE FIREBASE AUTH
-========================================== */
-
-let auth;
-
-try {
-
-    auth =
-        getAuth(
-            app
-        );
-
-}
-catch (error) {
-
-    console.error(
-        "FIREBASE AUTH INITIALIZATION ERROR:",
-        error
-    );
-
-    throw error;
-
-}
-
-
-/* ==========================================
-   DATABASE URL
-========================================== */
-
-export const FIREBASE_DATABASE_URL =
-    firebaseConfig.databaseURL;
-
-
-/* ==========================================
-   FIREBASE PROJECT ID
-========================================== */
-
-export const FIREBASE_PROJECT_ID =
-    firebaseConfig.projectId;
-
-
-/* ==========================================
-   EXPORT FIREBASE OBJECTS
-========================================== */
+/* =========================================================
+   EXPORT
+========================================================= */
 
 export {
-
     app,
-
     database,
-
     auth
-
 };
 
 
-/* ==========================================
-   DEFAULT EXPORT
-========================================== */
-
-export default app;
-
-
-/* ==========================================
-   DEBUG INFORMATION
-========================================== */
+/* =========================================================
+   CONNECTION TEST
+========================================================= */
 
 console.log(
-    "=========================================="
+    "🔥 Firebase initialized successfully"
 );
 
 console.log(
-    "MR CO-ORDINATION FIREBASE CONFIG"
+    "🔥 Realtime Database:",
+    database ? "READY" : "ERROR"
 );
 
 console.log(
-    "VERSION 11.2 FINAL"
-);
-
-console.log(
-    "=========================================="
-);
-
-console.log(
-    "Firebase App: INITIALIZED"
-);
-
-console.log(
-    "Project:",
-    firebaseConfig.projectId
-);
-
-console.log(
-    "Database:",
-    firebaseConfig.databaseURL
-);
-
-console.log(
-    "Realtime Database: INITIALIZED"
-);
-
-console.log(
-    "Firebase Auth: INITIALIZED"
-);
-
-console.log(
-    "GitHub Pages: READY"
-);
-
-console.log(
-    "iPhone / Safari: READY"
-);
-
-console.log(
-    "=========================================="
+    "🔐 Firebase Auth:",
+    auth ? "READY" : "ERROR"
 );
