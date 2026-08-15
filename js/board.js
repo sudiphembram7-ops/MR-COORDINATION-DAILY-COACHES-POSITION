@@ -1,28 +1,27 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    BOARD.JS
-   VERSION 12.1 FINAL
+   VERSION 13.0 FINAL
    ---------------------------------------------------------
-   PULL OUT + RETURN TO BOARD
-   RETURN TO ANY EMPTY CELL
+   PULL OUT + RETURN TO BOARD FIX
    ---------------------------------------------------------
-   FEATURES
    ✔ LIVE BOARD
    ✔ SAVE
    ✔ UPDATE
    ✔ DELETE
    ✔ PULL OUT
+   ✔ PULLED OUT LIST
    ✔ RETURN
+   ✔ RETURN TO ORIGINAL CELL
    ✔ RETURN TO ANY EMPTY CELL
    ✔ MOVE
    ✔ SWAP
-   ✔ DUPLICATE COACH PROTECTION
-   ✔ 145 CAPACITY COUNTER
+   ✔ DUPLICATE PROTECTION
+   ✔ 145 CAPACITY
    ✔ LIVE SEARCH
    ✔ STATUS COLOURS
    ✔ HISTORY
-   ✔ AUDIT
-   ✔ CSV / EXCEL
+   ✔ CSV
    ✔ A4 PRINT
    ✔ FULL SCREEN
    ✔ MOBILE TOUCH MOVE
@@ -38,12 +37,9 @@
 import {
     ref,
     get,
-    set,
     update,
-    remove,
     push,
-    onValue,
-    runTransaction
+    onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 import {
@@ -67,11 +63,11 @@ import {
    VERSION
 ========================================================= */
 
-const BOARD_VERSION = "12.1";
+const BOARD_VERSION = "13.0";
 
-const TOTAL_CAPACITY = 145;
-
-const LONG_PRESS_DELAY = 400;
+console.log(
+    `MR CO-ORDINATION BOARD.JS V${BOARD_VERSION} LOADED`
+);
 
 
 /* =========================================================
@@ -84,8 +80,6 @@ let pulledOutData = {};
 
 let currentCell = null;
 
-let currentPulledOutId = null;
-
 let dragCell = null;
 
 let mobileDragCell = null;
@@ -95,10 +89,6 @@ let mobileLongPressTimer = null;
 let boardListenerStarted = false;
 
 let pulledOutListenerStarted = false;
-
-let boardUnsubscribe = null;
-
-let pulledOutUnsubscribe = null;
 
 let coachModal = null;
 
@@ -114,6 +104,10 @@ let isPullingOut = false;
 
 let isReturning = false;
 
+const TOTAL_CAPACITY = 145;
+
+const LONG_PRESS_DELAY = 400;
+
 
 /* =========================================================
    STATUS LIST
@@ -122,21 +116,13 @@ let isReturning = false;
 const STATUS_CLASSES = {
 
     "PO": "status-po",
-
     "S": "status-s",
-
     "LM": "status-lm",
-
     "MED": "status-med",
-
     "RL": "status-rl",
-
     "R1": "status-r1",
-
     "RS": "status-rs",
-
     "L": "status-l",
-
     "HVY": "status-hvy"
 
 };
@@ -229,6 +215,8 @@ document.addEventListener(
         initializeSearch();
 
         initializePulledOutSearch();
+
+        initializePulledOutActions();
 
         initializeKeyboard();
 
@@ -352,49 +340,48 @@ function loadBoard() {
             "coachBoard"
         );
 
-    boardUnsubscribe =
-        onValue(
+    onValue(
 
-            boardRef,
+        boardRef,
 
-            snapshot => {
+        snapshot => {
 
-                boardData =
-                    snapshot.exists()
-                        ? snapshot.val()
-                        : {};
+            boardData =
+                snapshot.exists()
+                    ? snapshot.val()
+                    : {};
 
-                firebaseOnline = true;
+            firebaseOnline = true;
 
-                updateDatabaseStatus(
-                    true
-                );
+            updateDatabaseStatus(
+                true
+            );
 
-                drawBoard();
+            drawBoard();
 
-                updateCounters();
+            updateCounters();
 
-                updateLastUpdate();
+            updateLastUpdate();
 
-            },
+        },
 
-            error => {
+        error => {
 
-                firebaseOnline = false;
+            firebaseOnline = false;
 
-                updateDatabaseStatus(
-                    false,
-                    error
-                );
+            updateDatabaseStatus(
+                false,
+                error
+            );
 
-                console.error(
-                    "Firebase Board Error:",
-                    error
-                );
+            console.error(
+                "Firebase Board Error:",
+                error
+            );
 
-            }
+        }
 
-        );
+    );
 
 }
 
@@ -413,40 +400,39 @@ function loadPulledOut() {
 
     pulledOutListenerStarted = true;
 
-    const pulledRef =
+    const pulledOutRef =
         ref(
             database,
             "pulledOut"
         );
 
-    pulledOutUnsubscribe =
-        onValue(
+    onValue(
 
-            pulledRef,
+        pulledOutRef,
 
-            snapshot => {
+        snapshot => {
 
-                pulledOutData =
-                    snapshot.exists()
-                        ? snapshot.val()
-                        : {};
+            pulledOutData =
+                snapshot.exists()
+                    ? snapshot.val()
+                    : {};
 
-                renderPulledOutList();
+            renderPulledOut();
 
-                updatePulledOutCounter();
+            updatePulledOutCounter();
 
-            },
+        },
 
-            error => {
+        error => {
 
-                console.error(
-                    "Pulled Out Load Error:",
-                    error
-                );
+            console.error(
+                "Pulled Out Firebase Error:",
+                error
+            );
 
-            }
+        }
 
-        );
+    );
 
 }
 
@@ -456,17 +442,6 @@ function loadPulledOut() {
 ========================================================= */
 
 async function refreshBoard() {
-
-    const refreshButton =
-        document.getElementById(
-            "refreshBtn"
-        );
-
-    if (refreshButton) {
-
-        refreshButton.disabled = true;
-
-    }
 
     try {
 
@@ -483,6 +458,12 @@ async function refreshBoard() {
                 ? snapshot.val()
                 : {};
 
+        drawBoard();
+
+        updateCounters();
+
+        updateLastUpdate();
+
         const pulledSnapshot =
             await get(
                 ref(
@@ -496,15 +477,9 @@ async function refreshBoard() {
                 ? pulledSnapshot.val()
                 : {};
 
-        drawBoard();
-
-        renderPulledOutList();
-
-        updateCounters();
+        renderPulledOut();
 
         updatePulledOutCounter();
-
-        updateLastUpdate();
 
     }
     catch (error) {
@@ -518,15 +493,6 @@ async function refreshBoard() {
             "Refresh failed.\n\n" +
             error.message
         );
-
-    }
-    finally {
-
-        if (refreshButton) {
-
-            refreshButton.disabled = false;
-
-        }
 
     }
 
@@ -823,7 +789,9 @@ function updateCounters() {
 
 
     const total =
-        TOTAL_CAPACITY;
+        cells.length === TOTAL_CAPACITY
+            ? TOTAL_CAPACITY
+            : cells.length;
 
 
     let occupied = 0;
@@ -893,26 +861,26 @@ function updateCounters() {
 
 function updatePulledOutCounter() {
 
-    const count =
+    const total =
         Object.keys(
             pulledOutData || {}
         ).length;
 
 
-    const elements = [
+    const possibleIds = [
 
         "pulledOutCount",
 
-        "pulledOutCoachCount",
-
         "pulledOutTotal",
 
-        "pulledOutSearchCount"
+        "pulledOutCoachCount",
+
+        "pullOutCount"
 
     ];
 
 
-    elements.forEach(
+    possibleIds.forEach(
         id => {
 
             const element =
@@ -923,7 +891,437 @@ function updatePulledOutCounter() {
             if (element) {
 
                 element.textContent =
-                    count;
+                    total;
+
+            }
+
+        }
+    );
+
+
+    /*
+       Screenshot style:
+       Total: 1
+    */
+
+    document
+        .querySelectorAll(
+            "[data-pulled-out-count]"
+        )
+        .forEach(
+            element => {
+
+                element.textContent =
+                    total;
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   PULLED OUT SEARCH
+========================================================= */
+
+function initializePulledOutSearch() {
+
+    const ids = [
+
+        "pulledOutSearch",
+
+        "pullOutSearch",
+
+        "pulledSearch"
+
+    ];
+
+
+    ids.forEach(
+        id => {
+
+            const input =
+                document.getElementById(
+                    id
+                );
+
+            if (!input) {
+
+                return;
+
+            }
+
+
+            input.addEventListener(
+                "input",
+                () => {
+
+                    renderPulledOut(
+                        input.value
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RENDER PULLED OUT
+========================================================= */
+
+function renderPulledOut(
+    searchText = ""
+) {
+
+    const records =
+        Object.entries(
+            pulledOutData || {}
+        );
+
+
+    const query =
+        clean(
+            searchText
+        ).toUpperCase();
+
+
+    const filtered =
+        records.filter(
+            ([id, coach]) => {
+
+                if (!query) {
+
+                    return true;
+
+                }
+
+
+                const text = [
+
+                    coach?.coachNo,
+
+                    coach?.coachType,
+
+                    coach?.status,
+
+                    coach?.shop,
+
+                    coach?.originalLine,
+
+                    coach?.originalPosition,
+
+                    coach?.originalCell,
+
+                    coach?.pullOutTime
+
+                ]
+                    .map(clean)
+                    .join(" ")
+                    .toUpperCase();
+
+
+                return text.includes(
+                    query
+                );
+
+            }
+        );
+
+
+    /*
+       Try common table body IDs.
+    */
+
+    let tbody = null;
+
+
+    const bodyIds = [
+
+        "pulledOutTableBody",
+
+        "pullOutTableBody",
+
+        "pulledOutBody",
+
+        "pullOutBody"
+
+    ];
+
+
+    for (
+        const id of bodyIds
+    ) {
+
+        const element =
+            document.getElementById(
+                id
+            );
+
+        if (element) {
+
+            tbody = element;
+
+            break;
+
+        }
+
+    }
+
+
+    /*
+       If ID not found, use class.
+    */
+
+    if (!tbody) {
+
+        tbody =
+            document.querySelector(
+                ".pulled-out-table tbody"
+            );
+
+    }
+
+
+    if (!tbody) {
+
+        console.warn(
+            "Pulled Out table body not found."
+        );
+
+        updatePulledOutCounter();
+
+        return;
+
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if (!filtered.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="text-center text-muted p-3"
+                >
+                    No Pulled Out Coaches
+                </td>
+
+            </tr>
+
+        `;
+
+        updatePulledOutCounter();
+
+        return;
+
+    }
+
+
+    filtered
+        .sort(
+            ([, a], [, b]) => {
+
+                return (
+                    Number(
+                        b?.pullOutTimestamp || 0
+                    ) -
+                    Number(
+                        a?.pullOutTimestamp || 0
+                    )
+                );
+
+            }
+        )
+        .forEach(
+            ([id, coach]) => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const coachNo =
+                    clean(
+                        coach?.coachNo
+                    );
+
+                const coachType =
+                    clean(
+                        coach?.coachType
+                    );
+
+                const status =
+                    clean(
+                        coach?.status
+                    );
+
+                const shop =
+                    clean(
+                        coach?.shop
+                    );
+
+                const originalCell =
+                    clean(
+                        coach?.originalCell
+                    ) ||
+                    `${clean(coach?.originalLine)}_${clean(coach?.originalPosition)}`;
+
+
+                const pullTime =
+                    formatDateTime(
+                        coach?.pullOutTime ||
+                        coach?.pullOutTimestamp
+                    );
+
+
+                row.innerHTML = `
+
+                    <td>
+                        <strong>
+                            ${escapeHTML(coachNo)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHTML(coachType)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(status)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(shop)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(originalCell)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(pullTime)}
+                    </td>
+
+                    <td>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm return-coach-btn"
+                            data-pulled-id="${escapeHTML(id)}"
+                        >
+                            Return
+                        </button>
+
+                    </td>
+
+                `;
+
+
+                tbody.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+    updatePulledOutCounter();
+
+}
+
+
+/* =========================================================
+   PULLED OUT ACTION EVENTS
+========================================================= */
+
+function initializePulledOutActions() {
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    ".return-coach-btn"
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            event.preventDefault();
+
+            const pulledId =
+                button.dataset.pulledId;
+
+
+            if (!pulledId) {
+
+                alert(
+                    "Pulled Out Coach ID missing."
+                );
+
+                return;
+
+            }
+
+
+            returnCoach(
+                pulledId
+            );
+
+        }
+    );
+
+
+    /*
+       Support alternative HTML button:
+       data-action="return"
+    */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    '[data-action="return"]'
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            const pulledId =
+                button.dataset.pulledId ||
+                button.dataset.id;
+
+
+            if (pulledId) {
+
+                event.preventDefault();
+
+                returnCoach(
+                    pulledId
+                );
 
             }
 
@@ -934,115 +1332,674 @@ function updatePulledOutCounter() {
 
 
 /* =========================================================
-   LAST UPDATE
+   PULL OUT BUTTON
 ========================================================= */
 
-function updateLastUpdate() {
+async function pullOutCoach() {
 
-    const element =
-        document.getElementById(
-            "lastUpdate"
-        );
-
-    if (!element) {
+    if (!checkAdmin()) {
 
         return;
 
     }
 
-    element.textContent =
-        "Updated : " +
-        new Date().toLocaleTimeString(
-            "en-IN"
+
+    if (isPullingOut) {
+
+        return;
+
+    }
+
+
+    const line =
+        getElementValue(
+            "modalLine"
         );
+
+    const position =
+        getElementValue(
+            "modalPosition"
+        );
+
+    const coachNo =
+        getElementValue(
+            "modalCoachNo"
+        );
+
+
+    if (
+        !line ||
+        !position
+    ) {
+
+        alert(
+            "Line / Position missing."
+        );
+
+        return;
+
+    }
+
+
+    const sourceCoach =
+        boardData[
+            line
+        ]?.[
+            position
+        ];
+
+
+    if (!sourceCoach) {
+
+        alert(
+            "No coach found in this cell."
+        );
+
+        return;
+
+    }
+
+
+    if (!coachNo) {
+
+        alert(
+            "Coach Number missing."
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            `Pull Out Coach ${coachNo} from ${line} / ${position}?`
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    isPullingOut = true;
+
+
+    try {
+
+        const pulledId =
+            push(
+                ref(
+                    database,
+                    "pulledOut"
+                )
+            ).key;
+
+
+        if (!pulledId) {
+
+            throw new Error(
+                "Unable to create Pulled Out record."
+            );
+
+        }
+
+
+        const now =
+            new Date();
+
+
+        const pulledRecord = {
+
+            coachNo:
+                clean(
+                    sourceCoach.coachNo
+                ),
+
+            coachType:
+                clean(
+                    sourceCoach.coachType
+                ),
+
+            status:
+                clean(
+                    sourceCoach.status
+                ),
+
+            shop:
+                clean(
+                    sourceCoach.shop
+                ) ||
+                getShop(line),
+
+            originalLine:
+                line,
+
+            originalPosition:
+                position,
+
+            originalCell:
+                `${line}_${position}`,
+
+            pullOutTime:
+                now.toISOString(),
+
+            pullOutTimestamp:
+                Date.now(),
+
+            pulledOutBy:
+                auth.currentUser?.email ||
+                "Admin"
+
+        };
+
+
+        /*
+           Atomic Firebase update.
+
+           1. Save to pulledOut
+           2. Remove from board
+        */
+
+        const updates = {};
+
+
+        updates[
+            `pulledOut/${pulledId}`
+        ] =
+            pulledRecord;
+
+
+        updates[
+            `coachBoard/${line}/${position}`
+        ] =
+            null;
+
+
+        await update(
+            ref(
+                database
+            ),
+            updates
+        );
+
+
+        await writeLocalHistory(
+            "PULL OUT",
+            pulledRecord,
+            {
+
+                originalLine:
+                    line,
+
+                originalPosition:
+                    position,
+
+                pulledOutId:
+                    pulledId
+
+            }
+        );
+
+
+        closeModal();
+
+
+        alert(
+            `Coach ${coachNo} pulled out successfully.`
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "PULL OUT ERROR:",
+            error
+        );
+
+        alert(
+            "Pull Out failed:\n\n" +
+            error.message
+        );
+
+    }
+    finally {
+
+        isPullingOut = false;
+
+    }
 
 }
 
 
 /* =========================================================
-   FIREBASE STATUS
+   RETURN COACH
+   ---------------------------------------------------------
+   Original cell empty:
+       RETURN TO ORIGINAL CELL
+
+   Original cell occupied:
+       RETURN TO FIRST EMPTY CELL
+
+   If no empty cell:
+       RETURN BLOCKED
 ========================================================= */
 
-function initializeFirebaseStatus() {
-
-    const connectedRef =
-        ref(
-            database,
-            ".info/connected"
-        );
-
-    onValue(
-        connectedRef,
-        snapshot => {
-
-            firebaseOnline =
-                snapshot.val() === true;
-
-            updateDatabaseStatus(
-                firebaseOnline
-            );
-
-        },
-        error => {
-
-            firebaseOnline = false;
-
-            updateDatabaseStatus(
-                false,
-                error
-            );
-
-        }
-    );
-
-}
-
-
-function updateDatabaseStatus(
-    online,
-    error = null
+async function returnCoach(
+    pulledId
 ) {
 
-    const element =
-        document.getElementById(
-            "databaseStatus"
-        );
-
-    if (!element) {
+    if (!checkAdmin()) {
 
         return;
 
     }
 
 
-    if (online) {
+    if (isReturning) {
 
-        element.textContent =
-            "● Firebase Connected";
+        return;
 
-        element.classList.remove(
-            "text-danger"
+    }
+
+
+    const pulledCoach =
+        pulledOutData[
+            pulledId
+        ];
+
+
+    if (!pulledCoach) {
+
+        alert(
+            "Pulled Out Coach not found."
         );
 
-        element.classList.add(
-            "text-success"
+        return;
+
+    }
+
+
+    const coachNo =
+        clean(
+            pulledCoach.coachNo
+        );
+
+
+    if (!coachNo) {
+
+        alert(
+            "Coach Number missing."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Duplicate protection.
+
+       This coach should NOT already
+       exist anywhere on the board.
+    */
+
+    if (
+        duplicateCoach(
+            coachNo
+        )
+    ) {
+
+        alert(
+            `Coach ${coachNo} already exists on the board.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Find return cell.
+    */
+
+    const returnCell =
+        findReturnCell(
+            pulledCoach
+        );
+
+
+    if (!returnCell) {
+
+        alert(
+            "No empty cell available on the board.\n\n" +
+            "Please free one cell and try again."
+        );
+
+        return;
+
+    }
+
+
+    const returnLine =
+        returnCell.line;
+
+    const returnPosition =
+        returnCell.position;
+
+
+    const originalLine =
+        clean(
+            pulledCoach.originalLine
+        );
+
+    const originalPosition =
+        clean(
+            pulledCoach.originalPosition
+        );
+
+
+    const isOriginalCell =
+        returnLine === originalLine &&
+        returnPosition === originalPosition;
+
+
+    const confirmed =
+        confirm(
+            isOriginalCell
+
+                ? `Return Coach ${coachNo} to original cell ${returnLine} / ${returnPosition}?`
+
+                : `Original cell is occupied.\n\nReturn Coach ${coachNo} to empty cell ${returnLine} / ${returnPosition}?`
+
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    isReturning = true;
+
+
+    try {
+
+        const coach = {
+
+            coachNo:
+                coachNo,
+
+            coachType:
+                clean(
+                    pulledCoach.coachType
+                ),
+
+            status:
+                clean(
+                    pulledCoach.status
+                ) ||
+                "PO",
+
+            shop:
+                clean(
+                    pulledCoach.shop
+                ) ||
+                getShop(
+                    returnLine
+                ),
+
+            line:
+                returnLine,
+
+            position:
+                returnPosition,
+
+            returnedAt:
+                new Date().toISOString(),
+
+            returnedFrom:
+                `${originalLine}_${originalPosition}`
+
+        };
+
+
+        const updates = {};
+
+
+        /*
+           Put coach back to board.
+        */
+
+        updates[
+            `coachBoard/${returnLine}/${returnPosition}`
+        ] =
+            coach;
+
+
+        /*
+           Remove Pulled Out record.
+        */
+
+        updates[
+            `pulledOut/${pulledId}`
+        ] =
+            null;
+
+
+        /*
+           Atomic operation.
+        */
+
+        await update(
+            ref(
+                database
+            ),
+            updates
+        );
+
+
+        await writeLocalHistory(
+            "RETURN",
+            coach,
+            {
+
+                pulledOutId:
+                    pulledId,
+
+                originalLine:
+                    originalLine,
+
+                originalPosition:
+                    originalPosition,
+
+                returnLine:
+                    returnLine,
+
+                returnPosition:
+                    returnPosition
+
+            }
+        );
+
+
+        alert(
+            isOriginalCell
+
+                ? `Coach ${coachNo} returned to ${returnLine} / ${returnPosition}.`
+
+                : `Coach ${coachNo} returned to empty cell ${returnLine} / ${returnPosition}.`
+
         );
 
     }
-    else {
+    catch (error) {
 
-        element.textContent =
-            "● Firebase Offline";
-
-        element.classList.remove(
-            "text-success"
+        console.error(
+            "RETURN ERROR:",
+            error
         );
 
-        element.classList.add(
-            "text-danger"
+        alert(
+            "Return failed:\n\n" +
+            error.message
         );
 
     }
+    finally {
+
+        isReturning = false;
+
+    }
+
+}
+
+
+/* =========================================================
+   FIND RETURN CELL
+========================================================= */
+
+function findReturnCell(
+    pulledCoach
+) {
+
+    const originalLine =
+        clean(
+            pulledCoach?.originalLine
+        );
+
+    const originalPosition =
+        clean(
+            pulledCoach?.originalPosition
+        );
+
+
+    /*
+       1. Try original cell first.
+    */
+
+    if (
+        originalLine &&
+        originalPosition
+    ) {
+
+        const originalCoach =
+            boardData[
+                originalLine
+            ]?.[
+                originalPosition
+            ];
+
+
+        if (!originalCoach) {
+
+            const originalDOMCell =
+                document.getElementById(
+                    `${originalLine}_${originalPosition}`
+                );
+
+
+            /*
+               If Firebase says empty,
+               use original cell.
+            */
+
+            if (
+                !originalDOMCell ||
+                !clean(
+                    originalDOMCell.dataset.coach
+                )
+            ) {
+
+                return {
+
+                    line:
+                        originalLine,
+
+                    position:
+                        originalPosition
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    /*
+       2. Original occupied.
+       Find ANY empty board cell.
+    */
+
+    const cells =
+        Array.from(
+            document.querySelectorAll(
+                ".coach-table td"
+            )
+        );
+
+
+    for (
+        const cell of cells
+    ) {
+
+        const location =
+            getCellLocation(
+                cell
+            );
+
+
+        if (
+            !location.line ||
+            !location.position
+        ) {
+
+            continue;
+
+        }
+
+
+        const domCoach =
+            clean(
+                cell.dataset.coach
+            );
+
+
+        const firebaseCoach =
+            boardData[
+                location.line
+            ]?.[
+                location.position
+            ];
+
+
+        if (
+            !domCoach &&
+            !firebaseCoach
+        ) {
+
+            return {
+
+                line:
+                    location.line,
+
+                position:
+                    location.position
+
+            };
+
+        }
+
+    }
+
+
+    return null;
 
 }
 
@@ -1082,6 +2039,7 @@ function enableCellClick() {
                     ".coach-table td"
                 );
 
+
             if (!cell) {
 
                 return;
@@ -1091,6 +2049,7 @@ function enableCellClick() {
 
             currentCell =
                 cell;
+
 
             openModal(
                 cell
@@ -1166,7 +2125,13 @@ function openModal(cell) {
     );
 
 
-    currentPulledOutId = null;
+    /*
+       Enable / disable Pull Out button.
+    */
+
+    updatePullOutButton(
+        !!cell.dataset.coach
+    );
 
 
     if (coachModal) {
@@ -1179,13 +2144,59 @@ function openModal(cell) {
 
 
 /* =========================================================
+   PULL OUT BUTTON STATE
+========================================================= */
+
+function updatePullOutButton(
+    enabled
+) {
+
+    const ids = [
+
+        "pullOutCoachBtn",
+
+        "pullOutBtn",
+
+        "btnPullOut"
+
+    ];
+
+
+    ids.forEach(
+        id => {
+
+            const button =
+                document.getElementById(
+                    id
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            button.disabled =
+                !enabled;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    PARSE CELL ID
 ========================================================= */
 
 function parseCellId(id) {
 
     const text =
-        String(id || "");
+        String(
+            id || ""
+        );
 
 
     const index =
@@ -1196,9 +2207,11 @@ function parseCellId(id) {
 
         return {
 
-            line: text,
+            line:
+                text,
 
-            position: ""
+            position:
+                ""
 
         };
 
@@ -1236,6 +2249,7 @@ function setValue(
         document.getElementById(
             id
         );
+
 
     if (element) {
 
@@ -1366,7 +2380,8 @@ function getModalData() {
         status:
             getElementValue(
                 "modalStatus"
-            ) || "PO",
+            ) ||
+            "PO",
 
         updatedAt:
             new Date().toISOString()
@@ -1383,6 +2398,7 @@ function getElementValue(id) {
             id
         );
 
+
     return clean(
         element?.value
     );
@@ -1391,7 +2407,7 @@ function getElementValue(id) {
 
 
 /* =========================================================
-   DUPLICATE CHECK
+   DUPLICATE COACH CHECK
 ========================================================= */
 
 function duplicateCoach(
@@ -1422,6 +2438,7 @@ function duplicateCoach(
         const lineData =
             boardData[line];
 
+
         if (!lineData) {
 
             continue;
@@ -1448,6 +2465,7 @@ function duplicateCoach(
             const coach =
                 lineData[position];
 
+
             if (!coach) {
 
                 continue;
@@ -1455,73 +2473,19 @@ function duplicateCoach(
             }
 
 
-            if (
+            const existing =
                 clean(
                     coach.coachNo
-                ).toUpperCase() === target
+                ).toUpperCase();
+
+
+            if (
+                existing === target
             ) {
 
                 return true;
 
             }
-
-        }
-
-    }
-
-
-    return false;
-
-}
-
-
-/* =========================================================
-   DUPLICATE CHECK PULLED OUT
-========================================================= */
-
-function duplicatePulledOut(
-    coachNo,
-    ignoreId = ""
-) {
-
-    const target =
-        clean(
-            coachNo
-        ).toUpperCase();
-
-
-    for (
-        const id of Object.keys(
-            pulledOutData || {}
-        )
-    ) {
-
-        if (
-            id === ignoreId
-        ) {
-
-            continue;
-
-        }
-
-
-        const coach =
-            pulledOutData[id];
-
-        if (!coach) {
-
-            continue;
-
-        }
-
-
-        if (
-            clean(
-                coach.coachNo
-            ).toUpperCase() === target
-        ) {
-
-            return true;
 
         }
 
@@ -1555,18 +2519,18 @@ function initializeButtons() {
     );
 
     bindClick(
+        "pullOutCoachBtn",
+        pullOutCoach
+    );
+
+    bindClick(
         "pullOutBtn",
         pullOutCoach
     );
 
     bindClick(
-        "returnCoachBtn",
-        returnPulledOutCoach
-    );
-
-    bindClick(
-        "returnToBoardBtn",
-        returnPulledOutCoach
+        "btnPullOut",
+        pullOutCoach
     );
 
     bindClick(
@@ -1606,6 +2570,7 @@ function bindClick(
             id
         );
 
+
     if (!element) {
 
         return;
@@ -1613,8 +2578,12 @@ function bindClick(
     }
 
 
+    /*
+       Prevent duplicate listener.
+    */
+
     if (
-        element.dataset.mrBound === "1"
+        element.dataset.mrBoardBound === "true"
     ) {
 
         return;
@@ -1622,7 +2591,8 @@ function bindClick(
     }
 
 
-    element.dataset.mrBound = "1";
+    element.dataset.mrBoardBound =
+        "true";
 
 
     element.addEventListener(
@@ -1665,13 +2635,33 @@ async function saveCoach() {
 
     if (
         !coach.line ||
-        !coach.position ||
-        !coach.coachNo ||
-        !coach.coachType
+        !coach.position
     ) {
 
         alert(
-            "Line, Position, Coach Number and Coach Type are required."
+            "Line and Position are required."
+        );
+
+        return;
+
+    }
+
+
+    if (!coach.coachNo) {
+
+        alert(
+            "Coach Number is required."
+        );
+
+        return;
+
+    }
+
+
+    if (!coach.coachType) {
+
+        alert(
+            "Coach Type is required."
         );
 
         return;
@@ -1703,10 +2693,12 @@ async function saveCoach() {
             coach
         );
 
+
         await writeLocalHistory(
             "SAVE",
             coach
         );
+
 
         closeModal();
 
@@ -1746,31 +2738,8 @@ async function updateCoach() {
     }
 
 
-    if (isSaving) {
-
-        return;
-
-    }
-
-
     const coach =
         getModalData();
-
-
-    if (
-        !coach.line ||
-        !coach.position ||
-        !coach.coachNo ||
-        !coach.coachType
-    ) {
-
-        alert(
-            "Line, Position, Coach Number and Coach Type are required."
-        );
-
-        return;
-
-    }
 
 
     if (
@@ -1790,19 +2759,18 @@ async function updateCoach() {
     }
 
 
-    isSaving = true;
-
-
     try {
 
         await firebaseUpdateCoach(
             coach
         );
 
+
         await writeLocalHistory(
             "UPDATE",
             coach
         );
+
 
         closeModal();
 
@@ -1818,11 +2786,6 @@ async function updateCoach() {
             "Update failed:\n\n" +
             error.message
         );
-
-    }
-    finally {
-
-        isSaving = false;
 
     }
 
@@ -1858,10 +2821,10 @@ async function deleteCoach() {
         );
 
 
-    if (!line || !position || !coachNo) {
+    if (!coachNo) {
 
         alert(
-            "No coach is present in this cell."
+            "No coach is present."
         );
 
         return;
@@ -1887,6 +2850,7 @@ async function deleteCoach() {
             position
         );
 
+
         await writeLocalHistory(
             "DELETE",
             {
@@ -1897,6 +2861,7 @@ async function deleteCoach() {
                     getShop(line)
             }
         );
+
 
         closeModal();
 
@@ -1919,1102 +2884,19 @@ async function deleteCoach() {
 
 
 /* =========================================================
-   PULL OUT COACH
+   CLOSE MODAL
 ========================================================= */
 
-async function pullOutCoach() {
+function closeModal() {
 
-    if (!checkAdmin()) {
+    if (coachModal) {
 
-        return false;
-
-    }
-
-
-    if (isPullingOut) {
-
-        return false;
+        coachModal.hide();
 
     }
 
 
-    const line =
-        getElementValue(
-            "modalLine"
-        );
-
-    const position =
-        getElementValue(
-            "modalPosition"
-        );
-
-    const coachNo =
-        getElementValue(
-            "modalCoachNo"
-        );
-
-
-    if (
-        !line ||
-        !position ||
-        !coachNo
-    ) {
-
-        alert(
-            "Select an occupied coach cell first."
-        );
-
-        return false;
-
-    }
-
-
-    const coach =
-        boardData[
-            line
-        ]?.[
-            position
-        ];
-
-
-    if (!coach) {
-
-        alert(
-            "Coach not found in Firebase board."
-        );
-
-        return false;
-
-    }
-
-
-    if (
-        !confirm(
-            `Pull Out Coach ${coachNo} from ${line} / ${position}?`
-        )
-    ) {
-
-        return false;
-
-    }
-
-
-    isPullingOut = true;
-
-
-    try {
-
-        /*
-           Create a unique pulled-out ID.
-        */
-
-        const pulledRef =
-            push(
-                ref(
-                    database,
-                    "pulledOut"
-                )
-            );
-
-
-        const pulledId =
-            pulledRef.key;
-
-
-        const pulledCoach = {
-
-            ...coach,
-
-            coachNo:
-                clean(
-                    coach.coachNo
-                ),
-
-            originalLine:
-                line,
-
-            originalPosition:
-                position,
-
-            pulledOutLine:
-                line,
-
-            pulledOutPosition:
-                position,
-
-            pulledOutAt:
-                new Date().toISOString(),
-
-            pulledOutBy:
-                auth.currentUser?.email ||
-                "Admin",
-
-            pulledOutId:
-                pulledId,
-
-            returned:
-                false
-
-        };
-
-
-        /*
-           Atomic Firebase update:
-           1. Add to pulledOut
-           2. Remove from board
-        */
-
-        const updates = {};
-
-
-        updates[
-            `pulledOut/${pulledId}`
-        ] =
-            pulledCoach;
-
-
-        updates[
-            `coachBoard/${line}/${position}`
-        ] =
-            null;
-
-
-        await update(
-            ref(
-                database
-            ),
-            updates
-        );
-
-
-        await writeLocalHistory(
-            "PULL OUT",
-            pulledCoach,
-            {
-
-                pulledOutId:
-                    pulledId,
-
-                originalLine:
-                    line,
-
-                originalPosition:
-                    position
-
-            }
-        );
-
-
-        closeModal();
-
-
-        alert(
-            `Coach ${coachNo} pulled out successfully.`
-        );
-
-
-        return true;
-
-    }
-    catch (error) {
-
-        console.error(
-            "PULL OUT ERROR:",
-            error
-        );
-
-        alert(
-            "Pull Out failed:\n\n" +
-            error.message
-        );
-
-        return false;
-
-    }
-    finally {
-
-        isPullingOut = false;
-
-    }
-
-}
-
-
-/* =========================================================
-   RETURN TO BOARD
-   ---------------------------------------------------------
-   DEFAULT:
-   Return to original cell if empty.
-
-   IF original cell occupied:
-   User can select ANY empty cell.
-========================================================= */
-
-async function returnPulledOutCoach(
-    pulledId = null,
-    targetCell = null
-) {
-
-    if (!checkAdmin()) {
-
-        return false;
-
-    }
-
-
-    if (isReturning) {
-
-        return false;
-
-    }
-
-
-    /*
-       If called from selected pulled-out card,
-       get its ID.
-    */
-
-    const id =
-        pulledId ||
-        currentPulledOutId;
-
-
-    if (!id) {
-
-        alert(
-            "Please select a pulled-out coach first."
-        );
-
-        return false;
-
-    }
-
-
-    const pulledCoach =
-        pulledOutData?.[id];
-
-
-    if (!pulledCoach) {
-
-        alert(
-            "Pulled-out coach not found."
-        );
-
-        return false;
-
-    }
-
-
-    /*
-       If targetCell is not supplied,
-       first try original position.
-    */
-
-    let target = targetCell;
-
-
-    if (!target) {
-
-        const originalLine =
-            clean(
-                pulledCoach.originalLine
-            );
-
-        const originalPosition =
-            clean(
-                pulledCoach.originalPosition
-            );
-
-
-        if (
-            originalLine &&
-            originalPosition
-        ) {
-
-            target =
-                document.getElementById(
-                    `${originalLine}_${originalPosition}`
-                );
-
-        }
-
-    }
-
-
-    /*
-       If original cell is occupied,
-       ask user to select an empty cell.
-    */
-
-    if (
-        !target ||
-        clean(
-            target.dataset.coach
-        )
-    ) {
-
-        target = findFirstEmptyCell();
-
-
-        if (!target) {
-
-            alert(
-                "No empty cell available on the board."
-            );
-
-            return false;
-
-        }
-
-
-        const useAny =
-            confirm(
-                `Original position is occupied.\n\n` +
-                `Return Coach ${pulledCoach.coachNo} ` +
-                `to first available empty cell?\n\n` +
-                `Press Cancel to select an empty cell manually.`
-            );
-
-
-        if (!useAny) {
-
-            alert(
-                "Please select an empty board cell and press Return again."
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-    const location =
-        getCellLocation(
-            target
-        );
-
-
-    if (
-        !location.line ||
-        !location.position
-    ) {
-
-        alert(
-            "Invalid target cell."
-        );
-
-        return false;
-
-    }
-
-
-    /*
-       Target must be empty.
-    */
-
-    if (
-        boardData[
-            location.line
-        ]?.[
-            location.position
-        ]
-    ) {
-
-        alert(
-            "Target cell is occupied. Please select an EMPTY cell."
-        );
-
-        return false;
-
-    }
-
-
-    /*
-       Duplicate protection.
-    */
-
-    if (
-        duplicateCoach(
-            pulledCoach.coachNo
-        )
-    ) {
-
-        alert(
-            "This Coach Number already exists on the board."
-        );
-
-        return false;
-
-    }
-
-
-    if (
-        !confirm(
-            `Return Coach ${pulledCoach.coachNo} to ` +
-            `${location.line} / ${location.position}?`
-        )
-    ) {
-
-        return false;
-
-    }
-
-
-    isReturning = true;
-
-
-    try {
-
-        const returnedCoach = {
-
-            coachNo:
-                pulledCoach.coachNo,
-
-            coachType:
-                pulledCoach.coachType || "",
-
-            status:
-                pulledCoach.status || "PO",
-
-            shop:
-                pulledCoach.shop ||
-                getShop(
-                    location.line
-                ),
-
-            line:
-                location.line,
-
-            position:
-                location.position,
-
-            updatedAt:
-                new Date().toISOString(),
-
-            returnedAt:
-                new Date().toISOString(),
-
-            returnedBy:
-                auth.currentUser?.email ||
-                "Admin"
-
-        };
-
-
-        const updates = {};
-
-
-        /*
-           Put coach back on board.
-        */
-
-        updates[
-            `coachBoard/${location.line}/${location.position}`
-        ] =
-            returnedCoach;
-
-
-        /*
-           Remove from pulledOut.
-        */
-
-        updates[
-            `pulledOut/${id}`
-        ] =
-            null;
-
-
-        await update(
-            ref(
-                database
-            ),
-            updates
-        );
-
-
-        await writeLocalHistory(
-            "RETURN",
-            returnedCoach,
-            {
-
-                pulledOutId:
-                    id,
-
-                originalLine:
-                    pulledCoach.originalLine || "",
-
-                originalPosition:
-                    pulledCoach.originalPosition || "",
-
-                returnLine:
-                    location.line,
-
-                returnPosition:
-                    location.position
-
-            }
-        );
-
-
-        currentPulledOutId = null;
-
-
-        alert(
-            `Coach ${returnedCoach.coachNo} returned successfully to ` +
-            `${location.line} / ${location.position}.`
-        );
-
-
-        return true;
-
-    }
-    catch (error) {
-
-        console.error(
-            "RETURN ERROR:",
-            error
-        );
-
-        alert(
-            "Return failed:\n\n" +
-            error.message
-        );
-
-        return false;
-
-    }
-    finally {
-
-        isReturning = false;
-
-    }
-
-}
-
-
-/* =========================================================
-   FIND FIRST EMPTY CELL
-========================================================= */
-
-function findFirstEmptyCell() {
-
-    const cells =
-        Array.from(
-            document.querySelectorAll(
-                ".coach-table td"
-            )
-        );
-
-
-    return (
-        cells.find(
-            cell =>
-                !clean(
-                    cell.dataset.coach
-                )
-        ) ||
-        null
-    );
-
-}
-
-
-/* =========================================================
-   SELECT PULLED OUT COACH
-========================================================= */
-
-function selectPulledOutCoach(
-    id
-) {
-
-    const coach =
-        pulledOutData?.[id];
-
-
-    if (!coach) {
-
-        return;
-
-    }
-
-
-    currentPulledOutId =
-        id;
-
-
-    /*
-       Highlight selected card.
-    */
-
-    document
-        .querySelectorAll(
-            ".pulled-out-item"
-        )
-        .forEach(
-            element => {
-
-                element.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
-
-    const item =
-        document.querySelector(
-            `[data-pulled-id="${CSS.escape(id)}"]`
-        );
-
-
-    if (item) {
-
-        item.classList.add(
-            "selected"
-        );
-
-    }
-
-
-    /*
-       Fill modal if available.
-    */
-
-    setValue(
-        "modalCoachNo",
-        coach.coachNo
-    );
-
-    setValue(
-        "modalCoachType",
-        coach.coachType || ""
-    );
-
-    setValue(
-        "modalStatus",
-        coach.status || "PO"
-    );
-
-    setValue(
-        "modalShop",
-        coach.shop ||
-        getShop(
-            coach.originalLine
-        )
-    );
-
-    setValue(
-        "modalLine",
-        coach.originalLine || ""
-    );
-
-    setValue(
-        "modalPosition",
-        coach.originalPosition || ""
-    );
-
-}
-
-
-/* =========================================================
-   RETURN TO SELECTED EMPTY CELL
-========================================================= */
-
-function returnSelectedPulledOutToCell(
-    cell
-) {
-
-    if (!currentPulledOutId) {
-
-        alert(
-            "Please select a pulled-out coach first."
-        );
-
-        return;
-
-    }
-
-
-    returnPulledOutCoach(
-        currentPulledOutId,
-        cell
-    );
-
-}
-
-
-/* =========================================================
-   PULLED OUT LIST
-========================================================= */
-
-function renderPulledOutList() {
-
-    const container =
-        document.getElementById(
-            "pulledOutList"
-        );
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    container.innerHTML = "";
-
-
-    const entries =
-        Object.entries(
-            pulledOutData || {}
-        );
-
-
-    if (!entries.length) {
-
-        container.innerHTML = `
-
-            <div class="text-center text-muted p-3">
-
-                No Pulled Out Coaches
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    entries.sort(
-        (
-            [, a],
-            [, b]
-        ) => {
-
-            const da =
-                new Date(
-                    a?.pulledOutAt || 0
-                ).getTime();
-
-            const db =
-                new Date(
-                    b?.pulledOutAt || 0
-                ).getTime();
-
-            return db - da;
-
-        }
-    );
-
-
-    entries.forEach(
-        ([id, coach]) => {
-
-            const item =
-                document.createElement(
-                    "div"
-                );
-
-
-            item.className =
-                "pulled-out-item";
-
-
-            item.dataset.pulledId =
-                id;
-
-
-            item.innerHTML = `
-
-                <div class="pulled-out-info">
-
-                    <strong>
-                        ${escapeHTML(
-                            coach.coachNo
-                        )}
-                    </strong>
-
-                    <span>
-                        ${escapeHTML(
-                            coach.coachType || ""
-                        )}
-                    </span>
-
-                    <small>
-                        ${escapeHTML(
-                            coach.originalLine || ""
-                        )}
-                        /
-                        ${escapeHTML(
-                            coach.originalPosition || ""
-                        )}
-                    </small>
-
-                    <small>
-                        ${escapeHTML(
-                            coach.status || ""
-                        )}
-                    </small>
-
-                </div>
-
-                <div class="pulled-out-actions">
-
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-primary pulled-return-btn"
-                    >
-                        Return
-                    </button>
-
-                </div>
-
-            `;
-
-
-            item.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target.closest(
-                            ".pulled-return-btn"
-                        )
-                    ) {
-
-                        selectPulledOutCoach(
-                            id
-                        );
-
-                        returnPulledOutCoach(
-                            id
-                        );
-
-                        return;
-
-                    }
-
-
-                    selectPulledOutCoach(
-                        id
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                item
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   PULLED OUT SEARCH
-========================================================= */
-
-function initializePulledOutSearch() {
-
-    const searchBox =
-        document.getElementById(
-            "pulledOutSearchBox"
-        );
-
-
-    if (!searchBox) {
-
-        return;
-
-    }
-
-
-    searchBox.addEventListener(
-        "input",
-        () => {
-
-            filterPulledOutList(
-                searchBox.value
-            );
-
-        }
-    );
-
-}
-
-
-function filterPulledOutList(
-    query
-) {
-
-    const text =
-        clean(
-            query
-        ).toUpperCase();
-
-
-    const items =
-        document.querySelectorAll(
-            ".pulled-out-item"
-        );
-
-
-    let count = 0;
-
-
-    items.forEach(
-        item => {
-
-            const id =
-                item.dataset.pulledId;
-
-
-            const coach =
-                pulledOutData?.[id];
-
-
-            const searchable = [
-
-                coach?.coachNo,
-
-                coach?.coachType,
-
-                coach?.status,
-
-                coach?.originalLine,
-
-                coach?.originalPosition,
-
-                coach?.shop
-
-            ]
-                .map(clean)
-                .join(" ")
-                .toUpperCase();
-
-
-            const match =
-                !text ||
-                searchable.includes(
-                    text
-                );
-
-
-            item.style.display =
-                match
-                    ? ""
-                    : "none";
-
-
-            if (match) {
-
-                count++;
-
-            }
-
-        }
-    );
-
-
-    const counter =
-        document.getElementById(
-            "pulledOutSearchCount"
-        );
-
-
-    if (counter) {
-
-        counter.textContent =
-            count;
-
-    }
-
-}
-
-
-/* =========================================================
-   CLICK EMPTY CELL WHILE PULLED OUT COACH SELECTED
-   ---------------------------------------------------------
-   This allows:
-   Select Pulled-Out Coach
-   → click ANY empty board cell
-   → Return confirmation
-========================================================= */
-
-function initializeReturnMode() {
-
-    document.addEventListener(
-        "click",
-        event => {
-
-            if (!currentPulledOutId) {
-
-                return;
-
-            }
-
-
-            if (
-                event.target.closest(
-                    "button"
-                ) ||
-                event.target.closest(
-                    "input"
-                ) ||
-                event.target.closest(
-                    "select"
-                ) ||
-                event.target.closest(
-                    ".pulled-out-item"
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            const cell =
-                event.target.closest(
-                    ".coach-table td"
-                );
-
-
-            if (!cell) {
-
-                return;
-
-            }
-
-
-            if (
-                clean(
-                    cell.dataset.coach
-                )
-            ) {
-
-                alert(
-                    "Please select an EMPTY cell for Return."
-                );
-
-                return;
-
-            }
-
-
-            returnSelectedPulledOutToCell(
-                cell
-            );
-
-        }
-    );
+    currentCell = null;
 
 }
 
@@ -3138,12 +3020,7 @@ async function moveCoach(
                     to.line,
 
                 toPosition:
-                    to.position,
-
-                swappedCoach:
-                    targetCoach
-                        ? targetCoach.coachNo
-                        : ""
+                    to.position
 
             }
         );
@@ -3179,84 +3056,42 @@ async function moveCoach(
 
 
 /* =========================================================
-   DESKTOP DRAG & DROP
+   DESKTOP DRAG
 ========================================================= */
 
 function enableDragDrop() {
 
-    const cells =
-        document.querySelectorAll(
+    document
+        .querySelectorAll(
             ".coach-table td"
+        )
+        .forEach(
+            cell => {
+
+                cell.draggable =
+                    !!cell.dataset.coach;
+
+
+                cell.ondragstart =
+                    handleDragStart;
+
+                cell.ondragover =
+                    handleDragOver;
+
+                cell.ondragleave =
+                    handleDragLeave;
+
+                cell.ondrop =
+                    handleDrop;
+
+                cell.ondragend =
+                    handleDragEnd;
+
+            }
         );
-
-
-    cells.forEach(
-        cell => {
-
-            cell.draggable =
-                !!cell.dataset.coach;
-
-
-            cell.removeEventListener(
-                "dragstart",
-                handleDragStart
-            );
-
-            cell.removeEventListener(
-                "dragover",
-                handleDragOver
-            );
-
-            cell.removeEventListener(
-                "dragleave",
-                handleDragLeave
-            );
-
-            cell.removeEventListener(
-                "drop",
-                handleDrop
-            );
-
-            cell.removeEventListener(
-                "dragend",
-                handleDragEnd
-            );
-
-
-            cell.addEventListener(
-                "dragstart",
-                handleDragStart
-            );
-
-            cell.addEventListener(
-                "dragover",
-                handleDragOver
-            );
-
-            cell.addEventListener(
-                "dragleave",
-                handleDragLeave
-            );
-
-            cell.addEventListener(
-                "drop",
-                handleDrop
-            );
-
-            cell.addEventListener(
-                "dragend",
-                handleDragEnd
-            );
-
-        }
-    );
 
 }
 
-
-/* =========================================================
-   DRAG START
-========================================================= */
 
 function handleDragStart(
     event
@@ -3304,22 +3139,14 @@ function handleDragStart(
 }
 
 
-/* =========================================================
-   DRAG OVER
-========================================================= */
-
 function handleDragOver(
     event
 ) {
 
-    if (!adminLoggedIn) {
-
-        return;
-
-    }
-
-
-    if (!dragCell) {
+    if (
+        !adminLoggedIn ||
+        !dragCell
+    ) {
 
         return;
 
@@ -3335,10 +3162,6 @@ function handleDragOver(
 }
 
 
-/* =========================================================
-   DRAG LEAVE
-========================================================= */
-
 function handleDragLeave() {
 
     this.classList.remove(
@@ -3347,10 +3170,6 @@ function handleDragLeave() {
 
 }
 
-
-/* =========================================================
-   DROP
-========================================================= */
 
 async function handleDrop(
     event
@@ -3399,10 +3218,6 @@ async function handleDrop(
 }
 
 
-/* =========================================================
-   DRAG END
-========================================================= */
-
 function handleDragEnd() {
 
     dragCell = null;
@@ -3418,84 +3233,39 @@ function handleDragEnd() {
 
 function enableMobileDrag() {
 
-    const cells =
-        document.querySelectorAll(
+    document
+        .querySelectorAll(
             ".coach-table td"
+        )
+        .forEach(
+            cell => {
+
+                cell.ontouchstart =
+                    mobileTouchStart;
+
+                cell.ontouchmove =
+                    mobileTouchMove;
+
+                cell.ontouchend =
+                    mobileTouchEnd;
+
+                cell.ontouchcancel =
+                    mobileTouchCancel;
+
+            }
         );
-
-
-    cells.forEach(
-        cell => {
-
-            cell.removeEventListener(
-                "touchstart",
-                mobileTouchStart
-            );
-
-            cell.removeEventListener(
-                "touchmove",
-                mobileTouchMove
-            );
-
-            cell.removeEventListener(
-                "touchend",
-                mobileTouchEnd
-            );
-
-            cell.removeEventListener(
-                "touchcancel",
-                mobileTouchCancel
-            );
-
-
-            cell.addEventListener(
-                "touchstart",
-                mobileTouchStart,
-                {
-                    passive: true
-                }
-            );
-
-            cell.addEventListener(
-                "touchmove",
-                mobileTouchMove,
-                {
-                    passive: false
-                }
-            );
-
-            cell.addEventListener(
-                "touchend",
-                mobileTouchEnd
-            );
-
-            cell.addEventListener(
-                "touchcancel",
-                mobileTouchCancel
-            );
-
-        }
-    );
 
 }
 
-
-/* =========================================================
-   MOBILE TOUCH START
-========================================================= */
 
 function mobileTouchStart(
     event
 ) {
 
-    if (!adminLoggedIn) {
-
-        return;
-
-    }
-
-
-    if (!this.dataset.coach) {
+    if (
+        !adminLoggedIn ||
+        !this.dataset.coach
+    ) {
 
         return;
 
@@ -3510,18 +3280,6 @@ function mobileTouchStart(
         setTimeout(
             () => {
 
-                if (!mobileDragCell) {
-
-                    return;
-
-                }
-
-
-                mobileDragCell.classList.add(
-                    "mobile-drag-source"
-                );
-
-
                 if (
                     navigator.vibrate
                 ) {
@@ -3532,6 +3290,11 @@ function mobileTouchStart(
 
                 }
 
+
+                this.classList.add(
+                    "mobile-drag-source"
+                );
+
             },
             LONG_PRESS_DELAY
         );
@@ -3539,33 +3302,12 @@ function mobileTouchStart(
 }
 
 
-/* =========================================================
-   MOBILE TOUCH MOVE
-========================================================= */
-
 function mobileTouchMove(
     event
 ) {
 
-    if (!mobileDragCell) {
-
-        return;
-
-    }
-
-
-    const touch =
-        event.touches?.[0];
-
-
-    if (!touch) {
-
-        return;
-
-    }
-
-
     if (
+        !mobileDragCell ||
         !mobileDragCell.classList.contains(
             "mobile-drag-source"
         )
@@ -3579,6 +3321,20 @@ function mobileTouchMove(
     event.preventDefault();
 
 
+    const touch =
+        event.touches?.[0];
+
+
+    if (!touch) {
+
+        return;
+
+    }
+
+
+    clearMobileTarget();
+
+
     const target =
         document.elementFromPoint(
             touch.clientX,
@@ -3586,9 +3342,6 @@ function mobileTouchMove(
         )?.closest(
             ".coach-table td"
         );
-
-
-    clearMobileTarget();
 
 
     if (
@@ -3604,10 +3357,6 @@ function mobileTouchMove(
 
 }
 
-
-/* =========================================================
-   MOBILE TOUCH END
-========================================================= */
 
 async function mobileTouchEnd(
     event
@@ -3633,7 +3382,7 @@ async function mobileTouchEnd(
         event.changedTouches?.[0];
 
 
-    const wasDragging =
+    const dragging =
         source.classList.contains(
             "mobile-drag-source"
         );
@@ -3643,7 +3392,7 @@ async function mobileTouchEnd(
 
 
     if (
-        !wasDragging ||
+        !dragging ||
         !touch
     ) {
 
@@ -3667,26 +3416,19 @@ async function mobileTouchEnd(
 
 
     if (
-        !target ||
-        target === source
+        target &&
+        target !== source
     ) {
 
-        return;
+        await moveCoach(
+            source,
+            target
+        );
 
     }
 
-
-    await moveCoach(
-        source,
-        target
-    );
-
 }
 
-
-/* =========================================================
-   MOBILE CANCEL
-========================================================= */
 
 function mobileTouchCancel() {
 
@@ -3702,7 +3444,7 @@ function mobileTouchCancel() {
 
 
 /* =========================================================
-   DRAG HIGHLIGHT
+   CLEAR DRAG
 ========================================================= */
 
 function clearDragHighlight() {
@@ -3749,7 +3491,9 @@ function clearMobileTarget() {
    CELL LOCATION
 ========================================================= */
 
-function getCellLocation(cell) {
+function getCellLocation(
+    cell
+) {
 
     if (!cell) {
 
@@ -3848,7 +3592,7 @@ function performSearch(
     }
 
 
-    const matches = [];
+    let count = 0;
 
 
     cells.forEach(
@@ -3864,22 +3608,19 @@ function performSearch(
 
                 cell.dataset.line,
 
-                cell.dataset.position
+                cell.dataset.position,
+
+                cell.dataset.shop
 
             ]
                 .map(clean)
-                .map(
-                    value =>
-                        value.toUpperCase()
-                );
+                .join(" ")
+                .toUpperCase();
 
 
             if (
-                values.some(
-                    value =>
-                        value.includes(
-                            text
-                        )
+                values.includes(
+                    text
                 )
             ) {
 
@@ -3887,9 +3628,7 @@ function performSearch(
                     "search-match"
                 );
 
-                matches.push(
-                    cell
-                );
+                count++;
 
             }
 
@@ -3900,24 +3639,9 @@ function performSearch(
     if (resultElement) {
 
         resultElement.textContent =
-            matches.length
-                ? `${matches.length} result(s) found`
+            count
+                ? `${count} result(s) found`
                 : "No coach found.";
-
-    }
-
-
-    if (
-        matches.length === 1
-    ) {
-
-        matches[0].scrollIntoView(
-            {
-                behavior: "smooth",
-                block: "center",
-                inline: "center"
-            }
-        );
 
     }
 
@@ -3939,19 +3663,19 @@ function initializeKeyboard() {
                 event.key.toLowerCase() === "f"
             ) {
 
-                const searchBox =
+                const search =
                     document.getElementById(
                         "searchBox"
                     );
 
 
-                if (searchBox) {
+                if (search) {
 
                     event.preventDefault();
 
-                    searchBox.focus();
+                    search.focus();
 
-                    searchBox.select();
+                    search.select();
 
                 }
 
@@ -3968,9 +3692,6 @@ function initializeKeyboard() {
 
                 }
 
-                currentPulledOutId =
-                    null;
-
                 clearDragHighlight();
 
             }
@@ -3982,7 +3703,7 @@ function initializeKeyboard() {
 
 
 /* =========================================================
-   FULLSCREEN
+   FULL SCREEN
 ========================================================= */
 
 async function toggleFullscreen() {
@@ -3991,7 +3712,9 @@ async function toggleFullscreen() {
 
         if (!document.fullscreenElement) {
 
-            await document.documentElement.requestFullscreen();
+            await document
+                .documentElement
+                .requestFullscreen();
 
         }
         else {
@@ -4006,10 +3729,6 @@ async function toggleFullscreen() {
         console.error(
             "Fullscreen error:",
             error
-        );
-
-        alert(
-            "Fullscreen is not supported by this browser."
         );
 
     }
@@ -4053,7 +3772,7 @@ function printBoard() {
 
 
 /* =========================================================
-   CSV EXPORT
+   CSV
 ========================================================= */
 
 function exportCSV() {
@@ -4138,7 +3857,9 @@ function exportCSV() {
             .map(
                 row =>
                     row
-                        .map(csvEscape)
+                        .map(
+                            csvEscape
+                        )
                         .join(",")
             )
             .join("\r\n");
@@ -4147,7 +3868,7 @@ function exportCSV() {
     const blob =
         new Blob(
             [
-                "\uFEFF" +
+                "\uFEFF",
                 csv
             ],
             {
@@ -4169,20 +3890,12 @@ function exportCSV() {
         );
 
 
-    const date =
-        new Date()
-            .toISOString()
-            .slice(
-                0,
-                10
-            );
-
-
     link.href =
         url;
 
+
     link.download =
-        `MR-COORDINATION-BOARD-${date}.csv`;
+        `MR-COORDINATION-BOARD-${new Date().toISOString().slice(0,10)}.csv`;
 
 
     document.body.appendChild(
@@ -4200,7 +3913,9 @@ function exportCSV() {
 }
 
 
-function csvEscape(value) {
+function csvEscape(
+    value
+) {
 
     const text =
         String(
@@ -4251,7 +3966,9 @@ async function writeLocalHistory(
             {
 
                 action:
-                    clean(action),
+                    clean(
+                        action
+                    ),
 
                 coachNo:
                     clean(
@@ -4312,27 +4029,169 @@ async function writeLocalHistory(
 
 
 /* =========================================================
-   CLOSE MODAL
+   DATABASE STATUS
 ========================================================= */
 
-function closeModal() {
+function initializeFirebaseStatus() {
 
-    if (coachModal) {
+    const connectedRef =
+        ref(
+            database,
+            ".info/connected"
+        );
 
-        coachModal.hide();
+
+    onValue(
+        connectedRef,
+        snapshot => {
+
+            firebaseOnline =
+                snapshot.val() === true;
+
+            updateDatabaseStatus(
+                firebaseOnline
+            );
+
+        }
+    );
+
+}
+
+
+function updateDatabaseStatus(
+    online
+) {
+
+    const element =
+        document.getElementById(
+            "databaseStatus"
+        );
+
+
+    if (!element) {
+
+        return;
 
     }
 
-    currentCell = null;
+
+    if (online) {
+
+        element.textContent =
+            "● Firebase Connected";
+
+        element.classList.remove(
+            "text-danger"
+        );
+
+        element.classList.add(
+            "text-success"
+        );
+
+    }
+    else {
+
+        element.textContent =
+            "● Firebase Offline";
+
+        element.classList.remove(
+            "text-success"
+        );
+
+        element.classList.add(
+            "text-danger"
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   UTILITIES
+   LAST UPDATE
 ========================================================= */
 
-function clean(value) {
+function updateLastUpdate() {
+
+    const element =
+        document.getElementById(
+            "lastUpdate"
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element.textContent =
+        "Updated : " +
+        new Date().toLocaleTimeString(
+            "en-IN"
+        );
+
+}
+
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function formatDateTime(
+    value
+) {
+
+    if (!value) {
+
+        return "";
+
+    }
+
+
+    const date =
+        new Date(
+            typeof value === "number"
+                ? value
+                : value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return clean(
+            value
+        );
+
+    }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UTILITY
+========================================================= */
+
+function clean(
+    value
+) {
 
     return String(
         value ?? ""
@@ -4341,7 +4200,13 @@ function clean(value) {
 }
 
 
-function escapeHTML(value) {
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
+function escapeHTML(
+    value
+) {
 
     return String(
         value ?? ""
@@ -4371,14 +4236,7 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   INITIALIZE RETURN MODE
-========================================================= */
-
-initializeReturnMode();
-
-
-/* =========================================================
-   PUBLIC API
+   PUBLIC DEBUG API
 ========================================================= */
 
 window.MRBoard = {
@@ -4387,10 +4245,12 @@ window.MRBoard = {
         BOARD_VERSION,
 
     getBoard:
-        () => boardData,
+        () =>
+            boardData,
 
     getPulledOut:
-        () => pulledOutData,
+        () =>
+            pulledOutData,
 
     refresh:
         refreshBoard,
@@ -4398,8 +4258,20 @@ window.MRBoard = {
     counters:
         updateCounters,
 
+    pulledOutCounter:
+        updatePulledOutCounter,
+
     search:
         performSearch,
+
+    searchPulledOut:
+        renderPulledOut,
+
+    pullOut:
+        pullOutCoach,
+
+    returnCoach:
+        returnCoach,
 
     print:
         printBoard,
@@ -4408,19 +4280,7 @@ window.MRBoard = {
         exportCSV,
 
     fullscreen:
-        toggleFullscreen,
-
-    pullOut:
-        pullOutCoach,
-
-    returnCoach:
-        returnPulledOutCoach,
-
-    selectPulledOut:
-        selectPulledOutCoach,
-
-    returnToCell:
-        returnSelectedPulledOutToCell
+        toggleFullscreen
 
 };
 
@@ -4430,9 +4290,21 @@ window.MRBoard = {
 ========================================================= */
 
 console.log(
-    `MR CO-ORDINATION BOARD V${BOARD_VERSION} READY`
+    "================================================="
 );
 
 console.log(
-    "PULL OUT + RETURN TO ANY EMPTY CELL ENABLED"
+    "MR CO-ORDINATION BOARD V13.0 READY"
+);
+
+console.log(
+    "PULL OUT + RETURN SYSTEM READY"
+);
+
+console.log(
+    "RETURN TO ORIGINAL / ANY EMPTY CELL READY"
+);
+
+console.log(
+    "================================================="
 );
