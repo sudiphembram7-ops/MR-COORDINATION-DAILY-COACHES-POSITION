@@ -2,15 +2,28 @@
 <html lang="en">
 
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Coach History</title>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<title>Coach Movement History</title>
+
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+>
+
+<link
+    rel="stylesheet"
+    href="css/style.css"
+>
 
 <style>
+
 .table-responsive{
     overflow-x:auto;
     -webkit-overflow-scrolling:touch;
@@ -57,146 +70,766 @@
     .btn{
         width:100%;
     }
+
 }
+
 </style>
 
 </head>
 
+
 <body class="bg-light">
+
 
 <div class="container-fluid mt-3">
 
-<div class="card shadow">
+    <div class="card shadow">
 
-<div class="card-header bg-dark text-white">
-<h3 class="text-center mb-0">
-Coach Movement History
-</h3>
+
+        <!-- HEADER -->
+
+        <div class="card-header bg-dark text-white">
+
+            <h3 class="text-center mb-0">
+                Coach Movement History
+            </h3>
+
+        </div>
+
+
+        <!-- BODY -->
+
+        <div class="card-body">
+
+
+            <!-- SEARCH + REFRESH -->
+
+            <div class="row g-2 mb-3 align-items-center">
+
+
+                <div class="col-8 col-md-9">
+
+                    <input
+                        type="text"
+                        id="searchHistory"
+                        class="form-control"
+                        placeholder="Search Coach Number"
+                    >
+
+                </div>
+
+
+                <div class="col-4 col-md-3 d-grid">
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="refreshBtn"
+                    >
+
+                        Refresh
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div class="table-responsive">
+
+                <table
+                    id="historyTable"
+                    class="table table-bordered table-hover table-striped align-middle"
+                >
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>Date</th>
+
+                            <th>Shop</th>
+
+                            <th>Line</th>
+
+                            <th>Position</th>
+
+                            <th>Coach No</th>
+
+                            <th>Coach Type</th>
+
+                            <th>Status</th>
+
+                            <th>User</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="historyBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
 </div>
 
-<div class="card-body">
 
-<div class="row g-2 mb-3 align-items-center">
-
-<div class="col-8 col-md-9">
-
-<input
-type="text"
-id="searchHistory"
-class="form-control"
-placeholder="Search Coach Number">
-
-</div>
-
-<div class="col-4 col-md-3 d-grid">
-
-<button
-class="btn btn-primary"
-onclick="location.reload()">
-
-Refresh
-
-</button>
-
-</div>
-
-</div>
-
-<div class="table-responsive">
-
-<table
-id="historyTable"
-class="table table-bordered table-hover table-striped align-middle">
-
-<thead class="table-dark">
-
-<tr>
-
-<th>Date</th>
-<th>Shop</th>
-<th>Line</th>
-<th>Position</th>
-<th>Coach No</th>
-<th>Coach Type</th>
-<th>Status</th>
-<th>User</th>
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="historyBody">
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
 
 <script type="module">
+
+
+/* =========================================================
+   FIREBASE
+========================================================= */
 
 import { database } from "./js/firebase-config.js";
 
 import {
-ref,
-onValue
+    ref,
+    onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
 const historyBody =
-document.getElementById("historyBody");
+    document.getElementById("historyBody");
 
-onValue(ref(database, "history"), (snapshot) => {
+const searchHistory =
+    document.getElementById("searchHistory");
 
-    historyBody.innerHTML = "";
+const refreshBtn =
+    document.getElementById("refreshBtn");
 
-    if (!snapshot.exists()) return;
 
-    const history = Object.values(snapshot.val()).reverse();
 
-    history.forEach(item => {
+/* =========================================================
+   SAFE HTML
+========================================================= */
 
-        historyBody.innerHTML += `
-        <tr>
-            <td>${new Date(item.time).toLocaleString("en-IN")}</td>
-            <td>${item.shop || ""}</td>
-            <td>${item.line || ""}</td>
-            <td>${item.position || ""}</td>
-            <td>${item.coachNo || ""}</td>
-            <td>${item.coachType || ""}</td>
-            <td>${item.status || ""}</td>
-            <td>${item.user || "Admin"}</td>
-            <td>${item.action}</td>
-        </tr>`;
-    });
+function escapeHTML(value){
 
-});
+    if(
+        value === null ||
+        value === undefined
+    ){
+        return "";
+    }
 
-document.getElementById("searchHistory")
-.addEventListener("keyup",function(){
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
-const value=this.value.toUpperCase();
+}
 
-document.querySelectorAll("#historyBody tr")
-.forEach(row=>{
 
-row.style.display=row.innerText.toUpperCase().includes(value)
-? ""
-: "none";
 
-});
+/* =========================================================
+   FORMAT HISTORY DATE
+   ---------------------------------------------------------
+   Supports:
 
-});
+   1. time: Date.now()
+   2. timestamp: Date.now()
+   3. date + time
+   4. ISO date
+   5. Firebase Timestamp-like object
+
+========================================================= */
+
+function formatHistoryDate(item){
+
+
+    let date = null;
+
+
+
+    /* -----------------------------------------------------
+       CASE 1
+       Firebase Timestamp-like object
+    ----------------------------------------------------- */
+
+    if(
+        item.time &&
+        typeof item.time === "object" &&
+        typeof item.time.toDate === "function"
+    ){
+
+        date = item.time.toDate();
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       CASE 2
+       Numeric Firebase timestamp
+
+       Example:
+       1755241452000
+    ----------------------------------------------------- */
+
+    else if(
+        typeof item.time === "number" &&
+        item.time > 0
+    ){
+
+        date = new Date(item.time);
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       CASE 3
+       timestamp field
+    ----------------------------------------------------- */
+
+    else if(
+        typeof item.timestamp === "number" &&
+        item.timestamp > 0
+    ){
+
+        date = new Date(item.timestamp);
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       CASE 4
+       date + time
+
+       Example:
+
+       date = 15/8/2026
+       time = 3:14:12 PM
+
+    ----------------------------------------------------- */
+
+    else if(
+        typeof item.date === "string" &&
+        typeof item.time === "string"
+    ){
+
+        const dateMatch =
+            item.date.match(
+                /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/
+            );
+
+
+        if(dateMatch){
+
+            const day =
+                Number(dateMatch[1]);
+
+            const month =
+                Number(dateMatch[2]) - 1;
+
+            const year =
+                Number(dateMatch[3]);
+
+
+            let hours = 0;
+
+            let minutes = 0;
+
+            let seconds = 0;
+
+
+            const timeMatch =
+                item.time.match(
+                    /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i
+                );
+
+
+            if(timeMatch){
+
+                hours =
+                    Number(timeMatch[1]);
+
+                minutes =
+                    Number(timeMatch[2]);
+
+                seconds =
+                    Number(timeMatch[3] || 0);
+
+
+                const ampm =
+                    timeMatch[4];
+
+
+                if(ampm){
+
+                    if(
+                        ampm.toUpperCase() === "PM" &&
+                        hours < 12
+                    ){
+
+                        hours += 12;
+
+                    }
+
+
+                    if(
+                        ampm.toUpperCase() === "AM" &&
+                        hours === 12
+                    ){
+
+                        hours = 0;
+
+                    }
+
+                }
+
+
+                date =
+                    new Date(
+                        year,
+                        month,
+                        day,
+                        hours,
+                        minutes,
+                        seconds
+                    );
+
+            }
+
+        }
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       CASE 5
+       time itself is a valid date string
+
+       Example:
+       2026-08-15T15:14:12
+    ----------------------------------------------------- */
+
+    if(
+        !date &&
+        typeof item.time === "string"
+    ){
+
+        const parsed =
+            new Date(item.time);
+
+
+        if(
+            !isNaN(parsed.getTime())
+        ){
+
+            date = parsed;
+
+        }
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       CASE 6
+       timestamp string
+    ----------------------------------------------------- */
+
+    if(
+        !date &&
+        typeof item.timestamp === "string"
+    ){
+
+        const parsed =
+            new Date(item.timestamp);
+
+
+        if(
+            !isNaN(parsed.getTime())
+        ){
+
+            date = parsed;
+
+        }
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       CASE 7
+       createdAt
+    ----------------------------------------------------- */
+
+    if(
+        !date &&
+        item.createdAt
+    ){
+
+        const parsed =
+            new Date(item.createdAt);
+
+
+        if(
+            !isNaN(parsed.getTime())
+        ){
+
+            date = parsed;
+
+        }
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       FINAL CHECK
+    ----------------------------------------------------- */
+
+    if(
+        !date ||
+        isNaN(date.getTime())
+    ){
+
+        return "—";
+
+    }
+
+
+
+    /* -----------------------------------------------------
+       INDIAN DATE + TIME FORMAT
+    ----------------------------------------------------- */
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "numeric",
+            month: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   GET HISTORY SORT TIME
+========================================================= */
+
+function getHistoryTime(item){
+
+
+    /* New Firebase timestamp */
+
+    if(
+        typeof item.time === "number" &&
+        item.time > 0
+    ){
+
+        return item.time;
+
+    }
+
+
+    /* timestamp */
+
+    if(
+        typeof item.timestamp === "number" &&
+        item.timestamp > 0
+    ){
+
+        return item.timestamp;
+
+    }
+
+
+    /* Old date + time */
+
+    if(
+        item.date &&
+        item.time
+    ){
+
+        const dateText =
+            `${item.date} ${item.time}`;
+
+
+        const parsed =
+            new Date(dateText);
+
+
+        if(
+            !isNaN(parsed.getTime())
+        ){
+
+            return parsed.getTime();
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+
+
+/* =========================================================
+   LOAD HISTORY
+========================================================= */
+
+function loadHistory(){
+
+
+    onValue(
+        ref(database, "history"),
+        (snapshot) => {
+
+
+            historyBody.innerHTML = "";
+
+
+            /* ---------------------------------------------
+               NO DATA
+            --------------------------------------------- */
+
+            if(!snapshot.exists()){
+
+                historyBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="9"
+                            class="text-center"
+                        >
+
+                            No History Found
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+
+            /* ---------------------------------------------
+               CONVERT FIREBASE OBJECT TO ARRAY
+            --------------------------------------------- */
+
+            const history =
+                Object.values(snapshot.val());
+
+
+
+            /* ---------------------------------------------
+               NEWEST FIRST
+            --------------------------------------------- */
+
+            history.sort(
+                (a,b) =>
+                    getHistoryTime(b)
+                    -
+                    getHistoryTime(a)
+            );
+
+
+
+            /* ---------------------------------------------
+               CREATE ROWS
+            --------------------------------------------- */
+
+            history.forEach(item => {
+
+
+                const row =
+                    document.createElement("tr");
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${escapeHTML(
+                            formatHistoryDate(item)
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.shop || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.line || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.position || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.coachNo || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.coachType || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.status || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.user || "Admin"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.action || ""
+                        )}
+                    </td>
+
+                `;
+
+
+                historyBody.appendChild(row);
+
+            });
+
+
+            /* Re-apply search after refresh */
+
+            applySearch();
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function applySearch(){
+
+
+    const value =
+        searchHistory.value
+            .trim()
+            .toUpperCase();
+
+
+    document
+        .querySelectorAll("#historyBody tr")
+        .forEach(row => {
+
+
+            if(
+                row.innerText
+                    .toUpperCase()
+                    .includes(value)
+            ){
+
+                row.style.display = "";
+
+            }else{
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+}
+
+
+
+searchHistory.addEventListener(
+    "input",
+    applySearch
+);
+
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+refreshBtn.addEventListener(
+    "click",
+    () => {
+
+        location.reload();
+
+    }
+);
+
+
+
+/* =========================================================
+   START
+========================================================= */
+
+loadHistory();
+
 
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+></script>
+
 
 </body>
+
 </html>
