@@ -1,8 +1,13 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
-   A4 PRINT CSS
+   A4 ONE PAGE PRINT
+   VERSION 2.0
 ========================================================= */
 
+
+/* =========================================================
+   BASIC
+========================================================= */
 
 * {
     box-sizing: border-box;
@@ -11,26 +16,36 @@
 
 html,
 body {
+
     margin: 0;
     padding: 0;
+
+    width: 100%;
+
     background: #ffffff;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #000;
-}
 
+    color: #000000;
 
-body {
-    font-size: 10px;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
 }
 
 
 /* =========================================================
-   PAGE
+   PRINT PAGE
 ========================================================= */
 
-.print-page {
+#printRoot {
+
     width: 100%;
+
     margin: 0 auto;
+
+    padding: 0;
+
 }
 
 
@@ -39,143 +54,311 @@ body {
 ========================================================= */
 
 .print-header {
+
+    width: 100%;
+
     text-align: center;
-    border-bottom: 2px solid #000;
-    padding-bottom: 6px;
-    margin-bottom: 7px;
+
+    border-bottom:
+        1.5px solid #000;
+
+    padding-bottom: 3px;
+
+    margin-bottom: 4px;
+
 }
 
 
 .railway-title {
-    font-size: 16px;
+
+    font-size: 12px;
+
     font-weight: 800;
+
+    line-height: 1.05;
+
 }
 
 
 .workshop-title {
-    font-size: 13px;
+
+    font-size: 10px;
+
     font-weight: 700;
-    margin-top: 2px;
+
+    line-height: 1.05;
+
 }
 
 
 .board-title {
-    font-size: 15px;
+
+    font-size: 11px;
+
     font-weight: 800;
-    margin-top: 3px;
+
+    line-height: 1.05;
+
 }
 
 
-.subtitle {
-    font-size: 10px;
+.board-subtitle {
+
+    font-size: 7px;
+
     font-weight: 600;
-    margin-top: 2px;
+
+    line-height: 1.05;
+
 }
 
 
 /* =========================================================
-   INFORMATION
+   INFORMATION BAR
 ========================================================= */
 
 .print-info {
+
     display: flex;
+
+    align-items: center;
+
     justify-content: space-between;
-    gap: 8px;
-    border: 1px solid #000;
-    padding: 5px 7px;
-    margin-bottom: 8px;
-    font-size: 9px;
-}
 
-
-.print-info div {
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   PRINT TABLE
-========================================================= */
-
-.print-table {
     width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
+
+    border-bottom:
+        1px solid #999;
+
+    padding:
+        2px 4px;
+
+    margin-bottom: 4px;
+
+    font-size: 7px;
+
+    line-height: 1;
+
 }
 
 
-.print-table th,
-.print-table td {
-    border: 1px solid #000;
-    padding: 3px 4px;
-    text-align: center;
-    vertical-align: middle;
-    line-height: 1.15;
-    word-wrap: break-word;
-}
+.print-info span {
 
+    white-space: nowrap;
 
-.print-table th {
-    background: #e9ecef;
-    font-weight: 800;
-    font-size: 8.5px;
-}
-
-
-.print-table td {
-    font-size: 8.5px;
-}
-
-
-.print-table .coach-number {
-    font-weight: 800;
-    font-size: 9px;
 }
 
 
 /* =========================================================
-   COLUMN WIDTH
+   BOARD AREA
 ========================================================= */
 
-.print-table th:nth-child(1),
-.print-table td:nth-child(1) {
-    width: 4%;
+#printBoard {
+
+    width: 100%;
+
+    margin: 0;
+
+    padding: 0;
+
 }
 
 
-.print-table th:nth-child(2),
-.print-table td:nth-child(2) {
-    width: 15%;
+/* =========================================================
+   SHOP SECTIONS
+========================================================= */
+
+#printBoard > div {
+
+    margin-top: 0 !important;
+
+    margin-bottom: 3px !important;
+
 }
 
 
-.print-table th:nth-child(3),
-.print-table td:nth-child(3) {
-    width: 9%;
+/*
+   Shop headings
+*/
+
+#printBoard h1,
+#printBoard h2,
+#printBoard h3,
+#printBoard h4,
+#printBoard h5,
+#printBoard h6 {
+
+    margin-top: 2px !important;
+
+    margin-bottom: 2px !important;
+
+    padding: 0 !important;
+
+    font-size: 9px !important;
+
+    line-height: 1 !important;
+
+    text-align: center;
+
 }
 
 
-.print-table th:nth-child(4),
-.print-table td:nth-child(4) {
-    width: 10%;
+/* =========================================================
+   TABLE
+========================================================= */
+
+#printBoard table {
+
+    width: 100% !important;
+
+    max-width: 100% !important;
+
+    margin:
+        0 auto 3px auto !important;
+
+    border-collapse:
+        collapse !important;
+
+    table-layout: fixed;
+
 }
 
 
-.print-table th:nth-child(5),
-.print-table td:nth-child(5) {
-    width: 18%;
+/* =========================================================
+   TABLE CELL
+========================================================= */
+
+#printBoard table th,
+#printBoard table td {
+
+    border:
+        0.6px solid #555 !important;
+
+    padding:
+        1px 1px !important;
+
+    margin: 0 !important;
+
+    vertical-align:
+        middle !important;
+
+    text-align:
+        center !important;
+
+    line-height:
+        0.9 !important;
+
+    overflow:
+        hidden !important;
+
 }
 
 
-.print-table th:nth-child(6),
-.print-table td:nth-child(6) {
-    width: 24%;
+/* =========================================================
+   HEADER CELL
+========================================================= */
+
+#printBoard table th {
+
+    font-size:
+        5.5px !important;
+
+    font-weight:
+        700 !important;
+
+    height:
+        13px !important;
+
 }
 
 
-.print-table th:nth-child(7),
-.print-table td:nth-child(7) {
-    width: 20%;
+/* =========================================================
+   BODY CELL
+========================================================= */
+
+#printBoard table td {
+
+    font-size:
+        5.5px !important;
+
+    height:
+        25px !important;
+
+}
+
+
+/* =========================================================
+   COACH CARD
+========================================================= */
+
+#printBoard .coach-card {
+
+    display:
+        flex !important;
+
+    flex-direction:
+        column !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
+
+    width:
+        100% !important;
+
+    min-height:
+        21px !important;
+
+    padding:
+        0 !important;
+
+    margin:
+        0 !important;
+
+}
+
+
+/* =========================================================
+   COACH NUMBER
+========================================================= */
+
+#printBoard .coach-no {
+
+    font-size:
+        6.5px !important;
+
+    font-weight:
+        800 !important;
+
+    line-height:
+        1 !important;
+
+    white-space:
+        nowrap !important;
+
+}
+
+
+/* =========================================================
+   COACH TYPE
+========================================================= */
+
+#printBoard .coach-type {
+
+    font-size:
+        4.5px !important;
+
+    font-weight:
+        600 !important;
+
+    line-height:
+        1 !important;
+
+    white-space:
+        nowrap !important;
+
 }
 
 
@@ -183,48 +366,150 @@ body {
    STATUS
 ========================================================= */
 
-.status-po {
-    background: #d1e7dd !important;
+#printBoard .coach-status {
+
+    font-size:
+        4.5px !important;
+
+    font-weight:
+        700 !important;
+
+    line-height:
+        1 !important;
+
+    white-space:
+        nowrap !important;
+
 }
 
 
-.status-s {
-    background: #fff3cd !important;
+/* =========================================================
+   EMPTY CELLS
+========================================================= */
+
+#printBoard table td:empty {
+
+    min-height:
+        20px !important;
+
 }
 
 
-.status-lm {
-    background: #cff4fc !important;
+/* =========================================================
+   STATUS COLOURS
+========================================================= */
+
+#printBoard .status-po {
+
+    background:
+        #d1e7dd !important;
+
 }
 
 
-.status-med {
-    background: #f8d7da !important;
+#printBoard .status-s {
+
+    background:
+        #fff3cd !important;
+
 }
 
 
-.status-rl {
-    background: #e2e3e5 !important;
+#printBoard .status-lm {
+
+    background:
+        #cff4fc !important;
+
 }
 
 
-.status-r1 {
-    background: #dbeafe !important;
+#printBoard .status-med {
+
+    background:
+        #f8d7da !important;
+
 }
 
 
-.status-rs {
-    background: #fde2e2 !important;
+#printBoard .status-rl {
+
+    background:
+        #e2e3e5 !important;
+
 }
 
 
-.status-l {
-    background: #eadcf8 !important;
+#printBoard .status-r1 {
+
+    background:
+        #dbeafe !important;
+
 }
 
 
-.status-hvy {
-    background: #f5c2c7 !important;
+#printBoard .status-rs {
+
+    background:
+        #fde2e2 !important;
+
+}
+
+
+#printBoard .status-l {
+
+    background:
+        #eadcf8 !important;
+
+}
+
+
+#printBoard .status-hvy {
+
+    background:
+        #f5c2c7 !important;
+
+}
+
+
+/* =========================================================
+   BOOTSTRAP / OTHER CLASSES OVERRIDE
+========================================================= */
+
+#printBoard .table {
+
+    margin-bottom:
+        3px !important;
+
+}
+
+
+#printBoard .table-responsive {
+
+    overflow:
+        visible !important;
+
+    width:
+        100% !important;
+
+}
+
+
+#printBoard .container,
+#printBoard .container-fluid,
+#printBoard .row {
+
+    width:
+        100% !important;
+
+    max-width:
+        none !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
 }
 
 
@@ -233,118 +518,274 @@ body {
 ========================================================= */
 
 .print-footer {
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid #000;
-    margin-top: 7px;
-    padding-top: 4px;
-    font-size: 8px;
-    font-weight: 600;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    border-top:
+        1px solid #000;
+
+    padding-top:
+        2px;
+
+    margin-top:
+        2px;
+
+    font-size:
+        6px;
+
+    font-weight:
+        600;
+
+    line-height:
+        1;
+
 }
 
 
 /* =========================================================
-   LOADING
+   LOADING / ERROR
 ========================================================= */
 
 .loading,
-.empty-board,
 .print-error {
-    text-align: center;
-    padding: 30px;
-    font-size: 12px;
-    border: 1px solid #000;
+
+    text-align:
+        center;
+
+    padding:
+        20px;
+
+    font-size:
+        10px;
+
 }
 
 
 /* =========================================================
-   A4 PAGE
+   A4 LANDSCAPE
 ========================================================= */
 
 @page {
-    size: A4 landscape;
-    margin: 8mm;
+
+    size:
+        A4 landscape;
+
+    margin:
+        4mm;
+
+}
+
+/* =========================================================
+   SHOP PRINT LAYOUT
+========================================================= */
+
+#printBoard {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    column-gap:
+        5px;
+
+    row-gap:
+        3px;
+
+    align-items:
+        start;
+
 }
 
 
+/*
+   Large SCR / CR sections
+   use full width.
+*/
+
+.print-shop-section {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
+}
+
+
+/*
+   Shop title
+*/
+
+.print-shop-title {
+
+    text-align:
+        center;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1;
+
+    margin:
+        1px 0 2px 0;
+
+}
+
+
+/*
+   SCR / CR can span full page.
+*/
+
+.print-shop-section:has(
+    .scr,
+    [id*="SCR"],
+    [id*="scr"]
+) {
+
+    grid-column:
+        1 / -1;
+
+}
+
+
+/*
+   Any table with many columns
+   should use full width.
+*/
+
+.print-shop-section
+    table {
+
+    width:
+        100% !important;
+
+}
+
+
+/*
+   If table has 8+ columns,
+   make it full width.
+*/
+
+.print-shop-section
+    table:has(
+        th:nth-child(8)
+    ) {
+
+    grid-column:
+        1 / -1;
+
+}
 /* =========================================================
-   PRINT ONLY
+   PRINT
 ========================================================= */
 
 @media print {
 
     html,
     body {
-        width: 100%;
-        height: auto;
-        margin: 0;
-        padding: 0;
-        background: #fff;
+
+        width:
+            297mm;
+
+        height:
+            210mm;
+
+        margin:
+            0;
+
+        padding:
+            0;
+
+        overflow:
+            hidden;
+
     }
 
 
-    .print-page {
-        width: 100%;
+    #printRoot {
+
+        width:
+            100%;
+
+        height:
+            100%;
+
+        overflow:
+            hidden;
+
     }
 
 
-    .print-header {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
+    /*
+       VERY IMPORTANT:
+       Prevent browser from creating
+       another page.
+    */
 
-
-    .print-info {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-
-
-    .print-table {
-        width: 100%;
-    }
-
-
-    .print-table thead {
-        display: table-header-group;
-    }
-
-
-    .print-table tr {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-
-
-    .print-table th {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-
-    .print-table td {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-
-    .status-po,
-    .status-s,
-    .status-lm,
-    .status-med,
-    .status-rl,
-    .status-r1,
-    .status-rs,
-    .status-l,
-    .status-hvy {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-
+    .print-header,
+    .print-info,
+    #printBoard,
     .print-footer {
-        break-inside: avoid;
-        page-break-inside: avoid;
+
+        break-inside:
+            avoid;
+
+        page-break-inside:
+            avoid;
+
+    }
+
+
+    /*
+       Force colours to print.
+    */
+
+    #printBoard * {
+
+        -webkit-print-color-adjust:
+            exact !important;
+
+        print-color-adjust:
+            exact !important;
+
+    }
+
+
+    /*
+       Prevent links/buttons
+       from appearing.
+    */
+
+    button,
+    input,
+    select,
+    textarea,
+    .btn,
+    .no-print {
+
+        display:
+            none !important;
+
     }
 
 }
+
+
