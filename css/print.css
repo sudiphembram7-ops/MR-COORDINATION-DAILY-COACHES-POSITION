@@ -1,189 +1,511 @@
-/* ==========================================
-   MR CO-ORDINATION
-   PRODUCTION PRINT.CSS
-========================================== */
+/* =========================================================
+   MR CO-ORDINATION PRINT
+   PRINT.CSS
+   VERSION 2.0 FINAL
+   A4 LANDSCAPE - SINGLE PAGE
+========================================================= */
 
-@page{
+
+/* =========================================================
+   A4 PAGE
+========================================================= */
+
+@page {
     size: A4 landscape;
-    margin:5mm;
+    margin: 4mm;
+}
+
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+    box-sizing: border-box;
 }
 
 html,
-body{
-    margin:0;
-    padding:0;
-    background:#fff;
-    color:#000;
-    font-family:Arial,Helvetica,sans-serif;
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-/* HEADER */
-
-.header{
-    text-align:center;
-    padding:4px 0 !important;
-    margin-bottom:4px !important;
+.print-board {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-.header h3{
-    font-size:16px;
-    font-weight:700;
-    margin:0;
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+    width: 100%;
+    margin: 0 0 2px 0 !important;
+    padding: 3px 0 !important;
+    text-align: center;
 }
 
-.header h5{
-    font-size:11px;
-    margin:2px 0;
+.header h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 15px;
+    line-height: 17px;
+    font-weight: 700;
 }
 
-.header span{
-    font-size:8px;
+.header h5 {
+    margin: 0;
+    padding: 0;
+    font-size: 10px;
+    line-height: 12px;
+    font-weight: 700;
 }
 
-/* BOARD */
-
-.container-fluid,
-.print-board{
-    width:100%;
-    margin:0;
-    padding:0;
+.header .d-flex {
+    margin-top: 1px;
+    gap: 15px !important;
 }
 
-/* ROW */
-
-.row{
-    --bs-gutter-x:3px;
-    --bs-gutter-y:3px;
-    margin-bottom:3px !important;
-    page-break-inside:avoid;
-    break-inside:avoid;
+.header span {
+    font-size: 7px;
+    line-height: 8px;
 }
 
-/* SHOP */
 
-.shop-card{
-    border:1px solid #000;
-    margin:0;
-    padding:0;
-    page-break-inside:avoid;
-    break-inside:avoid;
+/* =========================================================
+   BOOTSTRAP ROW / COLUMN
+========================================================= */
+
+.row {
+    --bs-gutter-x: 2px !important;
+    --bs-gutter-y: 2px !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
-.shop-title{
-    font-size:10px;
-    font-weight:bold;
-    text-align:center;
-    padding:2px !important;
-    margin:0;
+.row > * {
+    padding-left: 1px !important;
+    padding-right: 1px !important;
 }
 
-/* TABLE */
-
-.coach-table{
-    width:100%;
-    border-collapse:collapse;
-    table-layout:fixed;
-    margin:0;
+.mt-2 {
+    margin-top: 2px !important;
 }
+
+
+/* =========================================================
+   SHOP CARD
+========================================================= */
+
+.shop-card {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #000;
+    background: #fff;
+    overflow: hidden;
+
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+
+/* =========================================================
+   SHOP TITLE
+========================================================= */
+
+.shop-title {
+    margin: 0 !important;
+    padding: 1px 2px !important;
+
+    height: 14px;
+
+    font-size: 9px !important;
+    line-height: 12px !important;
+
+    font-weight: 700;
+    text-align: center;
+
+    border-bottom: 1px solid #000;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.coach-table {
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    table-layout: fixed;
+    border-collapse: collapse !important;
+
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+
+/* =========================================================
+   TABLE CELL
+========================================================= */
 
 .coach-table th,
-.coach-table td{
-    border:1px solid #000 !important;
-    text-align:center;
-    vertical-align:middle;
-    padding:1px;
-    height:16px;
-    font-size:7px;
+.coach-table td {
+
+    border: 1px solid #000 !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    text-align: center;
+    vertical-align: middle;
+
+    height: 7mm;
+
+    font-size: 6.5px !important;
+    line-height: 7px !important;
+
+    overflow: hidden;
 }
 
-.coach-table thead th{
-    font-size:8px;
-    font-weight:bold;
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.coach-table thead th {
+
+    height: 5mm;
+
+    padding: 0 !important;
+
+    font-size: 6.5px !important;
+    line-height: 6px !important;
+
+    font-weight: 700;
+
+    white-space: nowrap;
 }
 
-.coach-card{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    width:100%;
-    min-height:14px;
-    font-size:6px;
-    font-weight:bold;
-    line-height:1;
-    word-break:break-word;
-    overflow:hidden;
+
+/* =========================================================
+   POSITION COLUMN
+========================================================= */
+
+.coach-table th:first-child {
+
+    width: 11mm;
+
+    font-size: 6.5px !important;
+    font-weight: 700;
+
+    white-space: nowrap;
 }
 
-/* LEGEND */
 
-.card{
-    margin-top:3px !important;
-    page-break-inside:avoid;
+/* =========================================================
+   COACH CARD
+========================================================= */
+
+.coach-card {
+
+    width: 100%;
+
+    height: 6mm;
+    min-height: 6mm;
+
+    margin: 0;
+    padding: 0 1px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    overflow: hidden;
+
+    font-size: 6.5px !important;
+    line-height: 6px !important;
+
+    font-weight: 700;
+
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
-.card-header{
-    padding:3px;
-    font-size:8px;
+
+/* =========================================================
+   FIRST ROW
+   N SHOP + M SHOP
+========================================================= */
+
+.print-board > .row:first-of-type {
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
-.card-body{
-    padding:3px;
+
+/* =========================================================
+   SECOND ROW
+   LIFTING BAY + J SHOP
+========================================================= */
+
+.second-row {
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
-.badge{
-    font-size:7px;
-    padding:2px 5px;
-    margin:1px;
+
+/* =========================================================
+   SCR SHOP
+========================================================= */
+
+#SCR9_H1,
+#SCR10_H1,
+#SCR11_H1,
+#SCR12_H1,
+#SCR13_H1,
+#SCR14_H1,
+#SCR15_H1,
+#SCR16_H1,
+#SCR18_H1,
+#SCR19_H1,
+#SCR21_H1,
+#SCR22_H1,
+
+#SCR9_H2,
+#SCR10_H2,
+#SCR11_H2,
+#SCR12_H2,
+#SCR13_H2,
+#SCR14_H2,
+#SCR15_H2,
+#SCR16_H2,
+#SCR18_H2,
+#SCR19_H2,
+#SCR21_H2,
+#SCR22_H2,
+
+#SCR9_D2,
+#SCR10_D2,
+#SCR11_D2,
+#SCR12_D2,
+#SCR13_D2,
+#SCR14_D2,
+#SCR15_D2,
+#SCR16_D2,
+#SCR18_D2,
+#SCR19_D2,
+#SCR21_D2,
+#SCR22_D2,
+
+#SCR9_D1,
+#SCR10_D1,
+#SCR11_D1,
+#SCR12_D1,
+#SCR13_D1,
+#SCR14_D1,
+#SCR15_D1,
+#SCR16_D1,
+#SCR18_D1,
+#SCR19_D1,
+#SCR21_D1,
+#SCR22_D1 {
+
+    padding: 0 !important;
 }
 
-/* HIDE */
 
-nav,
-.navbar,
-.btn,
-input,
-select,
-textarea,
-footer,
-.modal{
-    display:none !important;
+/* =========================================================
+   CR SHOP
+========================================================= */
+
+#F1_H,
+#F2_H,
+#F3_H,
+#F4_H,
+#F5_H,
+#F6_H,
+#F7_H,
+#F8_H,
+#F9_H,
+#F10_H,
+#F11_H,
+
+#F1_D,
+#F2_D,
+#F3_D,
+#F4_D,
+#F5_D,
+#F6_D,
+#F7_D,
+#F8_D,
+#F9_D,
+#F10_D,
+#F11_D {
+
+    padding: 0 !important;
 }
 
-/* PRINT */
 
-@media print{
+/* =========================================================
+   BACKGROUND PRINT
+========================================================= */
 
-html,
-body{
-    margin:0 !important;
-    padding:0 !important;
-    width:auto;
-    height:auto;
+@media print {
+
+    html,
+    body {
+
+        width: 297mm;
+        height: 210mm;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        background: #fff !important;
+
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+
+    /* -----------------------------------------
+       HEADER
+    ----------------------------------------- */
+
+    .header {
+
+        display: block !important;
+
+        margin: 0 0 2px 0 !important;
+
+        padding: 2px 0 !important;
+
+        background: #0d6efd !important;
+        color: #fff !important;
+    }
+
+
+    /* -----------------------------------------
+       SHOP COLORS
+    ----------------------------------------- */
+
+    .bg-warning {
+
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .bg-success {
+
+        background-color: #198754 !important;
+        color: #fff !important;
+    }
+
+    .bg-info {
+
+        background-color: #0dcaf0 !important;
+        color: #000 !important;
+    }
+
+    .bg-primary {
+
+        background-color: #0d6efd !important;
+        color: #fff !important;
+    }
+
+    .table-dark {
+
+        background-color: #212529 !important;
+        color: #fff !important;
+    }
+
+
+    /* -----------------------------------------
+       PREVENT PAGE BREAK
+    ----------------------------------------- */
+
+    .print-board,
+    .shop-card,
+    .coach-table,
+    .row {
+
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+
+    /* -----------------------------------------
+       HIDE UNNECESSARY ELEMENTS
+    ----------------------------------------- */
+
+    button,
+    nav,
+    footer,
+    .no-print,
+    .print-button {
+
+        display: none !important;
+    }
 }
 
-.container-fluid,
-.print-board{
-    width:100% !important;
-    margin:0 !important;
-    padding:0 !important;
+
+/* =========================================================
+   SCREEN PREVIEW
+========================================================= */
+
+@media screen {
+
+    body {
+        background: #f2f2f2;
+    }
+
+    .print-board {
+        background: #fff;
+    }
 }
 
-.row,
-.shop-card,
-table,
-thead,
-tbody,
-tr{
-    page-break-inside:avoid !important;
-    break-inside:avoid !important;
-}
 
-thead{
-    display:table-header-group;
-}
+/* =========================================================
+   MOBILE
+========================================================= */
 
-tfoot{
-    display:table-footer-group;
-}
+@media screen and (max-width: 768px) {
 
+    .header h3 {
+        font-size: 13px;
+    }
+
+    .header h5 {
+        font-size: 10px;
+    }
+
+    .header span {
+        font-size: 7px;
+    }
+
+    .coach-table th,
+    .coach-table td {
+        font-size: 6px !important;
+    }
+
+    .coach-card {
+        height: 18px;
+        min-height: 18px;
+        font-size: 6px !important;
+    }
 }
