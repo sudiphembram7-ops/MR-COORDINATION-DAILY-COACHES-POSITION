@@ -1,9 +1,260 @@
 /* =========================================================
-   MR CO-ORDINATION PRINT
-   PRINT.CSS
-   VERSION 2.0 FINAL
-   A4 LANDSCAPE - SINGLE PAGE
+   MR CO-ORDINATION BOARD
+   A4 PRINT CSS
 ========================================================= */
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
+}
+
+
+body {
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.print-page {
+    width: 100%;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.print-header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+    margin-bottom: 7px;
+}
+
+
+.railway-title {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+
+.workshop-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+
+.board-title {
+    font-size: 15px;
+    font-weight: 800;
+    margin-top: 3px;
+}
+
+
+.subtitle {
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+
+/* =========================================================
+   INFORMATION
+========================================================= */
+
+.print-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid #000;
+    padding: 5px 7px;
+    margin-bottom: 8px;
+    font-size: 9px;
+}
+
+
+.print-info div {
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   PRINT TABLE
+========================================================= */
+
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+
+.print-table th,
+.print-table td {
+    border: 1px solid #000;
+    padding: 3px 4px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1.15;
+    word-wrap: break-word;
+}
+
+
+.print-table th {
+    background: #e9ecef;
+    font-weight: 800;
+    font-size: 8.5px;
+}
+
+
+.print-table td {
+    font-size: 8.5px;
+}
+
+
+.print-table .coach-number {
+    font-weight: 800;
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   COLUMN WIDTH
+========================================================= */
+
+.print-table th:nth-child(1),
+.print-table td:nth-child(1) {
+    width: 4%;
+}
+
+
+.print-table th:nth-child(2),
+.print-table td:nth-child(2) {
+    width: 15%;
+}
+
+
+.print-table th:nth-child(3),
+.print-table td:nth-child(3) {
+    width: 9%;
+}
+
+
+.print-table th:nth-child(4),
+.print-table td:nth-child(4) {
+    width: 10%;
+}
+
+
+.print-table th:nth-child(5),
+.print-table td:nth-child(5) {
+    width: 18%;
+}
+
+
+.print-table th:nth-child(6),
+.print-table td:nth-child(6) {
+    width: 24%;
+}
+
+
+.print-table th:nth-child(7),
+.print-table td:nth-child(7) {
+    width: 20%;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-po {
+    background: #d1e7dd !important;
+}
+
+
+.status-s {
+    background: #fff3cd !important;
+}
+
+
+.status-lm {
+    background: #cff4fc !important;
+}
+
+
+.status-med {
+    background: #f8d7da !important;
+}
+
+
+.status-rl {
+    background: #e2e3e5 !important;
+}
+
+
+.status-r1 {
+    background: #dbeafe !important;
+}
+
+
+.status-rs {
+    background: #fde2e2 !important;
+}
+
+
+.status-l {
+    background: #eadcf8 !important;
+}
+
+
+.status-hvy {
+    background: #f5c2c7 !important;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.print-footer {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #000;
+    margin-top: 7px;
+    padding-top: 4px;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading,
+.empty-board,
+.print-error {
+    text-align: center;
+    padding: 30px;
+    font-size: 12px;
+    border: 1px solid #000;
+}
 
 
 /* =========================================================
@@ -12,500 +263,88 @@
 
 @page {
     size: A4 landscape;
-    margin: 4mm;
+    margin: 8mm;
 }
 
 
 /* =========================================================
-   GLOBAL
-========================================================= */
-
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    background: #fff;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-.print-board {
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.header {
-    width: 100%;
-    margin: 0 0 2px 0 !important;
-    padding: 3px 0 !important;
-    text-align: center;
-}
-
-.header h3 {
-    margin: 0;
-    padding: 0;
-    font-size: 15px;
-    line-height: 17px;
-    font-weight: 700;
-}
-
-.header h5 {
-    margin: 0;
-    padding: 0;
-    font-size: 10px;
-    line-height: 12px;
-    font-weight: 700;
-}
-
-.header .d-flex {
-    margin-top: 1px;
-    gap: 15px !important;
-}
-
-.header span {
-    font-size: 7px;
-    line-height: 8px;
-}
-
-
-/* =========================================================
-   BOOTSTRAP ROW / COLUMN
-========================================================= */
-
-.row {
-    --bs-gutter-x: 2px !important;
-    --bs-gutter-y: 2px !important;
-
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-}
-
-.row > * {
-    padding-left: 1px !important;
-    padding-right: 1px !important;
-}
-
-.mt-2 {
-    margin-top: 2px !important;
-}
-
-
-/* =========================================================
-   SHOP CARD
-========================================================= */
-
-.shop-card {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    border: 1px solid #000;
-    background: #fff;
-    overflow: hidden;
-
-    page-break-inside: avoid;
-    break-inside: avoid;
-}
-
-
-/* =========================================================
-   SHOP TITLE
-========================================================= */
-
-.shop-title {
-    margin: 0 !important;
-    padding: 1px 2px !important;
-
-    height: 14px;
-
-    font-size: 9px !important;
-    line-height: 12px !important;
-
-    font-weight: 700;
-    text-align: center;
-
-    border-bottom: 1px solid #000;
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-.coach-table {
-    width: 100% !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    table-layout: fixed;
-    border-collapse: collapse !important;
-
-    page-break-inside: avoid;
-    break-inside: avoid;
-}
-
-
-/* =========================================================
-   TABLE CELL
-========================================================= */
-
-.coach-table th,
-.coach-table td {
-
-    border: 1px solid #000 !important;
-
-    padding: 0 !important;
-    margin: 0 !important;
-
-    text-align: center;
-    vertical-align: middle;
-
-    height: 7mm;
-
-    font-size: 6.5px !important;
-    line-height: 7px !important;
-
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   TABLE HEADER
-========================================================= */
-
-.coach-table thead th {
-
-    height: 5mm;
-
-    padding: 0 !important;
-
-    font-size: 6.5px !important;
-    line-height: 6px !important;
-
-    font-weight: 700;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   POSITION COLUMN
-========================================================= */
-
-.coach-table th:first-child {
-
-    width: 11mm;
-
-    font-size: 6.5px !important;
-    font-weight: 700;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   COACH CARD
-========================================================= */
-
-.coach-card {
-
-    width: 100%;
-
-    height: 6mm;
-    min-height: 6mm;
-
-    margin: 0;
-    padding: 0 1px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    overflow: hidden;
-
-    font-size: 6.5px !important;
-    line-height: 6px !important;
-
-    font-weight: 700;
-
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-
-/* =========================================================
-   FIRST ROW
-   N SHOP + M SHOP
-========================================================= */
-
-.print-board > .row:first-of-type {
-    page-break-inside: avoid;
-    break-inside: avoid;
-}
-
-
-/* =========================================================
-   SECOND ROW
-   LIFTING BAY + J SHOP
-========================================================= */
-
-.second-row {
-    page-break-inside: avoid;
-    break-inside: avoid;
-}
-
-
-/* =========================================================
-   SCR SHOP
-========================================================= */
-
-#SCR9_H1,
-#SCR10_H1,
-#SCR11_H1,
-#SCR12_H1,
-#SCR13_H1,
-#SCR14_H1,
-#SCR15_H1,
-#SCR16_H1,
-#SCR18_H1,
-#SCR19_H1,
-#SCR21_H1,
-#SCR22_H1,
-
-#SCR9_H2,
-#SCR10_H2,
-#SCR11_H2,
-#SCR12_H2,
-#SCR13_H2,
-#SCR14_H2,
-#SCR15_H2,
-#SCR16_H2,
-#SCR18_H2,
-#SCR19_H2,
-#SCR21_H2,
-#SCR22_H2,
-
-#SCR9_D2,
-#SCR10_D2,
-#SCR11_D2,
-#SCR12_D2,
-#SCR13_D2,
-#SCR14_D2,
-#SCR15_D2,
-#SCR16_D2,
-#SCR18_D2,
-#SCR19_D2,
-#SCR21_D2,
-#SCR22_D2,
-
-#SCR9_D1,
-#SCR10_D1,
-#SCR11_D1,
-#SCR12_D1,
-#SCR13_D1,
-#SCR14_D1,
-#SCR15_D1,
-#SCR16_D1,
-#SCR18_D1,
-#SCR19_D1,
-#SCR21_D1,
-#SCR22_D1 {
-
-    padding: 0 !important;
-}
-
-
-/* =========================================================
-   CR SHOP
-========================================================= */
-
-#F1_H,
-#F2_H,
-#F3_H,
-#F4_H,
-#F5_H,
-#F6_H,
-#F7_H,
-#F8_H,
-#F9_H,
-#F10_H,
-#F11_H,
-
-#F1_D,
-#F2_D,
-#F3_D,
-#F4_D,
-#F5_D,
-#F6_D,
-#F7_D,
-#F8_D,
-#F9_D,
-#F10_D,
-#F11_D {
-
-    padding: 0 !important;
-}
-
-
-/* =========================================================
-   BACKGROUND PRINT
+   PRINT ONLY
 ========================================================= */
 
 @media print {
 
     html,
     body {
-
-        width: 297mm;
-        height: 210mm;
-
-        margin: 0 !important;
-        padding: 0 !important;
-
-        background: #fff !important;
-
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-
-    /* -----------------------------------------
-       HEADER
-    ----------------------------------------- */
-
-    .header {
-
-        display: block !important;
-
-        margin: 0 0 2px 0 !important;
-
-        padding: 2px 0 !important;
-
-        background: #0d6efd !important;
-        color: #fff !important;
-    }
-
-
-    /* -----------------------------------------
-       SHOP COLORS
-    ----------------------------------------- */
-
-    .bg-warning {
-
-        background-color: #ffc107 !important;
-        color: #000 !important;
-    }
-
-    .bg-success {
-
-        background-color: #198754 !important;
-        color: #fff !important;
-    }
-
-    .bg-info {
-
-        background-color: #0dcaf0 !important;
-        color: #000 !important;
-    }
-
-    .bg-primary {
-
-        background-color: #0d6efd !important;
-        color: #fff !important;
-    }
-
-    .table-dark {
-
-        background-color: #212529 !important;
-        color: #fff !important;
-    }
-
-
-    /* -----------------------------------------
-       PREVENT PAGE BREAK
-    ----------------------------------------- */
-
-    .print-board,
-    .shop-card,
-    .coach-table,
-    .row {
-
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-    }
-
-
-    /* -----------------------------------------
-       HIDE UNNECESSARY ELEMENTS
-    ----------------------------------------- */
-
-    button,
-    nav,
-    footer,
-    .no-print,
-    .print-button {
-
-        display: none !important;
-    }
-}
-
-
-/* =========================================================
-   SCREEN PREVIEW
-========================================================= */
-
-@media screen {
-
-    body {
-        background: #f2f2f2;
-    }
-
-    .print-board {
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
         background: #fff;
     }
-}
 
 
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media screen and (max-width: 768px) {
-
-    .header h3 {
-        font-size: 13px;
+    .print-page {
+        width: 100%;
     }
 
-    .header h5 {
-        font-size: 10px;
+
+    .print-header {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
-    .header span {
-        font-size: 7px;
+
+    .print-info {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
-    .coach-table th,
-    .coach-table td {
-        font-size: 6px !important;
+
+    .print-table {
+        width: 100%;
     }
 
-    .coach-card {
-        height: 18px;
-        min-height: 18px;
-        font-size: 6px !important;
+
+    .print-table thead {
+        display: table-header-group;
     }
+
+
+    .print-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+
+    .print-table th {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+
+    .print-table td {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+
+    .status-po,
+    .status-s,
+    .status-lm,
+    .status-med,
+    .status-rl,
+    .status-r1,
+    .status-rs,
+    .status-l,
+    .status-hvy {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+
+    .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
 }
