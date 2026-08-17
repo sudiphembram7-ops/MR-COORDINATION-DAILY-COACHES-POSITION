@@ -3,857 +3,706 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>MR CO-ORDINATION PRINT</title>
+    <title>
+        MR CO-ORDINATION BOARD - PRINT
+    </title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<link rel="stylesheet" href="css/style.css">
-
-<link rel="stylesheet" href="css/print.css">
+    <link
+        rel="stylesheet"
+        href="css/print.css"
+    >
 
 </head>
 
 
 <body>
 
+    <div class="print-page">
 
-<!-- ==========================================
-     HEADER
-========================================== -->
+        <!-- HEADER -->
 
-<header class="header bg-primary text-white text-center">
+        <header class="print-header">
 
-    <h3>
-        MR CO-ORDINATION DAILY COACHES POSITION
-    </h3>
+            <div class="railway-title">
+                INDIAN RAILWAYS
+            </div>
 
-    <h5>
-        LILUAH WORKSHOP
-    </h5>
+            <div class="workshop-title">
+                LILUAH WORKSHOP
+            </div>
 
-    <div class="d-flex justify-content-center gap-4">
+            <div class="board-title">
+                MR CO-ORDINATION BOARD
+            </div>
 
-        <span id="liveDate"></span>
+            <div class="subtitle">
+                DAILY COACHES POSITION
+            </div>
 
-        <span id="liveTime"></span>
+        </header>
 
-        <span id="lastUpdate"></span>
+
+        <!-- INFORMATION -->
+
+        <section class="print-info">
+
+            <div>
+                <strong>Date:</strong>
+                <span id="printDate">--</span>
+            </div>
+
+            <div>
+                <strong>Time:</strong>
+                <span id="printTime">--</span>
+            </div>
+
+            <div>
+                <strong>Total Capacity:</strong>
+                <span id="printTotal">145</span>
+            </div>
+
+            <div>
+                <strong>Occupied:</strong>
+                <span id="printOccupied">0</span>
+            </div>
+
+            <div>
+                <strong>Free:</strong>
+                <span id="printFree">145</span>
+            </div>
+
+        </section>
+
+
+        <!-- BOARD -->
+
+        <main id="printBoardContainer">
+
+            <div class="loading">
+                Loading board...
+            </div>
+
+        </main>
+
+
+        <!-- FOOTER -->
+
+        <footer class="print-footer">
+
+            <div>
+                MR CO-ORDINATION / LILUAH WORKSHOP
+            </div>
+
+            <div>
+                Generated:
+                <span id="generatedTime">--</span>
+            </div>
+
+        </footer>
 
     </div>
 
-</header>
 
+    <script type="module">
 
+        import {
+            ref,
+            get
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-<!-- ==========================================
-     PRINT BOARD
-========================================== -->
 
-<div class="container-fluid print-board">
+        import {
+            database
+        } from "./js/firebase-config.js";
 
 
-<!-- ==========================================
-     FIRST ROW
-     N SHOP + M SHOP
-========================================== -->
+        const TOTAL_CAPACITY = 145;
 
-<div class="row g-1">
 
+        /* =====================================================
+           STATUS
+        ===================================================== */
 
-<!-- ================= N SHOP ================= -->
+        const STATUS_CLASSES = {
 
-<div class="col-6">
+            "PO": "status-po",
+            "S": "status-s",
+            "LM": "status-lm",
+            "MED": "status-med",
+            "RL": "status-rl",
+            "R1": "status-r1",
+            "RS": "status-rs",
+            "L": "status-l",
+            "HVY": "status-hvy"
 
-<div class="shop-card">
+        };
 
-<h4 class="shop-title bg-warning text-center">
-    N SHOP
-</h4>
 
+        /* =====================================================
+           LOAD BOARD
+        ===================================================== */
 
-<table class="table table-bordered text-center coach-table">
+        async function loadPrintBoard() {
 
-<thead class="table-dark">
+            const container =
+                document.getElementById(
+                    "printBoardContainer"
+                );
 
-<tr>
 
-<th>Position</th>
+            try {
 
-<th>N2</th>
-<th>N3</th>
-<th>N5</th>
-<th>N7</th>
-<th>N8</th>
+                const snapshot =
+                    await get(
+                        ref(
+                            database,
+                            "coachBoard"
+                        )
+                    );
 
-</tr>
 
-</thead>
+                const boardData =
+                    snapshot.exists()
+                        ? snapshot.val()
+                        : {};
 
 
-<tbody>
+                drawPrintBoard(
+                    boardData
+                );
 
 
-<tr>
+                updatePrintCounters(
+                    boardData
+                );
 
-<th>H1</th>
 
-<td id="N2_H1">
-    <div class="coach-card"></div>
-</td>
+                updateDateTime();
 
-<td id="N3_H1">
-    <div class="coach-card"></div>
-</td>
 
-<td id="N5_H1">
-    <div class="coach-card"></div>
-</td>
+                /*
+                   Give browser a little time
+                   to render before printing.
+                */
 
-<td id="N7_H1">
-    <div class="coach-card"></div>
-</td>
+                setTimeout(
+                    () => {
 
-<td id="N8_H1">
-    <div class="coach-card"></div>
-</td>
+                        window.print();
 
-</tr>
+                    },
+                    700
+                );
 
+            }
+            catch (error) {
 
+                console.error(
+                    "PRINT LOAD ERROR:",
+                    error
+                );
 
-<tr>
 
-<th>H2</th>
+                container.innerHTML = `
 
-<td id="N2_H2">
-    <div class="coach-card"></div>
-</td>
+                    <div class="print-error">
 
-<td id="N3_H2">
-    <div class="coach-card"></div>
-</td>
+                        Failed to load board.
 
-<td id="N5_H2">
-    <div class="coach-card"></div>
-</td>
+                        <br><br>
 
-<td id="N7_H2">
-    <div class="coach-card"></div>
-</td>
+                        ${escapeHTML(
+                            error.message
+                        )}
 
-<td id="N8_H2">
-    <div class="coach-card"></div>
-</td>
+                    </div>
 
-</tr>
+                `;
 
+            }
 
+        }
 
-<tr>
 
-<th>H3</th>
+        /* =====================================================
+           DRAW PRINT BOARD
+        ===================================================== */
 
-<td id="N2_H3">
-    <div class="coach-card"></div>
-</td>
+        function drawPrintBoard(
+            boardData
+        ) {
 
-<td id="N3_H3">
-    <div class="coach-card"></div>
-</td>
+            const container =
+                document.getElementById(
+                    "printBoardContainer"
+                );
 
-<td id="N5_H3">
-    <div class="coach-card"></div>
-</td>
 
-<td id="N7_H3">
-    <div class="coach-card"></div>
-</td>
+            const cells =
+                document.querySelectorAll(
+                    ".coach-table td"
+                );
 
-<td id="N8_H3">
-    <div class="coach-card"></div>
-</td>
 
-</tr>
+            /*
+               We cannot depend on board.html DOM.
+               Therefore create board directly
+               from Firebase data.
+            */
 
 
+            const lines =
+                Object.keys(
+                    boardData || {}
+                );
 
-<tr>
 
-<th>D3</th>
+            if (!lines.length) {
 
-<td id="N2_D3">
-    <div class="coach-card"></div>
-</td>
+                container.innerHTML = `
 
-<td id="N3_D3">
-    <div class="coach-card"></div>
-</td>
+                    <div class="empty-board">
 
-<td id="N5_D3">
-    <div class="coach-card"></div>
-</td>
+                        No coach data available.
 
-<td id="N7_D3">
-    <div class="coach-card"></div>
-</td>
+                    </div>
 
-<td id="N8_D3">
-    <div class="coach-card"></div>
-</td>
+                `;
 
-</tr>
+                return;
 
+            }
 
 
-<tr>
+            let html = "";
 
-<th>D2</th>
 
-<td id="N2_D2">
-    <div class="coach-card"></div>
-</td>
+            html += `
 
-<td id="N3_D2">
-    <div class="coach-card"></div>
-</td>
+                <table class="print-table">
 
-<td id="N5_D2">
-    <div class="coach-card"></div>
-</td>
+                    <thead>
 
-<td id="N7_D2">
-    <div class="coach-card"></div>
-</td>
+                        <tr>
 
-<td id="N8_D2">
-    <div class="coach-card"></div>
-</td>
+                            <th>SL</th>
+                            <th>SHOP</th>
+                            <th>LINE</th>
+                            <th>POSITION</th>
+                            <th>COACH NUMBER</th>
+                            <th>COACH TYPE</th>
+                            <th>STATUS</th>
 
-</tr>
+                        </tr>
 
+                    </thead>
 
+                    <tbody>
 
-<tr>
+            `;
 
-<th>D1</th>
 
-<td id="N2_D1">
-    <div class="coach-card"></div>
-</td>
+            let serial = 1;
 
-<td id="N3_D1">
-    <div class="coach-card"></div>
-</td>
 
-<td id="N5_D1">
-    <div class="coach-card"></div>
-</td>
+            lines.forEach(
+                line => {
 
-<td id="N7_D1">
-    <div class="coach-card"></div>
-</td>
+                    const lineData =
+                        boardData[line];
 
-<td id="N8_D1">
-    <div class="coach-card"></div>
-</td>
 
-</tr>
+                    if (!lineData) {
 
+                        return;
 
-</tbody>
+                    }
 
-</table>
 
-</div>
+                    Object.keys(
+                        lineData
+                    ).forEach(
+                        position => {
 
-</div>
+                            const coach =
+                                lineData[
+                                    position
+                                ];
 
 
+                            if (!coach) {
 
-<!-- ================= M SHOP ================= -->
+                                return;
 
-<div class="col-6">
+                            }
 
-<div class="shop-card">
 
-<h4 class="shop-title bg-warning text-center">
-    M SHOP
-</h4>
+                            const coachNo =
+                                clean(
+                                    coach.coachNo
+                                );
 
 
-<table class="table table-bordered text-center coach-table">
+                            if (!coachNo) {
 
-<thead class="table-dark">
+                                return;
 
-<tr>
+                            }
 
-<th>Position</th>
 
-<th>M2</th>
-<th>M3</th>
-<th>M4</th>
-<th>M5</th>
-<th>M6</th>
+                            const coachType =
+                                clean(
+                                    coach.coachType
+                                );
 
-</tr>
 
-</thead>
+                            const status =
+                                clean(
+                                    coach.status
+                                );
 
 
-<tbody>
+                            const shop =
+                                clean(
+                                    coach.shop
+                                ) ||
+                                getShop(
+                                    line
+                                );
 
 
-<tr>
+                            const statusClass =
+                                STATUS_CLASSES[
+                                    status.toUpperCase()
+                                ] || "";
 
-<th>H</th>
 
-<td id="M2_H">
-    <div class="coach-card"></div>
-</td>
+                            html += `
 
-<td id="M3_H">
-    <div class="coach-card"></div>
-</td>
+                                <tr>
 
-<td id="M4_H">
-    <div class="coach-card"></div>
-</td>
+                                    <td>
+                                        ${serial++}
+                                    </td>
 
-<td id="M5_H">
-    <div class="coach-card"></div>
-</td>
+                                    <td>
+                                        ${escapeHTML(shop)}
+                                    </td>
 
-<td id="M6_H">
-    <div class="coach-card"></div>
-</td>
+                                    <td>
+                                        ${escapeHTML(line)}
+                                    </td>
 
-</tr>
+                                    <td>
+                                        ${escapeHTML(position)}
+                                    </td>
 
+                                    <td class="coach-number">
+                                        ${escapeHTML(coachNo)}
+                                    </td>
 
+                                    <td>
+                                        ${escapeHTML(coachType)}
+                                    </td>
 
-<tr>
+                                    <td class="${statusClass}">
+                                        ${escapeHTML(status)}
+                                    </td>
 
-<th>C</th>
+                                </tr>
 
-<td id="M2_C">
-    <div class="coach-card"></div>
-</td>
+                            `;
 
-<td id="M3_C">
-    <div class="coach-card"></div>
-</td>
+                        }
+                    );
 
-<td id="M4_C">
-    <div class="coach-card"></div>
-</td>
+                }
+            );
 
-<td id="M5_C">
-    <div class="coach-card"></div>
-</td>
 
-<td id="M6_C">
-    <div class="coach-card"></div>
-</td>
+            html += `
 
-</tr>
+                    </tbody>
 
+                </table>
 
+            `;
 
-<tr>
 
-<th>D</th>
+            container.innerHTML =
+                html;
 
-<td id="M2_D">
-    <div class="coach-card"></div>
-</td>
+        }
 
-<td id="M3_D">
-    <div class="coach-card"></div>
-</td>
 
-<td id="M4_D">
-    <div class="coach-card"></div>
-</td>
+        /* =====================================================
+           COUNTERS
+        ===================================================== */
 
-<td id="M5_D">
-    <div class="coach-card"></div>
-</td>
+        function updatePrintCounters(
+            boardData
+        ) {
 
-<td id="M6_D">
-    <div class="coach-card"></div>
-</td>
+            let occupied = 0;
 
-</tr>
 
+            Object.keys(
+                boardData || {}
+            ).forEach(
+                line => {
 
-</tbody>
+                    const lineData =
+                        boardData[line];
 
-</table>
 
-</div>
+                    if (!lineData) {
 
-</div>
+                        return;
 
+                    }
 
-</div>
 
+                    Object.keys(
+                        lineData
+                    ).forEach(
+                        position => {
 
+                            if (
+                                lineData[
+                                    position
+                                ]
+                            ) {
 
-<!-- ==========================================
-     SECOND ROW
-     LIFTING BAY + J SHOP
-========================================== -->
+                                occupied++;
 
-<div class="row second-row g-1 mt-2">
+                            }
 
+                        }
+                    );
 
-<!-- ================= LIFTING BAY ================= -->
+                }
+            );
 
-<div class="col-3">
 
-<div class="shop-card">
+            const total =
+                TOTAL_CAPACITY;
 
-<h4 class="shop-title bg-warning text-center">
-    LIFTING BAY
-</h4>
 
+            const free =
+                Math.max(
+                    0,
+                    total - occupied
+                );
 
-<table class="table table-bordered text-center coach-table">
 
-<thead class="table-dark">
+            document.getElementById(
+                "printTotal"
+            ).textContent =
+                total;
 
-<tr>
 
-<th>Position</th>
+            document.getElementById(
+                "printOccupied"
+            ).textContent =
+                occupied;
 
-<th>L9</th>
-<th>L10</th>
 
-</tr>
+            document.getElementById(
+                "printFree"
+            ).textContent =
+                free;
 
-</thead>
+        }
 
 
-<tbody>
+        /* =====================================================
+           DATE TIME
+        ===================================================== */
 
+        function updateDateTime() {
 
-<tr>
+            const now =
+                new Date();
 
-<th>H</th>
 
-<td id="L9_H">
-    <div class="coach-card"></div>
-</td>
+            const date =
+                now.toLocaleDateString(
+                    "en-IN",
+                    {
 
-<td id="L10_H">
-    <div class="coach-card"></div>
-</td>
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric"
 
-</tr>
+                    }
+                );
 
 
+            const time =
+                now.toLocaleTimeString(
+                    "en-IN"
+                );
 
-<tr>
 
-<th>C</th>
+            document.getElementById(
+                "printDate"
+            ).textContent =
+                date;
 
-<td id="L9_C">
-    <div class="coach-card"></div>
-</td>
 
-<td id="L10_C">
-    <div class="coach-card"></div>
-</td>
+            document.getElementById(
+                "printTime"
+            ).textContent =
+                time;
 
-</tr>
 
+            document.getElementById(
+                "generatedTime"
+            ).textContent =
+                date +
+                " " +
+                time;
 
+        }
 
-<tr>
 
-<th>D</th>
+        /* =====================================================
+           SHOP
+        ===================================================== */
 
-<td id="L9_D">
-    <div class="coach-card"></div>
-</td>
+        function getShop(
+            line
+        ) {
 
-<td id="L10_D">
-    <div class="coach-card"></div>
-</td>
+            const value =
+                clean(
+                    line
+                ).toUpperCase();
 
-</tr>
 
+            if (
+                value.startsWith("SCR")
+            ) {
 
-</tbody>
+                return "MR SCR SHOP";
 
-</table>
+            }
 
-</div>
 
-</div>
+            if (
+                value.startsWith("N")
+            ) {
 
+                return "N SHOP";
 
+            }
 
-<!-- ================= J SHOP ================= -->
 
-<div class="col-9">
+            if (
+                value.startsWith("M")
+            ) {
 
-<div class="shop-card">
+                return "M SHOP";
 
-<h4 class="shop-title bg-success text-white text-center">
-    J SHOP
-</h4>
+            }
 
 
-<table class="table table-bordered text-center coach-table">
+            if (
+                value.startsWith("F")
+            ) {
 
-<thead class="table-dark">
+                return "CR SHOP";
 
-<tr>
+            }
 
-<th>POSITION</th>
 
-<th>J1</th>
-<th>J2</th>
-<th>J3</th>
-<th>J4</th>
-<th>J5</th>
-<th>J6</th>
+            if (
+                value.startsWith("J")
+            ) {
 
-</tr>
+                return "J SHOP";
 
-</thead>
+            }
 
 
-<tbody>
+            if (
+                value.startsWith("L")
+            ) {
 
+                return "LIFTING BAY";
 
-<tr>
+            }
 
-<th>H1</th>
 
-<td id="J1_H1"><div class="coach-card"></div></td>
-<td id="J2_H1"><div class="coach-card"></div></td>
-<td id="J3_H1"><div class="coach-card"></div></td>
-<td id="J4_H1"><div class="coach-card"></div></td>
-<td id="J5_H1"><div class="coach-card"></div></td>
-<td id="J6_H1"><div class="coach-card"></div></td>
+            return "";
 
-</tr>
+        }
 
 
+        /* =====================================================
+           CLEAN
+        ===================================================== */
 
-<tr>
+        function clean(
+            value
+        ) {
 
-<th>H2</th>
+            return String(
+                value ?? ""
+            ).trim();
 
-<td id="J1_H2"><div class="coach-card"></div></td>
-<td id="J2_H2"><div class="coach-card"></div></td>
-<td id="J3_H2"><div class="coach-card"></div></td>
-<td id="J4_H2"><div class="coach-card"></div></td>
-<td id="J5_H2"><div class="coach-card"></div></td>
-<td id="J6_H2"><div class="coach-card"></div></td>
+        }
 
-</tr>
 
+        /* =====================================================
+           ESCAPE
+        ===================================================== */
 
+        function escapeHTML(
+            value
+        ) {
 
-<tr>
+            return String(
+                value ?? ""
+            )
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
 
-<th>D2</th>
+        }
 
-<td id="J1_D2"><div class="coach-card"></div></td>
-<td id="J2_D2"><div class="coach-card"></div></td>
-<td id="J3_D2"><div class="coach-card"></div></td>
-<td id="J4_D2"><div class="coach-card"></div></td>
-<td id="J5_D2"><div class="coach-card"></div></td>
-<td id="J6_D2"><div class="coach-card"></div></td>
 
-</tr>
+        /* =====================================================
+           START
+        ===================================================== */
 
+        loadPrintBoard();
 
-
-<tr>
-
-<th>D1</th>
-
-<td id="J1_D1"><div class="coach-card"></div></td>
-<td id="J2_D1"><div class="coach-card"></div></td>
-<td id="J3_D1"><div class="coach-card"></div></td>
-<td id="J4_D1"><div class="coach-card"></div></td>
-<td id="J5_D1"><div class="coach-card"></div></td>
-<td id="J6_D1"><div class="coach-card"></div></td>
-
-</tr>
-
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-
-</div>
-
-
-
-<!-- ==========================================
-     THIRD ROW
-     MR SCR SHOP
-========================================== -->
-
-<div class="row g-1 mt-2">
-
-<div class="col-12">
-
-<div class="shop-card">
-
-<h4 class="shop-title bg-warning text-center">
-    MR SCR SHOP
-</h4>
-
-
-<table class="table table-bordered text-center coach-table">
-
-<thead class="table-dark">
-
-<tr>
-
-<th>POSITION</th>
-
-<th>SCR9</th>
-<th>SCR10</th>
-<th>SCR11</th>
-<th>SCR12</th>
-<th>SCR13</th>
-<th>SCR14</th>
-<th>SCR15</th>
-<th>SCR16</th>
-<th>SCR18</th>
-<th>SCR19</th>
-<th>SCR21</th>
-<th>SCR22</th>
-
-</tr>
-
-</thead>
-
-
-<tbody>
-
-
-<tr>
-
-<th>H1</th>
-
-<td id="SCR9_H1"><div class="coach-card"></div></td>
-<td id="SCR10_H1"><div class="coach-card"></div></td>
-<td id="SCR11_H1"><div class="coach-card"></div></td>
-<td id="SCR12_H1"><div class="coach-card"></div></td>
-<td id="SCR13_H1"><div class="coach-card"></div></td>
-<td id="SCR14_H1"><div class="coach-card"></div></td>
-<td id="SCR15_H1"><div class="coach-card"></div></td>
-<td id="SCR16_H1"><div class="coach-card"></div></td>
-<td id="SCR18_H1"><div class="coach-card"></div></td>
-<td id="SCR19_H1"><div class="coach-card"></div></td>
-<td id="SCR21_H1"><div class="coach-card"></div></td>
-<td id="SCR22_H1"><div class="coach-card"></div></td>
-
-</tr>
-
-
-
-<tr>
-
-<th>H2</th>
-
-<td id="SCR9_H2"><div class="coach-card"></div></td>
-<td id="SCR10_H2"><div class="coach-card"></div></td>
-<td id="SCR11_H2"><div class="coach-card"></div></td>
-<td id="SCR12_H2"><div class="coach-card"></div></td>
-<td id="SCR13_H2"><div class="coach-card"></div></td>
-<td id="SCR14_H2"><div class="coach-card"></div></td>
-<td id="SCR15_H2"><div class="coach-card"></div></td>
-<td id="SCR16_H2"><div class="coach-card"></div></td>
-<td id="SCR18_H2"><div class="coach-card"></div></td>
-<td id="SCR19_H2"><div class="coach-card"></div></td>
-<td id="SCR21_H2"><div class="coach-card"></div></td>
-<td id="SCR22_H2"><div class="coach-card"></div></td>
-
-</tr>
-
-
-
-<tr>
-
-<th>D2</th>
-
-<td id="SCR9_D2"><div class="coach-card"></div></td>
-<td id="SCR10_D2"><div class="coach-card"></div></td>
-<td id="SCR11_D2"><div class="coach-card"></div></td>
-<td id="SCR12_D2"><div class="coach-card"></div></td>
-<td id="SCR13_D2"><div class="coach-card"></div></td>
-<td id="SCR14_D2"><div class="coach-card"></div></td>
-<td id="SCR15_D2"><div class="coach-card"></div></td>
-<td id="SCR16_D2"><div class="coach-card"></div></td>
-<td id="SCR18_D2"><div class="coach-card"></div></td>
-<td id="SCR19_D2"><div class="coach-card"></div></td>
-<td id="SCR21_D2"><div class="coach-card"></div></td>
-<td id="SCR22_D2"><div class="coach-card"></div></td>
-
-</tr>
-
-
-
-<tr>
-
-<th>D1</th>
-
-<td id="SCR9_D1"><div class="coach-card"></div></td>
-<td id="SCR10_D1"><div class="coach-card"></div></td>
-<td id="SCR11_D1"><div class="coach-card"></div></td>
-<td id="SCR12_D1"><div class="coach-card"></div></td>
-<td id="SCR13_D1"><div class="coach-card"></div></td>
-<td id="SCR14_D1"><div class="coach-card"></div></td>
-<td id="SCR15_D1"><div class="coach-card"></div></td>
-<td id="SCR16_D1"><div class="coach-card"></div></td>
-<td id="SCR18_D1"><div class="coach-card"></div></td>
-<td id="SCR19_D1"><div class="coach-card"></div></td>
-<td id="SCR21_D1"><div class="coach-card"></div></td>
-<td id="SCR22_D1"><div class="coach-card"></div></td>
-
-</tr>
-
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- ==========================================
-     FOURTH ROW
-     CR SHOP
-========================================== -->
-
-<div class="row g-1 mt-2">
-
-<div class="col-12">
-
-<div class="shop-card">
-
-<h4 class="shop-title bg-info text-white text-center">
-    CR SHOP
-</h4>
-
-
-<table class="table table-bordered text-center coach-table">
-
-<thead class="table-dark">
-
-<tr>
-
-<th>POSITION</th>
-
-<th>F1</th>
-<th>F2</th>
-<th>F3</th>
-<th>F4</th>
-<th>F5</th>
-<th>F6</th>
-<th>F7</th>
-<th>F8</th>
-<th>F9</th>
-<th>F10</th>
-<th>F11</th>
-
-</tr>
-
-</thead>
-
-
-<tbody>
-
-
-<tr>
-
-<th>H</th>
-
-<td id="F1_H"><div class="coach-card"></div></td>
-<td id="F2_H"><div class="coach-card"></div></td>
-<td id="F3_H"><div class="coach-card"></div></td>
-<td id="F4_H"><div class="coach-card"></div></td>
-<td id="F5_H"><div class="coach-card"></div></td>
-<td id="F6_H"><div class="coach-card"></div></td>
-<td id="F7_H"><div class="coach-card"></div></td>
-<td id="F8_H"><div class="coach-card"></div></td>
-<td id="F9_H"><div class="coach-card"></div></td>
-<td id="F10_H"><div class="coach-card"></div></td>
-<td id="F11_H"><div class="coach-card"></div></td>
-
-</tr>
-
-
-
-<tr>
-
-<th>D</th>
-
-<td id="F1_D"><div class="coach-card"></div></td>
-<td id="F2_D"><div class="coach-card"></div></td>
-<td id="F3_D"><div class="coach-card"></div></td>
-<td id="F4_D"><div class="coach-card"></div></td>
-<td id="F5_D"><div class="coach-card"></div></td>
-<td id="F6_D"><div class="coach-card"></div></td>
-<td id="F7_D"><div class="coach-card"></div></td>
-<td id="F8_D"><div class="coach-card"></div></td>
-<td id="F9_D"><div class="coach-card"></div></td>
-<td id="F10_D"><div class="coach-card"></div></td>
-<td id="F11_D"><div class="coach-card"></div></td>
-
-</tr>
-
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- ==========================================
-     STATUS LEGEND
-     INTENTIONALLY REMOVED
-========================================== -->
-
-
-</div>
-
-
-<!-- ==========================================
-     PRINT JAVASCRIPT
-========================================== -->
-
-<script type="module" src="js/print.js"></script>
-
+    </script>
 
 </body>
 
