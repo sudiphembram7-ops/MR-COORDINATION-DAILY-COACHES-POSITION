@@ -10,9 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        MR CO-ORDINATION BOARD - PRINT
-    </title>
+    <title>MR CO-ORDINATION BOARD - A4 PRINT</title>
 
     <link
         rel="stylesheet"
@@ -24,11 +22,9 @@
 
 <body>
 
-    <div class="print-page">
+    <div id="printRoot">
 
-        <!-- HEADER -->
-
-        <header class="print-header">
+        <div class="print-header">
 
             <div class="railway-title">
                 INDIAN RAILWAYS
@@ -42,667 +38,264 @@
                 MR CO-ORDINATION BOARD
             </div>
 
-            <div class="subtitle">
+            <div class="board-subtitle">
                 DAILY COACHES POSITION
             </div>
 
-        </header>
+        </div>
 
 
-        <!-- INFORMATION -->
+        <div class="print-info">
 
-        <section class="print-info">
-
-            <div>
-                <strong>Date:</strong>
+            <span>
+                <b>Date:</b>
                 <span id="printDate">--</span>
-            </div>
+            </span>
 
-            <div>
-                <strong>Time:</strong>
+            <span>
+                <b>Time:</b>
                 <span id="printTime">--</span>
-            </div>
+            </span>
 
-            <div>
-                <strong>Total Capacity:</strong>
+            <span>
+                <b>Total:</b>
                 <span id="printTotal">145</span>
-            </div>
+            </span>
 
-            <div>
-                <strong>Occupied:</strong>
+            <span>
+                <b>Occupied:</b>
                 <span id="printOccupied">0</span>
-            </div>
+            </span>
 
-            <div>
-                <strong>Free:</strong>
+            <span>
+                <b>Free:</b>
                 <span id="printFree">145</span>
-            </div>
+            </span>
 
-        </section>
+        </div>
 
 
-        <!-- BOARD -->
-
-        <main id="printBoardContainer">
+        <div id="printBoard">
 
             <div class="loading">
-                Loading board...
+                Preparing print...
             </div>
 
-        </main>
+        </div>
 
 
-        <!-- FOOTER -->
+        <div class="print-footer">
 
-        <footer class="print-footer">
-
-            <div>
+            <span>
                 MR CO-ORDINATION / LILUAH WORKSHOP
-            </div>
+            </span>
 
-            <div>
+            <span>
                 Generated:
                 <span id="generatedTime">--</span>
-            </div>
+            </span>
 
-        </footer>
+        </div>
 
     </div>
 
 
-    <script type="module">
+<script>
 
-        import {
-            ref,
-            get
-        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
+        loadPrintData();
 
-        import {
-            database
-        } from "./js/firebase-config.js";
+    }
+);
 
 
-        const TOTAL_CAPACITY = 145;
+/* =========================================================
+   LOAD PRINT DATA
+========================================================= */
 
+function loadPrintData() {
 
-        /* =====================================================
-           STATUS
-        ===================================================== */
+    const printBoard =
+        document.getElementById(
+            "printBoard"
+        );
 
-        const STATUS_CLASSES = {
 
-            "PO": "status-po",
-            "S": "status-s",
-            "LM": "status-lm",
-            "MED": "status-med",
-            "RL": "status-rl",
-            "R1": "status-r1",
-            "RS": "status-rs",
-            "L": "status-l",
-            "HVY": "status-hvy"
+    /*
+       board.js will put the complete
+       board HTML here.
+    */
 
-        };
+    const savedHTML =
+        sessionStorage.getItem(
+            "MR_PRINT_BOARD_HTML"
+        );
 
 
-        /* =====================================================
-           LOAD BOARD
-        ===================================================== */
+    const savedCounters =
+        sessionStorage.getItem(
+            "MR_PRINT_COUNTERS"
+        );
 
-        async function loadPrintBoard() {
 
-            const container =
-                document.getElementById(
-                    "printBoardContainer"
-                );
+    if (!savedHTML) {
 
+        printBoard.innerHTML = `
 
-            try {
+            <div class="print-error">
 
-                const snapshot =
-                    await get(
-                        ref(
-                            database,
-                            "coachBoard"
-                        )
-                    );
+                Board data not available.
 
+                <br><br>
 
-                const boardData =
-                    snapshot.exists()
-                        ? snapshot.val()
-                        : {};
+                Please open the board and
+                click Print again.
 
+            </div>
 
-                drawPrintBoard(
-                    boardData
-                );
+        `;
 
+        return;
 
-                updatePrintCounters(
-                    boardData
-                );
+    }
 
 
-                updateDateTime();
+    printBoard.innerHTML =
+        savedHTML;
 
 
-                /*
-                   Give browser a little time
-                   to render before printing.
-                */
+    /*
+       Restore counters.
+    */
 
-                setTimeout(
-                    () => {
+    if (savedCounters) {
 
-                        window.print();
+        try {
 
-                    },
-                    700
-                );
-
-            }
-            catch (error) {
-
-                console.error(
-                    "PRINT LOAD ERROR:",
-                    error
-                );
-
-
-                container.innerHTML = `
-
-                    <div class="print-error">
-
-                        Failed to load board.
-
-                        <br><br>
-
-                        ${escapeHTML(
-                            error.message
-                        )}
-
-                    </div>
-
-                `;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           DRAW PRINT BOARD
-        ===================================================== */
-
-        function drawPrintBoard(
-            boardData
-        ) {
-
-            const container =
-                document.getElementById(
-                    "printBoardContainer"
-                );
-
-
-            const cells =
-                document.querySelectorAll(
-                    ".coach-table td"
-                );
-
-
-            /*
-               We cannot depend on board.html DOM.
-               Therefore create board directly
-               from Firebase data.
-            */
-
-
-            const lines =
-                Object.keys(
-                    boardData || {}
-                );
-
-
-            if (!lines.length) {
-
-                container.innerHTML = `
-
-                    <div class="empty-board">
-
-                        No coach data available.
-
-                    </div>
-
-                `;
-
-                return;
-
-            }
-
-
-            let html = "";
-
-
-            html += `
-
-                <table class="print-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>SL</th>
-                            <th>SHOP</th>
-                            <th>LINE</th>
-                            <th>POSITION</th>
-                            <th>COACH NUMBER</th>
-                            <th>COACH TYPE</th>
-                            <th>STATUS</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-            `;
-
-
-            let serial = 1;
-
-
-            lines.forEach(
-                line => {
-
-                    const lineData =
-                        boardData[line];
-
-
-                    if (!lineData) {
-
-                        return;
-
-                    }
-
-
-                    Object.keys(
-                        lineData
-                    ).forEach(
-                        position => {
-
-                            const coach =
-                                lineData[
-                                    position
-                                ];
-
-
-                            if (!coach) {
-
-                                return;
-
-                            }
-
-
-                            const coachNo =
-                                clean(
-                                    coach.coachNo
-                                );
-
-
-                            if (!coachNo) {
-
-                                return;
-
-                            }
-
-
-                            const coachType =
-                                clean(
-                                    coach.coachType
-                                );
-
-
-                            const status =
-                                clean(
-                                    coach.status
-                                );
-
-
-                            const shop =
-                                clean(
-                                    coach.shop
-                                ) ||
-                                getShop(
-                                    line
-                                );
-
-
-                            const statusClass =
-                                STATUS_CLASSES[
-                                    status.toUpperCase()
-                                ] || "";
-
-
-                            html += `
-
-                                <tr>
-
-                                    <td>
-                                        ${serial++}
-                                    </td>
-
-                                    <td>
-                                        ${escapeHTML(shop)}
-                                    </td>
-
-                                    <td>
-                                        ${escapeHTML(line)}
-                                    </td>
-
-                                    <td>
-                                        ${escapeHTML(position)}
-                                    </td>
-
-                                    <td class="coach-number">
-                                        ${escapeHTML(coachNo)}
-                                    </td>
-
-                                    <td>
-                                        ${escapeHTML(coachType)}
-                                    </td>
-
-                                    <td class="${statusClass}">
-                                        ${escapeHTML(status)}
-                                    </td>
-
-                                </tr>
-
-                            `;
-
-                        }
-                    );
-
-                }
-            );
-
-
-            html += `
-
-                    </tbody>
-
-                </table>
-
-            `;
-
-
-            container.innerHTML =
-                html;
-
-        }
-
-
-        /* =====================================================
-           COUNTERS
-        ===================================================== */
-
-        function updatePrintCounters(
-            boardData
-        ) {
-
-            let occupied = 0;
-
-
-            Object.keys(
-                boardData || {}
-            ).forEach(
-                line => {
-
-                    const lineData =
-                        boardData[line];
-
-
-                    if (!lineData) {
-
-                        return;
-
-                    }
-
-
-                    Object.keys(
-                        lineData
-                    ).forEach(
-                        position => {
-
-                            if (
-                                lineData[
-                                    position
-                                ]
-                            ) {
-
-                                occupied++;
-
-                            }
-
-                        }
-                    );
-
-                }
-            );
-
-
-            const total =
-                TOTAL_CAPACITY;
-
-
-            const free =
-                Math.max(
-                    0,
-                    total - occupied
+            const counters =
+                JSON.parse(
+                    savedCounters
                 );
 
 
             document.getElementById(
                 "printTotal"
             ).textContent =
-                total;
+                counters.total ?? 145;
 
 
             document.getElementById(
                 "printOccupied"
             ).textContent =
-                occupied;
+                counters.occupied ?? 0;
 
 
             document.getElementById(
                 "printFree"
             ).textContent =
-                free;
+                counters.free ?? 145;
+
+        }
+        catch (error) {
+
+            console.warn(
+                "Counter parse error:",
+                error
+            );
 
         }
 
-
-        /* =====================================================
-           DATE TIME
-        ===================================================== */
-
-        function updateDateTime() {
-
-            const now =
-                new Date();
+    }
 
 
-            const date =
-                now.toLocaleDateString(
-                    "en-IN",
-                    {
-
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric"
-
-                    }
-                );
+    updateDateTime();
 
 
-            const time =
-                now.toLocaleTimeString(
-                    "en-IN"
-                );
+    /*
+       Wait for browser layout.
+    */
+
+    setTimeout(
+        function () {
+
+            window.print();
+
+        },
+        800
+    );
+
+}
 
 
-            document.getElementById(
-                "printDate"
-            ).textContent =
-                date;
+/* =========================================================
+   DATE / TIME
+========================================================= */
+
+function updateDateTime() {
+
+    const now =
+        new Date();
 
 
-            document.getElementById(
-                "printTime"
-            ).textContent =
-                time;
-
-
-            document.getElementById(
-                "generatedTime"
-            ).textContent =
-                date +
-                " " +
-                time;
-
-        }
-
-
-        /* =====================================================
-           SHOP
-        ===================================================== */
-
-        function getShop(
-            line
-        ) {
-
-            const value =
-                clean(
-                    line
-                ).toUpperCase();
-
-
-            if (
-                value.startsWith("SCR")
-            ) {
-
-                return "MR SCR SHOP";
-
+    const date =
+        now.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
             }
+        );
 
 
-            if (
-                value.startsWith("N")
-            ) {
-
-                return "N SHOP";
-
-            }
+    const time =
+        now.toLocaleTimeString(
+            "en-IN"
+        );
 
 
-            if (
-                value.startsWith("M")
-            ) {
-
-                return "M SHOP";
-
-            }
+    document.getElementById(
+        "printDate"
+    ).textContent =
+        date;
 
 
-            if (
-                value.startsWith("F")
-            ) {
-
-                return "CR SHOP";
-
-            }
+    document.getElementById(
+        "printTime"
+    ).textContent =
+        time;
 
 
-            if (
-                value.startsWith("J")
-            ) {
+    document.getElementById(
+        "generatedTime"
+    ).textContent =
+        date +
+        " " +
+        time;
 
-                return "J SHOP";
-
-            }
-
-
-            if (
-                value.startsWith("L")
-            ) {
-
-                return "LIFTING BAY";
-
-            }
+}
 
 
-            return "";
+/* =========================================================
+   AFTER PRINT
+========================================================= */
 
-        }
+window.addEventListener(
+    "afterprint",
+    function () {
 
+        /*
+           Do not close automatically.
+           User can return to board manually.
+        */
 
-        /* =====================================================
-           CLEAN
-        ===================================================== */
+    }
+);
 
-        function clean(
-            value
-        ) {
-
-            return String(
-                value ?? ""
-            ).trim();
-
-        }
-
-
-        /* =====================================================
-           ESCAPE
-        ===================================================== */
-
-        function escapeHTML(
-            value
-        ) {
-
-            return String(
-                value ?? ""
-            )
-                .replace(
-                    /&/g,
-                    "&amp;"
-                )
-                .replace(
-                    /</g,
-                    "&lt;"
-                )
-                .replace(
-                    />/g,
-                    "&gt;"
-                )
-                .replace(
-                    /"/g,
-                    "&quot;"
-                )
-                .replace(
-                    /'/g,
-                    "&#039;"
-                );
-
-        }
-
-
-        /* =====================================================
-           START
-        ===================================================== */
-
-        loadPrintBoard();
-
-    </script>
+</script>
 
 </body>
 
