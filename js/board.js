@@ -4286,36 +4286,27 @@ async function toggleFullscreen() {
 
 
 /* =========================================================
-   PRINT
+   A4 PRINT
 ========================================================= */
 
 function printBoard() {
 
-    document.body.classList.add(
-        "printing-board"
-    );
+    const printWindow =
+        window.open(
+            "print.html",
+            "_blank"
+        );
 
 
-    setTimeout(
-        () => {
+    if (!printWindow) {
 
-            window.print();
+        alert(
+            "Print window blocked.\n\nPlease allow pop-ups for this site."
+        );
 
-        },
-        100
-    );
+        return;
 
-
-    setTimeout(
-        () => {
-
-            document.body.classList.remove(
-                "printing-board"
-            );
-
-        },
-        1000
-    );
+    }
 
 }
 
