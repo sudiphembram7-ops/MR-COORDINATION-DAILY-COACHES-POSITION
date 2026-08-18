@@ -4287,9 +4287,29 @@ async function toggleFullscreen() {
 
 /* =========================================================
    A4 PRINT
+   ---------------------------------------------------------
+   Opens Firebase-powered print.html
 ========================================================= */
 
 function printBoard() {
+
+    if (!firebaseOnline) {
+
+        alert(
+            "Firebase is not connected.\n\n" +
+            "Please wait until Database shows Connected."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Open print page.
+       print.html directly loads coachBoard
+       from Firebase.
+    */
 
     const printWindow =
         window.open(
@@ -4301,15 +4321,13 @@ function printBoard() {
     if (!printWindow) {
 
         alert(
-            "Print window blocked.\n\nPlease allow pop-ups for this site."
+            "Print window was blocked.\n\n" +
+            "Please allow pop-ups for this website."
         );
-
-        return;
 
     }
 
 }
-
 
 /* =========================================================
    CSV EXPORT
