@@ -2,30 +2,20 @@
    MR CO-ORDINATION PRINT
    PRINT.JS
    VERSION 3.0 FINAL
-   ---------------------------------------------------------
-   PRINT FORMAT:
-   SHOP | LINE | POSITION | COACH NUMBER
 
-   ✔ FIREBASE REALTIME BOARD
-   ✔ LIVE UPDATE
-   ✔ ONLY OCCUPIED COACHES
+   PRINT ONLY:
    ✔ SHOP
    ✔ LINE
    ✔ POSITION
    ✔ COACH NUMBER
-   ✔ 145 CAPACITY
-   ✔ OCCUPIED
-   ✔ FREE
-   ✔ LAST UPDATE
-   ✔ FIREBASE CONNECTION STATUS
-   ✔ A4 PRINT
-   ✔ NO COACH TYPE
-   ✔ NO STATUS
-========================================================= */
 
+   NO:
+   ✘ COACH TYPE
+   ✘ STATUS
+   ✘ STATUS COLOUR
 
-/* =========================================================
-   FIREBASE IMPORT
+   FIREBASE:
+   coachBoard/{line}/{position}
 ========================================================= */
 
 import {
@@ -44,17 +34,6 @@ import {
 
 const BOARD_PATH = "coachBoard";
 
-const TOTAL_CAPACITY = 145;
-
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-let printBoardData = {};
-
-let firebaseConnected = false;
-
 
 /* =========================================================
    UTILITY
@@ -70,445 +49,98 @@ function clean(value) {
 
 
 /* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHTML(value) {
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
-/* =========================================================
-   GET SHOP
+   SHOP DETECTION
 ========================================================= */
 
 function getShop(line) {
 
-    const value =
-        clean(
-            line
-        ).toUpperCase();
+    line = clean(line).toUpperCase();
 
 
-    if (
-        value.startsWith("SCR")
-    ) {
+    /* MR SCR */
 
-        return "MR SCR SHOP";
-
+    if (line.startsWith("SCR")) {
+        return "MR SCR";
     }
 
 
-    if (
-        value.startsWith("N")
-    ) {
+    /* N SHOP */
 
+    if (line.startsWith("N")) {
         return "N SHOP";
-
     }
 
 
-    if (
-        value.startsWith("M")
-    ) {
+    /* M SHOP */
 
+    if (line.startsWith("M")) {
         return "M SHOP";
-
     }
 
 
-    if (
-        value.startsWith("F")
-    ) {
+    /* LIFTING BAY */
 
-        return "CR SHOP";
-
-    }
-
-
-    if (
-        value.startsWith("J")
-    ) {
-
-        return "J SHOP";
-
-    }
-
-
-    if (
-        value.startsWith("L")
-    ) {
-
+    if (line.startsWith("L")) {
         return "LIFTING BAY";
-
     }
 
 
-    return "";
+    /* CR SHOP */
+
+    if (line.startsWith("CR")) {
+        return "CR SHOP";
+    }
+
+
+    /* J SHOP */
+
+    if (line.startsWith("J")) {
+        return "J SHOP";
+    }
+
+
+    /* DEFAULT */
+
+    return "OTHER";
 
 }
 
 
 /* =========================================================
-   GET DOM
+   UPDATE DATE
 ========================================================= */
 
-function getElement(...ids) {
-
-    for (
-        const id of ids
-    ) {
-
-        const element =
-            document.getElementById(
-                id
-            );
-
-        if (element) {
-
-            return element;
-
-        }
-
-    }
-
-    return null;
-
-}
-
-
-/* =========================================================
-   COLLECT COACHES
-========================================================= */
-
-function collectCoaches(board) {
-
-    const records = [];
-
-
-    if (
-        !board ||
-        typeof board !== "object"
-    ) {
-
-        return records;
-
-    }
-
-
-    Object.keys(board)
-        .forEach(
-            line => {
-
-                const lineData =
-                    board[line];
-
-
-                if (
-                    !lineData ||
-                    typeof lineData !== "object"
-                ) {
-
-                    return;
-
-                }
-
-
-                Object.keys(lineData)
-                    .forEach(
-                        position => {
-
-                            const coach =
-                                lineData[position];
-
-
-                            if (
-                                !coach ||
-                                typeof coach !== "object"
-                            ) {
-
-                                return;
-
-                            }
-
-
-                            const coachNo =
-                                clean(
-                                    coach.coachNo
-                                );
-
-
-                            /*
-                               Empty Firebase cells
-                               are ignored.
-                            */
-
-                            if (!coachNo) {
-
-                                return;
-
-                            }
-
-
-                            const shop =
-                                clean(
-                                    coach.shop
-                                ) ||
-                                getShop(
-                                    line
-                                );
-
-
-                            records.push({
-
-                                shop:
-                                    shop,
-
-                                line:
-                                    clean(
-                                        line
-                                    ),
-
-                                position:
-                                    clean(
-                                        position
-                                    ),
-
-                                coachNo:
-                                    coachNo
-
-                            });
-
-                        }
-                    );
-
-            }
-        );
-
-
-    return records;
-
-}
-
-
-/* =========================================================
-   SORT
-========================================================= */
-
-function sortRecords(records) {
-
-    return records.sort(
-        (a, b) => {
-
-            /*
-               Shop
-            */
-
-            const shopCompare =
-                a.shop.localeCompare(
-                    b.shop
-                );
-
-
-            if (
-                shopCompare !== 0
-            ) {
-
-                return shopCompare;
-
-            }
-
-
-            /*
-               Line
-            */
-
-            const lineCompare =
-                a.line.localeCompare(
-                    b.line,
-                    undefined,
-                    {
-                        numeric: true
-                    }
-                );
-
-
-            if (
-                lineCompare !== 0
-            ) {
-
-                return lineCompare;
-
-            }
-
-
-            /*
-               Position
-            */
-
-            return a.position.localeCompare(
-                b.position,
-                undefined,
-                {
-                    numeric: true
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE COUNTERS
-========================================================= */
-
-function updateCounters(
-    occupied
-) {
-
-    const totalElement =
-        getElement(
-            "total",
-            "totalCoach",
-            "printTotal"
-        );
-
-
-    const occupiedElement =
-        getElement(
-            "occupied",
-            "occupiedCoach",
-            "printOccupied"
-        );
-
-
-    const freeElement =
-        getElement(
-            "free",
-            "freeCoach",
-            "printFree"
-        );
-
-
-    const free =
-        Math.max(
-            0,
-            TOTAL_CAPACITY - occupied
-        );
-
-
-    if (totalElement) {
-
-        totalElement.textContent =
-            TOTAL_CAPACITY;
-
-    }
-
-
-    if (occupiedElement) {
-
-        occupiedElement.textContent =
-            occupied;
-
-    }
-
-
-    if (freeElement) {
-
-        freeElement.textContent =
-            free;
-
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE FIREBASE STATUS
-========================================================= */
-
-function updateConnectionStatus(
-    online
-) {
+function updateDate() {
 
     const element =
-        getElement(
-            "databaseStatus",
-            "firebaseStatus",
-            "connectionStatus"
+        document.getElementById(
+            "liveDate"
         );
 
 
     if (!element) {
-
         return;
-
     }
 
 
-    if (online) {
-
-        element.textContent =
-            "● Connected";
-
-        element.classList.remove(
-            "text-danger"
+    element.textContent =
+        new Date().toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }
         );
-
-        element.classList.add(
-            "text-success"
-        );
-
-    }
-    else {
-
-        element.textContent =
-            "● Offline";
-
-        element.classList.remove(
-            "text-success"
-        );
-
-        element.classList.add(
-            "text-danger"
-        );
-
-    }
 
 }
 
 
 /* =========================================================
-   UPDATE LAST UPDATE
+   UPDATE TIME
 ========================================================= */
 
-function updateLastUpdate() {
+function updateTime() {
 
     const now =
         new Date();
@@ -525,56 +157,25 @@ function updateLastUpdate() {
         );
 
 
-    const date =
-        now.toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-            }
+    const liveTime =
+        document.getElementById(
+            "liveTime"
         );
 
 
-    const lastUpdate =
-        getElement(
-            "lastUpdate"
+    const printTime =
+        document.getElementById(
+            "printTime"
         );
 
 
-    const generated =
-        getElement(
-            "generated"
-        );
-
-
-    const footerTime =
-        getElement(
-            "footerTime"
-        );
-
-
-    if (lastUpdate) {
-
-        lastUpdate.textContent =
-            `Last Update: ${time}`;
-
+    if (liveTime) {
+        liveTime.textContent = time;
     }
 
 
-    if (generated) {
-
-        generated.textContent =
-            `${date} ${time}`;
-
-    }
-
-
-    if (footerTime) {
-
-        footerTime.textContent =
-            `${date} ${time}`;
-
+    if (printTime) {
+        printTime.textContent = time;
     }
 
 }
@@ -584,151 +185,306 @@ function updateLastUpdate() {
    RENDER PRINT TABLE
 ========================================================= */
 
-function renderPrintTable(
-    board
-) {
+function renderPrintTable(board) {
 
     const tbody =
-        getElement(
-            "printBody",
-            "printTableBody"
+        document.getElementById(
+            "printBody"
+        );
+
+
+    const noData =
+        document.getElementById(
+            "noData"
+        );
+
+
+    const totalCount =
+        document.getElementById(
+            "totalCount"
+        );
+
+
+    const occupiedCount =
+        document.getElementById(
+            "occupiedCount"
         );
 
 
     if (!tbody) {
-
-        console.error(
-            "Print table body not found."
-        );
-
         return;
-
     }
 
 
-    const records =
-        sortRecords(
-            collectCoaches(
-                board
-            )
-        );
+    /* CLEAR */
+
+    tbody.innerHTML = "";
 
 
-    updateCounters(
-        records.length
-    );
+    let occupied = 0;
 
 
-    updateLastUpdate();
-
-
-    /*
-       No coach
-    */
+    /* =====================================================
+       FIREBASE EMPTY
+    ===================================================== */
 
     if (
-        records.length === 0
+        !board ||
+        typeof board !== "object"
     ) {
 
-        tbody.innerHTML = `
+        if (noData) {
+            noData.style.display = "block";
+        }
 
-            <tr>
+        if (totalCount) {
+            totalCount.textContent = "0";
+        }
 
-                <td
-                    colspan="4"
-                    class="empty"
-                >
-                    No occupied coaches found.
-                </td>
-
-            </tr>
-
-        `;
+        if (occupiedCount) {
+            occupiedCount.textContent = "0";
+        }
 
         return;
 
     }
 
 
-    let html = "";
+    /* =====================================================
+       COLLECT DATA
+    ===================================================== */
 
-    let currentShop = "";
+    const rows = [];
 
 
-    records.forEach(
-        record => {
+    Object.keys(board).forEach(
+        line => {
 
-            /*
-               Shop heading
-            */
+            const lineData =
+                board[line];
+
 
             if (
-                record.shop !== currentShop
+                !lineData ||
+                typeof lineData !== "object"
             ) {
-
-                currentShop =
-                    record.shop;
-
-
-                html += `
-
-                    <tr class="shop-row">
-
-                        <td colspan="4">
-                            ${escapeHTML(
-                                currentShop
-                            )}
-                        </td>
-
-                    </tr>
-
-                `;
-
+                return;
             }
 
 
-            /*
-               ONLY 4 COLUMNS
-            */
+            Object.keys(lineData).forEach(
+                position => {
 
-            html += `
+                    const coach =
+                        lineData[position];
 
-                <tr>
 
-                    <td>
-                        ${escapeHTML(
-                            record.shop
-                        )}
-                    </td>
+                    if (
+                        !coach ||
+                        typeof coach !== "object"
+                    ) {
+                        return;
+                    }
 
-                    <td>
-                        ${escapeHTML(
-                            record.line
-                        )}
-                    </td>
 
-                    <td>
-                        ${escapeHTML(
-                            record.position
-                        )}
-                    </td>
+                    const coachNo =
+                        clean(
+                            coach.coachNo
+                        );
 
-                    <td>
-                        ${escapeHTML(
-                            record.coachNo
-                        )}
-                    </td>
 
-                </tr>
+                    /*
+                       Empty cells are not printed.
+                    */
 
-            `;
+                    if (!coachNo) {
+                        return;
+                    }
+
+
+                    rows.push({
+
+                        shop:
+                            getShop(line),
+
+                        line:
+                            clean(line),
+
+                        position:
+                            clean(position),
+
+                        coachNo:
+                            coachNo
+
+                    });
+
+
+                    occupied++;
+
+                }
+            );
 
         }
     );
 
 
-    tbody.innerHTML =
-        html;
+    /* =====================================================
+       SORT
+    ===================================================== */
+
+    rows.sort(
+        (a, b) => {
+
+            const shopCompare =
+                a.shop.localeCompare(
+                    b.shop,
+                    undefined,
+                    {
+                        numeric: true
+                    }
+                );
+
+
+            if (shopCompare !== 0) {
+                return shopCompare;
+            }
+
+
+            const lineCompare =
+                a.line.localeCompare(
+                    b.line,
+                    undefined,
+                    {
+                        numeric: true
+                    }
+                );
+
+
+            if (lineCompare !== 0) {
+                return lineCompare;
+            }
+
+
+            return a.position.localeCompare(
+                b.position,
+                undefined,
+                {
+                    numeric: true
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       CREATE ROWS
+    ===================================================== */
+
+    rows.forEach(
+        item => {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            /* SHOP */
+
+            const shop =
+                document.createElement(
+                    "td"
+                );
+
+            shop.textContent =
+                item.shop;
+
+
+            /* LINE */
+
+            const line =
+                document.createElement(
+                    "td"
+                );
+
+            line.textContent =
+                item.line;
+
+
+            /* POSITION */
+
+            const position =
+                document.createElement(
+                    "td"
+                );
+
+            position.textContent =
+                item.position;
+
+
+            /* COACH NUMBER */
+
+            const coachNo =
+                document.createElement(
+                    "td"
+                );
+
+            coachNo.textContent =
+                item.coachNo;
+
+
+            coachNo.className =
+                "coach-number";
+
+
+            tr.appendChild(shop);
+
+            tr.appendChild(line);
+
+            tr.appendChild(position);
+
+            tr.appendChild(coachNo);
+
+
+            tbody.appendChild(tr);
+
+        }
+    );
+
+
+    /* =====================================================
+       COUNTERS
+    ===================================================== */
+
+    if (totalCount) {
+
+        totalCount.textContent =
+            "145";
+
+    }
+
+
+    if (occupiedCount) {
+
+        occupiedCount.textContent =
+            occupied;
+
+    }
+
+
+    /* =====================================================
+       NO DATA
+    ===================================================== */
+
+    if (noData) {
+
+        noData.style.display =
+            rows.length === 0
+                ? "block"
+                : "none";
+
+    }
 
 }
 
@@ -750,161 +506,49 @@ onValue(
 
     snapshot => {
 
-        firebaseConnected =
-            true;
-
-
-        updateConnectionStatus(
-            true
-        );
-
-
-        printBoardData =
+        const board =
             snapshot.exists()
                 ? snapshot.val()
                 : {};
 
 
         console.log(
-            "PRINT FIREBASE UPDATE:",
-            printBoardData
+            "Firebase Print Update:",
+            board
         );
 
 
         renderPrintTable(
-            printBoardData
+            board
         );
 
     },
 
     error => {
 
-        firebaseConnected =
-            false;
-
-
         console.error(
-            "PRINT FIREBASE ERROR:",
+            "Firebase Print Error:",
             error
         );
 
-
-        updateConnectionStatus(
-            false
-        );
-
-
-        const tbody =
-            getElement(
-                "printBody",
-                "printTableBody"
+        const noData =
+            document.getElementById(
+                "noData"
             );
 
 
-        if (tbody) {
+        if (noData) {
 
-            tbody.innerHTML = `
+            noData.textContent =
+                "Firebase connection error.";
 
-                <tr>
-
-                    <td
-                        colspan="4"
-                        class="empty"
-                    >
-                        Firebase connection error.
-                    </td>
-
-                </tr>
-
-            `;
+            noData.style.display =
+                "block";
 
         }
 
     }
 
-);
-
-
-/* =========================================================
-   LIVE DATE
-========================================================= */
-
-function updateDate() {
-
-    const element =
-        getElement(
-            "liveDate"
-        );
-
-
-    if (!element) {
-
-        return;
-
-    }
-
-
-    element.textContent =
-        new Date().toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-            }
-        );
-
-}
-
-
-/* =========================================================
-   LIVE TIME
-========================================================= */
-
-function updateTime() {
-
-    const element =
-        getElement(
-            "liveTime"
-        );
-
-
-    if (!element) {
-
-        return;
-
-    }
-
-
-    element.textContent =
-        new Date().toLocaleTimeString(
-            "en-IN",
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }
-        );
-
-}
-
-
-/* =========================================================
-   START CLOCK
-========================================================= */
-
-updateDate();
-
-updateTime();
-
-setInterval(
-    updateDate,
-    1000
-);
-
-setInterval(
-    updateTime,
-    1000
 );
 
 
@@ -915,77 +559,30 @@ setInterval(
 window.printBoard =
     function () {
 
-        /*
-           Make sure Firebase data has loaded.
-        */
-
-        if (
-            !printBoardData ||
-            typeof printBoardData !== "object"
-        ) {
-
-            alert(
-                "Board data is not loaded yet.\n\nPlease wait for Firebase Connected."
-            );
-
-            return;
-
-        }
-
-
-        renderPrintTable(
-            printBoardData
-        );
-
-
-        setTimeout(
-            () => {
-
-                window.print();
-
-            },
-            100
-        );
+        window.print();
 
     };
 
 
 /* =========================================================
-   AUTO PRINT SUPPORT
+   DATE / TIME
 ========================================================= */
 
-window.autoPrintBoard =
-    function () {
+updateDate();
 
-        if (
-            !printBoardData ||
-            typeof printBoardData !== "object"
-        ) {
-
-            alert(
-                "Please wait for Firebase data to load."
-            );
-
-            return;
-
-        }
+updateTime();
 
 
-        renderPrintTable(
-            printBoardData
-        );
+setInterval(
+    updateDate,
+    1000
+);
 
 
-        setTimeout(
-            () => {
-
-                window.print();
-
-            },
-            300
-        );
-
-    };
+setInterval(
+    updateTime,
+    1000
+);
 
 
 /* =========================================================
@@ -997,37 +594,11 @@ document.addEventListener(
     () => {
 
         console.log(
-            "========================================"
+            "MR CO-ORDINATION PRINT VERSION 3.0"
         );
 
         console.log(
-            "MR CO-ORDINATION PRINT"
-        );
-
-        console.log(
-            "PRINT.JS VERSION 3.0 FINAL"
-        );
-
-        console.log(
-            "PRINT FORMAT:"
-        );
-
-        console.log(
-            "SHOP | LINE | POSITION | COACH NUMBER"
-        );
-
-        console.log(
-            "DATABASE PATH:",
-            BOARD_PATH
-        );
-
-        console.log(
-            "TOTAL CAPACITY:",
-            TOTAL_CAPACITY
-        );
-
-        console.log(
-            "========================================"
+            "PRINT: SHOP / LINE / POSITION / COACH NUMBER"
         );
 
     }
