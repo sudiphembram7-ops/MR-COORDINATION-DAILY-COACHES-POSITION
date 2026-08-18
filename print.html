@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>MR CO-ORDINATION BOARD - A4 PRINT</title>
+    <title>MR CO-ORDINATION PRINT</title>
 
     <link
         rel="stylesheet"
@@ -19,12 +19,12 @@
 
 </head>
 
-
 <body>
 
-    <div id="printRoot">
+    <div class="print-page">
 
-        <div class="print-header">
+        <!-- HEADER -->
+        <header class="print-header">
 
             <div class="railway-title">
                 INDIAN RAILWAYS
@@ -34,268 +34,93 @@
                 LILUAH WORKSHOP
             </div>
 
-            <div class="board-title">
-                MR CO-ORDINATION BOARD
+            <div class="main-title">
+                MR CO-ORDINATION
             </div>
 
-            <div class="board-subtitle">
+            <div class="sub-title">
                 DAILY COACHES POSITION
             </div>
 
-        </div>
-
-
-        <div class="print-info">
-
-            <span>
-                <b>Date:</b>
-                <span id="printDate">--</span>
-            </span>
-
-            <span>
-                <b>Time:</b>
-                <span id="printTime">--</span>
-            </span>
-
-            <span>
-                <b>Total:</b>
-                <span id="printTotal">145</span>
-            </span>
-
-            <span>
-                <b>Occupied:</b>
-                <span id="printOccupied">0</span>
-            </span>
-
-            <span>
-                <b>Free:</b>
-                <span id="printFree">145</span>
-            </span>
-
-        </div>
-
-
-        <div id="printBoard">
-
-            <div class="loading">
-                Preparing print...
+            <div class="date-time">
+                <span id="liveDate">--/--/----</span>
+                <span>|</span>
+                <span id="liveTime">--:--:--</span>
             </div>
 
-        </div>
+        </header>
 
 
-        <div class="print-footer">
+        <!-- SUMMARY -->
+        <div class="summary">
 
             <span>
-                MR CO-ORDINATION / LILUAH WORKSHOP
+                TOTAL:
+                <b id="totalCount">0</b>
             </span>
 
             <span>
-                Generated:
-                <span id="generatedTime">--</span>
+                OCCUPIED:
+                <b id="occupiedCount">0</b>
             </span>
 
         </div>
+
+
+        <!-- PRINT TABLE -->
+        <table id="printTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>SHOP</th>
+
+                    <th>LINE</th>
+
+                    <th>POSITION</th>
+
+                    <th>COACH NUMBER</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="printBody">
+
+            </tbody>
+
+        </table>
+
+
+        <div
+            id="noData"
+            class="no-data"
+            style="display:none;"
+        >
+            No coach data available.
+        </div>
+
+
+        <!-- FOOTER -->
+        <footer>
+
+            MR CO-ORDINATION / LILUAH WORKSHOP
+
+            <span>
+                Printed:
+                <span id="printTime">--:--:--</span>
+            </span>
+
+        </footer>
 
     </div>
 
 
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadPrintData();
-
-    }
-);
-
-
-/* =========================================================
-   LOAD PRINT DATA
-========================================================= */
-
-function loadPrintData() {
-
-    const printBoard =
-        document.getElementById(
-            "printBoard"
-        );
-
-
-    /*
-       board.js will put the complete
-       board HTML here.
-    */
-
-    const savedHTML =
-        sessionStorage.getItem(
-            "MR_PRINT_BOARD_HTML"
-        );
-
-
-    const savedCounters =
-        sessionStorage.getItem(
-            "MR_PRINT_COUNTERS"
-        );
-
-
-    if (!savedHTML) {
-
-        printBoard.innerHTML = `
-
-            <div class="print-error">
-
-                Board data not available.
-
-                <br><br>
-
-                Please open the board and
-                click Print again.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    printBoard.innerHTML =
-        savedHTML;
-
-
-    /*
-       Restore counters.
-    */
-
-    if (savedCounters) {
-
-        try {
-
-            const counters =
-                JSON.parse(
-                    savedCounters
-                );
-
-
-            document.getElementById(
-                "printTotal"
-            ).textContent =
-                counters.total ?? 145;
-
-
-            document.getElementById(
-                "printOccupied"
-            ).textContent =
-                counters.occupied ?? 0;
-
-
-            document.getElementById(
-                "printFree"
-            ).textContent =
-                counters.free ?? 145;
-
-        }
-        catch (error) {
-
-            console.warn(
-                "Counter parse error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    updateDateTime();
-
-
-    /*
-       Wait for browser layout.
-    */
-
-    setTimeout(
-        function () {
-
-            window.print();
-
-        },
-        800
-    );
-
-}
-
-
-/* =========================================================
-   DATE / TIME
-========================================================= */
-
-function updateDateTime() {
-
-    const now =
-        new Date();
-
-
-    const date =
-        now.toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-            }
-        );
-
-
-    const time =
-        now.toLocaleTimeString(
-            "en-IN"
-        );
-
-
-    document.getElementById(
-        "printDate"
-    ).textContent =
-        date;
-
-
-    document.getElementById(
-        "printTime"
-    ).textContent =
-        time;
-
-
-    document.getElementById(
-        "generatedTime"
-    ).textContent =
-        date +
-        " " +
-        time;
-
-}
-
-
-/* =========================================================
-   AFTER PRINT
-========================================================= */
-
-window.addEventListener(
-    "afterprint",
-    function () {
-
-        /*
-           Do not close automatically.
-           User can return to board manually.
-        */
-
-    }
-);
-
-</script>
+    <script
+        type="module"
+        src="js/print.js"
+    ></script>
 
 </body>
 
