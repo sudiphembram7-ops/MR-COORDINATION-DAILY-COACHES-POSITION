@@ -1,34 +1,61 @@
 /* =========================================================
-   MR CO-ORDINATION
-   A4 PRINT
-   COACH NUMBER ONLY
-   VERSION 1.0 FINAL
+   MR CO-ORDINATION DAILY COACHES POSITION
 
-   LAYOUT:
+   PRINT.JS
+   VERSION 2.0 FINAL
 
-   ┌──────────────────────┬──────────────────────┐
-   │ N SHOP + M SHOP      │ LIFTING BAY + J SHOP│
-   ├──────────────────────┼──────────────────────┤
-   │ MR SCR SHOP          │ CR SHOP              │
-   └──────────────────────┴──────────────────────┘
+   FORMAT 2
 
-   FIREBASE:
-   coachBoard
+   ---------------------------------------------------------
+
+   N SHOP + M SHOP
+   LIFTING BAY + J SHOP
+   MR SCR SHOP
+   CR SHOP
+
+   ---------------------------------------------------------
+
+   TABLE:
+
+   Position | Line | Line | Line | Line
+   H1       | Coach | Coach | Coach | Coach
+   H2       | Coach | Coach | Coach | Coach
+
+   ---------------------------------------------------------
+
+   ONLY:
+   - Line
+   - Position
+   - Coach Number
+
+   NOT:
+   - Status
+   - Coach Type
+   - Other fields
+
+   ---------------------------------------------------------
+
+   A4 LANDSCAPE
 ========================================================= */
 
 
 /* =========================================================
-   FIREBASE
+   FIREBASE IMPORT
 ========================================================= */
 
 import {
+
     ref,
     get
+
 } from
 "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+
 import {
+
     database
+
 } from "./firebase-config.js";
 
 
@@ -36,7 +63,8 @@ import {
    CONFIG
 ========================================================= */
 
-const BOARD_PATH = "coachBoard";
+const BOARD_PATH =
+    "coachBoard";
 
 
 /* =========================================================
@@ -44,83 +72,128 @@ const BOARD_PATH = "coachBoard";
 ========================================================= */
 
 const loading =
-    document.getElementById("loading");
+    document.getElementById(
+        "loading"
+    );
+
+
+const errorMessage =
+    document.getElementById(
+        "errorMessage"
+    );
+
+
+const printArea =
+    document.getElementById(
+        "printArea"
+    );
+
 
 const printDate =
-    document.getElementById("printDate");
+    document.getElementById(
+        "printDate"
+    );
+
+
+const printButton =
+    document.getElementById(
+        "printButton"
+    );
+
+
+const closeButton =
+    document.getElementById(
+        "closeButton"
+    );
 
 
 /* =========================================================
-   SHOP NORMALISE
+   SHOP NORMALISATION
 ========================================================= */
 
-function normaliseShop(shop){
+function normaliseShop(
+    value
+){
 
     if(
-        shop === null ||
-        shop === undefined
+        value === null ||
+        value === undefined
     ){
+
         return "";
+
     }
 
 
-    const value =
-        String(shop)
+    const shop =
+        String(value)
         .trim()
         .toUpperCase();
 
 
     if(
-        value === "N" ||
-        value === "N SHOP"
+        shop === "N" ||
+        shop === "N SHOP"
     ){
+
         return "N SHOP";
+
     }
 
 
     if(
-        value === "M" ||
-        value === "M SHOP"
+        shop === "M" ||
+        shop === "M SHOP"
     ){
+
         return "M SHOP";
+
     }
 
 
     if(
-        value === "L" ||
-        value === "LIFTING" ||
-        value === "LIFTING BAY"
+        shop === "L" ||
+        shop === "LIFTING" ||
+        shop === "LIFTING BAY"
     ){
+
         return "LIFTING BAY";
+
     }
 
 
     if(
-        value === "SCR" ||
-        value === "MR SCR" ||
-        value === "MR SCR SHOP"
+        shop === "J" ||
+        shop === "J SHOP"
     ){
-        return "MR SCR SHOP";
-    }
 
-
-    if(
-        value === "CR" ||
-        value === "CR SHOP"
-    ){
-        return "CR SHOP";
-    }
-
-
-    if(
-        value === "J" ||
-        value === "J SHOP"
-    ){
         return "J SHOP";
+
     }
 
 
-    return value;
+    if(
+        shop === "SCR" ||
+        shop === "MR SCR" ||
+        shop === "MR SCR SHOP"
+    ){
+
+        return "MR SCR SHOP";
+
+    }
+
+
+    if(
+        shop === "CR" ||
+        shop === "CR SHOP"
+    ){
+
+        return "CR SHOP";
+
+    }
+
+
+    return shop;
 
 }
 
@@ -129,17 +202,19 @@ function normaliseShop(shop){
    COACH NUMBER
 ========================================================= */
 
-function getCoachNumber(value){
+function getCoachNumber(
+    value
+){
 
     if(
         value === null ||
         value === undefined
     ){
+
         return "";
+
     }
 
-
-    /* Simple value */
 
     if(
         typeof value === "string" ||
@@ -152,22 +227,20 @@ function getCoachNumber(value){
     }
 
 
-    /* Object */
-
     if(
         typeof value === "object"
     ){
 
-        const number =
+        return String(
+
             value.coachNo ??
             value.coachNumber ??
             value.number ??
             value.coach ??
-            "";
+            value.coach_no ??
+            ""
 
-
-        return String(number)
-            .trim();
+        ).trim();
 
     }
 
@@ -181,16 +254,201 @@ function getCoachNumber(value){
    NATURAL SORT
 ========================================================= */
 
-function naturalSort(a,b){
+function naturalSort(
+    a,
+    b
+){
 
     return String(a).localeCompare(
+
         String(b),
+
         undefined,
+
         {
             numeric:true,
             sensitivity:"base"
         }
+
     );
+
+}
+
+
+/* =========================================================
+   SHOP CONFIGURATION
+========================================================= */
+
+const SHOP_CONFIG = {
+
+
+    "N SHOP": {
+
+        positions: [
+
+            "H1",
+            "H2",
+            "H3",
+            "D3",
+            "D2",
+            "D1"
+
+        ]
+
+    },
+
+
+    "M SHOP": {
+
+        positions: [
+
+            "H",
+            "C",
+            "D"
+
+        ]
+
+    },
+
+
+    "LIFTING BAY": {
+
+        positions: [
+
+            "H",
+            "C",
+            "D"
+
+        ]
+
+    },
+
+
+    "J SHOP": {
+
+        positions: [
+
+            "H1",
+            "H2",
+            "D2",
+            "D1"
+
+        ]
+
+    },
+
+
+    "MR SCR SHOP": {
+
+        positions: [
+
+            "H1",
+            "H2",
+            "D2",
+            "D1"
+
+        ]
+
+    },
+
+
+    "CR SHOP": {
+
+        positions: [
+
+            "H",
+            "D"
+
+        ]
+
+    }
+
+};
+
+
+/* =========================================================
+   PRINT GROUPS
+========================================================= */
+
+const PRINT_GROUPS = [
+
+
+    {
+
+        title:
+            "N SHOP + M SHOP",
+
+        shops: [
+
+            "N SHOP",
+            "M SHOP"
+
+        ]
+
+    },
+
+
+    {
+
+        title:
+            "LIFTING BAY + J SHOP",
+
+        shops: [
+
+            "LIFTING BAY",
+            "J SHOP"
+
+        ]
+
+    },
+
+
+    {
+
+        title:
+            "MR SCR SHOP",
+
+        shops: [
+
+            "MR SCR SHOP"
+
+        ]
+
+    },
+
+
+    {
+
+        title:
+            "CR SHOP",
+
+        shops: [
+
+            "CR SHOP"
+
+        ]
+
+    }
+
+];
+
+
+/* =========================================================
+   CREATE EMPTY BOARD
+========================================================= */
+
+function createEmptyBoard(){
+
+    return {
+
+        "N SHOP": {},
+        "M SHOP": {},
+        "LIFTING BAY": {},
+        "J SHOP": {},
+        "MR SCR SHOP": {},
+        "CR SHOP": {}
+
+    };
 
 }
 
@@ -200,48 +458,76 @@ function naturalSort(a,b){
 ========================================================= */
 
 function addCoach(
+
     board,
     shop,
     line,
     position,
     coach
+
 ){
 
     const coachNo =
-        getCoachNumber(coach);
+        getCoachNumber(
+            coach
+        );
 
 
     if(!coachNo){
+
         return;
+
     }
 
 
     shop =
-        normaliseShop(shop);
+        normaliseShop(
+            shop
+        );
 
 
-    if(!shop){
+    line =
+        String(
+            line ?? ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    position =
+        String(
+            position ?? ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    if(
+        !shop ||
+        !line ||
+        !position
+    ){
+
         return;
+
     }
 
 
-    if(!line){
-        line = "LINE";
-    }
+    if(
+        !board[shop]
+    ){
 
-
-    if(!position){
-        position = "H";
-    }
-
-
-    if(!board[shop]){
         board[shop] = {};
+
     }
 
 
-    if(!board[shop][line]){
+    if(
+        !board[shop][line]
+    ){
+
         board[shop][line] = {};
+
     }
 
 
@@ -252,228 +538,224 @@ function addCoach(
 
 
 /* =========================================================
-   CELL ID PARSER
+   PARSE CELL ID
 ========================================================= */
 
 function parseCellId(
+
+    board,
     id,
-    coach,
-    board
+    coach
+
 ){
 
     if(!id){
+
         return;
+
     }
 
 
-    id =
+    const cellId =
         String(id)
         .trim()
         .toUpperCase();
 
 
-    let shop = "";
-    let line = "";
-    let position = "";
+    let match;
 
 
     /* =====================================================
        N SHOP
-
-       N2_H1
-       N3_H2
-       N7_D1
     ===================================================== */
 
-    if(
-        /^N\d+[_-]/.test(id)
-    ){
+    match =
+        cellId.match(
 
-        const match =
-            id.match(
-                /^(N\d+)[_-](H1|H2|H3|D3|D2|D1)$/i
-            );
+            /^(N\d+)[_-](H1|H2|H3|D3|D2|D1)$/
+
+        );
 
 
-        if(match){
+    if(match){
 
-            shop = "N SHOP";
+        addCoach(
 
-            line = match[1];
+            board,
 
-            position = match[2];
+            "N SHOP",
 
-        }
+            match[1],
+
+            match[2],
+
+            coach
+
+        );
+
+        return;
 
     }
 
 
     /* =====================================================
        M SHOP
-
-       M2_H
-       M3_C
-       M4_D
     ===================================================== */
 
-    else if(
-        /^M\d+[_-]/.test(id)
-    ){
+    match =
+        cellId.match(
 
-        const match =
-            id.match(
-                /^(M\d+)[_-](H|C|D)$/i
-            );
+            /^(M\d+)[_-](H|C|D)$/
+
+        );
 
 
-        if(match){
+    if(match){
 
-            shop = "M SHOP";
+        addCoach(
 
-            line = match[1];
+            board,
 
-            position = match[2];
+            "M SHOP",
 
-        }
+            match[1],
+
+            match[2],
+
+            coach
+
+        );
+
+        return;
 
     }
 
 
     /* =====================================================
        LIFTING BAY
-
-       L9_H
-       L10_C
-       L10_D
     ===================================================== */
 
-    else if(
-        /^L\d+[_-]/.test(id)
-    ){
+    match =
+        cellId.match(
 
-        const match =
-            id.match(
-                /^(L\d+)[_-](H|C|D)$/i
-            );
+            /^(L\d+)[_-](H|C|D)$/
+
+        );
 
 
-        if(match){
+    if(match){
 
-            shop = "LIFTING BAY";
+        addCoach(
 
-            line = match[1];
+            board,
 
-            position = match[2];
+            "LIFTING BAY",
 
-        }
+            match[1],
+
+            match[2],
+
+            coach
+
+        );
+
+        return;
 
     }
 
 
     /* =====================================================
        MR SCR SHOP
-
-       SCR9_H1
-       SCR10_H2
-       SCR11_D2
     ===================================================== */
 
-    else if(
-        /^SCR\d+[_-]/.test(id)
-    ){
+    match =
+        cellId.match(
 
-        const match =
-            id.match(
-                /^(SCR\d+)[_-](H1|H2|D2|D1)$/i
-            );
+            /^(SCR\d+)[_-](H1|H2|D2|D1)$/
+
+        );
 
 
-        if(match){
+    if(match){
 
-            shop = "MR SCR SHOP";
+        addCoach(
 
-            line = match[1];
+            board,
 
-            position = match[2];
+            "MR SCR SHOP",
 
-        }
+            match[1],
+
+            match[2],
+
+            coach
+
+        );
+
+        return;
 
     }
 
 
     /* =====================================================
        CR SHOP
-
-       F1_H
-       F1_D
     ===================================================== */
 
-    else if(
-        /^F\d+[_-]/.test(id)
-    ){
+    match =
+        cellId.match(
 
-        const match =
-            id.match(
-                /^(F\d+)[_-](H|D)$/i
-            );
+            /^(F\d+)[_-](H|D)$/
+
+        );
 
 
-        if(match){
+    if(match){
 
-            shop = "CR SHOP";
+        addCoach(
 
-            line = match[1];
+            board,
 
-            position = match[2];
+            "CR SHOP",
 
-        }
+            match[1],
+
+            match[2],
+
+            coach
+
+        );
+
+        return;
 
     }
 
 
     /* =====================================================
        J SHOP
-
-       J1_H1
-       J2_H2
-       J3_D2
     ===================================================== */
 
-    else if(
-        /^J\d+[_-]/.test(id)
-    ){
+    match =
+        cellId.match(
 
-        const match =
-            id.match(
-                /^(J\d+)[_-](H1|H2|D2|D1)$/i
-            );
+            /^(J\d+)[_-](H1|H2|D2|D1)$/
+
+        );
 
 
-        if(match){
-
-            shop = "J SHOP";
-
-            line = match[1];
-
-            position = match[2];
-
-        }
-
-    }
-
-
-    if(
-        shop &&
-        line &&
-        position
-    ){
+    if(match){
 
         addCoach(
+
             board,
-            shop,
-            line,
-            position,
+
+            "J SHOP",
+
+            match[1],
+
+            match[2],
+
             coach
+
         );
 
     }
@@ -482,12 +764,15 @@ function parseCellId(
 
 
 /* =========================================================
-   PARSE FIREBASE
+   PARSE FIREBASE DATA
 ========================================================= */
 
-function parseBoard(raw){
+function parseBoard(
+    raw
+){
 
-    const board = {};
+    const board =
+        createEmptyBoard();
 
 
     if(
@@ -501,185 +786,239 @@ function parseBoard(raw){
 
 
     /* =====================================================
-       PASS 1
-       Direct / flat records
-    ===================================================== */
-
-    for(
-        const key of Object.keys(raw)
-    ){
-
-        const item =
-            raw[key];
-
-
-        if(
-            !item ||
-            typeof item !== "object"
-        ){
-            continue;
-        }
-
-
-        const coachNo =
-            getCoachNumber(item);
-
-
-        if(!coachNo){
-            continue;
-        }
-
-
-        /* =================================================
-           Format:
-           {
-             shop,
-             line,
-             position,
-             coachNo
-           }
-        ================================================= */
-
-        const shop =
-            normaliseShop(
-                item.shop
-            );
-
-
-        const line =
-            String(
-                item.line ??
-                ""
-            ).trim();
-
-
-        const position =
-            String(
-                item.position ??
-                ""
-            ).trim();
-
-
-        if(
-            shop &&
-            line &&
-            position
-        ){
-
-            addCoach(
-                board,
-                shop,
-                line,
-                position,
-                item
-            );
-
-        }
-
-
-        /* =================================================
-           Cell ID
-        ================================================= */
-
-        const cellId =
-            item.id ??
-            item.cellId ??
-            item.cell ??
-            key;
-
-
-        parseCellId(
-            cellId,
-            item,
-            board
-        );
-
-    }
-
-
-    /* =====================================================
-       PASS 2
-       Nested structure
+       FORMAT A
+       Nested:
 
        shop
-          line
-             position
-                coach
+         line
+           position
+             coach
     ===================================================== */
 
-    for(
-        const shopKey of Object.keys(raw)
-    ){
+    Object.keys(raw)
+        .forEach(
 
-        const shopValue =
-            raw[shopKey];
+            shopKey => {
 
-
-        if(
-            !shopValue ||
-            typeof shopValue !== "object"
-        ){
-            continue;
-        }
+                const shop =
+                    normaliseShop(
+                        shopKey
+                    );
 
 
-        const shop =
-            normaliseShop(shopKey);
+                const shopData =
+                    raw[shopKey];
 
 
-        if(!shop){
-            continue;
-        }
+                if(
+                    !shopData ||
+                    typeof shopData !== "object"
+                ){
 
+                    return;
 
-        for(
-            const lineKey of
-            Object.keys(shopValue)
-        ){
-
-            const lineValue =
-                shopValue[lineKey];
-
-
-            if(
-                !lineValue ||
-                typeof lineValue !== "object"
-            ){
-                continue;
-            }
-
-
-            for(
-                const positionKey of
-                Object.keys(lineValue)
-            ){
-
-                const coach =
-                    lineValue[positionKey];
-
-
-                const coachNo =
-                    getCoachNumber(coach);
-
-
-                if(!coachNo){
-                    continue;
                 }
 
 
-                addCoach(
-                    board,
-                    shop,
-                    lineKey,
-                    positionKey,
-                    coach
+                if(
+                    !SHOP_CONFIG[shop]
+                ){
+
+                    return;
+
+                }
+
+
+                Object.keys(
+                    shopData
+                )
+                .forEach(
+
+                    lineKey => {
+
+                        const lineData =
+                            shopData[
+                                lineKey
+                            ];
+
+
+                        if(
+                            !lineData ||
+                            typeof lineData !==
+                            "object"
+                        ){
+
+                            return;
+
+                        }
+
+
+                        Object.keys(
+                            lineData
+                        )
+                        .forEach(
+
+                            positionKey => {
+
+                                const coach =
+                                    lineData[
+                                        positionKey
+                                    ];
+
+
+                                const coachNo =
+                                    getCoachNumber(
+                                        coach
+                                    );
+
+
+                                if(coachNo){
+
+                                    addCoach(
+
+                                        board,
+
+                                        shop,
+
+                                        lineKey,
+
+                                        positionKey,
+
+                                        coach
+
+                                    );
+
+                                }
+
+                            }
+
+                        );
+
+                    }
+
                 );
 
             }
 
-        }
+        );
 
-    }
+
+    /* =====================================================
+       FORMAT B
+       Flat records
+    ===================================================== */
+
+    Object.keys(raw)
+        .forEach(
+
+            key => {
+
+                const item =
+                    raw[key];
+
+
+                if(
+                    !item ||
+                    typeof item !==
+                    "object"
+                ){
+
+                    return;
+
+                }
+
+
+                const coachNo =
+                    getCoachNumber(
+                        item
+                    );
+
+
+                if(!coachNo){
+
+                    return;
+
+                }
+
+
+                const shop =
+                    normaliseShop(
+
+                        item.shop ??
+                        item.shopName
+
+                    );
+
+
+                const line =
+                    String(
+
+                        item.line ??
+                        item.lineNo ??
+                        ""
+
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                const position =
+                    String(
+
+                        item.position ??
+                        ""
+
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                if(
+                    shop &&
+                    line &&
+                    position
+                ){
+
+                    addCoach(
+
+                        board,
+
+                        shop,
+
+                        line,
+
+                        position,
+
+                        item
+
+                    );
+
+                }
+
+
+                /* Cell ID fallback */
+
+                const cellId =
+
+                    item.id ??
+                    item.cellId ??
+                    item.cell ??
+                    key;
+
+
+                parseCellId(
+
+                    board,
+
+                    cellId,
+
+                    item
+
+                );
+
+            }
+
+        );
 
 
     return board;
@@ -688,128 +1027,284 @@ function parseBoard(raw){
 
 
 /* =========================================================
-   GET ALL POSITIONS
+   GET SHOP LINES
 ========================================================= */
 
-function getPositions(lines){
+function getShopLines(
 
-    const set =
-        new Set();
+    board,
+    shop
 
+){
 
-    Object.keys(lines)
-        .forEach(
-            line => {
+    if(
+        !board[shop]
+    ){
 
-                Object.keys(
-                    lines[line] || {}
-                )
-                .forEach(
-                    position => {
+        return [];
 
-                        set.add(position);
-
-                    }
-                );
-
-            }
-        );
+    }
 
 
-    return Array.from(set)
-        .sort(naturalSort);
+    return Object.keys(
+        board[shop]
+    )
+    .sort(
+        naturalSort
+    );
 
 }
 
 
 /* =========================================================
-   DRAW SHOP TABLE
+   GET SHOP POSITIONS
 ========================================================= */
 
-function drawShop(
-    shop,
-    lines
+function getShopPositions(
+
+    board,
+    shop
+
 ){
 
-    const wrapper =
-        document.createElement("div");
-
-    wrapper.className =
-        "singleShop";
+    const config =
+        SHOP_CONFIG[shop];
 
 
-    /* Shop name */
+    const positions = [];
+
+
+    /*
+     * Keep known position order first
+     */
+
+    if(config){
+
+        config.positions.forEach(
+
+            position => {
+
+                positions.push(
+                    position
+                );
+
+            }
+
+        );
+
+    }
+
+
+    /*
+     * Add any unknown positions
+     */
+
+    const found =
+        new Set(
+            positions
+        );
+
+
+    const lines =
+        board[shop] || {};
+
+
+    Object.keys(lines)
+        .forEach(
+
+            line => {
+
+                const lineData =
+                    lines[line];
+
+
+                if(
+                    !lineData ||
+                    typeof lineData !==
+                    "object"
+                ){
+
+                    return;
+
+                }
+
+
+                Object.keys(
+                    lineData
+                )
+                .forEach(
+
+                    position => {
+
+                        if(
+                            !found.has(
+                                position
+                            )
+                        ){
+
+                            found.add(
+                                position
+                            );
+
+                            positions.push(
+                                position
+                            );
+
+                        }
+
+                    }
+
+                );
+
+            }
+
+        );
+
+
+    return positions;
+
+}
+
+
+/* =========================================================
+   CREATE SHOP TABLE
+========================================================= */
+
+function createShopTable(
+
+    board,
+    shop
+
+){
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+    box.className =
+        "shopBox";
+
+
+    /* =====================================================
+       SHOP TITLE
+    ===================================================== */
 
     const title =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     title.className =
-        "shopName";
+        "shopTitle";
+
 
     title.textContent =
         shop;
 
 
-    wrapper.appendChild(title);
+    box.appendChild(
+        title
+    );
 
+
+    /* =====================================================
+       TABLE
+    ===================================================== */
 
     const table =
-        document.createElement("table");
+        document.createElement(
+            "table"
+        );
+
 
     table.className =
         "coachTable";
 
 
-    const lineList =
-        Object.keys(lines || {})
-        .sort(naturalSort);
+    /* =====================================================
+       LINES
+    ===================================================== */
 
-
-    if(!lineList.length){
-
-        return wrapper;
-
-    }
+    const lines =
+        getShopLines(
+            board,
+            shop
+        );
 
 
     /* =====================================================
-       HEADER
+       POSITIONS
+    ===================================================== */
+
+    const positions =
+        getShopPositions(
+            board,
+            shop
+        );
+
+
+    /* =====================================================
+       THEAD
     ===================================================== */
 
     const thead =
-        document.createElement("thead");
+        document.createElement(
+            "thead"
+        );
 
 
     const headerRow =
-        document.createElement("tr");
+        document.createElement(
+            "tr"
+        );
 
 
-    const positionTH =
-        document.createElement("th");
+    const positionHeader =
+        document.createElement(
+            "th"
+        );
 
-    positionTH.textContent =
-        "POS";
+
+    positionHeader.className =
+        "positionHeader";
+
+
+    positionHeader.textContent =
+        "POSITION";
 
 
     headerRow.appendChild(
-        positionTH
+        positionHeader
     );
 
 
-    lineList.forEach(
+    lines.forEach(
+
         line => {
 
             const th =
-                document.createElement("th");
+                document.createElement(
+                    "th"
+                );
+
+
+            /*
+             * LINE NUMBER
+             */
 
             th.textContent =
                 line;
+
 
             headerRow.appendChild(
                 th
             );
 
         }
+
     );
 
 
@@ -824,83 +1319,105 @@ function drawShop(
 
 
     /* =====================================================
-       BODY
+       TBODY
     ===================================================== */
 
     const tbody =
-        document.createElement("tbody");
-
-
-    const positions =
-        getPositions(lines);
+        document.createElement(
+            "tbody"
+        );
 
 
     positions.forEach(
+
         position => {
 
-            const tr =
-                document.createElement("tr");
+            const row =
+                document.createElement(
+                    "tr"
+                );
 
 
-            const posTD =
-                document.createElement("td");
+            /* =================================================
+               POSITION
+            ================================================= */
 
-            posTD.className =
-                "position";
+            const positionCell =
+                document.createElement(
+                    "td"
+                );
 
-            posTD.textContent =
+
+            positionCell.className =
+                "positionCell";
+
+
+            positionCell.textContent =
                 position;
 
 
-            tr.appendChild(
-                posTD
+            row.appendChild(
+                positionCell
             );
 
 
-            lineList.forEach(
+            /* =================================================
+               COACH NUMBERS
+            ================================================= */
+
+            lines.forEach(
+
                 line => {
 
-                    const td =
-                        document.createElement("td");
-
-                    const coachNo =
-                        lines[line]?.[position] ||
-                        "";
-
-
-                    if(coachNo){
-
-                        const span =
-                            document.createElement(
-                                "span"
-                            );
-
-                        span.className =
-                            "coachNumber";
-
-                        span.textContent =
-                            coachNo;
-
-                        td.appendChild(
-                            span
+                    const cell =
+                        document.createElement(
+                            "td"
                         );
+
+
+                    const coach =
+                        board[
+                            shop
+                        ]?.[
+                            line
+                        ]?.[
+                            position
+                        ] || "";
+
+
+                    if(coach){
+
+                        cell.className =
+                            "coachCell";
+
+
+                        cell.textContent =
+                            coach;
+
+                    }
+                    else{
+
+                        cell.className =
+                            "emptyCell";
 
                     }
 
 
-                    tr.appendChild(
-                        td
+                    row.appendChild(
+                        cell
                     );
 
                 }
+
             );
 
 
             tbody.appendChild(
-                tr
+                row
             );
 
         }
+
     );
 
 
@@ -909,87 +1426,147 @@ function drawShop(
     );
 
 
-    wrapper.appendChild(
+    box.appendChild(
         table
     );
 
 
-    return wrapper;
+    return box;
 
 }
 
 
 /* =========================================================
-   DRAW GROUP
+   CREATE GROUP
 ========================================================= */
 
-function drawGroup(
-    elementId,
-    shops,
-    board
+function createGroup(
+
+    board,
+    group
+
 ){
 
-    const container =
-        document.getElementById(
-            elementId
+    const section =
+        document.createElement(
+            "section"
         );
 
 
-    if(!container){
-        return;
-    }
+    section.className =
+        "printGroup";
 
 
-    container.innerHTML = "";
+    /* =====================================================
+       GROUP TITLE
+    ===================================================== */
+
+    const title =
+        document.createElement(
+            "div"
+        );
 
 
-    shops.forEach(
-        shop => {
+    title.className =
+        "groupTitle";
 
-            if(
-                board[shop] &&
-                Object.keys(
-                    board[shop]
-                ).length
-            ){
 
-                container.appendChild(
-                    drawShop(
-                        shop,
-                        board[shop]
-                    )
-                );
+    title.textContent =
+        group.title;
 
-            }
 
-        }
+    section.appendChild(
+        title
     );
 
 
-    /* No data */
+    /* =====================================================
+       SHOP CONTAINER
+    ===================================================== */
 
-    if(!container.children.length){
-
-        const empty =
-            document.createElement("div");
-
-        empty.className =
-            "noData";
-
-        empty.textContent =
-            "No coach";
-
-        container.appendChild(
-            empty
+    const container =
+        document.createElement(
+            "div"
         );
 
-    }
+
+    container.className =
+
+        group.shops.length === 2
+
+            ? "shopContainer two"
+
+            : "shopContainer one";
+
+
+    group.shops.forEach(
+
+        shop => {
+
+            container.appendChild(
+
+                createShopTable(
+
+                    board,
+
+                    shop
+
+                )
+
+            );
+
+        }
+
+    );
+
+
+    section.appendChild(
+        container
+    );
+
+
+    return section;
 
 }
 
 
 /* =========================================================
-   DATE / TIME
+   DRAW COMPLETE PRINT PAGE
+========================================================= */
+
+function drawPrintPage(
+    board
+){
+
+    printArea.innerHTML =
+        "";
+
+
+    PRINT_GROUPS.forEach(
+
+        group => {
+
+            printArea.appendChild(
+
+                createGroup(
+
+                    board,
+
+                    group
+
+                )
+
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   SET DATE
 ========================================================= */
 
 function setPrintDate(){
@@ -1000,27 +1577,48 @@ function setPrintDate(){
 
     const date =
         now.toLocaleDateString(
+
             "en-IN",
+
             {
-                day:"2-digit",
-                month:"2-digit",
-                year:"numeric"
+
+                day:
+                    "2-digit",
+
+                month:
+                    "2-digit",
+
+                year:
+                    "numeric"
+
             }
+
         );
 
 
     const time =
         now.toLocaleTimeString(
+
             "en-IN",
+
             {
-                hour:"2-digit",
-                minute:"2-digit",
-                second:"2-digit"
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit"
+
             }
+
         );
 
 
     printDate.textContent =
+
         "Printed: " +
         date +
         "  " +
@@ -1033,214 +1631,201 @@ function setPrintDate(){
    SHOW ERROR
 ========================================================= */
 
-function showError(message){
+function showError(
+    message
+){
 
-    loading.textContent =
+    loading.style.display =
+        "none";
+
+
+    errorMessage.style.display =
+        "block";
+
+
+    errorMessage.textContent =
         message;
-
-    loading.classList.add(
-        "error"
-    );
 
 }
 
 
 /* =========================================================
-   LOAD BOARD
+   LOAD FIREBASE BOARD
 ========================================================= */
 
 async function loadBoard(){
 
     try{
 
-        /* -------------------------------------------------
-           Firebase database check
-        ------------------------------------------------- */
+        loading.style.display =
+            "flex";
+
+
+        /* =================================================
+           DATABASE CHECK
+        ================================================= */
 
         if(!database){
 
             throw new Error(
-                "Firebase database not found."
+                "Firebase database is not available."
             );
 
         }
 
 
-        /* -------------------------------------------------
-           Get board
-        ------------------------------------------------- */
+        /* =================================================
+           GET DATA
+        ================================================= */
+
+        const boardRef =
+            ref(
+
+                database,
+
+                BOARD_PATH
+
+            );
+
 
         const snapshot =
             await get(
-                ref(
-                    database,
-                    BOARD_PATH
-                )
+                boardRef
             );
 
 
+        /* =================================================
+           NO DATA
+        ================================================= */
+
         if(
-            !snapshot ||
             !snapshot.exists()
         ){
 
-            drawGroup(
-                "NM",
-                [
-                    "N SHOP",
-                    "M SHOP"
-                ],
-                {}
-            );
+            drawPrintPage(
 
+                createEmptyBoard()
 
-            drawGroup(
-                "LJ",
-                [
-                    "LIFTING BAY",
-                    "J SHOP"
-                ],
-                {}
-            );
-
-
-            drawGroup(
-                "SCR",
-                [
-                    "MR SCR SHOP"
-                ],
-                {}
-            );
-
-
-            drawGroup(
-                "CR",
-                [
-                    "CR SHOP"
-                ],
-                {}
             );
 
 
             loading.style.display =
                 "none";
 
+
             return;
 
         }
 
 
-        /* -------------------------------------------------
-           Parse
-        ------------------------------------------------- */
+        /* =================================================
+           PARSE
+        ================================================= */
 
         const raw =
             snapshot.val();
 
 
         const board =
-            parseBoard(raw);
+            parseBoard(
+                raw
+            );
 
 
-        console.log(
-            "PRINT BOARD:",
+        /* =================================================
+           DRAW
+        ================================================= */
+
+        drawPrintPage(
             board
         );
 
 
-        /* -------------------------------------------------
-           GROUP 1
-           N + M
-        ------------------------------------------------- */
-
-        drawGroup(
-            "NM",
-            [
-                "N SHOP",
-                "M SHOP"
-            ],
-            board
-        );
-
-
-        /* -------------------------------------------------
-           GROUP 2
-           LIFTING + J
-        ------------------------------------------------- */
-
-        drawGroup(
-            "LJ",
-            [
-                "LIFTING BAY",
-                "J SHOP"
-            ],
-            board
-        );
-
-
-        /* -------------------------------------------------
-           GROUP 3
-           MR SCR
-        ------------------------------------------------- */
-
-        drawGroup(
-            "SCR",
-            [
-                "MR SCR SHOP"
-            ],
-            board
-        );
-
-
-        /* -------------------------------------------------
-           GROUP 4
-           CR
-        ------------------------------------------------- */
-
-        drawGroup(
-            "CR",
-            [
-                "CR SHOP"
-            ],
-            board
-        );
-
-
-        /* -------------------------------------------------
-           Hide loading
-        ------------------------------------------------- */
+        /* =================================================
+           HIDE LOADING
+        ================================================= */
 
         loading.style.display =
             "none";
-
 
     }
     catch(error){
 
         console.error(
-            "PRINT LOAD ERROR:",
+            "PRINT ERROR:",
             error
         );
 
 
         showError(
-            "Unable to load Coach Board"
-        );
 
+            "Unable to load Coach Board. " +
 
-        setTimeout(
-            () => {
+            "Please check Firebase connection."
 
-                loading.style.display =
-                    "none";
-
-            },
-            2500
         );
 
     }
 
 }
+
+
+/* =========================================================
+   PRINT BUTTON
+========================================================= */
+
+printButton.addEventListener(
+
+    "click",
+
+    () => {
+
+        window.print();
+
+    }
+
+);
+
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+closeButton.addEventListener(
+
+    "click",
+
+    () => {
+
+        window.close();
+
+
+        /*
+         * If browser does not allow window.close(),
+         * go back.
+         */
+
+        setTimeout(
+
+            () => {
+
+                if(
+                    !window.closed
+                ){
+
+                    history.back();
+
+                }
+
+            },
+
+            300
+
+        );
+
+    }
+
+);
 
 
 /* =========================================================
