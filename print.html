@@ -14,67 +14,246 @@
         MR CO-ORDINATION - PRINT
     </title>
 
+
     <style>
 
         /* =====================================================
-           SCREEN
+           GLOBAL
         ===================================================== */
 
+        *{
+            box-sizing:border-box;
+        }
+
+        html,
         body{
             margin:0;
-            padding:10px;
-            font-family:Arial, Helvetica, sans-serif;
-            background:#ffffff;
+            padding:0;
+            width:100%;
+            background:#fff;
             color:#000;
+            font-family:Arial, Helvetica, sans-serif;
         }
+
+
+        body{
+            padding:10px;
+        }
+
 
         .print-container{
             width:100%;
-            margin:auto;
+            max-width:1400px;
+            margin:0 auto;
         }
+
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
 
         .print-header{
             text-align:center;
             margin-bottom:8px;
         }
 
+
         .print-header h1{
             margin:0;
             font-size:18px;
+            line-height:1.15;
             font-weight:700;
         }
+
 
         .print-header h2{
-            margin:2px 0 0;
+            margin:3px 0 0;
             font-size:13px;
+            line-height:1.15;
             font-weight:700;
         }
 
+
         .print-date{
-            margin-top:3px;
+            margin-top:4px;
             font-size:9px;
+            font-weight:400;
         }
+
 
 
         /* =====================================================
-           GROUP
+           CONTROLS
         ===================================================== */
 
-        .group{
-            margin-bottom:7px;
-            page-break-inside:avoid;
+        .print-controls{
+            text-align:center;
+            margin-bottom:10px;
         }
 
-        .group-title{
-            background:#000;
+
+        .print-btn,
+        .refresh-btn{
+
+            border:none;
+
             color:#fff;
-            text-align:center;
-            font-size:11px;
-            font-weight:700;
-            padding:3px 4px;
-            margin:0;
-            border:1px solid #000;
+
+            padding:8px 24px;
+
+            border-radius:5px;
+
+            font-size:13px;
+
+            font-weight:500;
+
+            cursor:pointer;
+
         }
+
+
+        .print-btn{
+            background:#0d6efd;
+        }
+
+
+        .refresh-btn{
+            background:#198754;
+            margin-left:6px;
+        }
+
+
+        .print-btn:hover{
+            background:#0b5ed7;
+        }
+
+
+        .refresh-btn:hover{
+            background:#157347;
+        }
+
+
+
+        /* =====================================================
+           LOADING / ERROR
+        ===================================================== */
+
+        #loading{
+
+            text-align:center;
+
+            font-size:13px;
+
+            padding:15px;
+
+            font-weight:700;
+
+        }
+
+
+        #error{
+
+            text-align:center;
+
+            color:red;
+
+            font-size:12px;
+
+            font-weight:700;
+
+            padding:10px;
+
+        }
+
+
+
+        /* =====================================================
+           PRINT AREA
+        ===================================================== */
+
+        #printArea{
+            width:100%;
+        }
+
+
+
+        /* =====================================================
+           TWO COLUMN PAIR
+           N + M
+           LIFTING + J
+        ===================================================== */
+
+        .print-pair{
+
+            display:grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(0, 1fr);
+
+            gap:8px;
+
+            width:100%;
+
+            margin-bottom:7px;
+
+            align-items:start;
+
+        }
+
+
+        .print-pair .group{
+
+            width:100%;
+
+            margin-bottom:0;
+
+            min-width:0;
+
+        }
+
+
+
+        /* =====================================================
+           FULL WIDTH GROUP
+           SCR / CR
+        ===================================================== */
+
+        .full-width{
+
+            width:100%;
+
+            margin-bottom:7px;
+
+        }
+
+
+
+        /* =====================================================
+           GROUP TITLE
+        ===================================================== */
+
+        .group-title{
+
+            background:#000;
+
+            color:#fff;
+
+            text-align:center;
+
+            font-size:11px;
+
+            font-weight:700;
+
+            padding:3px 4px;
+
+            line-height:1.1;
+
+            border:1px solid #000;
+
+        }
+
 
 
         /* =====================================================
@@ -82,113 +261,158 @@
         ===================================================== */
 
         table{
+
             width:100%;
+
             border-collapse:collapse;
+
             table-layout:fixed;
+
             margin:0;
+
         }
+
 
         th,
         td{
+
             border:1px solid #000;
+
             text-align:center;
+
             vertical-align:middle;
-            padding:2px 3px;
+
+            padding:2px 2px;
+
             line-height:1;
+
+            overflow:hidden;
+
         }
+
 
         th{
+
             background:#e9e9e9;
+
             font-size:8px;
+
             font-weight:700;
+
+            height:16px;
+
+            white-space:nowrap;
+
         }
+
 
         td{
-            font-size:8px;
-            height:15px;
+
+            font-size:9px;
+
+            height:17px;
+
             font-weight:600;
+
+            white-space:nowrap;
+
         }
 
-
-        /* =====================================================
-           COLUMN WIDTH
-        ===================================================== */
-
-        .shop-col{
-            width:18%;
-        }
-
-        .line-col{
-            width:18%;
-        }
 
         .position-col{
-            width:20%;
+
+            width:18%;
+
         }
 
-        .coach-col{
-            width:44%;
+
+        .coach-number{
+
+            font-size:9px;
+
+            font-weight:700;
+
+            color:#000;
+
         }
 
-
-        /* =====================================================
-           EMPTY COACH
-        ===================================================== */
 
         .empty{
+
             color:#fff;
+
         }
+
 
 
         /* =====================================================
-           PRINT BUTTON
+           SCR / CR SMALL COLUMNS
         ===================================================== */
 
-        .print-controls{
-            text-align:center;
-            margin-bottom:8px;
+        .full-width th{
+            font-size:7px;
+            padding:2px 1px;
         }
 
-        .print-btn{
-            border:none;
-            background:#0d6efd;
-            color:#fff;
-            padding:7px 18px;
-            border-radius:4px;
-            font-size:12px;
-            cursor:pointer;
+
+        .full-width td{
+            font-size:8px;
+            padding:2px 1px;
         }
 
-        .refresh-btn{
-            border:none;
-            background:#198754;
-            color:#fff;
-            padding:7px 18px;
-            border-radius:4px;
-            font-size:12px;
-            cursor:pointer;
-            margin-left:5px;
+
+        .full-width .position-col{
+            width:7%;
         }
+
 
 
         /* =====================================================
-           LOADING
+           SCREEN MOBILE
         ===================================================== */
 
-        #loading{
-            text-align:center;
-            font-size:13px;
-            padding:15px;
-            font-weight:bold;
+        @media screen and (max-width:768px){
+
+            body{
+                padding:6px;
+            }
+
+
+            .print-header h1{
+                font-size:17px;
+            }
+
+
+            .print-header h2{
+                font-size:12px;
+            }
+
+
+            .print-pair{
+
+                grid-template-columns:1fr;
+
+                gap:6px;
+
+            }
+
+
+            .group-title{
+                font-size:11px;
+            }
+
+
+            th{
+                font-size:8px;
+            }
+
+
+            td{
+                font-size:8px;
+            }
+
         }
 
-        #error{
-            text-align:center;
-            color:red;
-            font-size:12px;
-            font-weight:bold;
-            padding:10px;
-        }
 
 
         /* =====================================================
@@ -196,79 +420,229 @@
         ===================================================== */
 
         @page{
+
             size:A4 landscape;
+
             margin:5mm;
+
         }
 
+
+
+        /* =====================================================
+           PRINT
+        ===================================================== */
 
         @media print{
 
             html,
             body{
+
                 width:100%;
-                height:100%;
+
+                height:auto;
+
                 margin:0;
+
                 padding:0;
+
                 background:#fff;
+
             }
+
+
+            .print-container{
+
+                width:100%;
+
+                max-width:none;
+
+                margin:0;
+
+            }
+
 
             .print-controls{
+
                 display:none !important;
+
             }
 
-            .print-header{
-                margin-bottom:4px;
-            }
-
-            .print-header h1{
-                font-size:14px;
-            }
-
-            .print-header h2{
-                font-size:10px;
-            }
-
-            .print-date{
-                font-size:7px;
-                margin-top:1px;
-            }
-
-            .group{
-                margin-bottom:3px;
-                page-break-inside:avoid;
-                break-inside:avoid;
-            }
-
-            .group-title{
-                font-size:8px;
-                padding:2px;
-                line-height:1;
-            }
-
-            th,
-            td{
-                padding:1px 2px;
-                line-height:1;
-            }
-
-            th{
-                font-size:6.5px;
-                height:10px;
-            }
-
-            td{
-                font-size:7px;
-                height:11px;
-            }
-
-            table{
-                page-break-inside:avoid;
-                break-inside:avoid;
-            }
 
             #loading,
             #error{
+
                 display:none !important;
+
+            }
+
+
+            .print-header{
+
+                margin-bottom:4px;
+
+            }
+
+
+            .print-header h1{
+
+                font-size:14px;
+
+                line-height:1.05;
+
+            }
+
+
+            .print-header h2{
+
+                font-size:10px;
+
+                margin-top:2px;
+
+            }
+
+
+            .print-date{
+
+                font-size:7px;
+
+                margin-top:1px;
+
+            }
+
+
+
+            /* =============================================
+               KEEP N + M SIDE BY SIDE
+            ============================================= */
+
+            .print-pair{
+
+                display:grid;
+
+                grid-template-columns:
+                    minmax(0, 1fr)
+                    minmax(0, 1fr);
+
+                gap:5px;
+
+                width:100%;
+
+                margin-bottom:3px;
+
+                page-break-inside:avoid;
+
+                break-inside:avoid;
+
+            }
+
+
+            .print-pair .group{
+
+                page-break-inside:avoid;
+
+                break-inside:avoid;
+
+            }
+
+
+
+            /* =============================================
+               FULL WIDTH
+            ============================================= */
+
+            .full-width{
+
+                width:100%;
+
+                margin-bottom:3px;
+
+                page-break-inside:avoid;
+
+                break-inside:avoid;
+
+            }
+
+
+            table{
+
+                width:100%;
+
+                page-break-inside:avoid;
+
+                break-inside:avoid;
+
+            }
+
+
+            .group-title{
+
+                font-size:8px;
+
+                padding:2px;
+
+                line-height:1;
+
+            }
+
+
+            th,
+            td{
+
+                padding:1px 1px;
+
+                line-height:1;
+
+            }
+
+
+            th{
+
+                font-size:6px;
+
+                height:10px;
+
+            }
+
+
+            td{
+
+                font-size:7px;
+
+                height:11px;
+
+            }
+
+
+            .coach-number{
+
+                font-size:7px;
+
+            }
+
+
+            .full-width th{
+
+                font-size:5.8px;
+
+                height:10px;
+
+            }
+
+
+            .full-width td{
+
+                font-size:6.5px;
+
+                height:11px;
+
+            }
+
+
+            .full-width .position-col{
+
+                width:7%;
+
             }
 
         }
@@ -308,6 +682,7 @@
     </div>
 
 
+
     <!-- =====================================================
          CONTROLS
     ===================================================== -->
@@ -315,13 +690,16 @@
     <div class="print-controls">
 
         <button
+            type="button"
             class="print-btn"
             onclick="window.print()"
         >
             PRINT
         </button>
 
+
         <button
+            type="button"
             class="refresh-btn"
             onclick="location.reload()"
         >
@@ -329,6 +707,7 @@
         </button>
 
     </div>
+
 
 
     <!-- =====================================================
@@ -343,6 +722,7 @@
     <div id="error"></div>
 
 
+
     <!-- =====================================================
          PRINT AREA
     ===================================================== -->
@@ -354,45 +734,88 @@
              N SHOP + M SHOP
         ================================================= -->
 
-        <section class="group">
+        <div class="print-pair">
 
-            <div class="group-title">
-                N SHOP + M SHOP
-            </div>
 
-            <table>
+            <!-- ================= N SHOP ================= -->
 
-                <thead>
+            <section class="group">
 
-                    <tr>
+                <div class="group-title">
+                    N SHOP
+                </div>
 
-                        <th class="shop-col">
-                            SHOP
-                        </th>
 
-                        <th class="line-col">
-                            LINE
-                        </th>
+                <table>
 
-                        <th class="position-col">
-                            POSITION
-                        </th>
+                    <thead>
 
-                        <th class="coach-col">
-                            COACH NUMBER
-                        </th>
+                        <tr>
 
-                    </tr>
+                            <th class="position-col">
+                                POSITION
+                            </th>
 
-                </thead>
+                            <th>N2</th>
+                            <th>N3</th>
+                            <th>N5</th>
+                            <th>N7</th>
+                            <th>N8</th>
 
-                <tbody id="nmTable">
+                        </tr>
 
-                </tbody>
+                    </thead>
 
-            </table>
 
-        </section>
+                    <tbody id="nTable">
+
+                    </tbody>
+
+                </table>
+
+            </section>
+
+
+
+            <!-- ================= M SHOP ================= -->
+
+            <section class="group">
+
+                <div class="group-title">
+                    M SHOP
+                </div>
+
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="position-col">
+                                POSITION
+                            </th>
+
+                            <th>M2</th>
+                            <th>M3</th>
+                            <th>M4</th>
+                            <th>M5</th>
+                            <th>M6</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="mTable">
+
+                    </tbody>
+
+                </table>
+
+            </section>
+
+        </div>
 
 
 
@@ -400,45 +823,86 @@
              LIFTING BAY + J SHOP
         ================================================= -->
 
-        <section class="group">
+        <div class="print-pair">
 
-            <div class="group-title">
-                LIFTING BAY + J SHOP
-            </div>
 
-            <table>
+            <!-- ============== LIFTING BAY ================ -->
 
-                <thead>
+            <section class="group">
 
-                    <tr>
+                <div class="group-title">
+                    LIFTING BAY
+                </div>
 
-                        <th class="shop-col">
-                            SHOP
-                        </th>
 
-                        <th class="line-col">
-                            LINE
-                        </th>
+                <table>
 
-                        <th class="position-col">
-                            POSITION
-                        </th>
+                    <thead>
 
-                        <th class="coach-col">
-                            COACH NUMBER
-                        </th>
+                        <tr>
 
-                    </tr>
+                            <th class="position-col">
+                                POSITION
+                            </th>
 
-                </thead>
+                            <th>L9</th>
+                            <th>L10</th>
 
-                <tbody id="ljTable">
+                        </tr>
 
-                </tbody>
+                    </thead>
 
-            </table>
 
-        </section>
+                    <tbody id="lTable">
+
+                    </tbody>
+
+                </table>
+
+            </section>
+
+
+
+            <!-- ================= J SHOP ================== -->
+
+            <section class="group">
+
+                <div class="group-title">
+                    J SHOP
+                </div>
+
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="position-col">
+                                POSITION
+                            </th>
+
+                            <th>J1</th>
+                            <th>J2</th>
+                            <th>J3</th>
+                            <th>J4</th>
+                            <th>J5</th>
+                            <th>J6</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="jTable">
+
+                    </tbody>
+
+                </table>
+
+            </section>
+
+        </div>
 
 
 
@@ -446,11 +910,12 @@
              MR SCR SHOP
         ================================================= -->
 
-        <section class="group">
+        <section class="group full-width">
 
             <div class="group-title">
                 MR SCR SHOP
             </div>
+
 
             <table>
 
@@ -458,25 +923,27 @@
 
                     <tr>
 
-                        <th class="shop-col">
-                            SHOP
-                        </th>
-
-                        <th class="line-col">
-                            LINE
-                        </th>
-
                         <th class="position-col">
                             POSITION
                         </th>
 
-                        <th class="coach-col">
-                            COACH NUMBER
-                        </th>
+                        <th>SCR9</th>
+                        <th>SCR10</th>
+                        <th>SCR11</th>
+                        <th>SCR12</th>
+                        <th>SCR13</th>
+                        <th>SCR14</th>
+                        <th>SCR15</th>
+                        <th>SCR16</th>
+                        <th>SCR18</th>
+                        <th>SCR19</th>
+                        <th>SCR21</th>
+                        <th>SCR22</th>
 
                     </tr>
 
                 </thead>
+
 
                 <tbody id="scrTable">
 
@@ -492,11 +959,12 @@
              CR SHOP
         ================================================= -->
 
-        <section class="group">
+        <section class="group full-width">
 
             <div class="group-title">
                 CR SHOP
             </div>
+
 
             <table>
 
@@ -504,25 +972,26 @@
 
                     <tr>
 
-                        <th class="shop-col">
-                            SHOP
-                        </th>
-
-                        <th class="line-col">
-                            LINE
-                        </th>
-
                         <th class="position-col">
                             POSITION
                         </th>
 
-                        <th class="coach-col">
-                            COACH NUMBER
-                        </th>
+                        <th>F1</th>
+                        <th>F2</th>
+                        <th>F3</th>
+                        <th>F4</th>
+                        <th>F5</th>
+                        <th>F6</th>
+                        <th>F7</th>
+                        <th>F8</th>
+                        <th>F9</th>
+                        <th>F10</th>
+                        <th>F11</th>
 
                     </tr>
 
                 </thead>
+
 
                 <tbody id="crTable">
 
