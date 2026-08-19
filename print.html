@@ -11,7 +11,7 @@
 >
 
 <title>
-MR CO-ORDINATION DAILY COACHES POSITION
+    MR CO-ORDINATION DAILY COACHES POSITION - PRINT
 </title>
 
 
@@ -23,57 +23,29 @@ MR CO-ORDINATION DAILY COACHES POSITION
 
 @page{
     size:A4 landscape;
-    margin:4mm;
+    margin:6mm;
 }
-
 
 *{
     box-sizing:border-box;
 }
 
-
 html,
 body{
+
     margin:0;
     padding:0;
+
     width:100%;
+
     background:#fff;
-    font-family:Arial,Helvetica,sans-serif;
-}
 
+    color:#000;
 
-/* =====================================================
-   SCREEN
-===================================================== */
-
-.printButtons{
-    position:fixed;
-    top:8px;
-    right:8px;
-    z-index:9999;
-    display:flex;
-    gap:6px;
-}
-
-
-.printButtons button{
-    border:0;
-    border-radius:5px;
-    padding:7px 13px;
-    font-size:12px;
-    font-weight:bold;
-    color:#fff;
-    cursor:pointer;
-}
-
-
-#printBtn{
-    background:#198754;
-}
-
-
-#closeBtn{
-    background:#dc3545;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
 
 
@@ -82,171 +54,179 @@ body{
 ===================================================== */
 
 #loading{
+
     position:fixed;
+
     inset:0;
-    z-index:9998;
+
+    z-index:9999;
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     background:#fff;
-    font-size:16px;
-    font-weight:bold;
+
+    font-size:20px;
+
+    font-weight:700;
+}
+
+#loading.error{
+
+    display:block;
+
+    padding-top:35vh;
+
+    text-align:center;
+
+    color:#b00020;
 }
 
 
 /* =====================================================
-   A4 PAGE
+   SCREEN BUTTONS
+===================================================== */
+
+.screenControls{
+
+    position:fixed;
+
+    top:15px;
+    right:15px;
+
+    z-index:10000;
+
+    display:flex;
+
+    gap:10px;
+}
+
+.screenControls button{
+
+    border:0;
+
+    border-radius:8px;
+
+    padding:12px 22px;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    color:#fff;
+
+    cursor:pointer;
+}
+
+#printButton{
+
+    background:#198754;
+}
+
+#closeButton{
+
+    background:#dc3545;
+}
+
+
+/* =====================================================
+   PRINT PAGE
 ===================================================== */
 
 #printPage{
+
     width:100%;
-    height:190mm;
-    overflow:hidden;
+
+    max-width:282mm;
+
+    margin:0 auto;
+
     background:#fff;
 }
 
 
 /* =====================================================
-   HEADER
+   DATE
 ===================================================== */
 
-.header{
+.printDate{
+
     width:100%;
-    text-align:center;
-    margin-bottom:2mm;
-}
 
+    text-align:right;
 
-.headerTitle{
-    font-size:12px;
+    font-size:9px;
+
     font-weight:700;
-    line-height:1;
-}
 
-
-.headerWorkshop{
-    font-size:8px;
-    font-weight:700;
-    margin-top:1mm;
-}
-
-
-.headerDate{
-    font-size:6px;
-    margin-top:1mm;
+    margin-bottom:3mm;
 }
 
 
 /* =====================================================
-   4 GROUP GRID
+   MAIN A4 LAYOUT
+
+   N SHOP + M SHOP
+   MR SCR SHOP
+   CR SHOP
+   LIFTING BAY + J SHOP
 ===================================================== */
 
-.groups{
-    width:100%;
-    height:176mm;
+.printGrid{
 
     display:grid;
 
     grid-template-columns:
-        1fr 1fr;
+        44%
+        56%;
 
     grid-template-rows:
-        1fr 1fr;
+        auto
+        auto
+        auto;
 
-    gap:2.5mm;
+    column-gap:6mm;
+
+    row-gap:4mm;
+
+    width:100%;
 }
 
 
 /* =====================================================
-   GROUP
+   BLOCK
 ===================================================== */
 
-.group{
+.shopBlock{
+
+    width:100%;
+
     min-width:0;
-    min-height:0;
-
-    border:0.3mm solid #333;
-
-    overflow:hidden;
-
-    display:flex;
-    flex-direction:column;
 }
 
 
 /* =====================================================
-   GROUP TITLE
+   SHOP TITLE
 ===================================================== */
 
-.groupTitle{
-    flex:0 0 6mm;
+.shopTitle{
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    width:100%;
 
-    background:#ffc107;
+    text-align:center;
 
-    color:#000;
+    font-size:11px;
 
-    font-size:8px;
     font-weight:700;
 
-    border-bottom:0.2mm solid #333;
-}
+    margin-bottom:1mm;
 
+    padding:1mm 0;
 
-/* =====================================================
-   SHOP CONTAINER
-===================================================== */
-
-.shopContainer{
-    flex:1;
-
-    min-height:0;
-
-    display:flex;
-
-    flex-direction:column;
-
-    overflow:hidden;
-}
-
-
-/* =====================================================
-   SHOP
-===================================================== */
-
-.shop{
-    flex:1;
-
-    min-height:0;
-
-    overflow:hidden;
-}
-
-
-.shop + .shop{
-    border-top:0.3mm solid #333;
-}
-
-
-/* =====================================================
-   SHOP NAME
-===================================================== */
-
-.shopName{
-    height:4.5mm;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    background:#20282c;
-    color:#fff;
-
-    font-size:6.5px;
-    font-weight:700;
+    border-bottom:0.3mm solid #000;
 }
 
 
@@ -254,10 +234,9 @@ body{
    TABLE
 ===================================================== */
 
-.boardTable{
-    width:100%;
+.shopTable{
 
-    height:calc(100% - 4.5mm);
+    width:100%;
 
     border-collapse:collapse;
 
@@ -265,65 +244,40 @@ body{
 }
 
 
-.boardTable th,
-.boardTable td{
-    border:0.18mm solid #555;
+.shopTable th,
+.shopTable td{
 
-    padding:0;
+    border:0.25mm solid #222;
 
     text-align:center;
 
     vertical-align:middle;
 
+    padding:0;
+
+    height:6.5mm;
+
     overflow:hidden;
-}
-
-
-.boardTable th{
-    height:4mm;
-
-    background:#20282c;
-
-    color:#fff;
-
-    font-size:4.5px;
-
-    font-weight:700;
-
-    line-height:1;
-
-    white-space:nowrap;
-}
-
-
-.boardTable td{
-    height:5.5mm;
-
-    font-size:6px;
-
-    line-height:1;
-
-    font-weight:700;
 
     white-space:nowrap;
 }
 
 
 /* =====================================================
-   POSITION
+   HEADER
 ===================================================== */
 
-.positionHeader,
-.positionCell{
-    width:11mm;
-}
+.shopTable th{
 
+    height:6mm;
 
-.positionCell{
-    background:#20282c;
-    color:#fff;
+    font-size:7px;
 
-    font-size:5px !important;
+    font-weight:700;
+
+    background:#eeeeee;
+
+    color:#000;
 }
 
 
@@ -331,14 +285,22 @@ body{
    COACH NUMBER
 ===================================================== */
 
+.shopTable td{
+
+    font-size:8px;
+
+    font-weight:700;
+}
+
 .coachNumber{
+
     display:block;
 
     width:100%;
 
     text-align:center;
 
-    font-size:6px;
+    font-size:8px;
 
     font-weight:700;
 
@@ -349,57 +311,163 @@ body{
 
 
 /* =====================================================
-   EMPTY
+   GRID POSITIONS
 ===================================================== */
 
-.emptyCell{
-    background:#fff;
+.nShop{
+
+    grid-column:1;
+
+    grid-row:1;
+}
+
+
+.mShop{
+
+    grid-column:1;
+
+    grid-row:2;
+}
+
+
+.scrShop{
+
+    grid-column:2;
+
+    grid-row:1 / span 2;
+}
+
+
+.crShop{
+
+    grid-column:1 / span 2;
+
+    grid-row:3;
 }
 
 
 /* =====================================================
-   FOOTER
+   BOTTOM
 ===================================================== */
 
-.footer{
-    text-align:center;
+.bottomRow{
 
-    font-size:5px;
+    grid-column:1 / span 2;
 
-    margin-top:1mm;
+    display:grid;
+
+    grid-template-columns:30% 40%;
+
+    justify-content:center;
+
+    gap:15%;
+
+    align-items:start;
+
+    margin-top:0;
 }
 
 
 /* =====================================================
-   PRINT
+   LIFTING
+===================================================== */
+
+.liftingShop{
+
+    width:100%;
+}
+
+
+/* =====================================================
+   J SHOP
+===================================================== */
+
+.jShop{
+
+    width:100%;
+}
+
+
+/* =====================================================
+   PRINT MODE
 ===================================================== */
 
 @media print{
 
-    .printButtons,
+    .screenControls,
     #loading{
+
         display:none !important;
     }
 
     html,
     body{
+
         width:100%;
-        height:100%;
+
         margin:0;
+
         padding:0;
     }
 
     #printPage{
+
         width:100%;
-        height:190mm;
-        overflow:hidden;
+
+        max-width:none;
+
+        margin:0;
     }
 
-    .groups{
+    .printGrid{
+
         page-break-inside:avoid;
+
         break-inside:avoid;
     }
 
+    .shopBlock{
+
+        page-break-inside:avoid;
+
+        break-inside:avoid;
+    }
+
+    .shopTable{
+
+        page-break-inside:avoid;
+
+        break-inside:avoid;
+    }
+
+    .shopTable th,
+    .shopTable td{
+
+        height:6mm;
+    }
+
+    .shopTable th{
+
+        font-size:7px;
+    }
+
+    .shopTable td,
+    .coachNumber{
+
+        font-size:7.5px;
+    }
+
+    .shopTitle{
+
+        font-size:10px;
+    }
+
+    .printDate{
+
+        font-size:8px;
+
+        margin-bottom:2mm;
+    }
 }
 
 
@@ -410,14 +478,19 @@ body{
 @media screen and (max-width:900px){
 
     body{
+
         overflow-x:auto;
     }
 
     #printPage{
-        width:1120px;
-        height:auto;
-        min-height:190mm;
-        margin:55px auto 20px;
+
+        width:1100px;
+
+        margin:
+
+            80px
+            auto
+            20px;
     }
 
 }
@@ -431,16 +504,23 @@ body{
 
 
 <!-- =====================================================
-     BUTTONS
+     SCREEN BUTTONS
 ===================================================== -->
 
-<div class="printButtons">
+<div class="screenControls">
 
-    <button id="printBtn">
+    <button
+        id="printButton"
+        type="button"
+    >
         PRINT A4
     </button>
 
-    <button id="closeBtn">
+
+    <button
+        id="closeButton"
+        type="button"
+    >
         CLOSE
     </button>
 
@@ -452,127 +532,92 @@ body{
 ===================================================== -->
 
 <div id="loading">
+
     Loading Coach Board...
+
 </div>
 
 
 <!-- =====================================================
-     A4 PAGE
+     PRINT PAGE
 ===================================================== -->
 
 <main id="printPage">
 
 
-    <!-- HEADER -->
-
-    <header class="header">
-
-        <div class="headerTitle">
-            MR CO-ORDINATION DAILY COACHES POSITION
-        </div>
-
-        <div class="headerWorkshop">
-            LILUAH WORKSHOP
-        </div>
-
-        <div
-            class="headerDate"
-            id="printDate"
-        >
-            -
-        </div>
-
-    </header>
-
-
-    <!-- =================================================
-         4 GROUPS
-    ================================================== -->
-
-    <div class="groups">
-
-
-        <!-- =============================================
-             GROUP 1
-             N SHOP + M SHOP
-        ============================================== -->
-
-        <section class="group">
-
-            <div class="groupTitle">
-                N SHOP + M SHOP
-            </div>
-
-            <div
-                class="shopContainer"
-                id="groupNM"
-            ></div>
-
-        </section>
-
-
-        <!-- =============================================
-             GROUP 2
-             LIFTING BAY + J SHOP
-        ============================================== -->
-
-        <section class="group">
-
-            <div class="groupTitle">
-                LIFTING BAY + J SHOP
-            </div>
-
-            <div
-                class="shopContainer"
-                id="groupLJ"
-            ></div>
-
-        </section>
-
-
-        <!-- =============================================
-             GROUP 3
-             MR SCR SHOP
-        ============================================== -->
-
-        <section class="group">
-
-            <div class="groupTitle">
-                MR SCR SHOP
-            </div>
-
-            <div
-                class="shopContainer"
-                id="groupSCR"
-            ></div>
-
-        </section>
-
-
-        <!-- =============================================
-             GROUP 4
-             CR SHOP
-        ============================================== -->
-
-        <section class="group">
-
-            <div class="groupTitle">
-                CR SHOP
-            </div>
-
-            <div
-                class="shopContainer"
-                id="groupCR"
-            ></div>
-
-        </section>
-
-
+    <div
+        class="printDate"
+        id="printDate"
+    >
+        DATE:- --
     </div>
 
 
-    <div class="footer">
-        MR CO-ORDINATION | COACH NUMBER POSITION
+    <div class="printGrid">
+
+
+        <!-- =================================================
+             N SHOP
+        ================================================== -->
+
+        <section
+            class="shopBlock nShop"
+            id="nShop"
+        ></section>
+
+
+        <!-- =================================================
+             M SHOP
+        ================================================== -->
+
+        <section
+            class="shopBlock mShop"
+            id="mShop"
+        ></section>
+
+
+        <!-- =================================================
+             MR SCR SHOP
+        ================================================== -->
+
+        <section
+            class="shopBlock scrShop"
+            id="scrShop"
+        ></section>
+
+
+        <!-- =================================================
+             CR SHOP
+        ================================================== -->
+
+        <section
+            class="shopBlock crShop"
+            id="crShop"
+        ></section>
+
+
+        <!-- =================================================
+             LIFTING + J SHOP
+        ================================================== -->
+
+        <div class="bottomRow">
+
+
+            <section
+                class="shopBlock liftingShop"
+                id="liftingShop"
+            ></section>
+
+
+            <section
+                class="shopBlock jShop"
+                id="jShop"
+            ></section>
+
+
+        </div>
+
+
     </div>
 
 
@@ -580,7 +625,7 @@ body{
 
 
 <!-- =====================================================
-     JAVASCRIPT
+     PRINT JS
 ===================================================== -->
 
 <script
