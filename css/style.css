@@ -1,15 +1,27 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    STYLE.CSS
-   VERSION 13.0 FINAL
+   VERSION 15.0 FINAL
    ---------------------------------------------------------
-   BOARD + PULLED OUT + RETURN
-   DESKTOP + MOBILE RESPONSIVE
+   ✔ DESKTOP FULL WIDTH
+   ✔ TABLET RESPONSIVE
+   ✔ MOBILE RESPONSIVE
+   ✔ SHOP TABLE RESPONSIVE
+   ✔ N / M / SCR / CR / LIFTING / J SHOP
+   ✔ PULLED OUT SECTION
+   ✔ RETURN BUTTON
+   ✔ SEARCH
+   ✔ COUNTERS
+   ✔ DRAG & DROP
+   ✔ MODAL
+   ✔ HISTORY
+   ✔ FULL SCREEN
+   ✔ A4 LANDSCAPE PRINT
 ========================================================= */
 
 
 /* =========================================================
-   GLOBAL
+   GLOBAL RESET
 ========================================================= */
 
 * {
@@ -18,18 +30,28 @@
 
 html {
     scroll-behavior: smooth;
+    width: 100%;
+    min-height: 100%;
 }
 
 body {
     margin: 0;
     padding: 0;
+
+    width: 100%;
+    min-height: 100vh;
+
     background: #f4f6f8;
     color: #151515;
+
     font-family:
         Arial,
         Helvetica,
         sans-serif;
+
     font-size: 16px;
+
+    overflow-x: hidden;
 }
 
 button,
@@ -45,6 +67,7 @@ button {
 
 img {
     max-width: 100%;
+    height: auto;
 }
 
 
@@ -57,6 +80,7 @@ img {
 .main-container {
     width: 100%;
     max-width: 1600px;
+
     margin: 0 auto;
     padding: 15px;
 }
@@ -69,10 +93,15 @@ img {
 header,
 .main-header,
 .board-header {
+    width: 100%;
+
     background: #212529;
     color: #ffffff;
+
     padding: 18px 22px;
+
     border-radius: 0 0 8px 8px;
+
     margin-bottom: 15px;
 }
 
@@ -80,6 +109,7 @@ header h1,
 .main-header h1,
 .board-header h1 {
     margin: 0;
+
     font-size: 30px;
     font-weight: 800;
 }
@@ -88,6 +118,7 @@ header h2,
 .main-header h2,
 .board-header h2 {
     margin: 5px 0 0;
+
     font-size: 20px;
     font-weight: 600;
 }
@@ -102,8 +133,8 @@ header h2,
 }
 
 .navbar-brand {
-    font-weight: 800;
     font-size: 25px;
+    font-weight: 800;
 }
 
 .navbar-toggler {
@@ -122,7 +153,10 @@ header h2,
 .btn {
     border-radius: 10px;
     font-weight: 700;
-    transition: 0.2s ease;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
 }
 
 .btn:hover {
@@ -162,17 +196,29 @@ header h2,
 .counter-container {
     display: flex;
     flex-wrap: wrap;
+
     gap: 12px;
+
+    width: 100%;
+
     margin: 15px 0;
 }
 
 .counter-card {
     flex: 1 1 180px;
+
+    min-width: 0;
+
     background: #ffffff;
+
     border: 1px solid #d7dce1;
+
     border-radius: 12px;
+
     padding: 15px;
+
     text-align: center;
+
     box-shadow:
         0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -185,6 +231,7 @@ header h2,
 .counter-card .counter-label {
     font-size: 14px;
     font-weight: 700;
+
     color: #666;
 }
 
@@ -215,13 +262,20 @@ header h2,
 #pulledOutSearchBox,
 #searchPulledOut {
     width: 100%;
+
     min-height: 58px;
+
     padding: 10px 18px;
+
     border: 2px solid #d8dde2;
+
     border-radius: 12px;
+
     background: #ffffff;
     color: #333;
+
     font-size: 20px;
+
     outline: none;
 }
 
@@ -230,8 +284,29 @@ header h2,
 #pulledOutSearchBox:focus,
 #searchPulledOut:focus {
     border-color: #336df3;
+
     box-shadow:
         0 0 0 3px rgba(51, 109, 243, 0.12);
+}
+
+
+/* =========================================================
+   ACTION BAR
+========================================================= */
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    width: 100%;
+
+    margin: 15px 0;
+}
+
+.action-bar button {
+    min-height: 45px;
 }
 
 
@@ -241,44 +316,64 @@ header h2,
 
 .board-table-wrapper {
     width: 100%;
+
     overflow-x: auto;
     overflow-y: hidden;
+
     -webkit-overflow-scrolling: touch;
+
     background: #ffffff;
+
     border-radius: 10px;
+
     margin-bottom: 20px;
 }
 
 
 /* =========================================================
-   MAIN BOARD TABLE
+   MAIN COACH TABLE
 ========================================================= */
 
 .coach-table {
     width: 100%;
+
     min-width: 850px;
+
     border-collapse: collapse;
+
     table-layout: fixed;
 }
 
 .coach-table th {
     background: #212529;
     color: #ffffff;
+
     border: 2px solid #454a4f;
+
     padding: 10px 6px;
+
     text-align: center;
+    vertical-align: middle;
+
     font-size: 15px;
     font-weight: 800;
+
+    white-space: nowrap;
 }
 
 .coach-table td {
-    min-height: 70px;
     height: 70px;
+    min-height: 70px;
+
     border: 2px solid #d4d9de;
+
     padding: 4px;
+
     text-align: center;
     vertical-align: middle;
+
     background: #ffffff;
+
     position: relative;
 }
 
@@ -294,27 +389,40 @@ header h2,
 .coach-card {
     width: 100%;
     min-height: 58px;
+
     display: flex;
+
     flex-direction: column;
+
     justify-content: center;
     align-items: center;
+
     line-height: 1.15;
+
     user-select: none;
+
+    overflow: hidden;
 }
 
 .coach-no {
     font-size: 19px;
     font-weight: 900;
+
+    white-space: nowrap;
 }
 
 .coach-type {
     font-size: 14px;
     font-weight: 700;
+
+    white-space: nowrap;
 }
 
 .coach-status {
     font-size: 13px;
     font-weight: 800;
+
+    white-space: nowrap;
 }
 
 
@@ -365,9 +473,12 @@ header h2,
 
 .search-match {
     outline: 4px solid #ff9800 !important;
+
     outline-offset: -4px;
+
     box-shadow:
         0 0 15px rgba(255, 152, 0, 0.65);
+
     z-index: 5;
 }
 
@@ -378,13 +489,220 @@ header h2,
 
 .mobile-drag-source {
     opacity: 0.55 !important;
+
     outline: 4px dashed #0d6efd !important;
 }
 
 .mobile-drag-target,
 .table-info {
     background: #cfe2ff !important;
+
     outline: 4px dashed #0d6efd !important;
+}
+
+
+/* =========================================================
+   SHOP CARD
+========================================================= */
+
+.shop-card {
+    width: 100%;
+
+    max-width: 100%;
+
+    margin-left: 0;
+    margin-right: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+}
+
+.shop-card .shop-title {
+    width: 100%;
+
+    margin: 0;
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   SHOP TABLE WRAPPER
+========================================================= */
+
+.shop-card .table-responsive {
+    display: block;
+
+    width: 100%;
+
+    max-width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   SHOP COACH TABLE
+========================================================= */
+
+.shop-card .coach-table {
+    width: 100%;
+
+    min-width: 0;
+
+    max-width: none;
+
+    margin: 0;
+
+    table-layout: fixed;
+
+    border-collapse: collapse;
+}
+
+
+/* =========================================================
+   SHOP POSITION COLUMN
+========================================================= */
+
+.shop-card .coach-table th:first-child,
+.shop-card .coach-table td:first-child {
+    width: 90px;
+
+    min-width: 90px;
+    max-width: 90px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SHOP OTHER COLUMNS
+========================================================= */
+
+.shop-card .coach-table th:not(:first-child),
+.shop-card .coach-table td:not(:first-child) {
+    width: auto;
+
+    min-width: 0;
+    max-width: none;
+}
+
+
+/* =========================================================
+   SHOP TABLE HEADER
+========================================================= */
+
+.shop-card .coach-table thead th {
+    height: 38px;
+
+    padding: 5px 3px;
+
+    font-size: 14px;
+
+    text-align: center;
+    vertical-align: middle;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SHOP TABLE BODY
+========================================================= */
+
+.shop-card .coach-table td {
+    height: 100px;
+
+    min-height: 100px;
+
+    padding: 3px;
+
+    text-align: center;
+    vertical-align: middle;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   SHOP COACH CARD
+========================================================= */
+
+.shop-card .coach-card {
+    width: 100%;
+
+    max-width: 100%;
+
+    height: 100%;
+
+    min-height: 90px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   SHOP COACH NUMBER
+========================================================= */
+
+.shop-card .coach-no {
+    max-width: 100%;
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   SHOP COACH TYPE
+========================================================= */
+
+.shop-card .coach-type {
+    max-width: 100%;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   SHOP COACH STATUS
+========================================================= */
+
+.shop-card .coach-status {
+    max-width: 100%;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    overflow: hidden;
 }
 
 
@@ -394,11 +712,17 @@ header h2,
 
 .pulled-out-section {
     width: 100%;
+
     margin: 25px 0;
+
     background: #ffffff;
+
     border: 1px solid #d6dbe0;
+
     border-radius: 14px;
+
     overflow: hidden;
+
     box-shadow:
         0 3px 12px rgba(0, 0, 0, 0.10);
 }
@@ -410,14 +734,18 @@ header h2,
 
 .pulled-out-header {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
+
     gap: 15px;
 
     min-height: 80px;
+
     padding: 15px 25px;
 
     background: #f9c744;
+
     color: #171717;
 
     border-bottom: 2px solid #dda900;
@@ -426,7 +754,9 @@ header h2,
 .pulled-out-header h2,
 .pulled-out-header h3 {
     margin: 0;
+
     font-size: 28px;
+
     font-weight: 900;
 }
 
@@ -435,6 +765,7 @@ header h2,
 #pulledOutTotal,
 #pulledOutCoachCount {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
@@ -446,19 +777,24 @@ header h2,
     border-radius: 14px;
 
     background: #212529;
+
     color: #ffffff;
 
     font-size: 18px;
+
     font-weight: 900;
 }
 
 
 /* =========================================================
-   PULLED OUT SEARCH AREA
+   PULLED OUT SEARCH
 ========================================================= */
 
 .pulled-out-search {
+    width: 100%;
+
     padding: 15px 20px;
+
     background: #ffffff;
 }
 
@@ -469,6 +805,7 @@ header h2,
 
 .pulled-out-table-wrapper {
     width: 100%;
+
     overflow-x: auto;
     overflow-y: hidden;
 
@@ -484,9 +821,11 @@ header h2,
 
 .pulled-out-table {
     width: 100%;
+
     min-width: 950px;
+
     border-collapse: collapse;
-    table-layout: auto;
+
     background: #ffffff;
 }
 
@@ -502,6 +841,7 @@ header h2,
     vertical-align: middle;
 
     font-size: 18px;
+
     font-weight: 900;
 
     white-space: nowrap;
@@ -518,6 +858,7 @@ header h2,
     background: #ffffff;
 
     font-size: 17px;
+
     line-height: 1.3;
 }
 
@@ -531,7 +872,7 @@ header h2,
 
 
 /* =========================================================
-   PULLED OUT TABLE COLUMN WIDTH
+   PULLED OUT COLUMN WIDTH
 ========================================================= */
 
 .pulled-out-table th:nth-child(1),
@@ -581,12 +922,15 @@ header h2,
     padding: 10px 18px;
 
     border: none;
+
     border-radius: 10px;
 
     background: #336df3;
+
     color: #ffffff;
 
     font-size: 17px;
+
     font-weight: 800;
 
     box-shadow:
@@ -599,6 +943,7 @@ header h2,
 
 .return-pulled-btn:hover {
     background: #2458d8;
+
     transform: translateY(-1px);
 }
 
@@ -608,23 +953,26 @@ header h2,
 
 .return-pulled-btn:disabled {
     opacity: 0.6;
+
     cursor: not-allowed;
 }
 
 
 /* =========================================================
-   PULLED OUT CARDS
-   Used when JS container is DIV
+   PULLED OUT CARD
 ========================================================= */
 
 .pulled-out-card {
     width: 100%;
+
     background: #ffffff;
 
     border: 1px solid #d8dde2;
+
     border-radius: 12px;
 
     padding: 18px;
+
     margin-bottom: 12px;
 
     box-shadow:
@@ -637,15 +985,19 @@ header h2,
 
 .pulled-out-card strong {
     display: block;
+
     margin-bottom: 3px;
 
     color: #555;
+
     font-size: 13px;
+
     text-transform: uppercase;
 }
 
 .pulled-out-card > div > div {
     font-size: 18px;
+
     font-weight: 600;
 }
 
@@ -657,6 +1009,7 @@ header h2,
 .pulled-out-table td.text-center,
 .pulled-out-card.text-center {
     color: #666;
+
     font-weight: 700;
 }
 
@@ -667,12 +1020,15 @@ header h2,
 
 .modal-content {
     border: none;
+
     border-radius: 15px;
+
     overflow: hidden;
 }
 
 .modal-header {
     background: #212529;
+
     color: #ffffff;
 }
 
@@ -691,13 +1047,16 @@ header h2,
 .form-control,
 .form-select {
     min-height: 48px;
+
     border-radius: 9px;
+
     border: 2px solid #d7dce1;
 }
 
 .form-control:focus,
 .form-select:focus {
     border-color: #336df3;
+
     box-shadow:
         0 0 0 3px rgba(51, 109, 243, 0.12);
 }
@@ -714,54 +1073,49 @@ header h2,
 
 
 /* =========================================================
-   HISTORY TABLE
+   HISTORY
 ========================================================= */
 
 .history-wrapper {
     width: 100%;
+
     overflow-x: auto;
+
     -webkit-overflow-scrolling: touch;
 }
 
 .history-table {
     width: 100%;
+
     min-width: 1000px;
+
     border-collapse: collapse;
 }
 
 .history-table th {
     background: #212529;
+
     color: #ffffff;
+
     padding: 13px;
+
     border: 2px solid #454a4f;
+
     text-align: center;
+
     font-weight: 800;
 }
 
 .history-table td {
     padding: 11px;
+
     border: 2px solid #d8dde2;
+
     text-align: center;
 }
 
 .history-table tr:nth-child(even) td {
     background: #f2f2f2;
-}
-
-
-/* =========================================================
-   REFRESH / ACTION AREA
-========================================================= */
-
-.action-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 15px 0;
-}
-
-.action-bar button {
-    min-height: 45px;
 }
 
 
@@ -775,97 +1129,211 @@ header h2,
 
 :fullscreen .board-container {
     max-width: none;
+
+    width: 100%;
 }
 
 
 /* =========================================================
-   PRINT / A4
+   ADMIN
 ========================================================= */
 
-@media print {
+body:not(.admin-logged-in) #saveCoachBtn,
+body:not(.admin-logged-in) #updateCoachBtn,
+body:not(.admin-logged-in) #deleteCoachBtn,
+body:not(.admin-logged-in) #pullOutCoachBtn {
+    opacity: 0.65;
+}
 
-    @page {
-        size: A4 landscape;
-        margin: 8mm;
-    }
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+.board-table-wrapper::-webkit-scrollbar,
+.shop-card .table-responsive::-webkit-scrollbar,
+.pulled-out-table-wrapper::-webkit-scrollbar,
+.history-wrapper::-webkit-scrollbar {
+    height: 9px;
+}
+
+.board-table-wrapper::-webkit-scrollbar-track,
+.shop-card .table-responsive::-webkit-scrollbar-track,
+.pulled-out-table-wrapper::-webkit-scrollbar-track,
+.history-wrapper::-webkit-scrollbar-track {
+    background: #e9ecef;
+
+    border-radius: 10px;
+}
+
+.board-table-wrapper::-webkit-scrollbar-thumb,
+.shop-card .table-responsive::-webkit-scrollbar-thumb,
+.pulled-out-table-wrapper::-webkit-scrollbar-thumb,
+.history-wrapper::-webkit-scrollbar-thumb {
+    background: #7d858d;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   DESKTOP
+   769px+
+========================================================= */
+
+@media (min-width: 769px) {
 
     html,
     body {
         width: 100%;
-        background: #ffffff !important;
+        max-width: 100%;
+
+        overflow-x: hidden;
     }
 
-    body {
-        font-size: 9px;
-    }
-
-    .no-print,
-    nav,
-    .navbar,
-    header,
-    .action-bar,
-    #searchBox,
-    .pulled-out-section,
-    .modal,
-    button {
-        display: none !important;
-    }
-
-    .board-container,
     .container,
+    .board-container,
     .main-container {
         width: 100%;
-        max-width: none;
-        margin: 0;
-        padding: 0;
+        max-width: 1600px;
     }
 
-    .board-table-wrapper {
-        overflow: visible !important;
+    .shop-card {
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
-    .coach-table {
-        width: 100%;
-        min-width: 0;
-        table-layout: fixed;
+    .shop-card .table-responsive {
+        width: 100% !important;
+        max-width: 100% !important;
+
+        overflow-x: auto;
     }
 
-    .coach-table th,
-    .coach-table td {
-        padding: 3px;
-        font-size: 8px;
-        border: 1px solid #000;
+    .shop-card .coach-table {
+        width: 100% !important;
+
+        min-width: 0 !important;
+
+        max-width: none !important;
+
+        table-layout: fixed !important;
     }
 
-    .coach-card {
-        min-height: 25px;
+    .shop-card .coach-table th:first-child,
+    .shop-card .coach-table td:first-child {
+        width: 90px !important;
+
+        min-width: 90px !important;
+        max-width: 90px !important;
     }
 
-    .coach-no {
-        font-size: 9px;
+    .shop-card .coach-table th:not(:first-child),
+    .shop-card .coach-table td:not(:first-child) {
+        width: auto !important;
+
+        min-width: 0 !important;
+        max-width: none !important;
     }
 
-    .coach-type,
-    .coach-status {
-        font-size: 7px;
+    .shop-card .coach-table td {
+        height: 100px !important;
+        min-height: 100px !important;
     }
+
+    .shop-card .coach-card {
+        min-height: 90px !important;
+    }
+
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+========================================================= */
+
+@media (min-width: 1400px) {
+
+    .container,
+    .board-container,
+    .main-container {
+        max-width: 100%;
+
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .shop-card .coach-table td {
+        height: 105px !important;
+    }
+
+    .shop-card .coach-card {
+        min-height: 95px !important;
+    }
+
+    .shop-card .coach-no {
+        font-size: 20px;
+    }
+
+    .shop-card .coach-type {
+        font-size: 13px;
+    }
+
+    .shop-card .coach-status {
+        font-size: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 769px) and (max-width: 1100px) {
+
+    .container,
+    .board-container,
+    .main-container {
+        padding: 8px;
+    }
+
+    .shop-card .coach-table {
+        min-width: 850px !important;
+    }
+
+    .shop-card .coach-table th {
+        font-size: 13px;
+    }
+
+    .shop-card .coach-table td {
+        height: 85px !important;
+    }
+
 }
 
 
 /* =========================================================
    MOBILE
+   768px AND BELOW
 ========================================================= */
 
 @media (max-width: 768px) {
 
     body {
         font-size: 15px;
+
+        overflow-x: hidden;
     }
 
     .container,
     .board-container,
     .main-container {
-        padding: 8px;
+        width: 100%;
+
+        max-width: 100%;
+
+        padding: 6px;
     }
 
 
@@ -875,7 +1343,8 @@ header h2,
     .main-header,
     .board-header {
         padding: 14px;
-        border-radius: 0 0 8px 8px;
+
+        margin-bottom: 10px;
     }
 
     header h1,
@@ -898,6 +1367,7 @@ header h2,
     #pulledOutSearchBox,
     #searchPulledOut {
         min-height: 52px;
+
         font-size: 18px;
     }
 
@@ -905,11 +1375,17 @@ header h2,
     /* COUNTERS */
 
     .counter-container {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
         gap: 8px;
     }
 
     .counter-card {
-        flex: 1 1 100px;
+        width: 100%;
+
         padding: 10px;
     }
 
@@ -918,11 +1394,34 @@ header h2,
     }
 
 
-    /* BOARD */
+    /* ACTION BAR */
+
+    .action-bar {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 8px;
+    }
+
+    .action-bar button {
+        width: 100%;
+
+        min-height: 48px;
+    }
+
+
+    /* =====================================================
+       MAIN BOARD
+    ===================================================== */
 
     .board-table-wrapper {
+        width: 100%;
+
         overflow-x: auto;
         overflow-y: hidden;
+
         border-radius: 8px;
     }
 
@@ -932,14 +1431,14 @@ header h2,
 
     .coach-table th {
         font-size: 13px;
+
         padding: 8px 5px;
-        white-space: nowrap;
     }
 
     .coach-table td {
-        min-width: 85px;
         height: 65px;
-        min-height: 65px;
+
+        min-width: 85px;
     }
 
     .coach-no {
@@ -955,16 +1454,105 @@ header h2,
     }
 
 
-    /* PULLED OUT HEADER */
+    /* =====================================================
+       SHOP TABLE
+    ===================================================== */
+
+    .shop-card {
+        width: 100% !important;
+
+        max-width: 100% !important;
+    }
+
+    .shop-card .table-responsive {
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        overflow-x: auto !important;
+
+        overflow-y: hidden !important;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .shop-card .coach-table {
+        width: 900px !important;
+
+        min-width: 900px !important;
+
+        max-width: none !important;
+
+        table-layout: fixed !important;
+    }
+
+    .shop-card .coach-table th:first-child,
+    .shop-card .coach-table td:first-child {
+        width: 80px !important;
+
+        min-width: 80px !important;
+
+        max-width: 80px !important;
+    }
+
+    .shop-card .coach-table th:not(:first-child),
+    .shop-card .coach-table td:not(:first-child) {
+        width: 115px !important;
+
+        min-width: 115px !important;
+
+        max-width: 115px !important;
+    }
+
+    .shop-card .coach-table thead th {
+        height: 40px !important;
+
+        padding: 7px 4px !important;
+
+        font-size: 13px !important;
+    }
+
+    .shop-card .coach-table td {
+        height: 70px !important;
+
+        min-height: 70px !important;
+
+        padding: 3px !important;
+    }
+
+    .shop-card .coach-card {
+        min-height: 62px !important;
+    }
+
+    .shop-card .coach-no {
+        font-size: 16px;
+    }
+
+    .shop-card .coach-type {
+        font-size: 11px;
+    }
+
+    .shop-card .coach-status {
+        font-size: 10px;
+    }
+
+
+    /* =====================================================
+       PULLED OUT
+    ===================================================== */
 
     .pulled-out-section {
         margin-top: 18px;
+
         border-radius: 10px;
     }
 
     .pulled-out-header {
         min-height: 65px;
+
         padding: 12px 15px;
+
+        gap: 10px;
     }
 
     .pulled-out-header h2,
@@ -977,25 +1565,22 @@ header h2,
     #pulledOutTotal,
     #pulledOutCoachCount {
         min-width: 60px;
+
         min-height: 36px;
+
         font-size: 15px;
+
         padding: 4px 10px;
     }
-
-
-    /* PULLED OUT SEARCH */
 
     .pulled-out-search {
         padding: 10px;
     }
 
-
-    /* PULLED OUT TABLE */
-
     .pulled-out-table-wrapper {
         padding: 0 10px 12px;
+
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
     }
 
     .pulled-out-table {
@@ -1004,52 +1589,35 @@ header h2,
 
     .pulled-out-table th {
         font-size: 15px;
+
         padding: 10px 8px;
     }
 
     .pulled-out-table td {
         font-size: 15px;
+
         padding: 10px 8px;
     }
 
-
-    /* RETURN */
-
     .return-pulled-btn {
         min-width: 85px;
+
+        min-height: 46px;
+
         padding: 9px 14px;
+
         font-size: 15px;
     }
 
 
-    /* CARDS */
-
-    .pulled-out-card {
-        padding: 14px;
-    }
-
-    .pulled-out-card > div > div {
-        font-size: 16px;
-    }
-
-
-    /* ACTION BUTTONS */
-
-    .action-bar {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .action-bar button {
-        width: 100%;
-    }
-
-
-    /* MODAL */
+    /* =====================================================
+       MODAL
+    ===================================================== */
 
     .modal-dialog {
-        margin: 8px;
+        width: calc(100% - 16px);
+
+        margin: 8px auto;
     }
 
     .modal-body {
@@ -1068,988 +1636,30 @@ header h2,
     .container,
     .board-container,
     .main-container {
-        padding: 5px;
-    }
-
-    .pulled-out-header {
-        padding: 10px 12px;
-    }
-
-    .pulled-out-header h2,
-    .pulled-out-header h3 {
-        font-size: 18px;
-    }
-
-    .pulled-out-total,
-    #pulledOutCount,
-    #pulledOutTotal,
-    #pulledOutCoachCount {
-        font-size: 14px;
-        min-width: 55px;
-    }
-
-    #pulledOutSearch,
-    #pulledOutSearchBox,
-    #searchPulledOut {
-        font-size: 16px;
-    }
-
-    .coach-table {
-        min-width: 700px;
-    }
-
-}
-
-
-/* =========================================================
-   TOUCH DEVICES
-========================================================= */
-
-@media (hover: none) and (pointer: coarse) {
-
-    .coach-table td {
-        touch-action: pan-x;
-    }
-
-    .return-pulled-btn {
-        min-height: 46px;
-        padding: 10px 16px;
-    }
-
-    button {
-        -webkit-tap-highlight-color: transparent;
-    }
-
-}
-
-
-/* =========================================================
-   ADMIN
-========================================================= */
-
-body:not(.admin-logged-in)
-    #saveCoachBtn,
-body:not(.admin-logged-in)
-    #updateCoachBtn,
-body:not(.admin-logged-in)
-    #deleteCoachBtn,
-body:not(.admin-logged-in)
-    #pullOutCoachBtn {
-    opacity: 0.65;
-}
-
-
-/* =========================================================
-   SCROLLBAR
-========================================================= */
-
-.board-table-wrapper::-webkit-scrollbar,
-.pulled-out-table-wrapper::-webkit-scrollbar,
-.history-wrapper::-webkit-scrollbar {
-    height: 9px;
-}
-
-.board-table-wrapper::-webkit-scrollbar-track,
-.pulled-out-table-wrapper::-webkit-scrollbar-track,
-.history-wrapper::-webkit-scrollbar-track {
-    background: #e9ecef;
-    border-radius: 10px;
-}
-
-.board-table-wrapper::-webkit-scrollbar-thumb,
-.pulled-out-table-wrapper::-webkit-scrollbar-thumb,
-.history-wrapper::-webkit-scrollbar-thumb {
-    background: #7d858d;
-    border-radius: 10px;
-}
-
-/* =========================================================
-   DESKTOP FULL SCREEN BOARD
-   VERSION 14.0
-   ---------------------------------------------------------
-   FIX:
-   SHOP TABLE MUST USE 100% DESKTOP WIDTH
-========================================================= */
-
-@media (min-width: 769px) {
-
-    /* -----------------------------------------------------
-       GLOBAL DESKTOP WIDTH
-    ----------------------------------------------------- */
-
-    html,
-    body {
-        width: 100%;
-        min-width: 100%;
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-    }
-
-
-    /* -----------------------------------------------------
-       SHOP CARD
-    ----------------------------------------------------- */
-
-    .shop-card {
-        display: block !important;
-
-        width: 100% !important;
-        max-width: none !important;
-
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-
-        padding: 0 !important;
-
-        box-sizing: border-box;
-    }
-
-
-    /* -----------------------------------------------------
-       SHOP TITLE
-    ----------------------------------------------------- */
-
-    .shop-card .shop-title {
-        display: block !important;
-
-        width: 100% !important;
-        max-width: none !important;
-
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-
-        box-sizing: border-box;
-
-        text-align: center;
-    }
-
-
-    /* -----------------------------------------------------
-       TABLE RESPONSIVE WRAPPER
-    ----------------------------------------------------- */
-
-    .shop-card .table-responsive {
-        display: block !important;
-
-        width: 100% !important;
-        max-width: none !important;
-
-        margin: 0 !important;
-        padding: 0 !important;
-
-        overflow-x: auto;
-        overflow-y: hidden;
-
-        box-sizing: border-box;
-    }
-
-
-    /* -----------------------------------------------------
-       MAIN COACH TABLE
-    ----------------------------------------------------- */
-
-    .shop-card .coach-table {
-        display: table !important;
-
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: none !important;
-
-        margin: 0 !important;
-        padding: 0 !important;
-
-        table-layout: fixed !important;
-        border-collapse: collapse !important;
-
-        box-sizing: border-box;
-    }
-
-
-    /* -----------------------------------------------------
-       TABLE CELLS
-    ----------------------------------------------------- */
-
-    .shop-card .coach-table th,
-    .shop-card .coach-table td {
-        box-sizing: border-box;
-
-        text-align: center;
-        vertical-align: middle;
-
-        overflow: hidden;
-    }
-
-
-    /* -----------------------------------------------------
-       POSITION COLUMN
-    ----------------------------------------------------- */
-
-    .shop-card .coach-table th:first-child,
-    .shop-card .coach-table td:first-child {
-
-        width: 80px !important;
-        min-width: 80px !important;
-        max-width: 80px !important;
-
-        white-space: nowrap;
-    }
-
-
-    /* -----------------------------------------------------
-       ALL COACH COLUMNS
-       REMAINING SPACE DISTRIBUTED EQUALLY
-    ----------------------------------------------------- */
-
-    .shop-card .coach-table th:not(:first-child),
-    .shop-card .coach-table td:not(:first-child) {
-
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: none !important;
-    }
-
-
-    /* -----------------------------------------------------
-       DESKTOP COACH CELL
-    ----------------------------------------------------- */
-
-    .shop-card .coach-table td {
-
-        height: 100px !important;
-        min-height: 100px !important;
-
-        padding: 3px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       COACH CARD
-    ----------------------------------------------------- */
-
-    .shop-card .coach-card {
-
-        width: 100% !important;
-        max-width: 100% !important;
-
-        height: 100% !important;
-        min-height: 90px !important;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: center;
-
-        overflow: hidden;
-
-        box-sizing: border-box;
-    }
-
-
-    /* -----------------------------------------------------
-       COACH NUMBER
-    ----------------------------------------------------- */
-
-    .shop-card .coach-no {
-
-        max-width: 100%;
-
-        font-size: 18px;
-
-        font-weight: 900;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-        text-overflow: clip;
-    }
-
-
-    /* -----------------------------------------------------
-       COACH TYPE
-    ----------------------------------------------------- */
-
-    .shop-card .coach-type {
-
-        max-width: 100%;
-
-        font-size: 12px;
-
-        font-weight: 700;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-    }
-
-
-    /* -----------------------------------------------------
-       COACH STATUS
-    ----------------------------------------------------- */
-
-    .shop-card .coach-status {
-
-        max-width: 100%;
-
-        font-size: 11px;
-
-        font-weight: 800;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-    }
-
-
-    /* -----------------------------------------------------
-       N SHOP
-       6 COLUMNS INCLUDING POSITION
-    ----------------------------------------------------- */
-
-    .shop-card:has(#N2_H1) .coach-table th:first-child,
-    .shop-card:has(#N2_H1) .coach-table td:first-child {
-
-        width: 90px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       M SHOP
-    ----------------------------------------------------- */
-
-    .shop-card:has(#M2_H) .coach-table th:first-child,
-    .shop-card:has(#M2_H) .coach-table td:first-child {
-
-        width: 90px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       LIFTING BAY
-    ----------------------------------------------------- */
-
-    .shop-card:has(#L9_H) .coach-table th:first-child,
-    .shop-card:has(#L9_H) .coach-table td:first-child {
-
-        width: 90px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       MR SCR SHOP
-       13 COLUMNS INCLUDING POSITION
-    ----------------------------------------------------- */
-
-    .shop-card:has(#SCR9_H1) .coach-table th:first-child,
-    .shop-card:has(#SCR9_H1) .coach-table td:first-child {
-
-        width: 90px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       CR SHOP
-       12 COLUMNS INCLUDING POSITION
-    ----------------------------------------------------- */
-
-    .shop-card:has(#F1_H) .coach-table th:first-child,
-    .shop-card:has(#F1_H) .coach-table td:first-child {
-
-        width: 90px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       J SHOP
-    ----------------------------------------------------- */
-
-    .shop-card:has(#J1_H1) .coach-table th:first-child,
-    .shop-card:has(#J1_H1) .coach-table td:first-child {
-
-        width: 90px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       TABLE HEADER
-    ----------------------------------------------------- */
-
-    .shop-card .coach-table thead th {
-
-        height: 38px !important;
-
-        padding: 5px 3px !important;
-
-        font-size: 14px !important;
-
-        white-space: nowrap;
-
-        text-align: center;
-    }
-
-
-    /* -----------------------------------------------------
-       SHOP SPACING
-    ----------------------------------------------------- */
-
-    .shop-card.mt-4 {
-
-        margin-top: 16px !important;
-    }
-
-}
-/* =========================================================
-   MR CO-ORDINATION BOARD
-   RESPONSIVE FIX
-   DESKTOP + TABLET + MOBILE
-   VERSION 14.1
-   ---------------------------------------------------------
-   ✔ DESKTOP = FULL WIDTH
-   ✔ MOBILE = HORIZONTAL SCROLL
-   ✔ TABLE WIDTH FIXED
-   ✔ SHOP CARD FULL WIDTH
-   ✔ NO DESKTOP OVERFLOW
-   ✔ MOBILE TOUCH FRIENDLY
-========================================================= */
-
-
-/* =========================================================
-   DESKTOP
-========================================================= */
-
-@media (min-width: 769px) {
-
-    html,
-    body {
-        width: 100%;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-    }
-
-    .container,
-    .board-container,
-    .main-container {
-        width: 100%;
-        max-width: 100%;
-        margin: 0;
-        padding: 12px;
-    }
-
-    /* SHOP */
-
-    .shop-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        padding: 0 !important;
-    }
-
-    .shop-card .shop-title {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    /* TABLE WRAPPER */
-
-    .shop-card .table-responsive,
-    .shop-card .board-table-wrapper {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        margin: 0 !important;
-        padding: 0 !important;
-
-        overflow-x: auto;
-        overflow-y: hidden;
-
-        -webkit-overflow-scrolling: touch;
-    }
-
-    /* MAIN TABLE */
-
-    .shop-card .coach-table {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        margin: 0 !important;
-
-        table-layout: fixed !important;
-        border-collapse: collapse !important;
-    }
-
-    /* POSITION COLUMN */
-
-    .shop-card .coach-table th:first-child,
-    .shop-card .coach-table td:first-child {
-        width: 85px !important;
-        min-width: 85px !important;
-        max-width: 85px !important;
-
-        white-space: nowrap;
-    }
-
-    /* OTHER COLUMNS */
-
-    .shop-card .coach-table th:not(:first-child),
-    .shop-card .coach-table td:not(:first-child) {
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: none !important;
-    }
-
-    /* TABLE HEADER */
-
-    .shop-card .coach-table thead th {
-        height: 38px !important;
-
-        padding: 5px 3px !important;
-
-        font-size: 14px !important;
-
-        text-align: center;
-        vertical-align: middle;
-
-        white-space: nowrap;
-    }
-
-    /* TABLE BODY */
-
-    .shop-card .coach-table td {
-        height: 95px !important;
-        min-height: 95px !important;
-
-        padding: 3px !important;
-
-        text-align: center;
-        vertical-align: middle;
-    }
-
-    /* COACH CARD */
-
-    .shop-card .coach-card {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        min-height: 85px !important;
-        height: 100% !important;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: center;
-
-        overflow: hidden;
-    }
-
-    .shop-card .coach-no {
-        font-size: 18px;
-        font-weight: 900;
-
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    .shop-card .coach-type {
-        font-size: 12px;
-        font-weight: 700;
-
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    .shop-card .coach-status {
-        font-size: 11px;
-        font-weight: 800;
-
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    /* COUNTERS */
-
-    .counter-container {
-        width: 100%;
-    }
-
-    /* PULLED OUT */
-
-    .pulled-out-section {
-        width: 100%;
-        max-width: 100%;
-    }
-
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (min-width: 769px) and (max-width: 1100px) {
-
-    .container,
-    .board-container,
-    .main-container {
-        padding: 8px;
-    }
-
-    .shop-card .coach-table {
-        min-width: 850px !important;
-    }
-
-    .shop-card .coach-table th,
-    .shop-card .coach-table td {
-        font-size: 13px;
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 768px) {
-
-    html,
-    body {
-        width: 100%;
-        max-width: 100%;
-
-        margin: 0;
-        padding: 0;
-
-        overflow-x: hidden;
-    }
-
-    .container,
-    .board-container,
-    .main-container {
-        width: 100%;
-        max-width: 100%;
-
-        margin: 0;
-        padding: 6px;
-    }
-
-
-    /* =====================================================
-       SHOP CARD
-    ===================================================== */
-
-    .shop-card {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-
-        padding: 0 !important;
-    }
-
-
-    /* =====================================================
-       SHOP TITLE
-    ===================================================== */
-
-    .shop-card .shop-title {
-        width: 100% !important;
-
-        margin: 0 !important;
-
-        padding: 10px;
-
-        text-align: center;
-    }
-
-
-    /* =====================================================
-       TABLE WRAPPER
-    ===================================================== */
-
-    .shop-card .table-responsive,
-    .shop-card .board-table-wrapper {
-
-        display: block !important;
-
-        width: 100% !important;
-        max-width: 100% !important;
-
-        margin: 0 !important;
-
-        padding: 0 !important;
-
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-
-        -webkit-overflow-scrolling: touch;
-    }
-
-
-    /* =====================================================
-       MOBILE TABLE
-    ===================================================== */
-
-    .shop-card .coach-table {
-
-        width: 900px !important;
-
-        min-width: 900px !important;
-        max-width: none !important;
-
-        table-layout: fixed !important;
-
-        border-collapse: collapse !important;
-    }
-
-
-    /* =====================================================
-       POSITION COLUMN
-    ===================================================== */
-
-    .shop-card .coach-table th:first-child,
-    .shop-card .coach-table td:first-child {
-
-        width: 80px !important;
-        min-width: 80px !important;
-        max-width: 80px !important;
-
-        white-space: nowrap;
-    }
-
-
-    /* =====================================================
-       OTHER COLUMNS
-    ===================================================== */
-
-    .shop-card .coach-table th:not(:first-child),
-    .shop-card .coach-table td:not(:first-child) {
-
-        width: 115px !important;
-        min-width: 115px !important;
-        max-width: 115px !important;
-    }
-
-
-    /* =====================================================
-       HEADER
-    ===================================================== */
-
-    .shop-card .coach-table thead th {
-
-        height: 40px !important;
-
-        padding: 7px 4px !important;
-
-        font-size: 13px !important;
-
-        white-space: nowrap;
-
-        text-align: center;
-        vertical-align: middle;
-    }
-
-
-    /* =====================================================
-       CELLS
-    ===================================================== */
-
-    .shop-card .coach-table td {
-
-        height: 70px !important;
-        min-height: 70px !important;
-
-        padding: 3px !important;
-
-        text-align: center;
-        vertical-align: middle;
-    }
-
-
-    /* =====================================================
-       COACH CARD
-    ===================================================== */
-
-    .shop-card .coach-card {
-
-        width: 100% !important;
-        max-width: 100% !important;
-
-        min-height: 62px !important;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: center;
-
-        overflow: hidden;
-    }
-
-
-    .shop-card .coach-no {
-        font-size: 16px;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-        text-overflow: clip;
-    }
-
-    .shop-card .coach-type {
-        font-size: 11px;
-
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    .shop-card .coach-status {
-        font-size: 10px;
-
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-
-    /* =====================================================
-       COUNTERS
-    ===================================================== */
-
-    .counter-container {
-        display: grid;
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-        gap: 8px;
-
-        width: 100%;
-    }
-
-    .counter-card {
-        width: 100%;
-
-        min-width: 0;
-
-        padding: 10px;
-    }
-
-
-    /* =====================================================
-       ACTION BUTTONS
-    ===================================================== */
-
-    .action-bar {
-
-        display: grid;
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-        gap: 8px;
-
-        width: 100%;
-    }
-
-    .action-bar button {
-        width: 100%;
-        min-height: 48px;
-    }
-
-
-    /* =====================================================
-       SEARCH
-    ===================================================== */
-
-    #searchBox,
-    #pulledOutSearch,
-    #pulledOutSearchBox,
-    #searchPulledOut {
-
-        width: 100%;
-
-        min-height: 50px;
-
-        font-size: 17px;
-    }
-
-
-    /* =====================================================
-       PULLED OUT
-    ===================================================== */
-
-    .pulled-out-section {
-
-        width: 100%;
-
-        margin-top: 15px;
-
-        border-radius: 10px;
-    }
-
-    .pulled-out-header {
-
-        min-height: 62px;
-
-        padding: 10px 12px;
-
-        gap: 8px;
-    }
-
-    .pulled-out-header h2,
-    .pulled-out-header h3 {
-
-        font-size: 19px;
-    }
-
-    .pulled-out-table-wrapper {
-
-        width: 100%;
-
-        overflow-x: auto;
-
-        padding: 0 8px 10px;
-    }
-
-    .pulled-out-table {
-
-        min-width: 900px;
-    }
-
-
-    /* =====================================================
-       MODAL
-    ===================================================== */
-
-    .modal-dialog {
-
-        width: calc(100% - 16px);
-
-        margin: 8px auto;
-    }
-
-}
-
-
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
-
-@media (max-width: 480px) {
-
-    .container,
-    .board-container,
-    .main-container {
         padding: 4px;
     }
 
-    .shop-card .coach-table {
+    header,
+    .main-header,
+    .board-header {
+        padding: 12px;
+    }
 
+    header h1,
+    .main-header h1,
+    .board-header h1 {
+        font-size: 20px;
+    }
+
+    .counter-card .counter-number {
+        font-size: 21px;
+    }
+
+    .counter-card .counter-label {
+        font-size: 12px;
+    }
+
+    .shop-card .coach-table {
         width: 850px !important;
 
         min-width: 850px !important;
@@ -2057,22 +1667,23 @@ body:not(.admin-logged-in)
 
     .shop-card .coach-table th:first-child,
     .shop-card .coach-table td:first-child {
-
         width: 70px !important;
+
         min-width: 70px !important;
+
         max-width: 70px !important;
     }
 
     .shop-card .coach-table th:not(:first-child),
     .shop-card .coach-table td:not(:first-child) {
-
         width: 110px !important;
+
         min-width: 110px !important;
+
         max-width: 110px !important;
     }
 
     .shop-card .coach-table td {
-
         height: 65px !important;
     }
 
@@ -2088,78 +1699,299 @@ body:not(.admin-logged-in)
         font-size: 9px;
     }
 
-    .counter-container {
-        grid-template-columns: repeat(2, 1fr);
+    .pulled-out-header h2,
+    .pulled-out-header h3 {
+        font-size: 18px;
+    }
+
+    .pulled-out-total,
+    #pulledOutCount,
+    #pulledOutTotal,
+    #pulledOutCoachCount {
+        font-size: 14px;
+
+        min-width: 55px;
     }
 
 }
 
 
 /* =========================================================
-   TOUCH DEVICE
+   TOUCH DEVICES
 ========================================================= */
 
 @media (hover: none) and (pointer: coarse) {
 
+    .board-table-wrapper,
     .shop-card .table-responsive,
-    .shop-card .board-table-wrapper,
-    .pulled-out-table-wrapper {
-
+    .pulled-out-table-wrapper,
+    .history-wrapper {
         touch-action: pan-x;
+
         overscroll-behavior-x: contain;
     }
 
-    .coach-table td {
-
-        -webkit-tap-highlight-color: transparent;
-    }
-
     button {
-
         -webkit-tap-highlight-color: transparent;
     }
 
+    .return-pulled-btn {
+        min-height: 46px;
+    }
+
 }
 
 
 /* =========================================================
-   DESKTOP LARGE SCREEN
+   PRINT / A4 LANDSCAPE
 ========================================================= */
 
-@media (min-width: 1400px) {
+@media print {
 
+    @page {
+        size: A4 landscape;
+
+        margin: 7mm;
+    }
+
+    html,
+    body {
+        width: 100%;
+
+        margin: 0;
+        padding: 0;
+
+        background: #ffffff !important;
+
+        color: #000000 !important;
+
+        overflow: visible !important;
+    }
+
+    body {
+        font-size: 8px;
+    }
+
+
+    /* HIDE NON PRINT */
+
+    .no-print,
+    nav,
+    .navbar,
+    header,
+    .main-header,
+    .board-header,
+    .action-bar,
+    #searchBox,
+    #pulledOutSearch,
+    #pulledOutSearchBox,
+    #searchPulledOut,
+    .pulled-out-section,
+    .modal,
+    button {
+        display: none !important;
+    }
+
+
+    /* CONTAINER */
+
+    .container,
+    .board-container,
+    .main-container {
+        width: 100% !important;
+
+        max-width: none !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+    }
+
+
+    /* SHOP */
+
+    .shop-card {
+        width: 100% !important;
+
+        max-width: none !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        break-inside: avoid;
+    }
+
+    .shop-card .shop-title {
+        display: block !important;
+
+        width: 100% !important;
+
+        margin: 0 0 3mm !important;
+
+        padding: 2mm !important;
+
+        font-size: 14px !important;
+
+        color: #000000 !important;
+
+        background: #ffffff !important;
+    }
+
+
+    /* TABLE WRAPPER */
+
+    .board-table-wrapper,
+    .shop-card .table-responsive {
+        width: 100% !important;
+
+        overflow: visible !important;
+
+        padding: 0 !important;
+
+        margin: 0 !important;
+    }
+
+
+    /* TABLE */
+
+    .coach-table,
+    .shop-card .coach-table {
+        width: 100% !important;
+
+        min-width: 0 !important;
+
+        max-width: none !important;
+
+        table-layout: fixed !important;
+
+        border-collapse: collapse !important;
+    }
+
+
+    /* HEADER */
+
+    .coach-table th,
+    .shop-card .coach-table th {
+        background: #eeeeee !important;
+
+        color: #000000 !important;
+
+        border: 1px solid #000000 !important;
+
+        padding: 2px !important;
+
+        font-size: 7px !important;
+
+        height: 20px !important;
+    }
+
+
+    /* CELLS */
+
+    .coach-table td,
     .shop-card .coach-table td {
+        border: 1px solid #000000 !important;
 
-        height: 105px !important;
+        padding: 1px !important;
+
+        height: 28px !important;
+
+        min-height: 28px !important;
+
+        font-size: 7px !important;
+
+        background: #ffffff !important;
     }
 
+
+    /* COACH CARD */
+
+    .coach-card,
     .shop-card .coach-card {
+        min-height: 20px !important;
 
-        min-height: 95px !important;
+        height: 100% !important;
+
+        display: flex !important;
+
+        justify-content: center !important;
+
+        align-items: center !important;
     }
 
+
+    .coach-no,
     .shop-card .coach-no {
+        font-size: 8px !important;
 
-        font-size: 20px;
+        font-weight: 900 !important;
     }
 
+    .coach-type,
     .shop-card .coach-type {
-
-        font-size: 13px;
+        font-size: 6px !important;
     }
 
+    .coach-status,
     .shop-card .coach-status {
+        font-size: 6px !important;
+    }
 
-        font-size: 12px;
+
+    /* KEEP STATUS COLOURS IN PRINT */
+
+    .status-po {
+        background: #fff3cd !important;
+    }
+
+    .status-s {
+        background: #d1e7dd !important;
+    }
+
+    .status-lm {
+        background: #cfe2ff !important;
+    }
+
+    .status-med {
+        background: #f8d7da !important;
+    }
+
+    .status-rl {
+        background: #e2d9f3 !important;
+    }
+
+    .status-r1 {
+        background: #d9f0ff !important;
+    }
+
+    .status-rs {
+        background: #fde2b8 !important;
+    }
+
+    .status-l {
+        background: #d7f9e9 !important;
+    }
+
+    .status-hvy {
+        background: #ffcdd2 !important;
+    }
+
+
+    /* POSITION COLUMN */
+
+    .shop-card .coach-table th:first-child,
+    .shop-card .coach-table td:first-child {
+        width: 45px !important;
+
+        min-width: 45px !important;
+
+        max-width: 45px !important;
     }
 
 }
 
 
 /* =========================================================
-   END VERSION 14.1
-========================================================= */
-
-/* =========================================================
-   END
+   END VERSION 15.0
 ========================================================= */
