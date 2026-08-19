@@ -6,24 +6,16 @@
    MATCHING:
    firebase-config.js VERSION 12.0
    Firebase SDK 11.0.2
-
-   FEATURES:
    ---------------------------------------------------------
-   ✔ Firebase Realtime Database
-   ✔ coachBoard
-   ✔ N SHOP
-   ✔ M SHOP
-   ✔ LIFTING BAY
-   ✔ J SHOP
-   ✔ MR SCR SHOP
-   ✔ CR SHOP
-   ✔ Coach Number only
-   ✔ Supports flat Firebase coach objects
-   ✔ Supports nested Firebase structure
-   ✔ Supports random Firebase keys
-   ✔ Supports shop name variations
-   ✔ Supports coachNo / coachNumber
-   ✔ Supports existing print HTML
+   FEATURES:
+   ✓ Firebase Realtime Database
+   ✓ coachBoard path
+   ✓ Coach Number rendering
+   ✓ N + M side by side
+   ✓ Lifting Bay + J side by side
+   ✓ MR SCR full width
+   ✓ CR full width
+   ✓ Multiple Firebase data structures supported
 ========================================================= */
 
 
@@ -41,31 +33,29 @@ import {
 } from "./firebase-config.js";
 
 
-console.log("======================================");
 console.log("🖨️ PRINT.JS VERSION 14.0 LOADED");
-console.log("🔥 Firebase Database:", database ? "READY" : "ERROR");
-console.log("======================================");
 
 
 /* =========================================================
-   FIREBASE PATH
+   FIREBASE BOARD PATH
 ========================================================= */
 
 const BOARD_PATH = "coachBoard";
 
 
 /* =========================================================
-   SHOP / LINE / POSITION CONFIGURATION
+   SHOP CONFIGURATION
 ========================================================= */
 
 const CONFIG = {
 
     N: {
 
-        shopNames: [
+        aliases: [
             "N",
             "N SHOP",
-            "NSHOP"
+            "NSHOP",
+            "N_SHOP"
         ],
 
         lines: [
@@ -85,20 +75,17 @@ const CONFIG = {
             "D1"
         ],
 
-        tableIds: [
-            "nTable",
-            "nmTable"
-        ]
-
+        table: "nTable"
     },
 
 
     M: {
 
-        shopNames: [
+        aliases: [
             "M",
             "M SHOP",
-            "MSHOP"
+            "MSHOP",
+            "M_SHOP"
         ],
 
         lines: [
@@ -115,20 +102,17 @@ const CONFIG = {
             "D"
         ],
 
-        tableIds: [
-            "mTable",
-            "nmTable"
-        ]
-
+        table: "mTable"
     },
 
 
     L: {
 
-        shopNames: [
+        aliases: [
             "L",
             "LIFTING BAY",
-            "LIFTINGBAY"
+            "LIFTINGBAY",
+            "LIFTING_BAY"
         ],
 
         lines: [
@@ -142,20 +126,17 @@ const CONFIG = {
             "D"
         ],
 
-        tableIds: [
-            "lTable",
-            "ljTable"
-        ]
-
+        table: "lTable"
     },
 
 
     J: {
 
-        shopNames: [
+        aliases: [
             "J",
             "J SHOP",
-            "JSHOP"
+            "JSHOP",
+            "J_SHOP"
         ],
 
         lines: [
@@ -174,22 +155,18 @@ const CONFIG = {
             "D1"
         ],
 
-        tableIds: [
-            "jTable",
-            "ljTable"
-        ]
-
+        table: "jTable"
     },
 
 
     SCR: {
 
-        shopNames: [
+        aliases: [
             "SCR",
-            "MR SCR",
             "MR SCR SHOP",
-            "MRSCR",
-            "MRSCRSHOP"
+            "MRSCRSHOP",
+            "MR_SCR_SHOP",
+            "SCR SHOP"
         ],
 
         lines: [
@@ -214,19 +191,17 @@ const CONFIG = {
             "D1"
         ],
 
-        tableIds: [
-            "scrTable"
-        ]
-
+        table: "scrTable"
     },
 
 
     CR: {
 
-        shopNames: [
+        aliases: [
             "CR",
             "CR SHOP",
-            "CRSHOP"
+            "CRSHOP",
+            "CR_SHOP"
         ],
 
         lines: [
@@ -248,46 +223,10 @@ const CONFIG = {
             "D"
         ],
 
-        tableIds: [
-            "crTable"
-        ]
-
+        table: "crTable"
     }
 
 };
-
-
-/* =========================================================
-   DATE / TIME
-========================================================= */
-
-function setPrintDate(){
-
-    const el =
-        document.getElementById("printDate");
-
-    if(!el){
-        return;
-    }
-
-    const now =
-        new Date();
-
-    el.textContent =
-        "Printed: " +
-        now.toLocaleDateString("en-GB") +
-        " " +
-        now.toLocaleTimeString(
-            "en-IN",
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
-            }
-        );
-
-}
 
 
 /* =========================================================
@@ -300,31 +239,41 @@ function normalize(value){
         value === null ||
         value === undefined
     ){
+
         return "";
+
     }
+
 
     return String(value)
         .trim()
         .toUpperCase()
-        .replace(/\s+/g, " ");
+        .replace(/\s+/g, " ")
+        .replace(/[_-]+/g, " ");
 
 }
 
 
 /* =========================================================
    COMPACT NORMALIZE
+   ---------------------------------------------------------
+   Example:
+   "N SHOP" -> "NSHOP"
+   "N_SHOP" -> "NSHOP"
 ========================================================= */
 
 function compact(value){
 
     return normalize(value)
-        .replace(/[\s_-]+/g, "");
+        .replace(/[^A-Z0-9]/g, "");
 
 }
 
 
 /* =========================================================
-   COACH NUMBER
+   GET COACH NUMBER
+   ---------------------------------------------------------
+   Supports many possible field names.
 ========================================================= */
 
 function getCoachNumber(value){
@@ -333,49 +282,60 @@ function getCoachNumber(value){
         value === null ||
         value === undefined
     ){
-        return "";
-    }
-
-
-    /* STRING */
-
-    if(typeof value === "string"){
-
-        return value.trim();
-
-    }
-
-
-    /* NUMBER */
-
-    if(typeof value === "number"){
-
-        return String(value);
-
-    }
-
-
-    /* NOT OBJECT */
-
-    if(typeof value !== "object"){
 
         return "";
 
     }
 
+
+    /* ---------------------------------------------
+       Primitive value
+    --------------------------------------------- */
+
+    if(
+        typeof value === "string" ||
+        typeof value === "number"
+    ){
+
+        const result =
+            String(value).trim();
+
+        return result;
+
+    }
+
+
+    if(
+        typeof value !== "object"
+    ){
+
+        return "";
+
+    }
+
+
+    /* ---------------------------------------------
+       Possible coach number fields
+    --------------------------------------------- */
 
     const keys = [
 
         "coachNo",
-        "coachNO",
         "coachNumber",
-        "coach_number",
-        "coach_no",
         "coach",
         "number",
-        "coachNum",
-        "coach_num",
-        "coachName"
+
+        "coach_no",
+        "coach_number",
+
+        "coachno",
+        "coachnumber",
+
+        "CoachNo",
+        "CoachNumber",
+
+        "COACHNO",
+        "COACHNUMBER"
 
     ];
 
@@ -389,16 +349,52 @@ function getCoachNumber(value){
             )
         ){
 
-            const v =
+            const candidate =
                 value[key];
 
             if(
-                v !== null &&
-                v !== undefined &&
-                String(v).trim() !== ""
+                candidate !== null &&
+                candidate !== undefined &&
+                String(candidate).trim() !== ""
             ){
 
-                return String(v).trim();
+                return String(candidate).trim();
+
+            }
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------
+       Nested data objects
+    --------------------------------------------- */
+
+    const nestedKeys = [
+
+        "data",
+        "coachData",
+        "details",
+        "value"
+
+    ];
+
+
+    for(const key of nestedKeys){
+
+        if(
+            value[key] !== null &&
+            value[key] !== undefined &&
+            typeof value[key] === "object"
+        ){
+
+            const nested =
+                getCoachNumber(value[key]);
+
+            if(nested){
+
+                return nested;
 
             }
 
@@ -413,10 +409,10 @@ function getCoachNumber(value){
 
 
 /* =========================================================
-   SHOP MATCH
+   MATCH ALIAS
 ========================================================= */
 
-function shopMatches(value, config){
+function matchesAlias(value, aliases){
 
     const a =
         compact(value);
@@ -426,10 +422,10 @@ function shopMatches(value, config){
     }
 
 
-    for(const name of config.shopNames){
+    for(const alias of aliases){
 
         if(
-            a === compact(name)
+            a === compact(alias)
         ){
 
             return true;
@@ -445,155 +441,217 @@ function shopMatches(value, config){
 
 
 /* =========================================================
-   FIELD HELPERS
+   FIND DIRECT SHOP
 ========================================================= */
 
-function getShopField(node){
-
-    if(
-        !node ||
-        typeof node !== "object"
-    ){
-        return "";
-    }
-
-    return (
-        node.shop ??
-        node.shopName ??
-        node.shop_name ??
-        node.section ??
-        node.sectionName ??
-        node.department ??
-        ""
-    );
-
-}
-
-
-function getLineField(node){
-
-    if(
-        !node ||
-        typeof node !== "object"
-    ){
-        return "";
-    }
-
-    return (
-        node.line ??
-        node.lineName ??
-        node.line_name ??
-        node.lineNo ??
-        node.lineNumber ??
-        ""
-    );
-
-}
-
-
-function getPositionField(node){
-
-    if(
-        !node ||
-        typeof node !== "object"
-    ){
-        return "";
-    }
-
-    return (
-        node.position ??
-        node.positionName ??
-        node.position_name ??
-        node.pos ??
-        node.cell ??
-        node.cellId ??
-        ""
-    );
-
-}
-
-
-/* =========================================================
-   EXACT LINE MATCH
-========================================================= */
-
-function lineMatches(value, target){
-
-    return (
-        normalize(value) ===
-        normalize(target)
-    );
-
-}
-
-
-/* =========================================================
-   EXACT POSITION MATCH
-========================================================= */
-
-function positionMatches(value, target){
-
-    return (
-        normalize(value) ===
-        normalize(target)
-    );
-
-}
-
-
-/* =========================================================
-   FIND COACH
-   ---------------------------------------------------------
-   Handles:
-   ---------------------------------------------------------
-   1. shop / line / position / coachNo
-   2. random Firebase keys
-   3. nested objects
-   4. direct line-position structure
-   5. parent context
-========================================================= */
-
-function findCoach(
-    board,
-    shop,
-    line,
-    position
-){
+function getShopNode(board, config){
 
     if(
         !board ||
         typeof board !== "object"
     ){
 
+        return null;
+
+    }
+
+
+    for(const key of Object.keys(board)){
+
+        if(
+            matchesAlias(
+                key,
+                config.aliases
+            )
+        ){
+
+            return board[key];
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   FIND KEY
+========================================================= */
+
+function findKey(object, target){
+
+    if(
+        !object ||
+        typeof object !== "object"
+    ){
+
+        return null;
+
+    }
+
+
+    const targetCompact =
+        compact(target);
+
+
+    for(const key of Object.keys(object)){
+
+        if(
+            compact(key) === targetCompact
+        ){
+
+            return key;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   DIRECT PATH SEARCH
+   ---------------------------------------------------------
+   Supports:
+   shop / line / position
+
+   Example:
+   coachBoard
+       N
+         N2
+           H1
+             coachNo
+========================================================= */
+
+function directSearch(
+    board,
+    shopConfig,
+    line,
+    position
+){
+
+    const shopNode =
+        getShopNode(
+            board,
+            shopConfig
+        );
+
+
+    if(
+        !shopNode ||
+        typeof shopNode !== "object"
+    ){
+
         return "";
 
     }
 
 
-    const config =
-        CONFIG[shop];
+    const lineKey =
+        findKey(
+            shopNode,
+            line
+        );
 
-    if(!config){
+
+    if(!lineKey){
+
         return "";
+
     }
+
+
+    const lineNode =
+        shopNode[lineKey];
+
+
+    /*
+     * Normal:
+     *
+     * N
+     *  N2
+     *   H1
+     */
+
+    if(
+        lineNode &&
+        typeof lineNode === "object"
+    ){
+
+        const positionKey =
+            findKey(
+                lineNode,
+                position
+            );
+
+
+        if(positionKey){
+
+            const coach =
+                getCoachNumber(
+                    lineNode[positionKey]
+                );
+
+
+            if(coach){
+
+                return coach;
+
+            }
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   RECURSIVE SEARCH
+   ---------------------------------------------------------
+   Searches actual Firebase object paths.
+========================================================= */
+
+function recursiveSearch(
+    board,
+    shopConfig,
+    line,
+    position
+){
+
+    const targetShop =
+        shopConfig.aliases.map(
+            value => compact(value)
+        );
+
+    const targetLine =
+        compact(line);
+
+    const targetPosition =
+        compact(position);
 
 
     let result = "";
 
 
-    /* =====================================================
-       RECURSIVE WALK
-    ===================================================== */
-
     function walk(
         node,
-        contextShop = "",
-        contextLine = "",
-        contextPosition = ""
+        path
     ){
 
         if(result){
+
             return;
+
         }
 
 
@@ -607,145 +665,106 @@ function findCoach(
         }
 
 
-        /* =================================================
-           PRIMITIVE
-        ================================================= */
+        /*
+         * OBJECT NODE
+         */
 
         if(
-            typeof node !== "object"
+            typeof node === "object"
         ){
 
             /*
-             * If primitive is found under an exact
-             * shop + line + position path
+             * --------------------------------------
+             * Explicit object fields
+             * --------------------------------------
              */
 
+            const nodeShop =
+                compact(
+                    node.shop ??
+                    node.shopName ??
+                    node.shop_name ??
+                    node.section
+                );
+
+
+            const nodeLine =
+                compact(
+                    node.line ??
+                    node.lineName ??
+                    node.line_name
+                );
+
+
+            const nodePosition =
+                compact(
+                    node.position ??
+                    node.positionName ??
+                    node.position_name ??
+                    node.cell
+                );
+
+
             if(
-                shopMatches(
-                    contextShop,
-                    config
-                ) &&
-                lineMatches(
-                    contextLine,
-                    line
-                ) &&
-                positionMatches(
-                    contextPosition,
-                    position
-                )
+                targetShop.includes(nodeShop) &&
+                nodeLine === targetLine &&
+                nodePosition === targetPosition
             ){
 
-                const number =
+                const coach =
                     getCoachNumber(node);
 
-                if(number){
 
-                    result =
-                        number;
+                if(coach){
+
+                    result = coach;
+
+                    return;
 
                 }
 
             }
 
-            return;
 
-        }
+            /*
+             * --------------------------------------
+             * Path based matching
+             * --------------------------------------
+             *
+             * Last 3 keys:
+             *
+             * SHOP / LINE / POSITION
+             */
 
+            if(path.length >= 3){
 
-        /* =================================================
-           CURRENT OBJECT FIELDS
-        ================================================= */
-
-        const ownShop =
-            getShopField(node);
-
-        const ownLine =
-            getLineField(node);
-
-        const ownPosition =
-            getPositionField(node);
+                const last3 =
+                    path.slice(-3);
 
 
-        const currentShop =
-            ownShop ||
-            contextShop;
+                const pathShop =
+                    compact(last3[0]);
 
-        const currentLine =
-            ownLine ||
-            contextLine;
+                const pathLine =
+                    compact(last3[1]);
 
-        const currentPosition =
-            ownPosition ||
-            contextPosition;
+                const pathPosition =
+                    compact(last3[2]);
 
-
-        /* =================================================
-           EXPLICIT COACH OBJECT
-        ================================================= */
-
-        if(
-            shopMatches(
-                currentShop,
-                config
-            ) &&
-            lineMatches(
-                currentLine,
-                line
-            ) &&
-            positionMatches(
-                currentPosition,
-                position
-            )
-        ){
-
-            const number =
-                getCoachNumber(node);
-
-            if(number){
-
-                result =
-                    number;
-
-                return;
-
-            }
-
-        }
-
-
-        /* =================================================
-           DIRECT OBJECT:
-           line -> position -> coach
-        ================================================= */
-
-        const lineNode =
-            node[line];
-
-        if(
-            lineNode !== undefined
-        ){
-
-            if(
-                typeof lineNode === "object" &&
-                lineNode !== null
-            ){
-
-                const positionNode =
-                    lineNode[position];
 
                 if(
-                    positionNode !== undefined
+                    targetShop.includes(pathShop) &&
+                    pathLine === targetLine &&
+                    pathPosition === targetPosition
                 ){
 
-                    const number =
-                        getCoachNumber(
-                            positionNode
-                        );
+                    const coach =
+                        getCoachNumber(node);
 
-                    if(number){
 
-                        result =
-                            number;
+                    if(coach){
+
+                        result = coach;
 
                         return;
 
@@ -755,40 +774,24 @@ function findCoach(
 
             }
 
-        }
 
+            /*
+             * --------------------------------------
+             * Walk children
+             * --------------------------------------
+             */
 
-        /* =================================================
-           DIRECT CELL:
-           LINE_POSITION
-        ================================================= */
-
-        const cellKeys = [
-
-            `${line}_${position}`,
-            `${line}-${position}`,
-            `${line} ${position}`
-
-        ];
-
-
-        for(
-            const cellKey of cellKeys
-        ){
-
-            if(
-                node[cellKey] !== undefined
+            for(
+                const key of Object.keys(node)
             ){
 
-                const number =
-                    getCoachNumber(
-                        node[cellKey]
-                    );
+                walk(
+                    node[key],
+                    path.concat(key)
+                );
 
-                if(number){
 
-                    result =
-                        number;
+                if(result){
 
                     return;
 
@@ -798,96 +801,10 @@ function findCoach(
 
         }
 
-
-        /* =================================================
-           CHILDREN
-        ================================================= */
-
-        for(
-            const key of Object.keys(node)
-        ){
-
-            const child =
-                node[key];
-
-
-            /*
-             * Key may itself be a line
-             */
-
-            let nextLine =
-                currentLine;
-
-            let nextPosition =
-                currentPosition;
-
-            let nextShop =
-                currentShop;
-
-
-            if(
-                CONFIG[shop].lines.some(
-                    x =>
-                        normalize(x) ===
-                        normalize(key)
-                )
-            ){
-
-                nextLine =
-                    key;
-
-            }
-
-
-            if(
-                CONFIG[shop].positions.some(
-                    x =>
-                        normalize(x) ===
-                        normalize(key)
-                )
-            ){
-
-                nextPosition =
-                    key;
-
-            }
-
-
-            /*
-             * Key may be shop
-             */
-
-            if(
-                shopMatches(
-                    key,
-                    config
-                )
-            ){
-
-                nextShop =
-                    key;
-
-            }
-
-
-            walk(
-                child,
-                nextShop,
-                nextLine,
-                nextPosition
-            );
-
-
-            if(result){
-                return;
-            }
-
-        }
-
     }
 
 
-    walk(board);
+    walk(board, []);
 
 
     return result;
@@ -896,27 +813,72 @@ function findCoach(
 
 
 /* =========================================================
-   FIND TABLE ELEMENT
+   FIND COACH
+   ---------------------------------------------------------
+   Main function.
 ========================================================= */
 
-function getTableElement(
-    config
+function findCoach(
+    board,
+    shop,
+    line,
+    position
 ){
 
-    for(
-        const id of config.tableIds
-    ){
+    const config =
+        CONFIG[shop];
 
-        const el =
-            document.getElementById(id);
 
-        if(el){
-            return el;
-        }
+    if(!config){
+
+        return "";
 
     }
 
-    return null;
+
+    /*
+     * STEP 1
+     * Direct structure
+     */
+
+    let coach =
+        directSearch(
+            board,
+            config,
+            line,
+            position
+        );
+
+
+    if(coach){
+
+        return coach;
+
+    }
+
+
+    /*
+     * STEP 2
+     * Recursive structure
+     */
+
+    coach =
+        recursiveSearch(
+            board,
+            config,
+            line,
+            position
+        );
+
+
+    if(coach){
+
+        return coach;
+
+    }
+
+
+    return "";
 
 }
 
@@ -933,20 +895,30 @@ function renderShop(
     const config =
         CONFIG[shop];
 
+
     if(!config){
+
+        console.warn(
+            "Unknown shop:",
+            shop
+        );
+
         return;
+
     }
 
 
     const tbody =
-        getTableElement(config);
+        document.getElementById(
+            config.table
+        );
+
 
     if(!tbody){
 
         console.warn(
-            "⚠️ Table not found for:",
-            shop,
-            config.tableIds
+            "Table not found:",
+            config.table
         );
 
         return;
@@ -965,24 +937,26 @@ function renderShop(
             document.createElement("tr");
 
 
-        /* =================================================
-           POSITION CELL
-        ================================================= */
+        /*
+         * POSITION CELL
+         */
 
         const positionCell =
             document.createElement("th");
 
+
         positionCell.textContent =
             position;
+
 
         tr.appendChild(
             positionCell
         );
 
 
-        /* =================================================
-           COACH CELLS
-        ================================================= */
+        /*
+         * COACH CELLS
+         */
 
         for(
             const line of config.lines
@@ -1001,22 +975,26 @@ function renderShop(
                 );
 
 
+            /*
+             * IMPORTANT:
+             * Coach number ONLY
+             */
+
             td.textContent =
                 coach || "";
 
 
             /*
-             * Optional debug attribute
+             * Debug information
              */
 
-            td.dataset.shop =
-                shop;
+            if(coach){
 
-            td.dataset.line =
-                line;
+                console.log(
+                    `✅ ${shop} / ${line} / ${position} = ${coach}`
+                );
 
-            td.dataset.position =
-                position;
+            }
 
 
             tr.appendChild(td);
@@ -1032,82 +1010,68 @@ function renderShop(
 
 
 /* =========================================================
-   DEBUG BOARD
+   RENDER ALL SHOPS
 ========================================================= */
 
-function debugBoard(board){
+function renderAllShops(board){
 
     console.log(
-        "======================================"
+        "🖨️ Rendering Firebase coachBoard..."
     );
 
-    console.log(
-        "🖨️ coachBoard raw data:"
-    );
 
-    console.log(board);
+    renderShop(board, "N");
 
-    console.log(
-        "🖨️ coachBoard type:",
-        typeof board
-    );
+    renderShop(board, "M");
 
-    if(
-        board &&
-        typeof board === "object"
-    ){
+    renderShop(board, "L");
 
-        console.log(
-            "🖨️ coachBoard keys:",
-            Object.keys(board)
-        );
+    renderShop(board, "J");
 
-    }
+    renderShop(board, "SCR");
+
+    renderShop(board, "CR");
+
 
     console.log(
-        "======================================"
+        "✅ All shops rendered"
     );
 
 }
 
 
 /* =========================================================
-   COUNT PRINTED COACHES
+   PRINT DATE
 ========================================================= */
 
-function countPrintedCoaches(){
+function setPrintDate(){
 
-    let count = 0;
-
-
-    const cells =
-        document.querySelectorAll(
-            "#printArea td"
+    const element =
+        document.getElementById(
+            "printDate"
         );
 
 
-    cells.forEach(
-        cell => {
+    if(!element){
 
-            if(
-                cell.textContent.trim() !== ""
-            ){
+        return;
 
-                count++;
-
-            }
-
-        }
-    );
+    }
 
 
-    console.log(
-        "🖨️ TOTAL COACH NUMBERS PRINTED:",
-        count
-    );
+    const now =
+        new Date();
 
 
-    return count;
+    element.textContent =
+        "Printed: " +
+        now.toLocaleDateString(
+            "en-GB"
+        ) +
+        " " +
+        now.toLocaleTimeString(
+            "en-IN"
+        );
 
 }
 
@@ -1123,6 +1087,7 @@ async function loadBoard(){
             "loading"
         );
 
+
     const error =
         document.getElementById(
             "error"
@@ -1132,7 +1097,7 @@ async function loadBoard(){
     try{
 
         console.log(
-            "🖨️ Loading:",
+            "🖨️ Loading Firebase:",
             BOARD_PATH
         );
 
@@ -1141,6 +1106,9 @@ async function loadBoard(){
 
             loading.style.display =
                 "block";
+
+            loading.textContent =
+                "Loading coach board...";
 
         }
 
@@ -1153,9 +1121,19 @@ async function loadBoard(){
         }
 
 
-        /* =================================================
-           FIREBASE REFERENCE
-        ================================================= */
+        /*
+         * EXACT SAME DATABASE INSTANCE
+         * FROM firebase-config.js
+         */
+
+        if(!database){
+
+            throw new Error(
+                "Firebase Database is not initialized."
+            );
+
+        }
+
 
         const boardRef =
             ref(
@@ -1164,12 +1142,10 @@ async function loadBoard(){
             );
 
 
-        /* =================================================
-           GET DATA
-        ================================================= */
-
         const snapshot =
-            await get(boardRef);
+            await get(
+                boardRef
+            );
 
 
         console.log(
@@ -1178,12 +1154,10 @@ async function loadBoard(){
         );
 
 
-        if(
-            !snapshot.exists()
-        ){
+        if(!snapshot.exists()){
 
             throw new Error(
-                "coachBoard is empty in Firebase."
+                "coachBoard data not found in Firebase."
             );
 
         }
@@ -1193,70 +1167,26 @@ async function loadBoard(){
             snapshot.val();
 
 
-        /* =================================================
-           DEBUG
-        ================================================= */
-
-        debugBoard(board);
-
-
-        /* =================================================
-           RENDER
-        ================================================= */
-
-        renderShop(
-            board,
-            "N"
-        );
-
-
-        renderShop(
-            board,
-            "M"
-        );
-
-
-        renderShop(
-            board,
-            "L"
-        );
-
-
-        renderShop(
-            board,
-            "J"
-        );
-
-
-        renderShop(
-            board,
-            "SCR"
-        );
-
-
-        renderShop(
-            board,
-            "CR"
-        );
-
-
-        /* =================================================
-           COUNT
-        ================================================= */
-
-        const total =
-            countPrintedCoaches();
-
+        /*
+         * IMPORTANT DEBUG
+         */
 
         console.log(
-            "✅ PRINT BOARD READY"
+            "🖨️ FULL coachBoard DATA:",
+            board
         );
 
 
-        console.log(
-            "✅ Coach numbers:",
-            total
+        /*
+         * RENDER
+         */
+
+        renderAllShops(
+            board
         );
+
+
+        setPrintDate();
 
 
         if(loading){
@@ -1267,23 +1197,9 @@ async function loadBoard(){
         }
 
 
-        setPrintDate();
-
-
-        /*
-         * If no coach numbers were found,
-         * show useful diagnostic message.
-         */
-
-        if(
-            total === 0
-        ){
-
-            console.warn(
-                "⚠️ No coach numbers matched shop + line + position."
-            );
-
-        }
+        console.log(
+            "✅ PRINT BOARD READY"
+        );
 
     }
     catch(errorObject){
@@ -1306,10 +1222,7 @@ async function loadBoard(){
 
             error.textContent =
                 "Unable to load coach board: " +
-                (
-                    errorObject.message ||
-                    errorObject
-                );
+                errorObject.message;
 
         }
 
@@ -1322,58 +1235,26 @@ async function loadBoard(){
    REFRESH BUTTON
 ========================================================= */
 
-function setupRefresh(){
+function initializeButtons(){
 
-    const buttons =
-        document.querySelectorAll(
+    const refreshButton =
+        document.querySelector(
             ".refresh-btn"
         );
 
 
-    buttons.forEach(
-        button => {
+    if(refreshButton){
 
-            button.addEventListener(
-                "click",
-                () => {
+        refreshButton.addEventListener(
+            "click",
+            () => {
 
-                    location.reload();
+                location.reload();
 
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   PRINT BUTTON
-========================================================= */
-
-function setupPrint(){
-
-    const buttons =
-        document.querySelectorAll(
-            ".print-btn"
+            }
         );
 
-
-    buttons.forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    window.print();
-
-                }
-            );
-
-        }
-    );
+    }
 
 }
 
@@ -1384,23 +1265,20 @@ function setupPrint(){
 
 document.addEventListener(
     "DOMContentLoaded",
-    async () => {
+    () => {
 
         console.log(
-            "🖨️ PRINT PAGE INITIALIZING..."
+            "🖨️ PRINT PAGE DOM READY"
         );
 
 
         setPrintDate();
 
 
-        setupRefresh();
+        initializeButtons();
 
 
-        setupPrint();
-
-
-        await loadBoard();
+        loadBoard();
 
     }
 );
