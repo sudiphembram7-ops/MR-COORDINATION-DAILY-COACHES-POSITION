@@ -10,63 +10,164 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>MR CO-ORDINATION - A4 PRINT</title>
+    <title>
+        MR CO-ORDINATION - PRINT
+    </title>
 
     <style>
 
         /* =====================================================
-           A4 LANDSCAPE
+           SCREEN
         ===================================================== */
 
-        @page{
-            size:A4 landscape;
-            margin:4mm;
-        }
-
-        *{
-            box-sizing:border-box;
-        }
-
-        html,
         body{
             margin:0;
-            padding:0;
-            width:100%;
-            background:#fff;
-            font-family:Arial,Helvetica,sans-serif;
+            padding:10px;
+            font-family:Arial, Helvetica, sans-serif;
+            background:#ffffff;
+            color:#000;
         }
 
-        body{
-            color:#000;
+        .print-container{
+            width:100%;
+            margin:auto;
+        }
+
+        .print-header{
+            text-align:center;
+            margin-bottom:8px;
+        }
+
+        .print-header h1{
+            margin:0;
+            font-size:18px;
+            font-weight:700;
+        }
+
+        .print-header h2{
+            margin:2px 0 0;
+            font-size:13px;
+            font-weight:700;
+        }
+
+        .print-date{
+            margin-top:3px;
+            font-size:9px;
         }
 
 
         /* =====================================================
-           SCREEN CONTROL
+           GROUP
         ===================================================== */
 
-        .printControls{
-            position:fixed;
-            top:10px;
-            right:10px;
-            z-index:9999;
-            display:flex;
-            gap:6px;
+        .group{
+            margin-bottom:7px;
+            page-break-inside:avoid;
         }
 
-        .printControls button{
-            border:0;
-            border-radius:5px;
-            padding:8px 14px;
-            font-size:13px;
-            font-weight:700;
-            cursor:pointer;
+        .group-title{
+            background:#000;
             color:#fff;
-            background:#198754;
+            text-align:center;
+            font-size:11px;
+            font-weight:700;
+            padding:3px 4px;
+            margin:0;
+            border:1px solid #000;
         }
 
-        .printControls button.closeBtn{
-            background:#dc3545;
+
+        /* =====================================================
+           TABLE
+        ===================================================== */
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            table-layout:fixed;
+            margin:0;
+        }
+
+        th,
+        td{
+            border:1px solid #000;
+            text-align:center;
+            vertical-align:middle;
+            padding:2px 3px;
+            line-height:1;
+        }
+
+        th{
+            background:#e9e9e9;
+            font-size:8px;
+            font-weight:700;
+        }
+
+        td{
+            font-size:8px;
+            height:15px;
+            font-weight:600;
+        }
+
+
+        /* =====================================================
+           COLUMN WIDTH
+        ===================================================== */
+
+        .shop-col{
+            width:18%;
+        }
+
+        .line-col{
+            width:18%;
+        }
+
+        .position-col{
+            width:20%;
+        }
+
+        .coach-col{
+            width:44%;
+        }
+
+
+        /* =====================================================
+           EMPTY COACH
+        ===================================================== */
+
+        .empty{
+            color:#fff;
+        }
+
+
+        /* =====================================================
+           PRINT BUTTON
+        ===================================================== */
+
+        .print-controls{
+            text-align:center;
+            margin-bottom:8px;
+        }
+
+        .print-btn{
+            border:none;
+            background:#0d6efd;
+            color:#fff;
+            padding:7px 18px;
+            border-radius:4px;
+            font-size:12px;
+            cursor:pointer;
+        }
+
+        .refresh-btn{
+            border:none;
+            background:#198754;
+            color:#fff;
+            padding:7px 18px;
+            border-radius:4px;
+            font-size:12px;
+            cursor:pointer;
+            margin-left:5px;
         }
 
 
@@ -75,245 +176,99 @@
         ===================================================== */
 
         #loading{
-            position:fixed;
-            inset:0;
-            z-index:9998;
-            background:#fff;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:18px;
-            font-weight:700;
-        }
-
-
-        /* =====================================================
-           MAIN PRINT PAGE
-        ===================================================== */
-
-        #printPage{
-            width:100%;
-            max-width:289mm;
-            margin:0 auto;
-        }
-
-
-        /* =====================================================
-           HEADER
-        ===================================================== */
-
-        .printHeader{
             text-align:center;
-            margin-bottom:2mm;
-        }
-
-        .printHeader h1{
-            margin:0;
             font-size:13px;
-            line-height:1;
-            font-weight:700;
+            padding:15px;
+            font-weight:bold;
         }
 
-        .printHeader h2{
-            margin:1mm 0 0;
-            font-size:9px;
-            line-height:1;
-            font-weight:700;
-        }
-
-        #printDate{
-            margin-top:1mm;
-            font-size:6px;
-        }
-
-
-        /* =====================================================
-           FORMAT 2 ROW
-        ===================================================== */
-
-        .formatRow{
-            width:100%;
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:2mm;
-            margin-bottom:2mm;
-            align-items:start;
-        }
-
-
-        /* =====================================================
-           SHOP BOX
-        ===================================================== */
-
-        .shopBox{
-            width:100%;
-            border:0.35mm solid #222;
-            break-inside:avoid;
-            page-break-inside:avoid;
-        }
-
-        .shopTitle{
-            width:100%;
+        #error{
             text-align:center;
-            font-size:8px;
-            font-weight:700;
-            line-height:1;
-            padding:1.2mm 0;
-            background:#ffc107;
-            border-bottom:0.35mm solid #222;
+            color:red;
+            font-size:12px;
+            font-weight:bold;
+            padding:10px;
         }
 
 
         /* =====================================================
-           PRINT TABLE
+           A4 LANDSCAPE
         ===================================================== */
 
-        .printTable{
-            width:100%;
-            border-collapse:collapse;
-            table-layout:fixed;
+        @page{
+            size:A4 landscape;
+            margin:5mm;
         }
 
-        .printTable th,
-        .printTable td{
-            border:0.25mm solid #555;
-            padding:0;
-            margin:0;
-            text-align:center;
-            vertical-align:middle;
-            overflow:hidden;
-            white-space:nowrap;
-        }
-
-        .printTable thead th{
-            height:5mm;
-            background:#20282c;
-            color:#fff;
-            font-size:5.5px;
-            font-weight:700;
-        }
-
-        .printTable tbody th{
-            width:11mm;
-            height:6mm;
-            background:#20282c;
-            color:#fff;
-            font-size:5.5px;
-            font-weight:700;
-        }
-
-        .printTable tbody td{
-            height:6mm;
-            background:#fff;
-            color:#000;
-            font-size:7px;
-            font-weight:700;
-            line-height:1;
-        }
-
-        .positionHead{
-            width:11mm;
-        }
-
-        .coachNumber{
-            display:block;
-            width:100%;
-            font-size:7px;
-            font-weight:700;
-            line-height:1;
-            text-align:center;
-        }
-
-
-        /* =====================================================
-           FULL WIDTH SHOP
-        ===================================================== */
-
-        .fullWidth{
-            width:100%;
-            margin-bottom:2mm;
-            break-inside:avoid;
-            page-break-inside:avoid;
-        }
-
-        .fullWidth .printTable tbody td{
-            height:6.5mm;
-        }
-
-
-        /* =====================================================
-           FOOTER
-        ===================================================== */
-
-        .printFooter{
-            text-align:center;
-            font-size:5.5px;
-            margin-top:1mm;
-        }
-
-
-        /* =====================================================
-           ERROR
-        ===================================================== */
-
-        .errorMessage{
-            text-align:center;
-            font-size:11px;
-            font-weight:700;
-            padding:10mm;
-            color:#b00020;
-        }
-
-
-        /* =====================================================
-           SCREEN PREVIEW
-        ===================================================== */
-
-        @media screen{
-
-            #printPage{
-                margin-top:65px;
-                padding:0 5px 15px;
-            }
-
-        }
-
-
-        /* =====================================================
-           PRINT MODE
-        ===================================================== */
 
         @media print{
 
             html,
             body{
                 width:100%;
-                height:auto;
-                overflow:visible;
+                height:100%;
+                margin:0;
+                padding:0;
+                background:#fff;
             }
 
-            .printControls,
-            #loading{
+            .print-controls{
                 display:none !important;
             }
 
-            #printPage{
-                width:100%;
-                max-width:none;
-                margin:0;
-                padding:0;
+            .print-header{
+                margin-bottom:4px;
             }
 
-            .formatRow,
-            .shopBox,
-            .fullWidth{
-                break-inside:avoid;
+            .print-header h1{
+                font-size:14px;
+            }
+
+            .print-header h2{
+                font-size:10px;
+            }
+
+            .print-date{
+                font-size:7px;
+                margin-top:1px;
+            }
+
+            .group{
+                margin-bottom:3px;
                 page-break-inside:avoid;
+                break-inside:avoid;
             }
 
-            .printHeader{
-                break-after:avoid;
-                page-break-after:avoid;
+            .group-title{
+                font-size:8px;
+                padding:2px;
+                line-height:1;
+            }
+
+            th,
+            td{
+                padding:1px 2px;
+                line-height:1;
+            }
+
+            th{
+                font-size:6.5px;
+                height:10px;
+            }
+
+            td{
+                font-size:7px;
+                height:11px;
+            }
+
+            table{
+                page-break-inside:avoid;
+                break-inside:avoid;
+            }
+
+            #loading,
+            #error{
+                display:none !important;
             }
 
         }
@@ -326,25 +281,51 @@
 <body>
 
 
+<div class="print-container">
+
+
     <!-- =====================================================
-         SCREEN BUTTONS
+         HEADER
     ===================================================== -->
 
-    <div class="printControls">
+    <div class="print-header">
+
+        <h1>
+            MR CO-ORDINATION DAILY COACHES POSITION
+        </h1>
+
+        <h2>
+            LILUAH WORKSHOP
+        </h2>
+
+        <div
+            id="printDate"
+            class="print-date"
+        >
+            --
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTROLS
+    ===================================================== -->
+
+    <div class="print-controls">
 
         <button
-            type="button"
+            class="print-btn"
             onclick="window.print()"
         >
-            PRINT A4
+            PRINT
         </button>
 
         <button
-            type="button"
-            class="closeBtn"
-            onclick="window.close()"
+            class="refresh-btn"
+            onclick="location.reload()"
         >
-            CLOSE
+            REFRESH
         </button>
 
     </div>
@@ -355,56 +336,218 @@
     ===================================================== -->
 
     <div id="loading">
-        Loading Coach Board...
+        Loading coach board...
     </div>
 
 
+    <div id="error"></div>
+
+
     <!-- =====================================================
-         PRINT PAGE
+         PRINT AREA
     ===================================================== -->
 
-    <main id="printPage">
-
-
-        <!-- HEADER -->
-
-        <header class="printHeader">
-
-            <h1>
-                MR CO-ORDINATION DAILY COACHES POSITION
-            </h1>
-
-            <h2>
-                LILUAH WORKSHOP
-            </h2>
-
-            <div id="printDate">
-                --
-            </div>
-
-        </header>
+    <div id="printArea">
 
 
         <!-- =================================================
-             FORMAT 2
+             N SHOP + M SHOP
         ================================================= -->
 
-        <div id="printArea"></div>
+        <section class="group">
+
+            <div class="group-title">
+                N SHOP + M SHOP
+            </div>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th class="shop-col">
+                            SHOP
+                        </th>
+
+                        <th class="line-col">
+                            LINE
+                        </th>
+
+                        <th class="position-col">
+                            POSITION
+                        </th>
+
+                        <th class="coach-col">
+                            COACH NUMBER
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="nmTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
 
 
-        <div class="printFooter">
-            MR CO-ORDINATION &nbsp; | &nbsp; Coach Number Position
-        </div>
+
+        <!-- =================================================
+             LIFTING BAY + J SHOP
+        ================================================= -->
+
+        <section class="group">
+
+            <div class="group-title">
+                LIFTING BAY + J SHOP
+            </div>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th class="shop-col">
+                            SHOP
+                        </th>
+
+                        <th class="line-col">
+                            LINE
+                        </th>
+
+                        <th class="position-col">
+                            POSITION
+                        </th>
+
+                        <th class="coach-col">
+                            COACH NUMBER
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="ljTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
 
 
-    </main>
+
+        <!-- =================================================
+             MR SCR SHOP
+        ================================================= -->
+
+        <section class="group">
+
+            <div class="group-title">
+                MR SCR SHOP
+            </div>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th class="shop-col">
+                            SHOP
+                        </th>
+
+                        <th class="line-col">
+                            LINE
+                        </th>
+
+                        <th class="position-col">
+                            POSITION
+                        </th>
+
+                        <th class="coach-col">
+                            COACH NUMBER
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="scrTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
 
 
-    <!-- =====================================================
-         PRINT JS
-    ===================================================== -->
 
-   
+        <!-- =================================================
+             CR SHOP
+        ================================================= -->
+
+        <section class="group">
+
+            <div class="group-title">
+                CR SHOP
+            </div>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th class="shop-col">
+                            SHOP
+                        </th>
+
+                        <th class="line-col">
+                            LINE
+                        </th>
+
+                        <th class="position-col">
+                            POSITION
+                        </th>
+
+                        <th class="coach-col">
+                            COACH NUMBER
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="crTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     PRINT JS
+===================================================== -->
+
+<script
+    type="module"
+    src="js/print.js"
+></script>
+
 
 </body>
 
