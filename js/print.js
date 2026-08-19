@@ -1,16 +1,34 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    PRINT.JS
-   VERSION 13.0 FINAL
-
+   VERSION 14.0 FINAL
+   ---------------------------------------------------------
    MATCHING:
    firebase-config.js VERSION 12.0
    Firebase SDK 11.0.2
+
+   FEATURES:
+   ---------------------------------------------------------
+   ✔ Firebase Realtime Database
+   ✔ coachBoard
+   ✔ N SHOP
+   ✔ M SHOP
+   ✔ LIFTING BAY
+   ✔ J SHOP
+   ✔ MR SCR SHOP
+   ✔ CR SHOP
+   ✔ Coach Number only
+   ✔ Supports flat Firebase coach objects
+   ✔ Supports nested Firebase structure
+   ✔ Supports random Firebase keys
+   ✔ Supports shop name variations
+   ✔ Supports coachNo / coachNumber
+   ✔ Supports existing print HTML
 ========================================================= */
 
 
 /* =========================================================
-   FIREBASE
+   FIREBASE IMPORT
 ========================================================= */
 
 import {
@@ -23,47 +41,157 @@ import {
 } from "./firebase-config.js";
 
 
-console.log("🖨️ PRINT JS LOADED");
+console.log("======================================");
+console.log("🖨️ PRINT.JS VERSION 14.0 LOADED");
+console.log("🔥 Firebase Database:", database ? "READY" : "ERROR");
+console.log("======================================");
 
 
 /* =========================================================
-   BOARD PATH
+   FIREBASE PATH
 ========================================================= */
 
 const BOARD_PATH = "coachBoard";
 
 
 /* =========================================================
-   SHOP CONFIGURATION
+   SHOP / LINE / POSITION CONFIGURATION
 ========================================================= */
 
 const CONFIG = {
 
     N: {
-        lines: ["N2","N3","N5","N7","N8"],
-        positions: ["H1","H2","H3","D3","D2","D1"],
-        table: "nTable"
+
+        shopNames: [
+            "N",
+            "N SHOP",
+            "NSHOP"
+        ],
+
+        lines: [
+            "N2",
+            "N3",
+            "N5",
+            "N7",
+            "N8"
+        ],
+
+        positions: [
+            "H1",
+            "H2",
+            "H3",
+            "D3",
+            "D2",
+            "D1"
+        ],
+
+        tableIds: [
+            "nTable",
+            "nmTable"
+        ]
+
     },
+
 
     M: {
-        lines: ["M2","M3","M4","M5","M6"],
-        positions: ["H","C","D"],
-        table: "mTable"
+
+        shopNames: [
+            "M",
+            "M SHOP",
+            "MSHOP"
+        ],
+
+        lines: [
+            "M2",
+            "M3",
+            "M4",
+            "M5",
+            "M6"
+        ],
+
+        positions: [
+            "H",
+            "C",
+            "D"
+        ],
+
+        tableIds: [
+            "mTable",
+            "nmTable"
+        ]
+
     },
+
 
     L: {
-        lines: ["L9","L10"],
-        positions: ["H","C","D"],
-        table: "lTable"
+
+        shopNames: [
+            "L",
+            "LIFTING BAY",
+            "LIFTINGBAY"
+        ],
+
+        lines: [
+            "L9",
+            "L10"
+        ],
+
+        positions: [
+            "H",
+            "C",
+            "D"
+        ],
+
+        tableIds: [
+            "lTable",
+            "ljTable"
+        ]
+
     },
+
 
     J: {
-        lines: ["J1","J2","J3","J4","J5","J6"],
-        positions: ["H1","H2","D2","D1"],
-        table: "jTable"
+
+        shopNames: [
+            "J",
+            "J SHOP",
+            "JSHOP"
+        ],
+
+        lines: [
+            "J1",
+            "J2",
+            "J3",
+            "J4",
+            "J5",
+            "J6"
+        ],
+
+        positions: [
+            "H1",
+            "H2",
+            "D2",
+            "D1"
+        ],
+
+        tableIds: [
+            "jTable",
+            "ljTable"
+        ]
+
     },
 
+
     SCR: {
+
+        shopNames: [
+            "SCR",
+            "MR SCR",
+            "MR SCR SHOP",
+            "MRSCR",
+            "MRSCRSHOP"
+        ],
+
         lines: [
             "SCR9",
             "SCR10",
@@ -78,11 +206,29 @@ const CONFIG = {
             "SCR21",
             "SCR22"
         ],
-        positions: ["H1","H2","D2","D1"],
-        table: "scrTable"
+
+        positions: [
+            "H1",
+            "H2",
+            "D2",
+            "D1"
+        ],
+
+        tableIds: [
+            "scrTable"
+        ]
+
     },
 
+
     CR: {
+
+        shopNames: [
+            "CR",
+            "CR SHOP",
+            "CRSHOP"
+        ],
+
         lines: [
             "F1",
             "F2",
@@ -96,8 +242,16 @@ const CONFIG = {
             "F10",
             "F11"
         ],
-        positions: ["H","D"],
-        table: "crTable"
+
+        positions: [
+            "H",
+            "D"
+        ],
+
+        tableIds: [
+            "crTable"
+        ]
+
     }
 
 };
@@ -116,30 +270,55 @@ function setPrintDate(){
         return;
     }
 
-    const now = new Date();
+    const now =
+        new Date();
 
     el.textContent =
         "Printed: " +
         now.toLocaleDateString("en-GB") +
         " " +
-        now.toLocaleTimeString("en-IN");
+        now.toLocaleTimeString(
+            "en-IN",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+            }
+        );
 
 }
 
 
 /* =========================================================
-   NORMALIZE TEXT
+   NORMALIZE
 ========================================================= */
 
 function normalize(value){
 
-    if(value === null || value === undefined){
+    if(
+        value === null ||
+        value === undefined
+    ){
         return "";
     }
 
     return String(value)
         .trim()
-        .toUpperCase();
+        .toUpperCase()
+        .replace(/\s+/g, " ");
+
+}
+
+
+/* =========================================================
+   COMPACT NORMALIZE
+========================================================= */
+
+function compact(value){
+
+    return normalize(value)
+        .replace(/[\s_-]+/g, "");
 
 }
 
@@ -150,44 +329,78 @@ function normalize(value){
 
 function getCoachNumber(value){
 
-    if(value === null || value === undefined){
+    if(
+        value === null ||
+        value === undefined
+    ){
         return "";
     }
+
+
+    /* STRING */
 
     if(typeof value === "string"){
+
         return value.trim();
+
     }
+
+
+    /* NUMBER */
 
     if(typeof value === "number"){
+
         return String(value);
+
     }
+
+
+    /* NOT OBJECT */
 
     if(typeof value !== "object"){
+
         return "";
+
     }
 
 
-    const possibleKeys = [
+    const keys = [
 
         "coachNo",
+        "coachNO",
         "coachNumber",
+        "coach_number",
+        "coach_no",
         "coach",
         "number",
-        "coach_no",
-        "coach_number"
+        "coachNum",
+        "coach_num",
+        "coachName"
 
     ];
 
 
-    for(const key of possibleKeys){
+    for(const key of keys){
 
         if(
-            value[key] !== undefined &&
-            value[key] !== null &&
-            String(value[key]).trim() !== ""
+            Object.prototype.hasOwnProperty.call(
+                value,
+                key
+            )
         ){
 
-            return String(value[key]).trim();
+            const v =
+                value[key];
+
+            if(
+                v !== null &&
+                v !== undefined &&
+                String(v).trim() !== ""
+            ){
+
+                return String(v).trim();
+
+            }
 
         }
 
@@ -195,134 +408,475 @@ function getCoachNumber(value){
 
 
     return "";
+
+}
+
+
+/* =========================================================
+   SHOP MATCH
+========================================================= */
+
+function shopMatches(value, config){
+
+    const a =
+        compact(value);
+
+    if(!a){
+        return false;
+    }
+
+
+    for(const name of config.shopNames){
+
+        if(
+            a === compact(name)
+        ){
+
+            return true;
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   FIELD HELPERS
+========================================================= */
+
+function getShopField(node){
+
+    if(
+        !node ||
+        typeof node !== "object"
+    ){
+        return "";
+    }
+
+    return (
+        node.shop ??
+        node.shopName ??
+        node.shop_name ??
+        node.section ??
+        node.sectionName ??
+        node.department ??
+        ""
+    );
+
+}
+
+
+function getLineField(node){
+
+    if(
+        !node ||
+        typeof node !== "object"
+    ){
+        return "";
+    }
+
+    return (
+        node.line ??
+        node.lineName ??
+        node.line_name ??
+        node.lineNo ??
+        node.lineNumber ??
+        ""
+    );
+
+}
+
+
+function getPositionField(node){
+
+    if(
+        !node ||
+        typeof node !== "object"
+    ){
+        return "";
+    }
+
+    return (
+        node.position ??
+        node.positionName ??
+        node.position_name ??
+        node.pos ??
+        node.cell ??
+        node.cellId ??
+        ""
+    );
+
+}
+
+
+/* =========================================================
+   EXACT LINE MATCH
+========================================================= */
+
+function lineMatches(value, target){
+
+    return (
+        normalize(value) ===
+        normalize(target)
+    );
+
+}
+
+
+/* =========================================================
+   EXACT POSITION MATCH
+========================================================= */
+
+function positionMatches(value, target){
+
+    return (
+        normalize(value) ===
+        normalize(target)
+    );
+
 }
 
 
 /* =========================================================
    FIND COACH
    ---------------------------------------------------------
-   Supports:
-   coachBoard/shop/line/position
-   and common object variations.
+   Handles:
+   ---------------------------------------------------------
+   1. shop / line / position / coachNo
+   2. random Firebase keys
+   3. nested objects
+   4. direct line-position structure
+   5. parent context
 ========================================================= */
 
-function findCoach(board, shop, line, position){
+function findCoach(
+    board,
+    shop,
+    line,
+    position
+){
 
-    if(!board){
+    if(
+        !board ||
+        typeof board !== "object"
+    ){
+
+        return "";
+
+    }
+
+
+    const config =
+        CONFIG[shop];
+
+    if(!config){
         return "";
     }
 
 
-    const s =
-        normalize(shop);
-
-    const l =
-        normalize(line);
-
-    const p =
-        normalize(position);
-
-
-    /*
-     * DIRECT STRUCTURE
-     */
-
-    const directShop =
-        board[shop];
-
-    if(directShop){
-
-        const directLine =
-            directShop[line];
-
-        if(directLine){
-
-            const directPosition =
-                directLine[position];
-
-            const number =
-                getCoachNumber(directPosition);
-
-            if(number){
-                return number;
-            }
-
-        }
-
-    }
-
-
-    /*
-     * SEARCH RECURSIVELY
-     */
-
     let result = "";
 
 
-    function walk(node){
+    /* =====================================================
+       RECURSIVE WALK
+    ===================================================== */
+
+    function walk(
+        node,
+        contextShop = "",
+        contextLine = "",
+        contextPosition = ""
+    ){
 
         if(result){
             return;
         }
 
+
         if(
             node === null ||
-            node === undefined ||
-            typeof node !== "object"
+            node === undefined
         ){
+
             return;
+
         }
 
 
-        /*
-         * Coach object with explicit fields
-         */
-
-        const nodeShop =
-            normalize(
-                node.shop ??
-                node.shopName ??
-                node.section
-            );
-
-        const nodeLine =
-            normalize(
-                node.line ??
-                node.lineName
-            );
-
-        const nodePosition =
-            normalize(
-                node.position ??
-                node.positionName ??
-                node.cell
-            );
-
+        /* =================================================
+           PRIMITIVE
+        ================================================= */
 
         if(
-            nodeShop === s &&
-            nodeLine === l &&
-            nodePosition === p
+            typeof node !== "object"
+        ){
+
+            /*
+             * If primitive is found under an exact
+             * shop + line + position path
+             */
+
+            if(
+                shopMatches(
+                    contextShop,
+                    config
+                ) &&
+                lineMatches(
+                    contextLine,
+                    line
+                ) &&
+                positionMatches(
+                    contextPosition,
+                    position
+                )
+            ){
+
+                const number =
+                    getCoachNumber(node);
+
+                if(number){
+
+                    result =
+                        number;
+
+                }
+
+            }
+
+            return;
+
+        }
+
+
+        /* =================================================
+           CURRENT OBJECT FIELDS
+        ================================================= */
+
+        const ownShop =
+            getShopField(node);
+
+        const ownLine =
+            getLineField(node);
+
+        const ownPosition =
+            getPositionField(node);
+
+
+        const currentShop =
+            ownShop ||
+            contextShop;
+
+        const currentLine =
+            ownLine ||
+            contextLine;
+
+        const currentPosition =
+            ownPosition ||
+            contextPosition;
+
+
+        /* =================================================
+           EXPLICIT COACH OBJECT
+        ================================================= */
+
+        if(
+            shopMatches(
+                currentShop,
+                config
+            ) &&
+            lineMatches(
+                currentLine,
+                line
+            ) &&
+            positionMatches(
+                currentPosition,
+                position
+            )
         ){
 
             const number =
                 getCoachNumber(node);
 
             if(number){
-                result = number;
+
+                result =
+                    number;
+
                 return;
+
             }
 
         }
 
 
-        /*
-         * Recursively inspect children
-         */
+        /* =================================================
+           DIRECT OBJECT:
+           line -> position -> coach
+        ================================================= */
 
-        for(const key of Object.keys(node)){
+        const lineNode =
+            node[line];
 
-            walk(node[key]);
+        if(
+            lineNode !== undefined
+        ){
+
+            if(
+                typeof lineNode === "object" &&
+                lineNode !== null
+            ){
+
+                const positionNode =
+                    lineNode[position];
+
+                if(
+                    positionNode !== undefined
+                ){
+
+                    const number =
+                        getCoachNumber(
+                            positionNode
+                        );
+
+                    if(number){
+
+                        result =
+                            number;
+
+                        return;
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+        /* =================================================
+           DIRECT CELL:
+           LINE_POSITION
+        ================================================= */
+
+        const cellKeys = [
+
+            `${line}_${position}`,
+            `${line}-${position}`,
+            `${line} ${position}`
+
+        ];
+
+
+        for(
+            const cellKey of cellKeys
+        ){
+
+            if(
+                node[cellKey] !== undefined
+            ){
+
+                const number =
+                    getCoachNumber(
+                        node[cellKey]
+                    );
+
+                if(number){
+
+                    result =
+                        number;
+
+                    return;
+
+                }
+
+            }
+
+        }
+
+
+        /* =================================================
+           CHILDREN
+        ================================================= */
+
+        for(
+            const key of Object.keys(node)
+        ){
+
+            const child =
+                node[key];
+
+
+            /*
+             * Key may itself be a line
+             */
+
+            let nextLine =
+                currentLine;
+
+            let nextPosition =
+                currentPosition;
+
+            let nextShop =
+                currentShop;
+
+
+            if(
+                CONFIG[shop].lines.some(
+                    x =>
+                        normalize(x) ===
+                        normalize(key)
+                )
+            ){
+
+                nextLine =
+                    key;
+
+            }
+
+
+            if(
+                CONFIG[shop].positions.some(
+                    x =>
+                        normalize(x) ===
+                        normalize(key)
+                )
+            ){
+
+                nextPosition =
+                    key;
+
+            }
+
+
+            /*
+             * Key may be shop
+             */
+
+            if(
+                shopMatches(
+                    key,
+                    config
+                )
+            ){
+
+                nextShop =
+                    key;
+
+            }
+
+
+            walk(
+                child,
+                nextShop,
+                nextLine,
+                nextPosition
+            );
+
 
             if(result){
                 return;
@@ -337,14 +891,44 @@ function findCoach(board, shop, line, position){
 
 
     return result;
+
 }
 
 
 /* =========================================================
-   CREATE TABLE
+   FIND TABLE ELEMENT
 ========================================================= */
 
-function renderShop(board, shop){
+function getTableElement(
+    config
+){
+
+    for(
+        const id of config.tableIds
+    ){
+
+        const el =
+            document.getElementById(id);
+
+        if(el){
+            return el;
+        }
+
+    }
+
+    return null;
+
+}
+
+
+/* =========================================================
+   RENDER SHOP
+========================================================= */
+
+function renderShop(
+    board,
+    shop
+){
 
     const config =
         CONFIG[shop];
@@ -355,25 +939,35 @@ function renderShop(board, shop){
 
 
     const tbody =
-        document.getElementById(config.table);
+        getTableElement(config);
 
     if(!tbody){
+
+        console.warn(
+            "⚠️ Table not found for:",
+            shop,
+            config.tableIds
+        );
+
         return;
+
     }
 
 
     tbody.innerHTML = "";
 
 
-    for(const position of config.positions){
+    for(
+        const position of config.positions
+    ){
 
         const tr =
             document.createElement("tr");
 
 
-        /*
-         * POSITION
-         */
+        /* =================================================
+           POSITION CELL
+        ================================================= */
 
         const positionCell =
             document.createElement("th");
@@ -381,14 +975,18 @@ function renderShop(board, shop){
         positionCell.textContent =
             position;
 
-        tr.appendChild(positionCell);
+        tr.appendChild(
+            positionCell
+        );
 
 
-        /*
-         * LINES
-         */
+        /* =================================================
+           COACH CELLS
+        ================================================= */
 
-        for(const line of config.lines){
+        for(
+            const line of config.lines
+        ){
 
             const td =
                 document.createElement("td");
@@ -407,6 +1005,20 @@ function renderShop(board, shop){
                 coach || "";
 
 
+            /*
+             * Optional debug attribute
+             */
+
+            td.dataset.shop =
+                shop;
+
+            td.dataset.line =
+                line;
+
+            td.dataset.position =
+                position;
+
+
             tr.appendChild(td);
 
         }
@@ -420,32 +1032,130 @@ function renderShop(board, shop){
 
 
 /* =========================================================
+   DEBUG BOARD
+========================================================= */
+
+function debugBoard(board){
+
+    console.log(
+        "======================================"
+    );
+
+    console.log(
+        "🖨️ coachBoard raw data:"
+    );
+
+    console.log(board);
+
+    console.log(
+        "🖨️ coachBoard type:",
+        typeof board
+    );
+
+    if(
+        board &&
+        typeof board === "object"
+    ){
+
+        console.log(
+            "🖨️ coachBoard keys:",
+            Object.keys(board)
+        );
+
+    }
+
+    console.log(
+        "======================================"
+    );
+
+}
+
+
+/* =========================================================
+   COUNT PRINTED COACHES
+========================================================= */
+
+function countPrintedCoaches(){
+
+    let count = 0;
+
+
+    const cells =
+        document.querySelectorAll(
+            "#printArea td"
+        );
+
+
+    cells.forEach(
+        cell => {
+
+            if(
+                cell.textContent.trim() !== ""
+            ){
+
+                count++;
+
+            }
+
+        }
+    );
+
+
+    console.log(
+        "🖨️ TOTAL COACH NUMBERS PRINTED:",
+        count
+    );
+
+
+    return count;
+
+}
+
+
+/* =========================================================
    LOAD BOARD
 ========================================================= */
 
 async function loadBoard(){
 
     const loading =
-        document.getElementById("loading");
+        document.getElementById(
+            "loading"
+        );
 
     const error =
-        document.getElementById("error");
+        document.getElementById(
+            "error"
+        );
 
 
     try{
 
+        console.log(
+            "🖨️ Loading:",
+            BOARD_PATH
+        );
+
+
         if(loading){
-            loading.style.display = "block";
+
+            loading.style.display =
+                "block";
+
         }
+
 
         if(error){
-            error.textContent = "";
+
+            error.textContent =
+                "";
+
         }
 
 
-        /*
-         * EXACT FIREBASE CONFIG MATCH
-         */
+        /* =================================================
+           FIREBASE REFERENCE
+        ================================================= */
 
         const boardRef =
             ref(
@@ -454,14 +1164,26 @@ async function loadBoard(){
             );
 
 
+        /* =================================================
+           GET DATA
+        ================================================= */
+
         const snapshot =
             await get(boardRef);
 
 
-        if(!snapshot.exists()){
+        console.log(
+            "🖨️ Firebase snapshot exists:",
+            snapshot.exists()
+        );
+
+
+        if(
+            !snapshot.exists()
+        ){
 
             throw new Error(
-                "No coach board data found in Firebase."
+                "coachBoard is empty in Firebase."
             );
 
         }
@@ -471,43 +1193,112 @@ async function loadBoard(){
             snapshot.val();
 
 
-        console.log(
-            "🖨️ Firebase coachBoard:",
-            board
+        /* =================================================
+           DEBUG
+        ================================================= */
+
+        debugBoard(board);
+
+
+        /* =================================================
+           RENDER
+        ================================================= */
+
+        renderShop(
+            board,
+            "N"
         );
 
 
-        /*
-         * RENDER ALL SHOPS
-         */
+        renderShop(
+            board,
+            "M"
+        );
 
-        renderShop(board, "N");
-        renderShop(board, "M");
-        renderShop(board, "L");
-        renderShop(board, "J");
-        renderShop(board, "SCR");
-        renderShop(board, "CR");
+
+        renderShop(
+            board,
+            "L"
+        );
+
+
+        renderShop(
+            board,
+            "J"
+        );
+
+
+        renderShop(
+            board,
+            "SCR"
+        );
+
+
+        renderShop(
+            board,
+            "CR"
+        );
+
+
+        /* =================================================
+           COUNT
+        ================================================= */
+
+        const total =
+            countPrintedCoaches();
+
+
+        console.log(
+            "✅ PRINT BOARD READY"
+        );
+
+
+        console.log(
+            "✅ Coach numbers:",
+            total
+        );
 
 
         if(loading){
-            loading.style.display = "none";
+
+            loading.style.display =
+                "none";
+
         }
 
 
         setPrintDate();
 
 
+        /*
+         * If no coach numbers were found,
+         * show useful diagnostic message.
+         */
+
+        if(
+            total === 0
+        ){
+
+            console.warn(
+                "⚠️ No coach numbers matched shop + line + position."
+            );
+
+        }
+
     }
-    catch(err){
+    catch(errorObject){
 
         console.error(
             "❌ PRINT LOAD ERROR:",
-            err
+            errorObject
         );
 
 
         if(loading){
-            loading.style.display = "none";
+
+            loading.style.display =
+                "none";
+
         }
 
 
@@ -515,11 +1306,74 @@ async function loadBoard(){
 
             error.textContent =
                 "Unable to load coach board: " +
-                err.message;
+                (
+                    errorObject.message ||
+                    errorObject
+                );
 
         }
 
     }
+
+}
+
+
+/* =========================================================
+   REFRESH BUTTON
+========================================================= */
+
+function setupRefresh(){
+
+    const buttons =
+        document.querySelectorAll(
+            ".refresh-btn"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    location.reload();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PRINT BUTTON
+========================================================= */
+
+function setupPrint(){
+
+    const buttons =
+        document.querySelectorAll(
+            ".print-btn"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    window.print();
+
+                }
+            );
+
+        }
+    );
 
 }
 
@@ -530,11 +1384,23 @@ async function loadBoard(){
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    async () => {
+
+        console.log(
+            "🖨️ PRINT PAGE INITIALIZING..."
+        );
+
 
         setPrintDate();
 
-        loadBoard();
+
+        setupRefresh();
+
+
+        setupPrint();
+
+
+        await loadBoard();
 
     }
 );
