@@ -3,651 +3,464 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>MR CO-ORDINATION - PRINT</title>
+
+
+<style>
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+    background:#fff;
+    color:#000;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+
+/* =====================================================
+   SCREEN
+===================================================== */
+
+body{
+    padding:10px;
+}
+
+.print-container{
+    width:100%;
+    max-width:1100px;
+    margin:0 auto;
+}
+
+.print-header{
+    text-align:center;
+    margin-bottom:8px;
+}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+.print-header h1{
+    margin:0;
+    font-size:20px;
+    line-height:1.1;
+    font-weight:700;
+}
+
+.print-header h2{
+    margin:3px 0 0;
+    font-size:13px;
+}
+
+.print-date{
+    margin-top:3px;
+    font-size:9px;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.print-controls{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.print-btn,
+.refresh-btn{
+    border:0;
+    color:#fff;
+    padding:7px 18px;
+    border-radius:5px;
+    font-size:12px;
+    cursor:pointer;
+}
+
+.print-btn{
+    background:#0d6efd;
+}
+
+.refresh-btn{
+    background:#198754;
+    margin-left:5px;
+}
+
+
+/* =====================================================
+   PRINT SHEET
+===================================================== */
+
+#printArea{
+    width:100%;
+    max-width:1050px;
+    margin:0 auto;
+}
 
-    <title>
-        MR CO-ORDINATION - PRINT
-    </title>
 
+/* =====================================================
+   TWO COLUMN ROWS
+===================================================== */
 
-    <style>
+.print-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+    margin-bottom:5px;
+}
 
-        /* =====================================================
-           GLOBAL
-        ===================================================== */
 
-        *{
-            box-sizing:border-box;
-        }
+/* =====================================================
+   GROUP
+===================================================== */
 
-        html,
-        body{
-            margin:0;
-            padding:0;
-            width:100%;
-            background:#fff;
-            color:#000;
-            font-family:Arial, Helvetica, sans-serif;
-        }
+.group{
+    width:100%;
+    margin:0;
+    break-inside:avoid;
+    page-break-inside:avoid;
+}
+
+.group-title{
+    background:#000;
+    color:#fff;
+    text-align:center;
 
+    font-size:10px;
+    font-weight:700;
 
-        body{
-            padding:10px;
-        }
+    padding:3px 4px;
 
+    line-height:1;
 
-        .print-container{
-            width:100%;
-            max-width:1400px;
-            margin:0 auto;
-        }
+    border:1px solid #000;
+}
 
 
+/* =====================================================
+   TABLE
+===================================================== */
 
-        /* =====================================================
-           HEADER
-        ===================================================== */
+table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+    margin:0;
+}
 
-        .print-header{
-            text-align:center;
-            margin-bottom:8px;
-        }
+th,
+td{
+    border:1px solid #000;
+    text-align:center;
+    vertical-align:middle;
 
+    padding:2px 2px;
 
-        .print-header h1{
-            margin:0;
-            font-size:18px;
-            line-height:1.15;
-            font-weight:700;
-        }
+    line-height:1;
+}
 
+th{
+    background:#e9e9e9;
+    font-size:7px;
+    font-weight:700;
+}
 
-        .print-header h2{
-            margin:3px 0 0;
-            font-size:13px;
-            line-height:1.15;
-            font-weight:700;
-        }
+td{
+    font-size:7.5px;
+    font-weight:600;
+    height:14px;
+}
 
 
-        .print-date{
-            margin-top:4px;
-            font-size:9px;
-            font-weight:400;
-        }
+/* =====================================================
+   COLUMN WIDTH
+===================================================== */
 
+.shop-col{
+    width:18%;
+}
 
+.line-col{
+    width:18%;
+}
 
-        /* =====================================================
-           CONTROLS
-        ===================================================== */
+.position-col{
+    width:20%;
+}
 
-        .print-controls{
-            text-align:center;
-            margin-bottom:10px;
-        }
+.coach-col{
+    width:44%;
+}
 
 
-        .print-btn,
-        .refresh-btn{
+/* =====================================================
+   FULL WIDTH GROUP
+===================================================== */
 
-            border:none;
+.full-width{
+    width:100%;
+    margin-bottom:5px;
+}
 
-            color:#fff;
 
-            padding:8px 24px;
+/* =====================================================
+   LOADING / ERROR
+===================================================== */
 
-            border-radius:5px;
+#loading{
+    text-align:center;
+    padding:12px;
+    font-size:12px;
+    font-weight:bold;
+}
 
-            font-size:13px;
+#error{
+    text-align:center;
+    color:red;
+    padding:8px;
+    font-size:12px;
+    font-weight:bold;
+}
 
-            font-weight:500;
 
-            cursor:pointer;
+/* =====================================================
+   MOBILE SCREEN
+===================================================== */
 
-        }
+@media(max-width:768px){
 
+    .print-container{
+        max-width:100%;
+    }
 
-        .print-btn{
-            background:#0d6efd;
-        }
+    #printArea{
+        max-width:100%;
+    }
 
+    .print-row{
+        grid-template-columns:1fr 1fr;
+        gap:3px;
+    }
 
-        .refresh-btn{
-            background:#198754;
-            margin-left:6px;
-        }
+    .print-header h1{
+        font-size:18px;
+    }
 
+    .group-title{
+        font-size:9px;
+    }
 
-        .print-btn:hover{
-            background:#0b5ed7;
-        }
+    th{
+        font-size:6px;
+    }
 
+    td{
+        font-size:6.5px;
+        height:13px;
+    }
 
-        .refresh-btn:hover{
-            background:#157347;
-        }
+}
 
 
+/* =====================================================
+   A4 LANDSCAPE PRINT
+===================================================== */
 
-        /* =====================================================
-           LOADING / ERROR
-        ===================================================== */
+@page{
+    size:A4 landscape;
+    margin:8mm;
+}
 
-        #loading{
 
-            text-align:center;
+/* =====================================================
+   PRINT MODE
+===================================================== */
 
-            font-size:13px;
+@media print{
 
-            padding:15px;
+    html,
+    body{
+        width:auto;
+        height:auto;
 
-            font-weight:700;
+        margin:0;
+        padding:0;
 
-        }
+        background:#fff;
+    }
 
 
-        #error{
+    body{
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+    }
 
-            text-align:center;
 
-            color:red;
+    .print-container{
 
-            font-size:12px;
+        /*
+         * IMPORTANT:
+         * Do NOT make this 100vw.
+         * Keep it compact inside A4.
+         */
 
-            font-weight:700;
+        width:250mm;
+        max-width:250mm;
 
-            padding:10px;
+        margin:0 auto;
+        padding:0;
+    }
 
-        }
 
+    .print-header{
+        margin-bottom:4px;
+    }
 
 
-        /* =====================================================
-           PRINT AREA
-        ===================================================== */
+    .print-header h1{
+        font-size:13px;
+        line-height:1.05;
+    }
 
-        #printArea{
-            width:100%;
-        }
 
+    .print-header h2{
+        font-size:9px;
+        margin-top:2px;
+    }
 
 
-        /* =====================================================
-           TWO COLUMN PAIR
-           N + M
-           LIFTING + J
-        ===================================================== */
+    .print-date{
+        font-size:6px;
+        margin-top:1px;
+    }
 
-        .print-pair{
 
-            display:grid;
+    .print-controls,
+    #loading,
+    #error{
+        display:none !important;
+    }
 
-            grid-template-columns:
-                minmax(0, 1fr)
-                minmax(0, 1fr);
 
-            gap:8px;
+    #printArea{
 
-            width:100%;
+        width:250mm;
+        max-width:250mm;
 
-            margin-bottom:7px;
+        margin:0 auto;
+    }
 
-            align-items:start;
 
-        }
+    .print-row{
 
+        display:grid;
 
-        .print-pair .group{
+        grid-template-columns:1fr 1fr;
 
-            width:100%;
+        gap:3mm;
 
-            margin-bottom:0;
+        margin-bottom:3mm;
+    }
 
-            min-width:0;
 
-        }
+    .full-width{
+        margin-bottom:3mm;
+    }
 
 
+    .group{
+        break-inside:avoid;
+        page-break-inside:avoid;
+    }
 
-        /* =====================================================
-           FULL WIDTH GROUP
-           SCR / CR
-        ===================================================== */
 
-        .full-width{
+    .group-title{
 
-            width:100%;
+        font-size:7px;
 
-            margin-bottom:7px;
+        padding:1.5mm 1mm;
 
-        }
+        line-height:1;
+    }
 
 
+    table{
 
-        /* =====================================================
-           GROUP TITLE
-        ===================================================== */
+        width:100%;
 
-        .group-title{
+        table-layout:fixed;
 
-            background:#000;
+        border-collapse:collapse;
 
-            color:#fff;
+        margin:0;
+    }
 
-            text-align:center;
 
-            font-size:11px;
+    th,
+    td{
 
-            font-weight:700;
+        padding:0.7mm 0.5mm;
 
-            padding:3px 4px;
+        line-height:1;
 
-            line-height:1.1;
+        border:0.3mm solid #000;
+    }
 
-            border:1px solid #000;
 
-        }
+    th{
 
+        font-size:5.5px;
 
+        height:6mm;
 
-        /* =====================================================
-           TABLE
-        ===================================================== */
+        font-weight:700;
+    }
 
-        table{
 
-            width:100%;
+    td{
 
-            border-collapse:collapse;
+        font-size:6px;
 
-            table-layout:fixed;
+        height:5.5mm;
 
-            margin:0;
+        font-weight:600;
+    }
 
-        }
 
+    /*
+     * Do not stretch tables vertically.
+     */
 
-        th,
-        td{
+    table,
+    tbody,
+    tr{
+        height:auto;
+    }
 
-            border:1px solid #000;
 
-            text-align:center;
+    /*
+     * Keep everything compact.
+     */
 
-            vertical-align:middle;
+    .print-row + .print-row{
+        margin-top:0;
+    }
 
-            padding:2px 2px;
+}
 
-            line-height:1;
-
-            overflow:hidden;
-
-        }
-
-
-        th{
-
-            background:#e9e9e9;
-
-            font-size:8px;
-
-            font-weight:700;
-
-            height:16px;
-
-            white-space:nowrap;
-
-        }
-
-
-        td{
-
-            font-size:9px;
-
-            height:17px;
-
-            font-weight:600;
-
-            white-space:nowrap;
-
-        }
-
-
-        .position-col{
-
-            width:18%;
-
-        }
-
-
-        .coach-number{
-
-            font-size:9px;
-
-            font-weight:700;
-
-            color:#000;
-
-        }
-
-
-        .empty{
-
-            color:#fff;
-
-        }
-
-
-
-        /* =====================================================
-           SCR / CR SMALL COLUMNS
-        ===================================================== */
-
-        .full-width th{
-            font-size:7px;
-            padding:2px 1px;
-        }
-
-
-        .full-width td{
-            font-size:8px;
-            padding:2px 1px;
-        }
-
-
-        .full-width .position-col{
-            width:7%;
-        }
-
-
-
-        /* =====================================================
-           SCREEN MOBILE
-        ===================================================== */
-
-        @media screen and (max-width:768px){
-
-            body{
-                padding:6px;
-            }
-
-
-            .print-header h1{
-                font-size:17px;
-            }
-
-
-            .print-header h2{
-                font-size:12px;
-            }
-
-
-            .print-pair{
-
-                grid-template-columns:1fr;
-
-                gap:6px;
-
-            }
-
-
-            .group-title{
-                font-size:11px;
-            }
-
-
-            th{
-                font-size:8px;
-            }
-
-
-            td{
-                font-size:8px;
-            }
-
-        }
-
-
-
-        /* =====================================================
-           A4 LANDSCAPE
-        ===================================================== */
-
-        @page{
-
-            size:A4 landscape;
-
-            margin:5mm;
-
-        }
-
-
-
-        /* =====================================================
-           PRINT
-        ===================================================== */
-
-        @media print{
-
-            html,
-            body{
-
-                width:100%;
-
-                height:auto;
-
-                margin:0;
-
-                padding:0;
-
-                background:#fff;
-
-            }
-
-
-            .print-container{
-
-                width:100%;
-
-                max-width:none;
-
-                margin:0;
-
-            }
-
-
-            .print-controls{
-
-                display:none !important;
-
-            }
-
-
-            #loading,
-            #error{
-
-                display:none !important;
-
-            }
-
-
-            .print-header{
-
-                margin-bottom:4px;
-
-            }
-
-
-            .print-header h1{
-
-                font-size:14px;
-
-                line-height:1.05;
-
-            }
-
-
-            .print-header h2{
-
-                font-size:10px;
-
-                margin-top:2px;
-
-            }
-
-
-            .print-date{
-
-                font-size:7px;
-
-                margin-top:1px;
-
-            }
-
-
-
-            /* =============================================
-               KEEP N + M SIDE BY SIDE
-            ============================================= */
-
-            .print-pair{
-
-                display:grid;
-
-                grid-template-columns:
-                    minmax(0, 1fr)
-                    minmax(0, 1fr);
-
-                gap:5px;
-
-                width:100%;
-
-                margin-bottom:3px;
-
-                page-break-inside:avoid;
-
-                break-inside:avoid;
-
-            }
-
-
-            .print-pair .group{
-
-                page-break-inside:avoid;
-
-                break-inside:avoid;
-
-            }
-
-
-
-            /* =============================================
-               FULL WIDTH
-            ============================================= */
-
-            .full-width{
-
-                width:100%;
-
-                margin-bottom:3px;
-
-                page-break-inside:avoid;
-
-                break-inside:avoid;
-
-            }
-
-
-            table{
-
-                width:100%;
-
-                page-break-inside:avoid;
-
-                break-inside:avoid;
-
-            }
-
-
-            .group-title{
-
-                font-size:8px;
-
-                padding:2px;
-
-                line-height:1;
-
-            }
-
-
-            th,
-            td{
-
-                padding:1px 1px;
-
-                line-height:1;
-
-            }
-
-
-            th{
-
-                font-size:6px;
-
-                height:10px;
-
-            }
-
-
-            td{
-
-                font-size:7px;
-
-                height:11px;
-
-            }
-
-
-            .coach-number{
-
-                font-size:7px;
-
-            }
-
-
-            .full-width th{
-
-                font-size:5.8px;
-
-                height:10px;
-
-            }
-
-
-            .full-width td{
-
-                font-size:6.5px;
-
-                height:11px;
-
-            }
-
-
-            .full-width .position-col{
-
-                width:7%;
-
-            }
-
-        }
-
-    </style>
+</style>
 
 </head>
 
@@ -658,9 +471,9 @@
 <div class="print-container">
 
 
-    <!-- =====================================================
+    <!-- =================================================
          HEADER
-    ===================================================== -->
+    ================================================= -->
 
     <div class="print-header">
 
@@ -682,24 +495,20 @@
     </div>
 
 
-
-    <!-- =====================================================
+    <!-- =================================================
          CONTROLS
-    ===================================================== -->
+    ================================================= -->
 
     <div class="print-controls">
 
         <button
-            type="button"
             class="print-btn"
             onclick="window.print()"
         >
             PRINT
         </button>
 
-
         <button
-            type="button"
             class="refresh-btn"
             onclick="location.reload()"
         >
@@ -709,42 +518,34 @@
     </div>
 
 
-
-    <!-- =====================================================
-         LOADING
-    ===================================================== -->
-
     <div id="loading">
         Loading coach board...
     </div>
 
-
     <div id="error"></div>
 
 
-
-    <!-- =====================================================
+    <!-- =================================================
          PRINT AREA
-    ===================================================== -->
+    ================================================= -->
 
     <div id="printArea">
 
 
-        <!-- =================================================
+        <!-- =============================================
              N SHOP + M SHOP
-        ================================================= -->
+        ============================================== -->
 
-        <div class="print-pair">
+        <div class="print-row">
 
 
-            <!-- ================= N SHOP ================= -->
+            <!-- N SHOP -->
 
             <section class="group">
 
                 <div class="group-title">
                     N SHOP
                 </div>
-
 
                 <table>
 
@@ -766,9 +567,7 @@
 
                     </thead>
 
-
                     <tbody id="nTable">
-
                     </tbody>
 
                 </table>
@@ -776,15 +575,13 @@
             </section>
 
 
-
-            <!-- ================= M SHOP ================= -->
+            <!-- M SHOP -->
 
             <section class="group">
 
                 <div class="group-title">
                     M SHOP
                 </div>
-
 
                 <table>
 
@@ -806,34 +603,31 @@
 
                     </thead>
 
-
                     <tbody id="mTable">
-
                     </tbody>
 
                 </table>
 
             </section>
 
+
         </div>
 
 
-
-        <!-- =================================================
+        <!-- =============================================
              LIFTING BAY + J SHOP
-        ================================================= -->
+        ============================================== -->
 
-        <div class="print-pair">
+        <div class="print-row">
 
 
-            <!-- ============== LIFTING BAY ================ -->
+            <!-- LIFTING BAY -->
 
             <section class="group">
 
                 <div class="group-title">
                     LIFTING BAY
                 </div>
-
 
                 <table>
 
@@ -852,9 +646,7 @@
 
                     </thead>
 
-
                     <tbody id="lTable">
-
                     </tbody>
 
                 </table>
@@ -862,15 +654,13 @@
             </section>
 
 
-
-            <!-- ================= J SHOP ================== -->
+            <!-- J SHOP -->
 
             <section class="group">
 
                 <div class="group-title">
                     J SHOP
                 </div>
-
 
                 <table>
 
@@ -893,22 +683,20 @@
 
                     </thead>
 
-
                     <tbody id="jTable">
-
                     </tbody>
 
                 </table>
 
             </section>
 
+
         </div>
 
 
-
-        <!-- =================================================
+        <!-- =============================================
              MR SCR SHOP
-        ================================================= -->
+        ============================================== -->
 
         <section class="group full-width">
 
@@ -916,14 +704,13 @@
                 MR SCR SHOP
             </div>
 
-
             <table>
 
                 <thead>
 
                     <tr>
 
-                        <th class="position-col">
+                        <th>
                             POSITION
                         </th>
 
@@ -944,9 +731,7 @@
 
                 </thead>
 
-
                 <tbody id="scrTable">
-
                 </tbody>
 
             </table>
@@ -954,10 +739,9 @@
         </section>
 
 
-
-        <!-- =================================================
+        <!-- =============================================
              CR SHOP
-        ================================================= -->
+        ============================================== -->
 
         <section class="group full-width">
 
@@ -965,14 +749,13 @@
                 CR SHOP
             </div>
 
-
             <table>
 
                 <thead>
 
                     <tr>
 
-                        <th class="position-col">
+                        <th>
                             POSITION
                         </th>
 
@@ -992,9 +775,7 @@
 
                 </thead>
 
-
                 <tbody id="crTable">
-
                 </tbody>
 
             </table>
@@ -1005,7 +786,6 @@
     </div>
 
 </div>
-
 
 
 <!-- =====================================================
