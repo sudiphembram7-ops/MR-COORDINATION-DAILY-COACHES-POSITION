@@ -1498,6 +1498,667 @@ body:not(.admin-logged-in)
     }
 
 }
+/* =========================================================
+   MR CO-ORDINATION BOARD
+   RESPONSIVE FIX
+   DESKTOP + TABLET + MOBILE
+   VERSION 14.1
+   ---------------------------------------------------------
+   ✔ DESKTOP = FULL WIDTH
+   ✔ MOBILE = HORIZONTAL SCROLL
+   ✔ TABLE WIDTH FIXED
+   ✔ SHOP CARD FULL WIDTH
+   ✔ NO DESKTOP OVERFLOW
+   ✔ MOBILE TOUCH FRIENDLY
+========================================================= */
+
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width: 769px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .container,
+    .board-container,
+    .main-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 12px;
+    }
+
+    /* SHOP */
+
+    .shop-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 0 !important;
+    }
+
+    .shop-card .shop-title {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* TABLE WRAPPER */
+
+    .shop-card .table-responsive,
+    .shop-card .board-table-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* MAIN TABLE */
+
+    .shop-card .coach-table {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+
+        margin: 0 !important;
+
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+    }
+
+    /* POSITION COLUMN */
+
+    .shop-card .coach-table th:first-child,
+    .shop-card .coach-table td:first-child {
+        width: 85px !important;
+        min-width: 85px !important;
+        max-width: 85px !important;
+
+        white-space: nowrap;
+    }
+
+    /* OTHER COLUMNS */
+
+    .shop-card .coach-table th:not(:first-child),
+    .shop-card .coach-table td:not(:first-child) {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+
+    /* TABLE HEADER */
+
+    .shop-card .coach-table thead th {
+        height: 38px !important;
+
+        padding: 5px 3px !important;
+
+        font-size: 14px !important;
+
+        text-align: center;
+        vertical-align: middle;
+
+        white-space: nowrap;
+    }
+
+    /* TABLE BODY */
+
+    .shop-card .coach-table td {
+        height: 95px !important;
+        min-height: 95px !important;
+
+        padding: 3px !important;
+
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    /* COACH CARD */
+
+    .shop-card .coach-card {
+        width: 100% !important;
+        max-width: 100% !important;
+
+        min-height: 85px !important;
+        height: 100% !important;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        overflow: hidden;
+    }
+
+    .shop-card .coach-no {
+        font-size: 18px;
+        font-weight: 900;
+
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .shop-card .coach-type {
+        font-size: 12px;
+        font-weight: 700;
+
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .shop-card .coach-status {
+        font-size: 11px;
+        font-weight: 800;
+
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    /* COUNTERS */
+
+    .counter-container {
+        width: 100%;
+    }
+
+    /* PULLED OUT */
+
+    .pulled-out-section {
+        width: 100%;
+        max-width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 769px) and (max-width: 1100px) {
+
+    .container,
+    .board-container,
+    .main-container {
+        padding: 8px;
+    }
+
+    .shop-card .coach-table {
+        min-width: 850px !important;
+    }
+
+    .shop-card .coach-table th,
+    .shop-card .coach-table td {
+        font-size: 13px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+
+        margin: 0;
+        padding: 0;
+
+        overflow-x: hidden;
+    }
+
+    .container,
+    .board-container,
+    .main-container {
+        width: 100%;
+        max-width: 100%;
+
+        margin: 0;
+        padding: 6px;
+    }
+
+
+    /* =====================================================
+       SHOP CARD
+    ===================================================== */
+
+    .shop-card {
+        width: 100% !important;
+        max-width: 100% !important;
+
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+
+        padding: 0 !important;
+    }
+
+
+    /* =====================================================
+       SHOP TITLE
+    ===================================================== */
+
+    .shop-card .shop-title {
+        width: 100% !important;
+
+        margin: 0 !important;
+
+        padding: 10px;
+
+        text-align: center;
+    }
+
+
+    /* =====================================================
+       TABLE WRAPPER
+    ===================================================== */
+
+    .shop-card .table-responsive,
+    .shop-card .board-table-wrapper {
+
+        display: block !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+
+    /* =====================================================
+       MOBILE TABLE
+    ===================================================== */
+
+    .shop-card .coach-table {
+
+        width: 900px !important;
+
+        min-width: 900px !important;
+        max-width: none !important;
+
+        table-layout: fixed !important;
+
+        border-collapse: collapse !important;
+    }
+
+
+    /* =====================================================
+       POSITION COLUMN
+    ===================================================== */
+
+    .shop-card .coach-table th:first-child,
+    .shop-card .coach-table td:first-child {
+
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       OTHER COLUMNS
+    ===================================================== */
+
+    .shop-card .coach-table th:not(:first-child),
+    .shop-card .coach-table td:not(:first-child) {
+
+        width: 115px !important;
+        min-width: 115px !important;
+        max-width: 115px !important;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .shop-card .coach-table thead th {
+
+        height: 40px !important;
+
+        padding: 7px 4px !important;
+
+        font-size: 13px !important;
+
+        white-space: nowrap;
+
+        text-align: center;
+        vertical-align: middle;
+    }
+
+
+    /* =====================================================
+       CELLS
+    ===================================================== */
+
+    .shop-card .coach-table td {
+
+        height: 70px !important;
+        min-height: 70px !important;
+
+        padding: 3px !important;
+
+        text-align: center;
+        vertical-align: middle;
+    }
+
+
+    /* =====================================================
+       COACH CARD
+    ===================================================== */
+
+    .shop-card .coach-card {
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        min-height: 62px !important;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        overflow: hidden;
+    }
+
+
+    .shop-card .coach-no {
+        font-size: 16px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+        text-overflow: clip;
+    }
+
+    .shop-card .coach-type {
+        font-size: 11px;
+
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .shop-card .coach-status {
+        font-size: 10px;
+
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+
+    /* =====================================================
+       COUNTERS
+    ===================================================== */
+
+    .counter-container {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 8px;
+
+        width: 100%;
+    }
+
+    .counter-card {
+        width: 100%;
+
+        min-width: 0;
+
+        padding: 10px;
+    }
+
+
+    /* =====================================================
+       ACTION BUTTONS
+    ===================================================== */
+
+    .action-bar {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 8px;
+
+        width: 100%;
+    }
+
+    .action-bar button {
+        width: 100%;
+        min-height: 48px;
+    }
+
+
+    /* =====================================================
+       SEARCH
+    ===================================================== */
+
+    #searchBox,
+    #pulledOutSearch,
+    #pulledOutSearchBox,
+    #searchPulledOut {
+
+        width: 100%;
+
+        min-height: 50px;
+
+        font-size: 17px;
+    }
+
+
+    /* =====================================================
+       PULLED OUT
+    ===================================================== */
+
+    .pulled-out-section {
+
+        width: 100%;
+
+        margin-top: 15px;
+
+        border-radius: 10px;
+    }
+
+    .pulled-out-header {
+
+        min-height: 62px;
+
+        padding: 10px 12px;
+
+        gap: 8px;
+    }
+
+    .pulled-out-header h2,
+    .pulled-out-header h3 {
+
+        font-size: 19px;
+    }
+
+    .pulled-out-table-wrapper {
+
+        width: 100%;
+
+        overflow-x: auto;
+
+        padding: 0 8px 10px;
+    }
+
+    .pulled-out-table {
+
+        min-width: 900px;
+    }
+
+
+    /* =====================================================
+       MODAL
+    ===================================================== */
+
+    .modal-dialog {
+
+        width: calc(100% - 16px);
+
+        margin: 8px auto;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .container,
+    .board-container,
+    .main-container {
+        padding: 4px;
+    }
+
+    .shop-card .coach-table {
+
+        width: 850px !important;
+
+        min-width: 850px !important;
+    }
+
+    .shop-card .coach-table th:first-child,
+    .shop-card .coach-table td:first-child {
+
+        width: 70px !important;
+        min-width: 70px !important;
+        max-width: 70px !important;
+    }
+
+    .shop-card .coach-table th:not(:first-child),
+    .shop-card .coach-table td:not(:first-child) {
+
+        width: 110px !important;
+        min-width: 110px !important;
+        max-width: 110px !important;
+    }
+
+    .shop-card .coach-table td {
+
+        height: 65px !important;
+    }
+
+    .shop-card .coach-no {
+        font-size: 15px;
+    }
+
+    .shop-card .coach-type {
+        font-size: 10px;
+    }
+
+    .shop-card .coach-status {
+        font-size: 9px;
+    }
+
+    .counter-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+/* =========================================================
+   TOUCH DEVICE
+========================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+    .shop-card .table-responsive,
+    .shop-card .board-table-wrapper,
+    .pulled-out-table-wrapper {
+
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
+    }
+
+    .coach-table td {
+
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+
+        -webkit-tap-highlight-color: transparent;
+    }
+
+}
+
+
+/* =========================================================
+   DESKTOP LARGE SCREEN
+========================================================= */
+
+@media (min-width: 1400px) {
+
+    .shop-card .coach-table td {
+
+        height: 105px !important;
+    }
+
+    .shop-card .coach-card {
+
+        min-height: 95px !important;
+    }
+
+    .shop-card .coach-no {
+
+        font-size: 20px;
+    }
+
+    .shop-card .coach-type {
+
+        font-size: 13px;
+    }
+
+    .shop-card .coach-status {
+
+        font-size: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   END VERSION 14.1
+========================================================= */
 
 /* =========================================================
    END
