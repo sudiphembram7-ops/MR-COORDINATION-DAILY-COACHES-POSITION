@@ -2513,7 +2513,285 @@ async function handleReturnCellClick(
     );
 
 }
+/* =========================================================
+   EXECUTE RETURN TO BOARD
+   VERSION 15.2 FINAL
+   ---------------------------------------------------------
+   Pulled-out coach -> ANY EMPTY BOARD CELL
+========================================================= */
 
+async function executeReturnToBoard(
+    newLine,
+    newPosition
+) {
+
+    if (!requireAdmin())
+        return;
+
+
+    if (!selectedPulledOutCoach) {
+
+        showMessage(
+            "No pulled-out coach selected.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    const pulledKey =
+        clean(
+            selectedPulledOutKey
+        );
+
+
+    if (!pulledKey) {
+
+        showMessage(
+            "Pulled-out coach ID is missing.",
+            "danger"
+        );
+
+        return;
+    }
+
+
+    newLine =
+        clean(
+            newLine
+        );
+
+    newPosition =
+        clean(
+            newPosition
+        );
+
+
+    if (
+        !newLine ||
+        !newPosition
+    ) {
+
+        showMessage(
+            "Invalid return target.",
+            "danger"
+        );
+
+        return;
+    }
+
+
+    /*
+       ALWAYS check current board data again
+       before writing.
+    */
+
+    const existingCoach =
+        boardData?.[
+            newLine
+        ]?.[
+            newPosition
+        ];
+
+
+    if (existingCoach) {
+
+        showMessage(
+            `${newLine} / ${newPosition} is already occupied.`,
+            "warning"
+        );
+
+        return;
+    }
+
+
+    const coach =
+        selectedPulledOutCoach;
+
+
+    const now =
+        new Date().toISOString();
+
+
+    /*
+       IMPORTANT:
+       Preserve original pull-out information.
+    */
+
+    const returnedCoach = {
+
+        ...coach,
+
+        shop:
+            getShopFromLine(
+                newLine
+            ),
+
+        line:
+            newLine,
+
+        position:
+            newPosition,
+
+        originalShop:
+            coach.originalShop ||
+            getShopFromLine(
+                coach.originalLine ||
+                ""
+            ),
+
+        originalLine:
+            coach.originalLine ||
+            "",
+
+        originalPosition:
+            coach.originalPosition ||
+            "",
+
+        returnedAt:
+            now,
+
+        updatedAt:
+            now
+
+    };
+
+
+    /*
+       FIREBASE PATHS
+    */
+
+    const boardTargetPath =
+        `${BOARD_PATH}/${newLine}/${newPosition}`;
+
+
+    const pulledOutPath =
+        `${PULLED_OUT_PATH}/${pulledKey}`;
+
+
+    /*
+       ATOMIC FIREBASE UPDATE
+       ----------------------
+       1. Put coach in selected cell
+       2. Remove coach from pulledOut
+    */
+
+    const updates = {};
+
+
+    updates[
+        boardTargetPath
+    ] =
+        returnedCoach;
+
+
+    updates[
+        pulledOutPath
+    ] =
+        null;
+
+
+    try {
+
+        /*
+           Prevent double tap / double return.
+        */
+
+        returnMode = false;
+
+
+        await update(
+            ref(database),
+            updates
+        );
+
+
+        /*
+           HISTORY
+        */
+
+        await writeLocalHistory(
+            "RETURN_TO_BOARD",
+            returnedCoach
+        );
+
+
+        /*
+           Clear return selection.
+        */
+
+        selectedLine =
+            "";
+
+        selectedPosition =
+            "";
+
+        selectedPulledOutKey =
+            "";
+
+        selectedPulledOutCoach =
+            null;
+
+        editingMode =
+            false;
+
+
+        removeEmptyCellHighlight();
+
+
+        /*
+           Reload once immediately.
+           Realtime listener will also update.
+        */
+
+        await loadBoardOnce();
+
+        await loadPulledOutOnce();
+
+
+        showMessage(
+            `Coach ${coach.coachNo || ""} returned to ${newLine} / ${newPosition}.`,
+            "success"
+        );
+
+
+        console.log(
+            "RETURN SUCCESS:",
+            coach.coachNo,
+            "→",
+            newLine,
+            newPosition
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "RETURN TO BOARD ERROR:",
+            error
+        );
+
+
+        /*
+           Restore return mode if Firebase failed.
+        */
+
+        returnMode = true;
+
+
+        highlightEmptyCells();
+
+
+        showMessage(
+            error?.message ||
+            "Return to board failed.",
+            "danger"
+        );
+
+    }
+
+}
 /* =========================================================
    HIGHLIGHT EMPTY CELLS
 ========================================================= */
@@ -4263,14 +4541,25 @@ function getAllBoardCells() {
 
 /* =========================================================
    IS BOARD CELL
+   VERSION 15.2
+   ---------------------------------------------------------
+   Do not depend on a restrictive ID pattern.
+   A real TD with an ID is treated as a board cell,
+   while obvious non-board elements are excluded.
 ========================================================= */
 
-function isBoardCell(
-    cell
-) {
+function isBoardCell(cell) {
 
     if (!cell)
         return false;
+
+
+    if (
+        cell.tagName &&
+        cell.tagName.toLowerCase() !== "td"
+    ) {
+        return false;
+    }
 
 
     const id =
@@ -4284,21 +4573,44 @@ function isBoardCell(
 
 
     /*
-       Supported examples:
+       Exclude known non-board TDs if any.
+    */
 
+    const excludedIds = [
+
+        "totalCoach",
+        "occupiedCoach",
+        "freeCoach",
+        "pulledOutList"
+
+    ];
+
+
+    if (
+        excludedIds.includes(
+            id
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       Board cell IDs use underscore
+       between LINE and POSITION.
+
+       Examples:
        N2_H1
+       N3_H1
        M2_H
-       L9_H
        SCR9_H1
        F1_H
        J1_H1
     */
 
-    return (
-        /^[A-Z]+\d+_[A-Z0-9]+$/i.test(
-            id
-        )
-    );
+    return id.includes("_");
 
 }
 
