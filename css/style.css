@@ -2076,7 +2076,25 @@ body:not(.admin-logged-in) #pullOutCoachBtn {
         max-width: 45px !important;
     }
 }
+/* =========================================================
+   RETURN TO BOARD TARGET
+========================================================= */
 
+.return-target {
+    outline: 3px dashed #198754 !important;
+    outline-offset: -3px;
+    cursor: pointer !important;
+}
+
+
+/* =========================================================
+   SELECTED RETURN CELL
+========================================================= */
+
+.return-selected {
+    outline: 4px solid #0d6efd !important;
+    outline-offset: -4px;
+}
 
 /* =========================================================
    50. END
