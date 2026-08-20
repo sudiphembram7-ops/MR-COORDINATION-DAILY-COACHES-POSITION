@@ -24,13 +24,26 @@
 
 <style>
 
+/* =========================================================
+   HISTORY PAGE
+========================================================= */
+
+body{
+    background:#f5f6f8;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
 .table-responsive{
     overflow-x:auto;
     -webkit-overflow-scrolling:touch;
 }
 
 #historyTable{
-    min-width:1100px;
+    min-width:1450px;
 }
 
 #historyTable th,
@@ -38,14 +51,108 @@
     white-space:nowrap;
     text-align:center;
     vertical-align:middle;
-    padding:10px;
+    padding:10px 12px;
 }
 
 #historyTable thead th{
     position:sticky;
     top:0;
-    z-index:2;
+    z-index:5;
 }
+
+
+/* =========================================================
+   ACTION BADGES
+========================================================= */
+
+.action-badge{
+    display:inline-block;
+    min-width:80px;
+    padding:5px 10px;
+    border-radius:6px;
+    font-weight:700;
+    font-size:13px;
+}
+
+.action-MOVE{
+    background:#0d6efd;
+    color:#fff;
+}
+
+.action-SWAP{
+    background:#6f42c1;
+    color:#fff;
+}
+
+.action-SAVE{
+    background:#198754;
+    color:#fff;
+}
+
+.action-UPDATE{
+    background:#ffc107;
+    color:#000;
+}
+
+.action-DELETE{
+    background:#dc3545;
+    color:#fff;
+}
+
+.action-STATUS_UPDATE{
+    background:#fd7e14;
+    color:#fff;
+}
+
+.action-RESTORE_BOARD{
+    background:#20c997;
+    color:#000;
+}
+
+.action-CLEAR_BOARD{
+    background:#343a40;
+    color:#fff;
+}
+
+
+/* =========================================================
+   MOVEMENT
+========================================================= */
+
+.from-cell{
+    font-weight:600;
+}
+
+.to-cell{
+    font-weight:700;
+}
+
+.arrow{
+    font-size:20px;
+    font-weight:bold;
+    padding:0 5px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+#searchHistory{
+    font-size:18px;
+    min-height:50px;
+}
+
+#refreshBtn{
+    min-height:50px;
+    font-size:18px;
+    font-weight:600;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
 
 @media(max-width:768px){
 
@@ -54,21 +161,25 @@
     }
 
     .card-header h3{
-        font-size:28px;
+        font-size:27px;
     }
 
     #historyTable{
-        min-width:1000px;
+        min-width:1450px;
     }
 
     #historyTable th,
     #historyTable td{
         font-size:13px;
-        padding:8px;
+        padding:8px 10px;
     }
 
-    .btn{
-        width:100%;
+    #searchHistory{
+        font-size:17px;
+    }
+
+    #refreshBtn{
+        font-size:17px;
     }
 
 }
@@ -78,7 +189,7 @@
 </head>
 
 
-<body class="bg-light">
+<body>
 
 
 <div class="container-fluid mt-3">
@@ -86,7 +197,9 @@
     <div class="card shadow">
 
 
-        <!-- HEADER -->
+        <!-- =================================================
+             HEADER
+        ================================================= -->
 
         <div class="card-header bg-dark text-white">
 
@@ -97,15 +210,18 @@
         </div>
 
 
-        <!-- BODY -->
+        <!-- =================================================
+             BODY
+        ================================================= -->
 
         <div class="card-body">
 
 
-            <!-- SEARCH + REFRESH -->
+            <!-- =================================================
+                 SEARCH
+            ================================================= -->
 
             <div class="row g-2 mb-3 align-items-center">
-
 
                 <div class="col-8 col-md-9">
 
@@ -113,7 +229,7 @@
                         type="text"
                         id="searchHistory"
                         class="form-control"
-                        placeholder="Search Coach Number"
+                        placeholder="Search Coach / Shop / Line / Position / Action"
                     >
 
                 </div>
@@ -133,11 +249,12 @@
 
                 </div>
 
-
             </div>
 
 
-            <!-- TABLE -->
+            <!-- =================================================
+                 TABLE
+            ================================================= -->
 
             <div class="table-responsive">
 
@@ -150,13 +267,11 @@
 
                         <tr>
 
-                            <th>Date</th>
+                            <th>Date / Time</th>
+
+                            <th>Action</th>
 
                             <th>Shop</th>
-
-                            <th>Line</th>
-
-                            <th>Position</th>
 
                             <th>Coach No</th>
 
@@ -164,9 +279,17 @@
 
                             <th>Status</th>
 
-                            <th>User</th>
+                            <th>From Line</th>
 
-                            <th>Action</th>
+                            <th>From Position</th>
+
+                            <th>To Line</th>
+
+                            <th>To Position</th>
+
+                            <th>Swapped Coach</th>
+
+                            <th>User</th>
 
                         </tr>
 
@@ -197,13 +320,14 @@
    FIREBASE
 ========================================================= */
 
-import { database } from "./js/firebase-config.js";
+import {
+    database
+} from "./js/firebase-config.js";
 
 import {
     ref,
     onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
 
 
 /* =========================================================
@@ -220,7 +344,6 @@ const refreshBtn =
     document.getElementById("refreshBtn");
 
 
-
 /* =========================================================
    SAFE HTML
 ========================================================= */
@@ -231,7 +354,9 @@ function escapeHTML(value){
         value === null ||
         value === undefined
     ){
+
         return "";
+
     }
 
     return String(value)
@@ -244,29 +369,98 @@ function escapeHTML(value){
 }
 
 
-
 /* =========================================================
-   FORMAT HISTORY DATE
-   ---------------------------------------------------------
-   Supports:
-
-   1. time: Date.now()
-   2. timestamp: Date.now()
-   3. date + time
-   4. ISO date
-   5. Firebase Timestamp-like object
-
+   CLEAN
 ========================================================= */
 
-function formatHistoryDate(item){
+function clean(value){
 
+    return String(
+        value ?? ""
+    ).trim();
+
+}
+
+
+/* =========================================================
+   SHOP FROM LINE
+========================================================= */
+
+function getShopFromLine(line){
+
+    line =
+        clean(line).toUpperCase();
+
+
+    if(
+        line.startsWith("SCR")
+    ){
+
+        return "MR SCR SHOP";
+
+    }
+
+
+    if(
+        line.startsWith("N")
+    ){
+
+        return "N SHOP";
+
+    }
+
+
+    if(
+        line.startsWith("M")
+    ){
+
+        return "M SHOP";
+
+    }
+
+
+    if(
+        line.startsWith("F")
+    ){
+
+        return "CR SHOP";
+
+    }
+
+
+    if(
+        line.startsWith("J")
+    ){
+
+        return "J SHOP";
+
+    }
+
+
+    if(
+        line.startsWith("L")
+    ){
+
+        return "LIFTING BAY";
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   GET DATE OBJECT
+========================================================= */
+
+function getHistoryDate(item){
 
     let date = null;
 
 
-
     /* -----------------------------------------------------
-       CASE 1
        Firebase Timestamp-like object
     ----------------------------------------------------- */
 
@@ -276,18 +470,14 @@ function formatHistoryDate(item){
         typeof item.time.toDate === "function"
     ){
 
-        date = item.time.toDate();
+        date =
+            item.time.toDate();
 
     }
 
 
-
     /* -----------------------------------------------------
-       CASE 2
-       Numeric Firebase timestamp
-
-       Example:
-       1755241452000
+       Numeric time
     ----------------------------------------------------- */
 
     else if(
@@ -295,15 +485,14 @@ function formatHistoryDate(item){
         item.time > 0
     ){
 
-        date = new Date(item.time);
+        date =
+            new Date(item.time);
 
     }
 
 
-
     /* -----------------------------------------------------
-       CASE 3
-       timestamp field
+       Numeric timestamp
     ----------------------------------------------------- */
 
     else if(
@@ -311,134 +500,24 @@ function formatHistoryDate(item){
         item.timestamp > 0
     ){
 
-        date = new Date(item.timestamp);
+        date =
+            new Date(item.timestamp);
 
     }
 
 
-
     /* -----------------------------------------------------
-       CASE 4
-       date + time
-
-       Example:
-
-       date = 15/8/2026
-       time = 3:14:12 PM
-
+       String ISO time
     ----------------------------------------------------- */
 
     else if(
-        typeof item.date === "string" &&
-        typeof item.time === "string"
-    ){
-
-        const dateMatch =
-            item.date.match(
-                /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/
-            );
-
-
-        if(dateMatch){
-
-            const day =
-                Number(dateMatch[1]);
-
-            const month =
-                Number(dateMatch[2]) - 1;
-
-            const year =
-                Number(dateMatch[3]);
-
-
-            let hours = 0;
-
-            let minutes = 0;
-
-            let seconds = 0;
-
-
-            const timeMatch =
-                item.time.match(
-                    /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i
-                );
-
-
-            if(timeMatch){
-
-                hours =
-                    Number(timeMatch[1]);
-
-                minutes =
-                    Number(timeMatch[2]);
-
-                seconds =
-                    Number(timeMatch[3] || 0);
-
-
-                const ampm =
-                    timeMatch[4];
-
-
-                if(ampm){
-
-                    if(
-                        ampm.toUpperCase() === "PM" &&
-                        hours < 12
-                    ){
-
-                        hours += 12;
-
-                    }
-
-
-                    if(
-                        ampm.toUpperCase() === "AM" &&
-                        hours === 12
-                    ){
-
-                        hours = 0;
-
-                    }
-
-                }
-
-
-                date =
-                    new Date(
-                        year,
-                        month,
-                        day,
-                        hours,
-                        minutes,
-                        seconds
-                    );
-
-            }
-
-        }
-
-    }
-
-
-
-    /* -----------------------------------------------------
-       CASE 5
-       time itself is a valid date string
-
-       Example:
-       2026-08-15T15:14:12
-    ----------------------------------------------------- */
-
-    if(
-        !date &&
-        typeof item.time === "string"
+        typeof item.time === "string" &&
+        item.time.trim()
     ){
 
         const parsed =
             new Date(item.time);
 
-
         if(
             !isNaN(parsed.getTime())
         ){
@@ -450,21 +529,19 @@ function formatHistoryDate(item){
     }
 
 
-
     /* -----------------------------------------------------
-       CASE 6
-       timestamp string
+       String timestamp
     ----------------------------------------------------- */
 
     if(
         !date &&
-        typeof item.timestamp === "string"
+        typeof item.timestamp === "string" &&
+        item.timestamp.trim()
     ){
 
         const parsed =
             new Date(item.timestamp);
 
-
         if(
             !isNaN(parsed.getTime())
         ){
@@ -476,9 +553,7 @@ function formatHistoryDate(item){
     }
 
 
-
     /* -----------------------------------------------------
-       CASE 7
        createdAt
     ----------------------------------------------------- */
 
@@ -490,6 +565,31 @@ function formatHistoryDate(item){
         const parsed =
             new Date(item.createdAt);
 
+        if(
+            !isNaN(parsed.getTime())
+        ){
+
+            date = parsed;
+
+        }
+
+    }
+
+
+    /* -----------------------------------------------------
+       Old date + time format
+    ----------------------------------------------------- */
+
+    if(
+        !date &&
+        item.date &&
+        item.time
+    ){
+
+        const parsed =
+            new Date(
+                `${item.date} ${item.time}`
+            );
 
         if(
             !isNaN(parsed.getTime())
@@ -502,10 +602,20 @@ function formatHistoryDate(item){
     }
 
 
+    return date;
 
-    /* -----------------------------------------------------
-       FINAL CHECK
-    ----------------------------------------------------- */
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatHistoryDate(item){
+
+    const date =
+        getHistoryDate(item);
+
 
     if(
         !date ||
@@ -517,81 +627,38 @@ function formatHistoryDate(item){
     }
 
 
-
-    /* -----------------------------------------------------
-       INDIAN DATE + TIME FORMAT
-    ----------------------------------------------------- */
-
     return date.toLocaleString(
         "en-IN",
         {
-            day: "numeric",
-            month: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true
+            day:"numeric",
+            month:"numeric",
+            year:"numeric",
+            hour:"numeric",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
         }
     );
 
 }
 
 
-
 /* =========================================================
-   GET HISTORY SORT TIME
+   SORT TIME
 ========================================================= */
 
 function getHistoryTime(item){
 
+    const date =
+        getHistoryDate(item);
 
-    /* New Firebase timestamp */
 
     if(
-        typeof item.time === "number" &&
-        item.time > 0
+        date &&
+        !isNaN(date.getTime())
     ){
 
-        return item.time;
-
-    }
-
-
-    /* timestamp */
-
-    if(
-        typeof item.timestamp === "number" &&
-        item.timestamp > 0
-    ){
-
-        return item.timestamp;
-
-    }
-
-
-    /* Old date + time */
-
-    if(
-        item.date &&
-        item.time
-    ){
-
-        const dateText =
-            `${item.date} ${item.time}`;
-
-
-        const parsed =
-            new Date(dateText);
-
-
-        if(
-            !isNaN(parsed.getTime())
-        ){
-
-            return parsed.getTime();
-
-        }
+        return date.getTime();
 
     }
 
@@ -601,6 +668,79 @@ function getHistoryTime(item){
 }
 
 
+/* =========================================================
+   ACTION BADGE
+========================================================= */
+
+function createActionBadge(action){
+
+    const value =
+        clean(action).toUpperCase();
+
+
+    if(!value){
+
+        return "";
+
+    }
+
+
+    return `
+        <span class="action-badge action-${escapeHTML(value)}">
+            ${escapeHTML(value)}
+        </span>
+    `;
+
+}
+
+
+/* =========================================================
+   GET SHOP
+========================================================= */
+
+function getHistoryShop(item){
+
+    /* Existing shop field */
+
+    if(
+        clean(item.shop)
+    ){
+
+        return clean(item.shop);
+
+    }
+
+
+    /* MOVE / SWAP */
+
+    if(
+        clean(item.fromLine)
+    ){
+
+        return getShopFromLine(
+            item.fromLine
+        );
+
+    }
+
+
+    /* Normal history */
+
+    if(
+        clean(item.line)
+    ){
+
+        return getShopFromLine(
+            item.line
+        );
+
+    }
+
+
+    return "";
+
+}
+
 
 /* =========================================================
    LOAD HISTORY
@@ -608,27 +748,32 @@ function getHistoryTime(item){
 
 function loadHistory(){
 
-
     onValue(
-        ref(database, "history"),
-        (snapshot) => {
 
+        ref(
+            database,
+            "history"
+        ),
+
+        snapshot => {
 
             historyBody.innerHTML = "";
 
 
-            /* ---------------------------------------------
-               NO DATA
-            --------------------------------------------- */
+            /* =================================================
+               NO HISTORY
+            ================================================= */
 
-            if(!snapshot.exists()){
+            if(
+                !snapshot.exists()
+            ){
 
                 historyBody.innerHTML = `
 
                     <tr>
 
                         <td
-                            colspan="9"
+                            colspan="12"
                             class="text-center"
                         >
 
@@ -645,19 +790,31 @@ function loadHistory(){
             }
 
 
+            /* =================================================
+               OBJECT -> ARRAY
+            ================================================= */
 
-            /* ---------------------------------------------
-               CONVERT FIREBASE OBJECT TO ARRAY
-            --------------------------------------------- */
+            const rawData =
+                snapshot.val();
+
 
             const history =
-                Object.values(snapshot.val());
+                Object.entries(
+                    rawData
+                ).map(
+                    ([key, value]) => ({
+
+                        key,
+
+                        ...(value || {})
+
+                    })
+                );
 
 
-
-            /* ---------------------------------------------
+            /* =================================================
                NEWEST FIRST
-            --------------------------------------------- */
+            ================================================= */
 
             history.sort(
                 (a,b) =>
@@ -667,91 +824,337 @@ function loadHistory(){
             );
 
 
+            /* =================================================
+               ROWS
+            ================================================= */
 
-            /* ---------------------------------------------
-               CREATE ROWS
-            --------------------------------------------- */
-
-            history.forEach(item => {
-
-
-                const row =
-                    document.createElement("tr");
+            history.forEach(
+                item => {
 
 
-                row.innerHTML = `
-
-                    <td>
-                        ${escapeHTML(
-                            formatHistoryDate(item)
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.shop || ""
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.line || ""
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.position || ""
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.coachNo || ""
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.coachType || ""
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.status || ""
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.user || "Admin"
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            item.action || ""
-                        )}
-                    </td>
-
-                `;
+                    const action =
+                        clean(
+                            item.action
+                        ).toUpperCase();
 
 
-                historyBody.appendChild(row);
+                    const isMovement =
+                        action === "MOVE" ||
+                        action === "SWAP";
 
-            });
+
+                    let fromLine = "";
+                    let fromPosition = "";
+                    let toLine = "";
+                    let toPosition = "";
+                    let swappedCoach = "";
 
 
-            /* Re-apply search after refresh */
+                    /* -------------------------------------------------
+                       MOVEMENT HISTORY
+                    ------------------------------------------------- */
+
+                    if(
+                        isMovement
+                    ){
+
+                        fromLine =
+                            clean(
+                                item.fromLine
+                            );
+
+                        fromPosition =
+                            clean(
+                                item.fromPosition
+                            );
+
+                        toLine =
+                            clean(
+                                item.toLine
+                            );
+
+                        toPosition =
+                            clean(
+                                item.toPosition
+                            );
+
+                        swappedCoach =
+                            clean(
+                                item.swappedCoachNo
+                            );
+
+                    }
+
+
+                    /* -------------------------------------------------
+                       NORMAL HISTORY
+                    ------------------------------------------------- */
+
+                    else{
+
+                        fromLine =
+                            clean(
+                                item.oldLine
+                            );
+
+                        fromPosition =
+                            clean(
+                                item.oldPosition
+                            );
+
+                        toLine =
+                            clean(
+                                item.line
+                            );
+
+                        toPosition =
+                            clean(
+                                item.position
+                            );
+
+                    }
+
+
+                    const row =
+                        document.createElement("tr");
+
+
+                    /* -------------------------------------------------
+                       MOVEMENT ROW
+                    ------------------------------------------------- */
+
+                    if(
+                        isMovement
+                    ){
+
+                        row.innerHTML = `
+
+                            <td>
+                                ${escapeHTML(
+                                    formatHistoryDate(item)
+                                )}
+                            </td>
+
+                            <td>
+                                ${createActionBadge(action)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getHistoryShop(item)
+                                )}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    ${escapeHTML(
+                                        item.coachNo
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.coachType
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.status
+                                )}
+                            </td>
+
+                            <td class="from-cell">
+                                ${escapeHTML(
+                                    fromLine
+                                )}
+                            </td>
+
+                            <td class="from-cell">
+                                ${escapeHTML(
+                                    fromPosition
+                                )}
+                            </td>
+
+                            <td class="to-cell">
+                                ${escapeHTML(
+                                    toLine
+                                )}
+                            </td>
+
+                            <td class="to-cell">
+                                ${escapeHTML(
+                                    toPosition
+                                )}
+                            </td>
+
+                            <td>
+                                ${
+                                    swappedCoach
+                                        ? escapeHTML(
+                                            swappedCoach
+                                          )
+                                        : "—"
+                                }
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.user || "Admin"
+                                )}
+                            </td>
+
+                        `;
+
+                    }
+
+
+                    /* -------------------------------------------------
+                       NORMAL ROW
+                    ------------------------------------------------- */
+
+                    else{
+
+                        row.innerHTML = `
+
+                            <td>
+                                ${escapeHTML(
+                                    formatHistoryDate(item)
+                                )}
+                            </td>
+
+                            <td>
+                                ${createActionBadge(action)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getHistoryShop(item)
+                                )}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    ${escapeHTML(
+                                        item.coachNo
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.coachType
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.status
+                                )}
+                            </td>
+
+                            <td>
+                                ${
+                                    fromLine
+                                        ? escapeHTML(
+                                            fromLine
+                                          )
+                                        : "—"
+                                }
+                            </td>
+
+                            <td>
+                                ${
+                                    fromPosition
+                                        ? escapeHTML(
+                                            fromPosition
+                                          )
+                                        : "—"
+                                }
+                            </td>
+
+                            <td>
+                                ${
+                                    toLine
+                                        ? escapeHTML(
+                                            toLine
+                                          )
+                                        : "—"
+                                }
+                            </td>
+
+                            <td>
+                                ${
+                                    toPosition
+                                        ? escapeHTML(
+                                            toPosition
+                                          )
+                                        : "—"
+                                }
+                            </td>
+
+                            <td>
+                                —
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.user || "Admin"
+                                )}
+                            </td>
+
+                        `;
+
+                    }
+
+
+                    historyBody.appendChild(
+                        row
+                    );
+
+                }
+            );
+
+
+            /* =================================================
+               SEARCH
+            ================================================= */
 
             applySearch();
 
+        },
+
+        error => {
+
+            console.error(
+                "HISTORY LOAD ERROR:",
+                error
+            );
+
+
+            historyBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="12"
+                        class="text-center text-danger"
+                    >
+
+                        Firebase History Load Error
+
+                    </td>
+
+                </tr>
+
+            `;
+
         }
+
     );
 
 }
-
 
 
 /* =========================================================
@@ -760,7 +1163,6 @@ function loadHistory(){
 
 function applySearch(){
 
-
     const value =
         searchHistory.value
             .trim()
@@ -768,35 +1170,32 @@ function applySearch(){
 
 
     document
-        .querySelectorAll("#historyBody tr")
-        .forEach(row => {
+        .querySelectorAll(
+            "#historyBody tr"
+        )
+        .forEach(
+            row => {
+
+                const text =
+                    row.innerText
+                        .toUpperCase();
 
 
-            if(
-                row.innerText
-                    .toUpperCase()
-                    .includes(value)
-            ){
-
-                row.style.display = "";
-
-            }else{
-
-                row.style.display = "none";
+                row.style.display =
+                    text.includes(value)
+                        ? ""
+                        : "none";
 
             }
-
-        });
+        );
 
 }
-
 
 
 searchHistory.addEventListener(
     "input",
     applySearch
 );
-
 
 
 /* =========================================================
@@ -813,7 +1212,6 @@ refreshBtn.addEventListener(
 );
 
 
-
 /* =========================================================
    START
 ========================================================= */
@@ -822,7 +1220,6 @@ loadHistory();
 
 
 </script>
-
 
 
 <script
