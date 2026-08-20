@@ -4368,16 +4368,12 @@ function exportExcel() {
 }
 
 
-/* =========================================================
-   PRINT / PDF
-========================================================= */
-
-function printBoard() {
-
-    window.print();
-
+function openPrintPage() {
+    window.open("print.html", "_blank");
 }
 
+document.getElementById("printBtn")
+    ?.addEventListener("click", openPrintPage);
 
 /* =========================================================
    LOCAL HISTORY
