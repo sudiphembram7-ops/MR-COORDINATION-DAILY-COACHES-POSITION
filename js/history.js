@@ -1,627 +1,1800 @@
 /* =========================================================
-   MR CO-ORDINATION BOARD
+   MR CO-ORDINATION DAILY COACHES POSITION
    HISTORY.JS
-   VERSION 15.1 FINAL
-   ---------------------------------------------------------
-   MATCHED WITH:
-   ---------------------------------------------------------
-   board.js V15.1 FINAL
-   firebase-config.js V12
-   Firebase Realtime Database
+   VERSION 16.0 FINAL
    ---------------------------------------------------------
    FEATURES
    ✔ REALTIME HISTORY
-   ✔ ISO TIME SUPPORTED
-   ✔ Date.now() SUPPORTED
-   ✔ timestamp SUPPORTED
-   ✔ createdAt SUPPORTED
-   ✔ OLD DATE + TIME SUPPORTED
-   ✔ NEWEST FIRST
+   ✔ SAVE
+   ✔ UPDATE
+   ✔ DELETE
+   ✔ MOVE
+   ✔ SWAP
+   ✔ PULL OUT
+   ✔ RETURN TO BOARD
+   ✔ DELETE PULLED OUT
+   ✔ STATUS UPDATE
+   ✔ FROM / TO MOVEMENT
    ✔ SEARCH
-   ✔ COACH NUMBER SEARCH
-   ✔ SHOP SEARCH
-   ✔ LINE SEARCH
-   ✔ POSITION SEARCH
-   ✔ SAFE HTML
-   ✔ DOM READY SAFE
-   ✔ FIREBASE ERROR HANDLING
+   ✔ ACTION FILTER
+   ✔ DATE/TIME
+   ✔ SHOP
+   ✔ LINE
+   ✔ POSITION
+   ✔ COACH NUMBER
+   ✔ COACH TYPE
+   ✔ STATUS
+   ✔ USER
    ✔ REFRESH
+   ✔ CLEAR SEARCH
+   ✔ CSV EXPORT
+   ✔ PRINT
 ========================================================= */
 
 
 /* =========================================================
-   FIREBASE
+   FIREBASE IMPORT
 ========================================================= */
 
 import {
-    database
+    database,
+    auth
 } from "./firebase-config.js";
-
 
 import {
     ref,
-    onValue
+    onValue,
+    get
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
 /* =========================================================
-   GLOBAL DOM
+   VERSION
 ========================================================= */
 
-let historyBody = null;
-
-let searchHistory = null;
-
-let refreshBtn = null;
+const HISTORY_VERSION = "16.0 FINAL";
 
 
 /* =========================================================
-   DOM ELEMENTS
+   DATABASE PATH
 ========================================================= */
 
-function initializeElements() {
+const HISTORY_PATH = "history";
 
-    historyBody =
-        document.getElementById(
-            "historyBody"
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
+let historyData = {};
+
+let filteredHistory = [];
+
+let currentSearch = "";
+
+let currentAction = "ALL";
+
+let historyListenerStarted = false;
+
+
+/* =========================================================
+   DOM READY
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        console.log(
+            "========================================"
         );
 
-    searchHistory =
-        document.getElementById(
-            "searchHistory"
+        console.log(
+            `MR CO-ORDINATION HISTORY V${HISTORY_VERSION}`
         );
 
-    refreshBtn =
+        console.log(
+            "HISTORY.JS LOADED"
+        );
+
+        console.log(
+            "========================================"
+        );
+
+        initializeHistory();
+
+    }
+);
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+function initializeHistory() {
+
+    initializeSearch();
+
+    initializeActionFilter();
+
+    initializeButtons();
+
+    initializeFirebaseHistory();
+
+    startClock();
+
+    console.log(
+        "HISTORY INITIALIZATION COMPLETE"
+    );
+
+}
+
+
+/* =========================================================
+   FIREBASE HISTORY LISTENER
+========================================================= */
+
+function initializeFirebaseHistory() {
+
+    if (historyListenerStarted)
+        return;
+
+    historyListenerStarted = true;
+
+
+    const historyRef =
+        ref(
+            database,
+            HISTORY_PATH
+        );
+
+
+    onValue(
+
+        historyRef,
+
+        snapshot => {
+
+            historyData =
+                snapshot.exists()
+                    ? snapshot.val()
+                    : {};
+
+
+            console.log(
+                "HISTORY UPDATED:",
+                Object.keys(
+                    historyData
+                ).length
+            );
+
+
+            renderHistory();
+
+        },
+
+        error => {
+
+            console.error(
+                "HISTORY LISTENER ERROR:",
+                error
+            );
+
+
+            showMessage(
+                error?.message ||
+                "Unable to load history.",
+                "danger"
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   LOAD HISTORY ONCE
+========================================================= */
+
+async function loadHistoryOnce() {
+
+    try {
+
+        const snapshot =
+            await get(
+                ref(
+                    database,
+                    HISTORY_PATH
+                )
+            );
+
+
+        historyData =
+            snapshot.exists()
+                ? snapshot.val()
+                : {};
+
+
+        renderHistory();
+
+    }
+    catch (error) {
+
+        console.error(
+            "LOAD HISTORY ERROR:",
+            error
+        );
+
+
+        showMessage(
+            error?.message ||
+            "History loading failed.",
+            "danger"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER HISTORY
+========================================================= */
+
+function renderHistory() {
+
+    const entries =
+        Object.entries(
+            historyData || {}
+        );
+
+
+    /*
+       Newest first
+    */
+
+    entries.sort(
+        (
+            [, a],
+            [, b]
+        ) => {
+
+            const dateA =
+                getHistoryTime(
+                    a
+                );
+
+            const dateB =
+                getHistoryTime(
+                    b
+                );
+
+
+            return (
+                dateB -
+                dateA
+            );
+
+        }
+    );
+
+
+    filteredHistory =
+        entries.filter(
+            ([key, record]) => {
+
+                return matchesFilters(
+                    key,
+                    record
+                );
+
+            }
+        );
+
+
+    updateHistoryCount(
+        entries.length,
+        filteredHistory.length
+    );
+
+
+    drawHistoryTable(
+        filteredHistory
+    );
+
+}
+
+
+/* =========================================================
+   FILTER MATCH
+========================================================= */
+
+function matchesFilters(
+    key,
+    record
+) {
+
+    /*
+       ACTION FILTER
+    */
+
+    if (
+        currentAction !==
+        "ALL"
+    ) {
+
+        const action =
+            normalizeAction(
+                record?.action
+            );
+
+
+        if (
+            action !==
+            normalizeAction(
+                currentAction
+            )
+        ) {
+
+            return false;
+
+        }
+
+    }
+
+
+    /*
+       SEARCH
+    */
+
+    const keyword =
+        clean(
+            currentSearch
+        ).toLowerCase();
+
+
+    if (!keyword)
+        return true;
+
+
+    const searchable = [
+
+        key,
+
+        record?.action,
+
+        record?.shop,
+
+        record?.line,
+
+        record?.position,
+
+        record?.coachNo,
+
+        record?.coachType,
+
+        record?.status,
+
+        record?.user,
+
+        record?.fromShop,
+
+        record?.fromLine,
+
+        record?.fromPosition,
+
+        record?.toShop,
+
+        record?.toLine,
+
+        record?.toPosition,
+
+        record?.swappedCoachNo,
+
+        record?.oldCoachNo,
+
+        record?.oldLine,
+
+        record?.oldPosition,
+
+        record?.time,
+
+        record?.timestamp
+
+    ]
+        .join(" ")
+        .toLowerCase();
+
+
+    return searchable.includes(
+        keyword
+    );
+
+}
+
+
+/* =========================================================
+   DRAW HISTORY TABLE
+========================================================= */
+
+function drawHistoryTable(
+    entries
+) {
+
+    const table =
+        document.getElementById(
+            "historyTable"
+        );
+
+
+    if (!table) {
+
+        console.warn(
+            "historyTable element not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Support both:
+       <table id="historyTable">
+       and
+       <tbody id="historyTable">
+    */
+
+    let tbody;
+
+
+    if (
+        table.tagName &&
+        table.tagName.toLowerCase() ===
+        "tbody"
+    ) {
+
+        tbody =
+            table;
+
+    }
+    else {
+
+        tbody =
+            table.querySelector(
+                "tbody"
+            );
+
+    }
+
+
+    if (!tbody) {
+
+        console.warn(
+            "historyTable tbody not found."
+        );
+
+        return;
+
+    }
+
+
+    if (!entries.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="12"
+                    class="text-center text-muted py-4"
+                >
+
+                    No history found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        entries
+            .map(
+                ([key, record]) => {
+
+                    return buildHistoryRow(
+                        key,
+                        record
+                    );
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* =========================================================
+   BUILD HISTORY ROW
+========================================================= */
+
+function buildHistoryRow(
+    key,
+    record
+) {
+
+    const action =
+        normalizeAction(
+            record?.action
+        );
+
+
+    const actionBadge =
+        getActionBadge(
+            action
+        );
+
+
+    const dateTime =
+        formatDateTime(
+            getHistoryDateValue(
+                record
+            )
+        );
+
+
+    const coachNo =
+        clean(
+            record?.coachNo
+        );
+
+
+    const coachType =
+        clean(
+            record?.coachType
+        );
+
+
+    const status =
+        clean(
+            record?.status
+        );
+
+
+    const user =
+        clean(
+            record?.user
+        ) ||
+        "Admin";
+
+
+    /*
+       MOVEMENT
+    */
+
+    const movement =
+        buildMovementText(
+            record
+        );
+
+
+    /*
+       For normal actions use
+       normal shop / line / position.
+    */
+
+    const shop =
+        getDisplayShop(
+            record
+        );
+
+
+    const line =
+        getDisplayLine(
+            record
+        );
+
+
+    const position =
+        getDisplayPosition(
+            record
+        );
+
+
+    return `
+
+        <tr>
+
+            <!-- DATE -->
+
+            <td>
+                ${escapeHTML(
+                    dateTime
+                )}
+            </td>
+
+
+            <!-- SHOP -->
+
+            <td>
+                ${escapeHTML(
+                    shop
+                )}
+            </td>
+
+
+            <!-- LINE -->
+
+            <td>
+                ${escapeHTML(
+                    line
+                )}
+            </td>
+
+
+            <!-- POSITION -->
+
+            <td>
+                ${escapeHTML(
+                    position
+                )}
+            </td>
+
+
+            <!-- COACH NUMBER -->
+
+            <td>
+
+                <strong>
+                    ${escapeHTML(
+                        coachNo
+                    )}
+                </strong>
+
+            </td>
+
+
+            <!-- COACH TYPE -->
+
+            <td>
+                ${escapeHTML(
+                    coachType
+                )}
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+                ${buildStatusBadge(
+                    status
+                )}
+
+            </td>
+
+
+            <!-- ACTION -->
+
+            <td>
+
+                ${actionBadge}
+
+            </td>
+
+
+            <!-- MOVEMENT -->
+
+            <td>
+
+                ${movement}
+
+            </td>
+
+
+            <!-- USER -->
+
+            <td>
+                ${escapeHTML(
+                    user
+                )}
+            </td>
+
+
+            <!-- HISTORY KEY -->
+
+            <td>
+
+                <small
+                    class="text-muted"
+                    title="${escapeAttribute(
+                        key
+                    )}"
+                >
+
+                    ${escapeHTML(
+                        shortKey(key)
+                    )}
+
+                </small>
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+/* =========================================================
+   MOVEMENT TEXT
+========================================================= */
+
+function buildMovementText(
+    record
+) {
+
+    const action =
+        normalizeAction(
+            record?.action
+        );
+
+
+    /*
+       MOVE / SWAP
+    */
+
+    if (
+        action === "MOVE" ||
+        action === "SWAP" ||
+        action === "RETURN_TO_BOARD"
+    ) {
+
+        const fromShop =
+            clean(
+                record?.fromShop
+            );
+
+
+        const fromLine =
+            clean(
+                record?.fromLine
+            );
+
+
+        const fromPosition =
+            clean(
+                record?.fromPosition
+            );
+
+
+        const toShop =
+            clean(
+                record?.toShop
+            );
+
+
+        const toLine =
+            clean(
+                record?.toLine
+            );
+
+
+        const toPosition =
+            clean(
+                record?.toPosition
+            );
+
+
+        /*
+           New format
+        */
+
+        if (
+            fromLine ||
+            fromPosition ||
+            toLine ||
+            toPosition
+        ) {
+
+            const fromText =
+                [
+                    fromShop,
+                    fromLine,
+                    fromPosition
+                ]
+                    .filter(Boolean)
+                    .join(" / ");
+
+
+            const toText =
+                [
+                    toShop,
+                    toLine,
+                    toPosition
+                ]
+                    .filter(Boolean)
+                    .join(" / ");
+
+
+            let html = `
+
+                <span class="text-nowrap">
+
+                    ${escapeHTML(
+                        fromText ||
+                        "--"
+                    )}
+
+                    <strong class="mx-1">
+                        →
+                    </strong>
+
+                    ${escapeHTML(
+                        toText ||
+                        "--"
+                    )}
+
+                </span>
+
+            `;
+
+
+            /*
+               SWAP coach
+            */
+
+            if (
+                action === "SWAP" &&
+                record?.swappedCoachNo
+            ) {
+
+                html += `
+
+                    <div class="small text-muted mt-1">
+
+                        ↔ Swapped with
+                        <strong>
+                            ${escapeHTML(
+                                record.swappedCoachNo
+                            )}
+                        </strong>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            return html;
+
+        }
+
+    }
+
+
+    /*
+       PULL OUT
+    */
+
+    if (
+        action === "PULL_OUT"
+    ) {
+
+        const originalLine =
+            clean(
+                record?.originalLine ||
+                record?.line
+            );
+
+
+        const originalPosition =
+            clean(
+                record?.originalPosition ||
+                record?.position
+            );
+
+
+        return `
+
+            <span class="text-warning">
+
+                Pulled out from
+
+                <strong>
+
+                    ${escapeHTML(
+                        originalLine
+                    )}
+
+                    /
+
+                    ${escapeHTML(
+                        originalPosition
+                    )}
+
+                </strong>
+
+            </span>
+
+        `;
+
+    }
+
+
+    /*
+       DELETE PULLED OUT
+    */
+
+    if (
+        action ===
+        "DELETE_PULLED_OUT"
+    ) {
+
+        return `
+
+            <span class="text-danger">
+
+                Pulled-out coach deleted
+
+            </span>
+
+        `;
+
+    }
+
+
+    /*
+       STATUS UPDATE
+    */
+
+    if (
+        action ===
+        "STATUS_UPDATE"
+    ) {
+
+        return `
+
+            <span class="text-info">
+
+                Status changed
+
+            </span>
+
+        `;
+
+    }
+
+
+    /*
+       RESTORE
+    */
+
+    if (
+        action ===
+        "RESTORE_BOARD"
+    ) {
+
+        return `
+
+            <span class="text-primary">
+
+                Board restored
+
+            </span>
+
+        `;
+
+    }
+
+
+    /*
+       CLEAR
+    */
+
+    if (
+        action ===
+        "CLEAR_BOARD"
+    ) {
+
+        return `
+
+            <span class="text-danger">
+
+                Entire board cleared
+
+            </span>
+
+        `;
+
+    }
+
+
+    return "--";
+
+}
+
+
+/* =========================================================
+   ACTION BADGE
+========================================================= */
+
+function getActionBadge(
+    action
+) {
+
+    const value =
+        normalizeAction(
+            action
+        );
+
+
+    const map = {
+
+        SAVE:
+            [
+                "success",
+                "SAVE"
+            ],
+
+        UPDATE:
+            [
+                "primary",
+                "UPDATE"
+            ],
+
+        DELETE:
+            [
+                "danger",
+                "DELETE"
+            ],
+
+        MOVE:
+            [
+                "info",
+                "MOVE"
+            ],
+
+        SWAP:
+            [
+                "warning",
+                "SWAP"
+            ],
+
+        PULL_OUT:
+            [
+                "warning",
+                "PULL OUT"
+            ],
+
+        RETURN_TO_BOARD:
+            [
+                "success",
+                "RETURN"
+            ],
+
+        DELETE_PULLED_OUT:
+            [
+                "danger",
+                "DELETE PULLED"
+            ],
+
+        STATUS_UPDATE:
+            [
+                "secondary",
+                "STATUS"
+            ],
+
+        RESTORE_BOARD:
+            [
+                "primary",
+                "RESTORE"
+            ],
+
+        CLEAR_BOARD:
+            [
+                "danger",
+                "CLEAR"
+            ]
+
+    };
+
+
+    const item =
+        map[value] ||
+        [
+            "secondary",
+            value || "UNKNOWN"
+        ];
+
+
+    return `
+
+        <span
+            class="badge bg-${item[0]}"
+        >
+
+            ${escapeHTML(
+                item[1]
+            )}
+
+        </span>
+
+    `;
+
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+function buildStatusBadge(
+    status
+) {
+
+    const value =
+        clean(
+            status
+        );
+
+
+    if (!value)
+        return "--";
+
+
+    const normalized =
+        value.toUpperCase();
+
+
+    const classes = {
+
+        PO:
+            "bg-success",
+
+        S:
+            "bg-primary",
+
+        LM:
+            "bg-warning text-dark",
+
+        MED:
+            "bg-danger",
+
+        RL:
+            "bg-info text-dark",
+
+        R1:
+            "bg-secondary",
+
+        RS:
+            "bg-dark",
+
+        L:
+            "bg-primary",
+
+        HVY:
+            "bg-danger"
+
+    };
+
+
+    const className =
+        classes[
+            normalized
+        ] ||
+        "bg-secondary";
+
+
+    return `
+
+        <span
+            class="badge ${className}"
+        >
+
+            ${escapeHTML(
+                normalized
+            )}
+
+        </span>
+
+    `;
+
+}
+
+
+/* =========================================================
+   DISPLAY SHOP
+========================================================= */
+
+function getDisplayShop(
+    record
+) {
+
+    return clean(
+        record?.shop ||
+        record?.toShop ||
+        record?.originalShop ||
+        record?.fromShop
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY LINE
+========================================================= */
+
+function getDisplayLine(
+    record
+) {
+
+    const action =
+        normalizeAction(
+            record?.action
+        );
+
+
+    /*
+       MOVE / SWAP:
+       Show destination as main line.
+    */
+
+    if (
+        action === "MOVE" ||
+        action === "SWAP" ||
+        action === "RETURN_TO_BOARD"
+    ) {
+
+        return clean(
+            record?.toLine ||
+            record?.line
+        );
+
+    }
+
+
+    return clean(
+        record?.line ||
+        record?.originalLine
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY POSITION
+========================================================= */
+
+function getDisplayPosition(
+    record
+) {
+
+    const action =
+        normalizeAction(
+            record?.action
+        );
+
+
+    if (
+        action === "MOVE" ||
+        action === "SWAP" ||
+        action === "RETURN_TO_BOARD"
+    ) {
+
+        return clean(
+            record?.toPosition ||
+            record?.position
+        );
+
+    }
+
+
+    return clean(
+        record?.position ||
+        record?.originalPosition
+    );
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function initializeSearch() {
+
+    const searchBox =
+        document.getElementById(
+            "historySearch"
+        ) ||
+        document.getElementById(
+            "searchBox"
+        );
+
+
+    if (!searchBox)
+        return;
+
+
+    searchBox.addEventListener(
+        "input",
+        debounce(
+            event => {
+
+                currentSearch =
+                    event.target.value ||
+                    "";
+
+                renderHistory();
+
+            },
+            150
+        )
+    );
+
+}
+
+
+/* =========================================================
+   ACTION FILTER
+========================================================= */
+
+function initializeActionFilter() {
+
+    const filter =
+        document.getElementById(
+            "historyActionFilter"
+        ) ||
+        document.getElementById(
+            "actionFilter"
+        );
+
+
+    if (!filter)
+        return;
+
+
+    filter.addEventListener(
+        "change",
+        event => {
+
+            currentAction =
+                event.target.value ||
+                "ALL";
+
+
+            renderHistory();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+function initializeButtons() {
+
+    /*
+       REFRESH
+    */
+
+    const refreshBtn =
+        document.getElementById(
+            "refreshHistoryBtn"
+        ) ||
         document.getElementById(
             "refreshBtn"
         );
 
 
-    console.log(
-        "HISTORY BODY:",
-        historyBody
-    );
+    if (refreshBtn) {
 
-    console.log(
-        "HISTORY SEARCH:",
-        searchHistory
-    );
-
-    console.log(
-        "HISTORY REFRESH:",
-        refreshBtn
-    );
-
-}
-
-
-/* =========================================================
-   SAFE HTML
-========================================================= */
-
-function escapeHTML(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
+        refreshBtn.addEventListener(
+            "click",
+            loadHistoryOnce
         );
 
-}
-
-
-/* =========================================================
-   DATE PARSER
-========================================================= */
-
-function parseDateValue(value) {
-
-    if (
-        value === null ||
-        value === undefined ||
-        value === ""
-    ) {
-
-        return null;
-
     }
 
 
-    /* =====================================================
-       NUMBER
-    ===================================================== */
+    /*
+       CLEAR SEARCH
+    */
 
-    if (
-        typeof value === "number"
-    ) {
-
-        if (
-            value <= 0
-        ) {
-
-            return null;
-
-        }
+    const clearBtn =
+        document.getElementById(
+            "clearHistorySearch"
+        );
 
 
-        const date =
-            new Date(value);
+    if (clearBtn) {
+
+        clearBtn.addEventListener(
+            "click",
+            () => {
+
+                currentSearch =
+                    "";
+
+                const searchBox =
+                    document.getElementById(
+                        "historySearch"
+                    ) ||
+                    document.getElementById(
+                        "searchBox"
+                    );
 
 
-        if (
-            isNaN(
-                date.getTime()
-            )
-        ) {
+                if (searchBox) {
 
-            return null;
-
-        }
-
-
-        return date;
-
-    }
-
-
-    /* =====================================================
-       OBJECT
-    ===================================================== */
-
-    if (
-        typeof value === "object"
-    ) {
-
-        /* Firebase Timestamp */
-
-        if (
-            typeof value.toDate ===
-            "function"
-        ) {
-
-            try {
-
-                const date =
-                    value.toDate();
-
-
-                if (
-                    date &&
-                    !isNaN(
-                        date.getTime()
-                    )
-                ) {
-
-                    return date;
+                    searchBox.value =
+                        "";
 
                 }
 
-            }
-            catch (error) {
 
-                console.warn(
-                    "Timestamp parse error:",
-                    error
-                );
+                renderHistory();
 
             }
-
-        }
-
-
-        return null;
+        );
 
     }
 
 
-    /* =====================================================
-       STRING
-    ===================================================== */
+    /*
+       CSV
+    */
 
-    const text =
-        String(value).trim();
+    const exportBtn =
+        document.getElementById(
+            "exportHistoryBtn"
+        ) ||
+        document.getElementById(
+            "historyExcelBtn"
+        );
 
 
-    if (!text) {
+    if (exportBtn) {
 
-        return null;
+        exportBtn.addEventListener(
+            "click",
+            exportHistoryCSV
+        );
 
     }
 
 
-    /* =====================================================
-       NUMERIC STRING
-    ===================================================== */
+    /*
+       PRINT
+    */
 
-    if (
-        /^\d+$/.test(text)
-    ) {
-
-        const number =
-            Number(text);
+    const printBtn =
+        document.getElementById(
+            "printHistoryBtn"
+        );
 
 
-        if (
-            number > 0
-        ) {
+    if (printBtn) {
 
-            const date =
-                new Date(number);
+        printBtn.addEventListener(
+            "click",
+            () => {
 
-
-            if (
-                !isNaN(
-                    date.getTime()
-                )
-            ) {
-
-                return date;
+                window.print();
 
             }
-
-        }
-
-    }
-
-
-    /* =====================================================
-       ISO STRING
-       Example:
-       2026-08-20T19:50:53.000Z
-    ===================================================== */
-
-    const date =
-        new Date(text);
-
-
-    if (
-        !isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return date;
+        );
 
     }
-
-
-    return null;
 
 }
 
 
 /* =========================================================
-   OLD DATE + TIME
+   HISTORY COUNT
 ========================================================= */
 
-function parseOldDateTime(
-    dateString,
-    timeString
+function updateHistoryCount(
+    total,
+    filtered
 ) {
 
-    if (
-        !dateString ||
-        !timeString
-    ) {
+    const totalEl =
+        document.getElementById(
+            "historyCount"
+        );
 
-        return null;
+
+    const countEl =
+        document.getElementById(
+            "historyTotal"
+        );
+
+
+    const resultEl =
+        document.getElementById(
+            "historySearchCount"
+        );
+
+
+    if (totalEl) {
+
+        totalEl.textContent =
+            total;
 
     }
 
 
-    const dateMatch =
-        String(dateString)
-            .trim()
-            .match(
-                /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/
-            );
+    if (countEl) {
 
-
-    if (!dateMatch) {
-
-        return null;
+        countEl.textContent =
+            total;
 
     }
 
 
-    const day =
-        Number(
-            dateMatch[1]
-        );
-
-
-    const month =
-        Number(
-            dateMatch[2]
-        ) - 1;
-
-
-    const year =
-        Number(
-            dateMatch[3]
-        );
-
-
-    const timeMatch =
-        String(timeString)
-            .trim()
-            .match(
-                /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i
-            );
-
-
-    if (!timeMatch) {
-
-        return null;
-
-    }
-
-
-    let hours =
-        Number(
-            timeMatch[1]
-        );
-
-
-    const minutes =
-        Number(
-            timeMatch[2]
-        );
-
-
-    const seconds =
-        Number(
-            timeMatch[3] || 0
-        );
-
-
-    const ampm =
-        timeMatch[4];
-
-
-    if (ampm) {
-
-        const upper =
-            ampm.toUpperCase();
-
+    if (resultEl) {
 
         if (
-            upper === "PM" &&
-            hours < 12
+            currentSearch ||
+            currentAction !== "ALL"
         ) {
 
-            hours += 12;
+            resultEl.textContent =
+                `${filtered} found`;
 
         }
+        else {
 
-
-        if (
-            upper === "AM" &&
-            hours === 12
-        ) {
-
-            hours = 0;
+            resultEl.textContent =
+                "";
 
         }
 
     }
-
-
-    const result =
-        new Date(
-            year,
-            month,
-            day,
-            hours,
-            minutes,
-            seconds
-        );
-
-
-    if (
-        isNaN(
-            result.getTime()
-        )
-    ) {
-
-        return null;
-
-    }
-
-
-    return result;
 
 }
 
 
 /* =========================================================
-   GET HISTORY DATE
+   CSV EXPORT
 ========================================================= */
 
-function getHistoryDate(item) {
-
-    if (!item) {
-
-        return null;
-
-    }
-
-
-    /* =====================================================
-       1. TIME
-       IMPORTANT:
-       board.js V15.1 writes ISO string here.
-    ===================================================== */
+function exportHistoryCSV() {
 
     if (
-        item.time !== undefined &&
-        item.time !== null
+        !filteredHistory.length
     ) {
 
-        const date =
-            parseDateValue(
-                item.time
-            );
+        showMessage(
+            "No history records to export.",
+            "warning"
+        );
 
-
-        if (date) {
-
-            return date;
-
-        }
+        return;
 
     }
 
 
-    /* =====================================================
-       2. TIMESTAMP
-    ===================================================== */
-
-    if (
-        item.timestamp !== undefined
-    ) {
-
-        const date =
-            parseDateValue(
-                item.timestamp
-            );
+    const rows = [];
 
 
-        if (date) {
+    rows.push([
 
-            return date;
+        "Date / Time",
+
+        "Shop",
+
+        "Line",
+
+        "Position",
+
+        "Coach No.",
+
+        "Coach Type",
+
+        "Status",
+
+        "Action",
+
+        "From Shop",
+
+        "From Line",
+
+        "From Position",
+
+        "To Shop",
+
+        "To Line",
+
+        "To Position",
+
+        "Swapped Coach",
+
+        "User",
+
+        "History ID"
+
+    ]);
+
+
+    filteredHistory.forEach(
+        ([key, record]) => {
+
+            rows.push([
+
+                getHistoryDateValue(
+                    record
+                ),
+
+                record?.shop ||
+                    record?.toShop ||
+                    "",
+
+                record?.line ||
+                    record?.toLine ||
+                    "",
+
+                record?.position ||
+                    record?.toPosition ||
+                    "",
+
+                record?.coachNo ||
+                    "",
+
+                record?.coachType ||
+                    "",
+
+                record?.status ||
+                    "",
+
+                record?.action ||
+                    "",
+
+                record?.fromShop ||
+                    "",
+
+                record?.fromLine ||
+                    "",
+
+                record?.fromPosition ||
+                    "",
+
+                record?.toShop ||
+                    "",
+
+                record?.toLine ||
+                    "",
+
+                record?.toPosition ||
+                    "",
+
+                record?.swappedCoachNo ||
+                    "",
+
+                record?.user ||
+                    "Admin",
+
+                key
+
+            ]);
 
         }
-
-    }
-
-
-    /* =====================================================
-       3. CREATED AT
-    ===================================================== */
-
-    if (
-        item.createdAt !== undefined
-    ) {
-
-        const date =
-            parseDateValue(
-                item.createdAt
-            );
+    );
 
 
-        if (date) {
-
-            return date;
-
-        }
-
-    }
-
-
-    /* =====================================================
-       4. OLD DATE + TIME
-    ===================================================== */
-
-    if (
-        item.date &&
-        item.time &&
-        typeof item.time === "string"
-    ) {
-
-        const date =
-            parseOldDateTime(
-                item.date,
-                item.time
-            );
+    const csv =
+        rows
+            .map(
+                row =>
+                    row
+                        .map(
+                            csvEscape
+                        )
+                        .join(",")
+            )
+            .join("\n");
 
 
-        if (date) {
-
-            return date;
-
-        }
-
-    }
-
-
-    /* =====================================================
-       5. DATE ONLY
-    ===================================================== */
-
-    if (item.date) {
-
-        const date =
-            parseDateValue(
-                item.date
-            );
+    const blob =
+        new Blob(
+            [
+                "\uFEFF",
+                csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
 
 
-        if (date) {
-
-            return date;
-
-        }
-
-    }
+    const url =
+        URL.createObjectURL(
+            blob
+        );
 
 
-    return null;
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        `MR-COORDINATION-HISTORY-${dateFileName()}.csv`;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+
+    showMessage(
+        "History CSV exported successfully.",
+        "success"
+    );
 
 }
 
 
 /* =========================================================
-   FORMAT DATE
+   CLOCK
 ========================================================= */
 
-function formatHistoryDate(item) {
+function startClock() {
+
+    updateClock();
+
+    setInterval(
+        updateClock,
+        1000
+    );
+
+}
+
+
+/* =========================================================
+   CLOCK UPDATE
+========================================================= */
+
+function updateClock() {
+
+    const now =
+        new Date();
+
 
     const date =
-        getHistoryDate(item);
-
-
-    if (!date) {
-
-        return "—";
-
-    }
-
-
-    try {
-
-        return date.toLocaleString(
+        now.toLocaleDateString(
             "en-IN",
             {
                 day:
@@ -631,8 +1804,16 @@ function formatHistoryDate(item) {
                     "2-digit",
 
                 year:
-                    "numeric",
+                    "numeric"
 
+            }
+        );
+
+
+    const time =
+        now.toLocaleTimeString(
+            "en-IN",
+            {
                 hour:
                     "2-digit",
 
@@ -648,15 +1829,31 @@ function formatHistoryDate(item) {
             }
         );
 
-    }
-    catch (error) {
 
-        console.error(
-            "DATE FORMAT ERROR:",
-            error
+    const dateEl =
+        document.getElementById(
+            "liveDate"
         );
 
-        return "—";
+
+    const timeEl =
+        document.getElementById(
+            "liveTime"
+        );
+
+
+    if (dateEl) {
+
+        dateEl.textContent =
+            `Date: ${date}`;
+
+    }
+
+
+    if (timeEl) {
+
+        timeEl.textContent =
+            `Time: ${time}`;
 
     }
 
@@ -664,604 +1861,627 @@ function formatHistoryDate(item) {
 
 
 /* =========================================================
-   SORT TIME
+   HISTORY TIME
 ========================================================= */
 
-function getSortTime(item) {
+function getHistoryTime(
+    record
+) {
+
+    const value =
+        getHistoryDateValue(
+            record
+        );
+
 
     const date =
-        getHistoryDate(item);
+        new Date(
+            value
+        );
 
 
-    if (!date) {
-
-        return 0;
-
-    }
+    const time =
+        date.getTime();
 
 
-    return date.getTime();
+    return Number.isNaN(
+        time
+    )
+        ? 0
+        : time;
 
 }
 
 
 /* =========================================================
-   SEARCH
+   HISTORY DATE VALUE
 ========================================================= */
 
-function applySearch() {
+function getHistoryDateValue(
+    record
+) {
 
-    if (!historyBody) {
-
-        return;
-
-    }
-
-
-    const keyword =
-        searchHistory
-            ? searchHistory.value
-                .trim()
-                .toUpperCase()
-            : "";
-
-
-    const rows =
-        historyBody.querySelectorAll(
-            "tr"
-        );
-
-
-    rows.forEach(
-        row => {
-
-            const text =
-                String(
-                    row.innerText || ""
-                )
-                .toUpperCase();
-
-
-            if (
-                text.includes(
-                    keyword
-                )
-            ) {
-
-                row.style.display =
-                    "";
-
-            }
-            else {
-
-                row.style.display =
-                    "none";
-
-            }
-
-        }
+    return (
+        record?.time ||
+        record?.timestamp ||
+        record?.createdAt ||
+        ""
     );
 
 }
 
 
 /* =========================================================
-   DISPLAY HISTORY
+   DATE FORMAT
 ========================================================= */
 
-function displayHistory(
-    data
+function formatDateTime(
+    value
 ) {
 
-    if (!historyBody) {
+    if (!value)
+        return "--";
 
-        console.error(
-            "historyBody not found."
+
+    const date =
+        new Date(
+            value
         );
-
-        return;
-
-    }
-
-
-    historyBody.innerHTML =
-        "";
 
 
     if (
-        !Array.isArray(data) ||
-        data.length === 0
+        Number.isNaN(
+            date.getTime()
+        )
     ) {
 
-        historyBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="9"
-                    class="text-center text-muted"
-                >
-                    No History Found
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
+        return clean(
+            value
+        );
 
     }
 
 
-    /* =====================================================
-       NEWEST FIRST
-    ===================================================== */
+    return date.toLocaleString(
+        "en-IN",
+        {
 
-    data.sort(
-        (a, b) =>
-            getSortTime(b) -
-            getSortTime(a)
-    );
+            day:
+                "2-digit",
 
+            month:
+                "2-digit",
 
-    /* =====================================================
-       ROWS
-    ===================================================== */
+            year:
+                "numeric",
 
-    data.forEach(
-        item => {
+            hour:
+                "2-digit",
 
-            if (
-                !item ||
-                typeof item !== "object"
-            ) {
+            minute:
+                "2-digit",
 
-                return;
+            second:
+                "2-digit",
 
-            }
-
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            const action =
-                item.action ||
-                "";
-
-
-            const user =
-                item.user ||
-                "Admin";
-
-
-            const coachNo =
-                item.coachNo ||
-                "";
-
-
-            const coachType =
-                item.coachType ||
-                "";
-
-
-            const status =
-                item.status ||
-                "";
-
-
-            const shop =
-                item.shop ||
-                "";
-
-
-            const line =
-                item.line ||
-                "";
-
-
-            const position =
-                item.position ||
-                "";
-
-
-            row.innerHTML = `
-
-                <td>
-                    ${escapeHTML(
-                        formatHistoryDate(
-                            item
-                        )
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        shop
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        line
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        position
-                    )}
-                </td>
-
-                <td class="fw-bold">
-                    ${escapeHTML(
-                        coachNo
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        coachType
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        status
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        user
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        action
-                    )}
-                </td>
-
-            `;
-
-
-            historyBody.appendChild(
-                row
-            );
+            hour12:
+                true
 
         }
     );
 
-
-    applySearch();
-
 }
 
 
 /* =========================================================
-   LOADING
+   NORMALIZE ACTION
 ========================================================= */
 
-function showLoading() {
-
-    if (!historyBody) {
-
-        return;
-
-    }
-
-
-    historyBody.innerHTML = `
-
-        <tr>
-
-            <td
-                colspan="9"
-                class="text-center"
-            >
-                Loading History...
-            </td>
-
-        </tr>
-
-    `;
-
-}
-
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-function showError(
-    message
+function normalizeAction(
+    value
 ) {
 
-    if (!historyBody) {
-
-        return;
-
-    }
-
-
-    historyBody.innerHTML = `
-
-        <tr>
-
-            <td
-                colspan="9"
-                class="text-center text-danger fw-bold"
-            >
-                ${escapeHTML(
-                    message
-                )}
-            </td>
-
-        </tr>
-
-    `;
+    return clean(
+        value
+    )
+        .toUpperCase()
+        .replace(
+            /\s+/g,
+            "_"
+        );
 
 }
 
 
 /* =========================================================
-   FIREBASE LISTENER
+   SHORT KEY
 ========================================================= */
 
-function loadHistory() {
+function shortKey(
+    key
+) {
 
-    if (!historyBody) {
-
-        console.error(
-            "Cannot load history."
+    const value =
+        clean(
+            key
         );
 
-        return;
+
+    if (
+        value.length <= 12
+    ) {
+
+        return value;
 
     }
 
 
-    showLoading();
+    return (
+        value.substring(
+            0,
+            6
+        ) +
+        "..." +
+        value.substring(
+            value.length - 4
+        )
+    );
+
+}
 
 
-    const historyRef =
-        ref(
-            database,
-            "history"
+/* =========================================================
+   DATE FILE NAME
+========================================================= */
+
+function dateFileName() {
+
+    const now =
+        new Date();
+
+
+    return [
+
+        now.getFullYear(),
+
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            now.getHours()
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            now.getMinutes()
+        ).padStart(
+            2,
+            "0"
+        )
+
+    ].join("-");
+
+}
+
+
+/* =========================================================
+   CLEAN
+========================================================= */
+
+function clean(
+    value
+) {
+
+    return String(
+        value ??
+        ""
+    ).trim();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ??
+        ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   ESCAPE ATTRIBUTE
+========================================================= */
+
+function escapeAttribute(
+    value
+) {
+
+    return escapeHTML(
+        value
+    );
+
+}
+
+
+/* =========================================================
+   CSV ESCAPE
+========================================================= */
+
+function csvEscape(
+    value
+) {
+
+    const text =
+        String(
+            value ??
+            ""
         );
 
 
-    console.log(
-        "Listening Firebase path:",
-        "history"
-    );
+    if (
+        text.includes(",") ||
+        text.includes('"') ||
+        text.includes("\n") ||
+        text.includes("\r")
+    ) {
+
+        return `"${text.replace(
+            /"/g,
+            '""'
+        )}"`;
+
+    }
 
 
-    onValue(
+    return text;
 
-        historyRef,
+}
 
-        snapshot => {
 
-            console.log(
-                "HISTORY SNAPSHOT:",
-                snapshot.val()
+/* =========================================================
+   DEBOUNCE
+========================================================= */
+
+function debounce(
+    fn,
+    delay
+) {
+
+    let timer;
+
+
+    return function (...args) {
+
+        clearTimeout(
+            timer
+        );
+
+
+        timer =
+            setTimeout(
+                () => {
+
+                    fn.apply(
+                        this,
+                        args
+                    );
+
+                },
+                delay
             );
 
+    };
 
-            if (
-                !snapshot.exists()
-            ) {
-
-                console.log(
-                    "No history data found."
-                );
+}
 
 
-                displayHistory(
-                    []
-                );
+/* =========================================================
+   MESSAGE
+========================================================= */
 
-                return;
+function showMessage(
+    message,
+    type = "info"
+) {
+
+    document
+        .querySelectorAll(
+            ".history-js-alert"
+        )
+        .forEach(
+            el => {
+
+                el.remove();
 
             }
+        );
 
 
-            const rawData =
-                snapshot.val();
+    const alert =
+        document.createElement(
+            "div"
+        );
 
 
-            const history =
-                Object.entries(
-                    rawData || {}
-                )
-                .map(
-                    ([key, value]) => {
-
-                        return {
-
-                            ...(value || {}),
-
-                            _firebaseKey:
-                                key
-
-                        };
-
-                    }
-                );
+    alert.className =
+        `alert alert-${type} history-js-alert position-fixed shadow`;
 
 
-            console.log(
-                "HISTORY COUNT:",
-                history.length
-            );
+    alert.style.top =
+        "20px";
 
 
-            displayHistory(
-                history
-            );
-
-        },
-
-        error => {
-
-            console.error(
-                "FIREBASE HISTORY ERROR:",
-                error
-            );
+    alert.style.left =
+        "50%";
 
 
-            showError(
-                "Failed to load history: " +
-                (
-                    error?.message ||
-                    "Firebase error"
-                )
-            );
+    alert.style.transform =
+        "translateX(-50%)";
 
-        }
 
+    alert.style.zIndex =
+        "99999";
+
+
+    alert.style.minWidth =
+        "280px";
+
+
+    alert.style.maxWidth =
+        "90%";
+
+
+    alert.style.textAlign =
+        "center";
+
+
+    alert.innerHTML =
+        escapeHTML(
+            message
+        );
+
+
+    document.body.appendChild(
+        alert
     );
 
-}
 
-
-/* =========================================================
-   SEARCH INITIALIZE
-========================================================= */
-
-function initializeSearch() {
-
-    if (!searchHistory) {
-
-        return;
-
-    }
-
-
-    searchHistory.addEventListener(
-        "input",
-        applySearch
-    );
-
-}
-
-
-/* =========================================================
-   REFRESH
-========================================================= */
-
-function initializeRefresh() {
-
-    if (!refreshBtn) {
-
-        return;
-
-    }
-
-
-    refreshBtn.addEventListener(
-        "click",
+    setTimeout(
         () => {
 
-            location.reload();
+            if (alert) {
+
+                alert.remove();
+
+            }
+
+        },
+        3500
+    );
+
+}
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        /*
+           CTRL + R
+        */
+
+        if (
+            event.ctrlKey &&
+            event.key.toLowerCase() ===
+            "r"
+        ) {
+
+            event.preventDefault();
+
+            loadHistoryOnce();
 
         }
-    );
-
-}
 
 
-/* =========================================================
-   MAIN INITIALIZE
-========================================================= */
+        /*
+           ESC = CLEAR SEARCH
+        */
 
-function initializeHistory() {
+        if (
+            event.key ===
+            "Escape"
+        ) {
 
-    console.log(
-        "========================================"
-    );
+            currentSearch =
+                "";
 
-    console.log(
-        "MR CO-ORDINATION HISTORY"
-    );
-
-    console.log(
-        "HISTORY.JS V15.1 FINAL"
-    );
-
-    console.log(
-        "========================================"
-    );
+            const searchBox =
+                document.getElementById(
+                    "historySearch"
+                ) ||
+                document.getElementById(
+                    "searchBox"
+                );
 
 
-    initializeElements();
+            if (searchBox) {
+
+                searchBox.value =
+                    "";
+
+            }
 
 
-    if (!historyBody) {
+            renderHistory();
 
-        console.error(
-            "ERROR: #historyBody is missing from history.html"
-        );
-
-        return;
+        }
 
     }
-
-
-    initializeSearch();
-
-    initializeRefresh();
-
-    loadHistory();
-
-}
+);
 
 
 /* =========================================================
-   DOM READY
-========================================================= */
-
-if (
-    document.readyState ===
-    "loading"
-) {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        initializeHistory
-    );
-
-}
-else {
-
-    initializeHistory();
-
-}
-
-
-/* =========================================================
-   DEBUG
+   GLOBAL DEBUG
 ========================================================= */
 
 window.MRHistory = {
 
-    reload:
-        () => {
+    getHistory:
+        () =>
+            historyData,
 
-            loadHistory();
+    refresh:
+        () =>
+            loadHistoryOnce(),
+
+    search:
+        keyword => {
+
+            currentSearch =
+                clean(
+                    keyword
+                );
+
+            renderHistory();
+
+        },
+
+    filter:
+        action => {
+
+            currentAction =
+                clean(
+                    action
+                ) ||
+                "ALL";
+
+            renderHistory();
 
         },
 
     version:
-        "15.1 FINAL"
+        HISTORY_VERSION
 
 };
 
 
+/* =========================================================
+   READY LOG
+========================================================= */
+
 console.log(
-    "HISTORY.JS V15.1 FINAL LOADED"
+    "========================================"
+);
+
+console.log(
+    "MR CO-ORDINATION HISTORY"
+);
+
+console.log(
+    "HISTORY.JS VERSION 16.0 FINAL"
+);
+
+console.log(
+    "========================================"
+);
+
+console.log(
+    "REALTIME HISTORY     : READY"
+);
+
+console.log(
+    "SAVE                 : READY"
+);
+
+console.log(
+    "UPDATE               : READY"
+);
+
+console.log(
+    "DELETE               : READY"
+);
+
+console.log(
+    "MOVE                 : READY"
+);
+
+console.log(
+    "SWAP                 : READY"
+);
+
+console.log(
+    "PULL OUT             : READY"
+);
+
+console.log(
+    "RETURN               : READY"
+);
+
+console.log(
+    "MOVEMENT FROM/TO     : READY"
+);
+
+console.log(
+    "SEARCH               : READY"
+);
+
+console.log(
+    "ACTION FILTER        : READY"
+);
+
+console.log(
+    "CSV EXPORT           : READY"
+);
+
+console.log(
+    "PRINT                : READY"
+);
+
+console.log(
+    "========================================"
 );
