@@ -1479,26 +1479,20 @@ function openPulledOutCoach(
 
 /* =========================================================
    RETURN TO BOARD
-   ---------------------------------------------------------
+   VERSION 15.2 FIX
+
    FLOW:
    1. Open pulled-out coach
-   2. Press RETURN
+   2. Press RETURN TO BOARD
    3. RETURN MODE ON
-   4. Click ANY EMPTY BOARD CELL
-   5. Target cell opens modal
-   6. Press RETURN again
-   7. Coach goes to selected empty cell
+   4. Tap ANY EMPTY BOARD CELL
+   5. Coach automatically returns there
 ========================================================= */
 
 async function returnPulledOutCoach() {
 
     if (!requireAdmin())
         return;
-
-
-    /*
-       No pulled-out coach
-    */
 
     if (!selectedPulledOutCoach) {
 
@@ -1512,243 +1506,65 @@ async function returnPulledOutCoach() {
 
 
     /*
-       FIRST RETURN CLICK
+       FIRST RETURN BUTTON CLICK
+       -------------------------
+       Activate target selection.
     */
 
     if (!returnMode) {
 
-        returnMode =
-            true;
-
-        /*
-           Clear previous target.
-        */
+        returnMode = true;
 
         selectedLine = "";
-
         selectedPosition = "";
 
-        showMessage(
-            "RETURN MODE ON — Click ANY EMPTY BOARD CELL.",
-            "info"
-        );
+        /*
+           Close current coach modal.
+        */
 
         closeModal();
+
+        /*
+           Highlight every empty board cell.
+        */
 
         highlightEmptyCells();
 
+        showMessage(
+            `Coach ${selectedPulledOutCoach.coachNo || ""}: tap ANY EMPTY BOARD CELL.`,
+            "info"
+        );
+
         return;
     }
 
 
     /*
-       SECOND RETURN CLICK
+       SECOND CALL IS ONLY A SAFETY FALLBACK.
+       Normally the cell click directly performs
+       the return.
     */
 
     if (
-        !selectedLine ||
-        !selectedPosition
+        selectedLine &&
+        selectedPosition
     ) {
 
-        showMessage(
-            "Please click ANY EMPTY BOARD CELL first.",
-            "warning"
-        );
-
-        return;
-    }
-
-
-    /*
-       Verify target is empty.
-    */
-
-    const targetCoach =
-        boardData?.[
-            selectedLine
-        ]?.[
-            selectedPosition
-        ];
-
-
-    if (targetCoach) {
-
-        showMessage(
-            "Selected cell is occupied. Please select another EMPTY cell.",
-            "warning"
-        );
-
-        return;
-    }
-
-
-    const coach =
-        selectedPulledOutCoach;
-
-
-    const pulledKey =
-        selectedPulledOutKey;
-
-
-    if (!pulledKey) {
-
-        showMessage(
-            "Pulled-out coach ID is missing.",
-            "danger"
-        );
-
-        return;
-    }
-
-
-    const newLine =
-        clean(
-            selectedLine
-        );
-
-
-    const newPosition =
-        clean(
+        await executeReturnToBoard(
+            selectedLine,
             selectedPosition
         );
 
-
-    const now =
-        new Date().toISOString();
-
-
-    const returnedCoach = {
-
-        ...coach,
-
-        shop:
-            getShopFromLine(
-                newLine
-            ),
-
-        line:
-            newLine,
-
-        position:
-            newPosition,
-
-        originalShop:
-            coach.originalShop ||
-            getShopFromLine(
-                coach.originalLine
-            ),
-
-        originalLine:
-            coach.originalLine ||
-            "",
-
-        originalPosition:
-            coach.originalPosition ||
-            "",
-
-        returnedAt:
-            now,
-
-        updatedAt:
-            now
-
-    };
-
-
-    const targetPath =
-        `${BOARD_PATH}/${newLine}/${newPosition}`;
-
-
-    const pulledPath =
-        `${PULLED_OUT_PATH}/${pulledKey}`;
-
-
-    try {
-
-        /*
-           FINAL ATOMIC RETURN
-        */
-
-        const updates = {};
-
-
-        updates[targetPath] =
-            returnedCoach;
-
-
-        updates[pulledPath] =
-            null;
-
-
-        await update(
-            ref(database),
-            updates
-        );
-
-
-        /*
-           HISTORY
-        */
-
-        await writeLocalHistory(
-            "RETURN_TO_BOARD",
-            returnedCoach
-        );
-
-
-        showMessage(
-            `Coach ${coach.coachNo} returned to ${newLine} / ${newPosition}.`,
-            "success"
-        );
-
-
-        /*
-           RESET RETURN STATE
-        */
-
-        returnMode =
-            false;
-
-        selectedLine =
-            "";
-
-        selectedPosition =
-            "";
-
-        selectedPulledOutKey =
-            "";
-
-        selectedPulledOutCoach =
-            null;
-
-        editingMode =
-            false;
-
-
-        removeEmptyCellHighlight();
-
-
-        closeModal();
-
+        return;
     }
-    catch (error) {
 
-        console.error(
-            "RETURN ERROR:",
-            error
-        );
 
-        showMessage(
-            error?.message ||
-            "Return to board failed.",
-            "danger"
-        );
-
-    }
+    showMessage(
+        "Please tap an EMPTY BOARD CELL.",
+        "warning"
+    );
 
 }
-
-
 /* =========================================================
    BOARD LISTENER
 ========================================================= */
