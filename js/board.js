@@ -2387,11 +2387,15 @@ function initializeBoardCells() {
 
 /* =========================================================
    RETURN CELL CLICK
+   VERSION 15.2 FIX
    ---------------------------------------------------------
    ANY EMPTY CELL
+   ---------------------------------------------------------
+   Tapping an empty cell immediately returns the
+   selected pulled-out coach to that cell.
 ========================================================= */
 
-function handleReturnCellClick(
+async function handleReturnCellClick(
     cell,
     line,
     position
@@ -2412,6 +2416,29 @@ function handleReturnCellClick(
     }
 
 
+    line =
+        clean(line);
+
+    position =
+        clean(position);
+
+
+    if (!line || !position) {
+
+        showMessage(
+            "Invalid board cell.",
+            "danger"
+        );
+
+        return;
+    }
+
+
+    /*
+       Check target from CURRENT realtime
+       boardData.
+    */
+
     const targetCoach =
         boardData?.[
             line
@@ -2421,13 +2448,13 @@ function handleReturnCellClick(
 
 
     /*
-       Target MUST be empty.
+       TARGET MUST BE EMPTY
     */
 
     if (targetCoach) {
 
         showMessage(
-            `${line} / ${position} is occupied. Please select an EMPTY cell.`,
+            `${line} / ${position} is occupied. Please tap another EMPTY cell.`,
             "warning"
         );
 
@@ -2436,125 +2463,56 @@ function handleReturnCellClick(
 
 
     /*
-       SAVE NEW TARGET
+       Visual confirmation.
     */
 
-    selectedLine =
-        clean(line);
+    document
+        .querySelectorAll(
+            ".return-selected"
+        )
+        .forEach(
+            item => {
 
-    selectedPosition =
-        clean(position);
+                item.classList.remove(
+                    "return-selected"
+                );
 
+            }
+        );
 
-    console.log(
-        "RETURN TARGET:",
-        selectedLine,
-        selectedPosition
-    );
-
-
-    /*
-       Update modal with NEW target.
-    */
-
-    const el =
-        getModalElements();
-
-
-    if (el.shop) {
-
-        el.shop.value =
-            getShopFromLine(
-                selectedLine
-            );
-
-    }
-
-
-    if (el.line) {
-
-        el.line.value =
-            selectedLine;
-
-    }
-
-
-    if (el.position) {
-
-        el.position.value =
-            selectedPosition;
-
-    }
-
-
-    if (el.coachNo) {
-
-        el.coachNo.value =
-            selectedPulledOutCoach.coachNo ||
-            "";
-
-    }
-
-
-    if (el.coachType) {
-
-        el.coachType.value =
-            selectedPulledOutCoach.coachType ||
-            "";
-
-    }
-
-
-    if (el.status) {
-
-        el.status.value =
-            selectedPulledOutCoach.status ||
-            "";
-
-    }
-
-
-    /*
-       Keep return mode ON.
-    */
-
-    returnMode =
-        true;
-
-
-    editingMode =
-        false;
-
-
-    removeEmptyCellHighlight();
-
-
-    /*
-       Highlight selected target.
-    */
 
     cell.classList.add(
         "return-selected"
     );
 
 
-    updateEditButtons();
+    selectedLine =
+        line;
+
+    selectedPosition =
+        position;
 
 
-    showMessage(
-        `RETURN TARGET SELECTED: ${selectedLine} / ${selectedPosition}`,
-        "info"
+    console.log(
+        "RETURN TARGET SELECTED:",
+        line,
+        position
     );
 
 
     /*
-       Open modal.
+       IMPORTANT:
+       Do NOT open the modal again.
+
+       Return immediately to selected cell.
     */
 
-    showModal();
+    await executeReturnToBoard(
+        line,
+        position
+    );
 
 }
-
 
 /* =========================================================
    HIGHLIGHT EMPTY CELLS
