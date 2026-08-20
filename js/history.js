@@ -1,25 +1,42 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    HISTORY.JS
-   VERSION 1.0 FIXED
-
-   FIX:
-   ✔ Invalid Date fixed
-   ✔ Firebase time: Date.now()
-   ✔ Old date + time format supported
-   ✔ timestamp supported
-   ✔ createdAt supported
-   ✔ Search Coach Number
-   ✔ Newest History First
-   ✔ Safe HTML output
+   VERSION 15.1 FINAL
+   ---------------------------------------------------------
+   MATCHED WITH:
+   ---------------------------------------------------------
+   board.js V15.1 FINAL
+   firebase-config.js V12
+   Firebase Realtime Database
+   ---------------------------------------------------------
+   FEATURES
+   ✔ REALTIME HISTORY
+   ✔ ISO TIME SUPPORTED
+   ✔ Date.now() SUPPORTED
+   ✔ timestamp SUPPORTED
+   ✔ createdAt SUPPORTED
+   ✔ OLD DATE + TIME SUPPORTED
+   ✔ NEWEST FIRST
+   ✔ SEARCH
+   ✔ COACH NUMBER SEARCH
+   ✔ SHOP SEARCH
+   ✔ LINE SEARCH
+   ✔ POSITION SEARCH
+   ✔ SAFE HTML
+   ✔ DOM READY SAFE
+   ✔ FIREBASE ERROR HANDLING
+   ✔ REFRESH
 ========================================================= */
 
 
 /* =========================================================
-   FIREBASE IMPORT
+   FIREBASE
 ========================================================= */
 
-import { database } from "./firebase-config.js";
+import {
+    database
+} from "./firebase-config.js";
+
 
 import {
     ref,
@@ -27,20 +44,55 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
-
 /* =========================================================
-   ELEMENTS
+   GLOBAL DOM
 ========================================================= */
 
-const historyBody =
-    document.getElementById("historyBody");
+let historyBody = null;
 
-const searchHistory =
-    document.getElementById("searchHistory");
+let searchHistory = null;
 
-const refreshBtn =
-    document.getElementById("refreshBtn");
+let refreshBtn = null;
 
+
+/* =========================================================
+   DOM ELEMENTS
+========================================================= */
+
+function initializeElements() {
+
+    historyBody =
+        document.getElementById(
+            "historyBody"
+        );
+
+    searchHistory =
+        document.getElementById(
+            "searchHistory"
+        );
+
+    refreshBtn =
+        document.getElementById(
+            "refreshBtn"
+        );
+
+
+    console.log(
+        "HISTORY BODY:",
+        historyBody
+    );
+
+    console.log(
+        "HISTORY SEARCH:",
+        searchHistory
+    );
+
+    console.log(
+        "HISTORY REFRESH:",
+        refreshBtn
+    );
+
+}
 
 
 /* =========================================================
@@ -53,58 +105,272 @@ function escapeHTML(value) {
         value === null ||
         value === undefined
     ) {
+
         return "";
+
     }
 
+
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
-
 /* =========================================================
-   PARSE OLD DATE + TIME
-   Example:
-
-   date = 15/8/2026
-   time = 3:14:12 PM
-
+   DATE PARSER
 ========================================================= */
 
-function parseOldDateTime(dateString, timeString) {
+function parseDateValue(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return null;
+
+    }
+
+
+    /* =====================================================
+       NUMBER
+    ===================================================== */
+
+    if (
+        typeof value === "number"
+    ) {
+
+        if (
+            value <= 0
+        ) {
+
+            return null;
+
+        }
+
+
+        const date =
+            new Date(value);
+
+
+        if (
+            isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        return date;
+
+    }
+
+
+    /* =====================================================
+       OBJECT
+    ===================================================== */
+
+    if (
+        typeof value === "object"
+    ) {
+
+        /* Firebase Timestamp */
+
+        if (
+            typeof value.toDate ===
+            "function"
+        ) {
+
+            try {
+
+                const date =
+                    value.toDate();
+
+
+                if (
+                    date &&
+                    !isNaN(
+                        date.getTime()
+                    )
+                ) {
+
+                    return date;
+
+                }
+
+            }
+            catch (error) {
+
+                console.warn(
+                    "Timestamp parse error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* =====================================================
+       STRING
+    ===================================================== */
+
+    const text =
+        String(value).trim();
+
+
+    if (!text) {
+
+        return null;
+
+    }
+
+
+    /* =====================================================
+       NUMERIC STRING
+    ===================================================== */
+
+    if (
+        /^\d+$/.test(text)
+    ) {
+
+        const number =
+            Number(text);
+
+
+        if (
+            number > 0
+        ) {
+
+            const date =
+                new Date(number);
+
+
+            if (
+                !isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return date;
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ISO STRING
+       Example:
+       2026-08-20T19:50:53.000Z
+    ===================================================== */
+
+    const date =
+        new Date(text);
+
+
+    if (
+        !isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return date;
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   OLD DATE + TIME
+========================================================= */
+
+function parseOldDateTime(
+    dateString,
+    timeString
+) {
 
     if (
         !dateString ||
         !timeString
     ) {
+
         return null;
+
     }
 
 
     const dateMatch =
-        String(dateString).trim().match(
-            /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/
-        );
+        String(dateString)
+            .trim()
+            .match(
+                /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/
+            );
 
 
     if (!dateMatch) {
+
         return null;
+
     }
 
 
     const day =
-        Number(dateMatch[1]);
+        Number(
+            dateMatch[1]
+        );
+
 
     const month =
-        Number(dateMatch[2]) - 1;
+        Number(
+            dateMatch[2]
+        ) - 1;
+
 
     const year =
-        Number(dateMatch[3]);
+        Number(
+            dateMatch[3]
+        );
 
 
     const timeMatch =
@@ -116,18 +382,29 @@ function parseOldDateTime(dateString, timeString) {
 
 
     if (!timeMatch) {
+
         return null;
+
     }
 
 
     let hours =
-        Number(timeMatch[1]);
+        Number(
+            timeMatch[1]
+        );
+
 
     const minutes =
-        Number(timeMatch[2]);
+        Number(
+            timeMatch[2]
+        );
+
 
     const seconds =
-        Number(timeMatch[3] || 0);
+        Number(
+            timeMatch[3] || 0
+        );
+
 
     const ampm =
         timeMatch[4];
@@ -135,19 +412,27 @@ function parseOldDateTime(dateString, timeString) {
 
     if (ampm) {
 
+        const upper =
+            ampm.toUpperCase();
+
+
         if (
-            ampm.toUpperCase() === "PM" &&
+            upper === "PM" &&
             hours < 12
         ) {
+
             hours += 12;
+
         }
 
 
         if (
-            ampm.toUpperCase() === "AM" &&
+            upper === "AM" &&
             hours === 12
         ) {
+
             hours = 0;
+
         }
 
     }
@@ -165,9 +450,13 @@ function parseOldDateTime(dateString, timeString) {
 
 
     if (
-        isNaN(result.getTime())
+        isNaN(
+            result.getTime()
+        )
     ) {
+
         return null;
+
     }
 
 
@@ -176,176 +465,141 @@ function parseOldDateTime(dateString, timeString) {
 }
 
 
-
 /* =========================================================
    GET HISTORY DATE
 ========================================================= */
 
 function getHistoryDate(item) {
 
-    let date = null;
-
-
-    /* -----------------------------------------------------
-       1. time = Firebase Timestamp object
-    ----------------------------------------------------- */
-
-    if (
-        item.time &&
-        typeof item.time === "object" &&
-        typeof item.time.toDate === "function"
-    ) {
-
-        date =
-            item.time.toDate();
-
-    }
-
-
-    /* -----------------------------------------------------
-       2. time = milliseconds
-    ----------------------------------------------------- */
-
-    else if (
-        typeof item.time === "number" &&
-        item.time > 0
-    ) {
-
-        date =
-            new Date(item.time);
-
-    }
-
-
-    /* -----------------------------------------------------
-       3. time = numeric string
-    ----------------------------------------------------- */
-
-    else if (
-        typeof item.time === "string" &&
-        /^\d+$/.test(item.time.trim())
-    ) {
-
-        date =
-            new Date(
-                Number(item.time)
-            );
-
-    }
-
-
-    /* -----------------------------------------------------
-       4. timestamp = milliseconds
-    ----------------------------------------------------- */
-
-    else if (
-        typeof item.timestamp === "number" &&
-        item.timestamp > 0
-    ) {
-
-        date =
-            new Date(item.timestamp);
-
-    }
-
-
-    /* -----------------------------------------------------
-       5. timestamp = numeric string
-    ----------------------------------------------------- */
-
-    else if (
-        typeof item.timestamp === "string" &&
-        /^\d+$/.test(item.timestamp.trim())
-    ) {
-
-        date =
-            new Date(
-                Number(item.timestamp)
-            );
-
-    }
-
-
-    /* -----------------------------------------------------
-       6. OLD SYSTEM
-       date + time
-    ----------------------------------------------------- */
-
-    if (
-        !date &&
-        item.date &&
-        item.time &&
-        typeof item.time === "string"
-    ) {
-
-        date =
-            parseOldDateTime(
-                item.date,
-                item.time
-            );
-
-    }
-
-
-    /* -----------------------------------------------------
-       7. createdAt
-    ----------------------------------------------------- */
-
-    if (
-        !date &&
-        item.createdAt
-    ) {
-
-        if (
-            typeof item.createdAt === "number"
-        ) {
-
-            date =
-                new Date(
-                    item.createdAt
-                );
-
-        }
-        else {
-
-            const parsed =
-                new Date(
-                    item.createdAt
-                );
-
-            if (
-                !isNaN(
-                    parsed.getTime()
-                )
-            ) {
-
-                date = parsed;
-
-            }
-
-        }
-
-    }
-
-
-    /* -----------------------------------------------------
-       8. FINAL CHECK
-    ----------------------------------------------------- */
-
-    if (
-        !date ||
-        isNaN(date.getTime())
-    ) {
+    if (!item) {
 
         return null;
 
     }
 
 
-    return date;
+    /* =====================================================
+       1. TIME
+       IMPORTANT:
+       board.js V15.1 writes ISO string here.
+    ===================================================== */
+
+    if (
+        item.time !== undefined &&
+        item.time !== null
+    ) {
+
+        const date =
+            parseDateValue(
+                item.time
+            );
+
+
+        if (date) {
+
+            return date;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       2. TIMESTAMP
+    ===================================================== */
+
+    if (
+        item.timestamp !== undefined
+    ) {
+
+        const date =
+            parseDateValue(
+                item.timestamp
+            );
+
+
+        if (date) {
+
+            return date;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       3. CREATED AT
+    ===================================================== */
+
+    if (
+        item.createdAt !== undefined
+    ) {
+
+        const date =
+            parseDateValue(
+                item.createdAt
+            );
+
+
+        if (date) {
+
+            return date;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       4. OLD DATE + TIME
+    ===================================================== */
+
+    if (
+        item.date &&
+        item.time &&
+        typeof item.time === "string"
+    ) {
+
+        const date =
+            parseOldDateTime(
+                item.date,
+                item.time
+            );
+
+
+        if (date) {
+
+            return date;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       5. DATE ONLY
+    ===================================================== */
+
+    if (item.date) {
+
+        const date =
+            parseDateValue(
+                item.date
+            );
+
+
+        if (date) {
+
+            return date;
+
+        }
+
+    }
+
+
+    return null;
 
 }
-
 
 
 /* =========================================================
@@ -365,25 +619,52 @@ function formatHistoryDate(item) {
     }
 
 
-    return date.toLocaleString(
-        "en-IN",
-        {
-            day: "numeric",
-            month: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true
-        }
-    );
+    try {
+
+        return date.toLocaleString(
+            "en-IN",
+            {
+                day:
+                    "2-digit",
+
+                month:
+                    "2-digit",
+
+                year:
+                    "numeric",
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit",
+
+                hour12:
+                    true
+
+            }
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "DATE FORMAT ERROR:",
+            error
+        );
+
+        return "—";
+
+    }
 
 }
 
 
-
 /* =========================================================
-   GET SORT TIME
+   SORT TIME
 ========================================================= */
 
 function getSortTime(item) {
@@ -393,7 +674,9 @@ function getSortTime(item) {
 
 
     if (!date) {
+
         return 0;
+
     }
 
 
@@ -402,64 +685,107 @@ function getSortTime(item) {
 }
 
 
-
 /* =========================================================
    SEARCH
 ========================================================= */
 
 function applySearch() {
 
-    if (!searchHistory) {
+    if (!historyBody) {
+
         return;
+
     }
 
 
-    const value =
-        searchHistory.value
-            .trim()
-            .toUpperCase();
+    const keyword =
+        searchHistory
+            ? searchHistory.value
+                .trim()
+                .toUpperCase()
+            : "";
 
 
     const rows =
-        document.querySelectorAll(
-            "#historyBody tr"
+        historyBody.querySelectorAll(
+            "tr"
         );
 
 
-    rows.forEach(row => {
+    rows.forEach(
+        row => {
 
-        const text =
-            row.innerText.toUpperCase();
+            const text =
+                String(
+                    row.innerText || ""
+                )
+                .toUpperCase();
 
 
-        row.style.display =
-            text.includes(value)
-                ? ""
-                : "none";
+            if (
+                text.includes(
+                    keyword
+                )
+            ) {
 
-    });
+                row.style.display =
+                    "";
+
+            }
+            else {
+
+                row.style.display =
+                    "none";
+
+            }
+
+        }
+    );
 
 }
-
 
 
 /* =========================================================
    DISPLAY HISTORY
 ========================================================= */
 
-function displayHistory(data) {
+function displayHistory(
+    data
+) {
 
-    historyBody.innerHTML = "";
+    if (!historyBody) {
+
+        console.error(
+            "historyBody not found."
+        );
+
+        return;
+
+    }
 
 
-    if (!data || data.length === 0) {
+    historyBody.innerHTML =
+        "";
+
+
+    if (
+        !Array.isArray(data) ||
+        data.length === 0
+    ) {
 
         historyBody.innerHTML = `
+
             <tr>
-                <td colspan="9" class="text-center">
+
+                <td
+                    colspan="9"
+                    class="text-center text-muted"
+                >
                     No History Found
                 </td>
+
             </tr>
+
         `;
 
         return;
@@ -467,9 +793,9 @@ function displayHistory(data) {
     }
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        NEWEST FIRST
-    ----------------------------------------------------- */
+    ===================================================== */
 
     data.sort(
         (a, b) =>
@@ -478,78 +804,136 @@ function displayHistory(data) {
     );
 
 
-    /* -----------------------------------------------------
-       CREATE ROW
-    ----------------------------------------------------- */
+    /* =====================================================
+       ROWS
+    ===================================================== */
 
-    data.forEach(item => {
+    data.forEach(
+        item => {
 
-        const row =
-            document.createElement("tr");
+            if (
+                !item ||
+                typeof item !== "object"
+            ) {
 
+                return;
 
-        row.innerHTML = `
-
-            <td>
-                ${escapeHTML(
-                    formatHistoryDate(item)
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.shop || ""
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.line || ""
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.position || ""
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.coachNo || ""
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.coachType || ""
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.status || ""
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.user || "Admin"
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    item.action || ""
-                )}
-            </td>
-
-        `;
+            }
 
 
-        historyBody.appendChild(row);
+            const row =
+                document.createElement(
+                    "tr"
+                );
 
-    });
+
+            const action =
+                item.action ||
+                "";
+
+
+            const user =
+                item.user ||
+                "Admin";
+
+
+            const coachNo =
+                item.coachNo ||
+                "";
+
+
+            const coachType =
+                item.coachType ||
+                "";
+
+
+            const status =
+                item.status ||
+                "";
+
+
+            const shop =
+                item.shop ||
+                "";
+
+
+            const line =
+                item.line ||
+                "";
+
+
+            const position =
+                item.position ||
+                "";
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHTML(
+                        formatHistoryDate(
+                            item
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        shop
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        line
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        position
+                    )}
+                </td>
+
+                <td class="fw-bold">
+                    ${escapeHTML(
+                        coachNo
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        coachType
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        status
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        user
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        action
+                    )}
+                </td>
+
+            `;
+
+
+            historyBody.appendChild(
+                row
+            );
+
+        }
+    );
 
 
     applySearch();
@@ -557,61 +941,206 @@ function displayHistory(data) {
 }
 
 
-
 /* =========================================================
-   FIREBASE HISTORY LISTENER
+   LOADING
 ========================================================= */
 
-onValue(
-    ref(database, "history"),
-    (snapshot) => {
+function showLoading() {
 
-        if (!snapshot.exists()) {
+    if (!historyBody) {
 
-            displayHistory([]);
+        return;
 
-            return;
-
-        }
+    }
 
 
-        const rawData =
-            snapshot.val();
+    historyBody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="9"
+                class="text-center"
+            >
+                Loading History...
+            </td>
+
+        </tr>
+
+    `;
+
+}
 
 
-        const history =
-            Object.values(rawData);
+/* =========================================================
+   ERROR
+========================================================= */
+
+function showError(
+    message
+) {
+
+    if (!historyBody) {
+
+        return;
+
+    }
 
 
-        displayHistory(history);
+    historyBody.innerHTML = `
 
-    },
-    (error) => {
+        <tr>
+
+            <td
+                colspan="9"
+                class="text-center text-danger fw-bold"
+            >
+                ${escapeHTML(
+                    message
+                )}
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+/* =========================================================
+   FIREBASE LISTENER
+========================================================= */
+
+function loadHistory() {
+
+    if (!historyBody) {
 
         console.error(
-            "History Firebase Error:",
-            error
+            "Cannot load history."
+        );
+
+        return;
+
+    }
+
+
+    showLoading();
+
+
+    const historyRef =
+        ref(
+            database,
+            "history"
         );
 
 
-        historyBody.innerHTML = `
-            <tr>
-                <td colspan="9" class="text-center text-danger">
-                    Failed to load history
-                </td>
-            </tr>
-        `;
+    console.log(
+        "Listening Firebase path:",
+        "history"
+    );
 
-    }
-);
 
+    onValue(
+
+        historyRef,
+
+        snapshot => {
+
+            console.log(
+                "HISTORY SNAPSHOT:",
+                snapshot.val()
+            );
+
+
+            if (
+                !snapshot.exists()
+            ) {
+
+                console.log(
+                    "No history data found."
+                );
+
+
+                displayHistory(
+                    []
+                );
+
+                return;
+
+            }
+
+
+            const rawData =
+                snapshot.val();
+
+
+            const history =
+                Object.entries(
+                    rawData || {}
+                )
+                .map(
+                    ([key, value]) => {
+
+                        return {
+
+                            ...(value || {}),
+
+                            _firebaseKey:
+                                key
+
+                        };
+
+                    }
+                );
+
+
+            console.log(
+                "HISTORY COUNT:",
+                history.length
+            );
+
+
+            displayHistory(
+                history
+            );
+
+        },
+
+        error => {
+
+            console.error(
+                "FIREBASE HISTORY ERROR:",
+                error
+            );
+
+
+            showError(
+                "Failed to load history: " +
+                (
+                    error?.message ||
+                    "Firebase error"
+                )
+            );
+
+        }
+
+    );
+
+}
 
 
 /* =========================================================
-   SEARCH EVENT
+   SEARCH INITIALIZE
 ========================================================= */
 
-if (searchHistory) {
+function initializeSearch() {
+
+    if (!searchHistory) {
+
+        return;
+
+    }
+
 
     searchHistory.addEventListener(
         "input",
@@ -621,12 +1150,18 @@ if (searchHistory) {
 }
 
 
-
 /* =========================================================
-   REFRESH BUTTON
+   REFRESH
 ========================================================= */
 
-if (refreshBtn) {
+function initializeRefresh() {
+
+    if (!refreshBtn) {
+
+        return;
+
+    }
+
 
     refreshBtn.addEventListener(
         "click",
@@ -638,3 +1173,95 @@ if (refreshBtn) {
     );
 
 }
+
+
+/* =========================================================
+   MAIN INITIALIZE
+========================================================= */
+
+function initializeHistory() {
+
+    console.log(
+        "========================================"
+    );
+
+    console.log(
+        "MR CO-ORDINATION HISTORY"
+    );
+
+    console.log(
+        "HISTORY.JS V15.1 FINAL"
+    );
+
+    console.log(
+        "========================================"
+    );
+
+
+    initializeElements();
+
+
+    if (!historyBody) {
+
+        console.error(
+            "ERROR: #historyBody is missing from history.html"
+        );
+
+        return;
+
+    }
+
+
+    initializeSearch();
+
+    initializeRefresh();
+
+    loadHistory();
+
+}
+
+
+/* =========================================================
+   DOM READY
+========================================================= */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeHistory
+    );
+
+}
+else {
+
+    initializeHistory();
+
+}
+
+
+/* =========================================================
+   DEBUG
+========================================================= */
+
+window.MRHistory = {
+
+    reload:
+        () => {
+
+            loadHistory();
+
+        },
+
+    version:
+        "15.1 FINAL"
+
+};
+
+
+console.log(
+    "HISTORY.JS V15.1 FINAL LOADED"
+);
