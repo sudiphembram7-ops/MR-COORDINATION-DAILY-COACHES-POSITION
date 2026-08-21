@@ -2085,115 +2085,70 @@ function applyStatusColour(
 }
 
 
-/* =========================================================
-   COUNTERS
-   ---------------------------------------------------------
-   TOTAL = FIXED CAPACITY 145
-   OCCUPIED = ACTUAL COACHES
-   FREE = 145 - OCCUPIED
-========================================================= */
-
 function updateCounters() {
 
-    let occupied =
-        0;
+    let totalCoach = 0;
+    let occupiedCoach = 0;
 
+    /*
+     * Count only actual coaches
+     * coachNo থাকলেই occupied
+     */
 
-    Object.keys(
-        boardData || {}
-    ).forEach(
-        line => {
+    Object.values(boardData || {}).forEach(lineData => {
 
-            const lineData =
-                boardData[line];
+        if (!lineData || typeof lineData !== "object") return;
 
+        Object.values(lineData).forEach(coach => {
 
-            if (
-                !lineData ||
-                typeof lineData !==
-                "object"
-            ) {
+            if (!coach || typeof coach !== "object") return;
 
-                return;
+            const coachNo = String(
+                coach.coachNo ?? ""
+            ).trim();
+
+            if (coachNo !== "") {
+                occupiedCoach++;
             }
 
+        });
 
-            Object.keys(
-                lineData
-            ).forEach(
-                position => {
+    });
 
-                    if (
-                        lineData[position]
-                    ) {
+    /*
+     * TOTAL COACH = actual occupied coaches
+     */
 
-                        occupied++;
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-
-    const total =
-        TOTAL_CAPACITY;
-
-
-    const free =
-        Math.max(
-            0,
-            total - occupied
-        );
-
+    totalCoach = occupiedCoach;
 
     const totalEl =
-        document.getElementById(
-            "totalCoach"
-        );
-
+        document.getElementById("totalCoach");
 
     const occupiedEl =
-        document.getElementById(
-            "occupiedCoach"
-        );
-
+        document.getElementById("occupiedCoach");
 
     const freeEl =
-        document.getElementById(
-            "freeCoach"
-        );
+        document.getElementById("freeCoach");
 
+    if (totalEl)
+        totalEl.textContent = totalCoach;
 
-    if (totalEl) {
+    if (occupiedEl)
+        occupiedEl.textContent = occupiedCoach;
 
-        totalEl.textContent =
-            total;
+    /*
+     * Free position should NOT be calculated
+     * as coach count.
+     * It is based on board capacity.
+     */
 
-    }
+    const capacity = 145;
 
+    const freeCoach =
+        Math.max(0, capacity - occupiedCoach);
 
-    if (occupiedEl) {
-
-        occupiedEl.textContent =
-            occupied;
-
-    }
-
-
-    if (freeEl) {
-
-        freeEl.textContent =
-            free;
-
-    }
-
-
-    console.log(
-        `COUNTERS → Total: ${total}, Occupied: ${occupied}, Free: ${free}`
-    );
+    if (freeEl)
+        freeEl.textContent = freeCoach;
 
 }
 
