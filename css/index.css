@@ -1,28 +1,37 @@
 /* =========================================================
-   MR COORDINATION DAILY COACHES POSITION
+   MR COACH COORDINATION DAILY COACHES POSITION
    INDEX.CSS
-   VERSION 1.0 FINAL
+   VERSION 2.0 FINAL
    ---------------------------------------------------------
-   RESPONSIVE
-   DESKTOP
-   TABLET
-   MOBILE
+   MATCHED WITH:
+   index.html
+   ---------------------------------------------------------
+   FEATURES
+   ✔ DESKTOP RESPONSIVE
+   ✔ TABLET RESPONSIVE
+   ✔ MOBILE RESPONSIVE
+   ✔ 5 MENU CARDS
+   ✔ STICKY NAVIGATION
+   ✔ MODERN RAILWAY UI
+   ✔ FOOTER BOTTOM
+   ✔ iPHONE / ANDROID
 ========================================================= */
 
 
 /* =========================================================
-   GLOBAL
+   GLOBAL RESET
 ========================================================= */
 
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 html {
     width: 100%;
     min-height: 100%;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -34,15 +43,15 @@ body {
         Helvetica,
         sans-serif;
 
+    color: #1f2937;
+
     background:
         linear-gradient(
             135deg,
             #eef4ff 0%,
-            #f8fbff 45%,
-            #eef7f1 100%
+            #f8fbff 50%,
+            #eef8f1 100%
         );
-
-    color: #1f2937;
 
     display: flex;
     flex-direction: column;
@@ -54,11 +63,17 @@ body {
 ========================================================= */
 
 .header {
+
     width: 100%;
 
-    padding: 24px 20px 22px;
+    padding:
+        25px
+        15px
+        22px;
 
     text-align: center;
+
+    color: #ffffff;
 
     background:
         linear-gradient(
@@ -68,57 +83,88 @@ body {
             #006400
         );
 
-    color: #ffffff;
-
     box-shadow:
-        0 4px 14px rgba(0, 0, 0, 0.18);
+        0 4px 15px
+        rgba(0, 0, 0, 0.20);
 
     position: relative;
+
     z-index: 10;
 }
 
+
+/* Indian Railways */
+
 .header h1 {
-    font-size: 28px;
+
+    margin-bottom: 7px;
+
+    font-size: 29px;
+
     font-weight: 800;
 
     letter-spacing: 1px;
 
-    margin-bottom: 7px;
+    line-height: 1.2;
 }
 
+
+/* Main title */
+
 .header h2 {
+
+    margin-bottom: 7px;
+
     font-size: 23px;
+
     font-weight: 700;
 
     letter-spacing: 0.5px;
 
-    margin-bottom: 6px;
+    line-height: 1.3;
 }
+
+
+/* Workshop */
 
 .header p {
-    font-size: 17px;
-    font-weight: 500;
-
-    opacity: 0.95;
 
     margin-bottom: 10px;
+
+    font-size: 17px;
+
+    font-weight: 500;
 }
 
+
+/* Date / Time */
+
 #dateTime {
+
     display: inline-block;
+
+    padding:
+        5px
+        14px;
 
     min-height: 22px;
 
-    font-size: 14px;
-    font-weight: 600;
+    color: #ffffff;
 
-    padding: 5px 13px;
+    background:
+        rgba(255, 255, 255, 0.15);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.30);
 
     border-radius: 20px;
 
-    background: rgba(255, 255, 255, 0.16);
+    font-size: 13px;
 
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-weight: 600;
+
+    backdrop-filter: blur(5px);
 }
 
 
@@ -127,134 +173,201 @@ body {
 ========================================================= */
 
 nav {
+
     width: 100%;
 
+    padding:
+        11px
+        15px;
+
     display: flex;
+
     justify-content: center;
+
     align-items: center;
 
     flex-wrap: wrap;
 
     gap: 8px;
 
-    padding: 12px 15px;
-
     background: #ffffff;
 
-    border-bottom: 1px solid #d9e2ec;
+    border-bottom:
+        1px solid
+        #dbe3ec;
 
     box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08);
+        0 2px 8px
+        rgba(0, 0, 0, 0.08);
 
     position: sticky;
+
     top: 0;
 
-    z-index: 20;
+    z-index: 100;
 }
 
-nav a {
-    display: inline-flex;
 
-    justify-content: center;
-    align-items: center;
+/* Navigation links */
+
+nav a {
 
     min-width: 115px;
 
-    padding: 9px 18px;
+    padding:
+        9px
+        17px;
+
+    display: inline-flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    color: #003b73;
+
+    background: #f1f5f9;
+
+    border:
+        1px solid
+        #d7e0e9;
 
     border-radius: 8px;
 
     text-decoration: none;
 
     font-size: 14px;
+
     font-weight: 700;
 
-    color: #003b73;
-
-    background: #f1f5f9;
-
-    border: 1px solid #d7e0ea;
-
     transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+        all 0.2s ease;
 }
 
+
+/* Hover */
+
 nav a:hover {
+
     color: #ffffff;
 
     background: #005baa;
 
-    transform: translateY(-1px);
+    border-color: #005baa;
+
+    transform:
+        translateY(-1px);
 
     box-shadow:
-        0 4px 10px rgba(0, 91, 170, 0.25);
+        0 4px 10px
+        rgba(0, 91, 170, 0.25);
 }
 
+
+/* Click */
+
 nav a:active {
-    transform: scale(0.97);
+
+    transform:
+        scale(0.97);
 }
 
 
 /* =========================================================
-   WELCOME SECTION
+   WELCOME
 ========================================================= */
 
 .welcome {
-    width: min(1100px, calc(100% - 30px));
 
-    margin: 28px auto 18px;
+    width:
+        min(
+            1100px,
+            calc(100% - 30px)
+        );
 
-    padding: 25px 20px;
+    margin:
+        28px auto
+        18px;
+
+    padding:
+        25px
+        20px;
 
     text-align: center;
 
     background: #ffffff;
 
+    border:
+        1px solid
+        #dce5ee;
+
     border-radius: 14px;
 
-    border: 1px solid #dce5ee;
-
     box-shadow:
-        0 5px 18px rgba(0, 0, 0, 0.08);
+        0 5px 18px
+        rgba(0, 0, 0, 0.08);
 }
 
+
+/* Welcome title */
+
 .welcome h2 {
+
+    margin-bottom: 8px;
+
     color: #003b73;
 
     font-size: 27px;
 
-    margin-bottom: 8px;
+    font-weight: 700;
 }
 
+
+/* Welcome text */
+
 .welcome p {
-    color: #475569;
+
+    color: #64748b;
 
     font-size: 16px;
 
     font-weight: 500;
+
+    line-height: 1.5;
 }
 
 
 /* =========================================================
-   MENU
+   MENU CONTAINER
 ========================================================= */
 
 .menu {
-    width: min(1100px, calc(100% - 30px));
 
-    margin: 0 auto;
+    width:
+        min(
+            1100px,
+            calc(100% - 30px)
+        );
 
-    padding: 8px 0 30px;
+    margin:
+        0 auto;
+
+    padding:
+        5px
+        0
+        35px;
 
     display: grid;
 
     grid-template-columns:
-        repeat(4, minmax(0, 1fr));
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
 
     gap: 18px;
+
+    align-items: stretch;
 }
 
 
@@ -263,20 +376,14 @@ nav a:active {
 ========================================================= */
 
 .card {
+
     min-width: 0;
 
-    padding: 24px 18px;
+    min-height: 190px;
 
-    text-align: center;
-
-    background: #ffffff;
-
-    border-radius: 14px;
-
-    border: 1px solid #dce5ee;
-
-    box-shadow:
-        0 5px 16px rgba(0, 0, 0, 0.08);
+    padding:
+        23px
+        16px;
 
     display: flex;
 
@@ -286,38 +393,80 @@ nav a:active {
 
     align-items: center;
 
-    min-height: 190px;
+    text-align: center;
 
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
+    background: #ffffff;
 
-.card:hover {
-    transform: translateY(-4px);
+    border:
+        1px solid
+        #dce5ee;
+
+    border-radius: 14px;
 
     box-shadow:
-        0 9px 24px rgba(0, 0, 0, 0.13);
+        0 5px 16px
+        rgba(0, 0, 0, 0.08);
+
+    transition:
+        transform 0.20s ease,
+        box-shadow 0.20s ease;
 }
 
+
+/* Card hover */
+
+.card:hover {
+
+    transform:
+        translateY(-4px);
+
+    box-shadow:
+        0 9px 24px
+        rgba(0, 0, 0, 0.14);
+}
+
+
+/* Card heading */
+
 .card h3 {
+
     width: 100%;
+
+    margin-bottom: 8px;
 
     color: #003b73;
 
     font-size: 20px;
 
-    margin-bottom: 10px;
+    font-weight: 700;
+
+    line-height: 1.3;
 }
 
+
+/* Card description */
+
 .card p {
+
+    margin-bottom: 18px;
+
     color: #64748b;
 
     font-size: 14px;
 
     line-height: 1.5;
+}
 
-    margin-bottom: 20px;
+
+/* =========================================================
+   CARD LINKS
+========================================================= */
+
+.card a {
+
+    text-decoration: none;
+
+    display: inline-block;
 }
 
 
@@ -326,17 +475,20 @@ nav a:active {
 ========================================================= */
 
 .card button {
+
     min-width: 110px;
 
-    padding: 10px 18px;
+    padding:
+        10px
+        18px;
 
     border: none;
 
     border-radius: 8px;
 
-    background: #005baa;
-
     color: #ffffff;
+
+    background: #005baa;
 
     font-size: 14px;
 
@@ -345,34 +497,40 @@ nav a:active {
     cursor: pointer;
 
     transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+        all 0.2s ease;
 }
+
+
+/* Button hover */
 
 .card button:hover {
+
     background: #003b73;
 
-    transform: translateY(-1px);
+    transform:
+        translateY(-1px);
 
     box-shadow:
-        0 4px 10px rgba(0, 59, 115, 0.25);
+        0 4px 10px
+        rgba(0, 59, 115, 0.25);
 }
+
+
+/* Button active */
 
 .card button:active {
-    transform: scale(0.96);
-}
 
-.card a {
-    text-decoration: none;
+    transform:
+        scale(0.96);
 }
 
 
 /* =========================================================
-   COMING SOON BUTTON
+   REPORTS / COMING SOON
 ========================================================= */
 
 .card button:disabled {
+
     background: #94a3b8;
 
     color: #ffffff;
@@ -380,6 +538,8 @@ nav a:active {
     cursor: not-allowed;
 
     box-shadow: none;
+
+    transform: none;
 }
 
 
@@ -388,23 +548,59 @@ nav a:active {
 ========================================================= */
 
 footer {
+
     width: 100%;
 
     margin-top: auto;
 
-    padding: 18px 15px;
+    padding:
+        17px
+        15px;
 
     text-align: center;
 
+    color: #ffffff;
+
     background: #003b73;
 
-    color: #ffffff;
+    border-top:
+        4px solid
+        #006400;
 
     font-size: 13px;
 
     line-height: 1.5;
+}
 
-    border-top: 4px solid #006400;
+
+/* =========================================================
+   LARGE DESKTOP
+========================================================= */
+
+@media (min-width: 1400px) {
+
+    .header h1 {
+        font-size: 32px;
+    }
+
+    .header h2 {
+        font-size: 26px;
+    }
+
+    .menu {
+
+        max-width: 1250px;
+
+        gap: 22px;
+    }
+
+    .card {
+
+        min-height: 205px;
+
+        padding: 27px 20px;
+    }
+
 }
 
 
@@ -412,19 +608,59 @@ footer {
    TABLET
 ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
+
+    .menu {
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0, 1fr)
+            );
+
+        gap: 15px;
+    }
+
+    .card {
+
+        min-height: 180px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .header {
+
+        padding:
+            21px
+            12px;
+    }
 
     .header h1 {
+
         font-size: 25px;
     }
 
     .header h2 {
+
         font-size: 20px;
     }
 
     .menu {
+
         grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 13px;
     }
 
 }
@@ -437,119 +673,165 @@ footer {
 @media (max-width: 600px) {
 
     body {
-        background: #f4f7fb;
+
+        background:
+            #f4f7fb;
     }
 
 
     /* HEADER */
 
     .header {
-        padding: 18px 12px 17px;
+
+        padding:
+            18px
+            10px
+            17px;
     }
 
     .header h1 {
+
         font-size: 20px;
 
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
     }
 
     .header h2 {
-        font-size: 16px;
+
+        font-size: 15px;
 
         line-height: 1.35;
     }
 
     .header p {
+
+        margin-bottom: 9px;
+
         font-size: 14px;
     }
 
     #dateTime {
-        font-size: 12px;
 
-        padding: 4px 10px;
+        padding:
+            4px
+            10px;
+
+        font-size: 11px;
     }
 
 
-    /* NAV */
+    /* NAVIGATION */
 
     nav {
-        padding: 9px 8px;
+
+        padding:
+            8px;
 
         gap: 6px;
     }
 
     nav a {
-        min-width: auto;
 
-        flex: 1 1 calc(50% - 6px);
+        min-width: 0;
 
-        padding: 8px 8px;
+        flex:
+            1 1
+            calc(50% - 6px);
+
+        padding:
+            8px
+            6px;
 
         font-size: 12px;
+
+        border-radius: 7px;
     }
 
 
     /* WELCOME */
 
     .welcome {
-        width: calc(100% - 20px);
 
-        margin: 18px auto 14px;
+        width:
+            calc(100% - 20px);
 
-        padding: 18px 12px;
+        margin:
+            18px auto
+            13px;
+
+        padding:
+            18px
+            12px;
 
         border-radius: 11px;
     }
 
     .welcome h2 {
+
         font-size: 22px;
     }
 
     .welcome p {
-        font-size: 14px;
+
+        font-size: 13px;
     }
 
 
     /* MENU */
 
     .menu {
-        width: calc(100% - 20px);
+
+        width:
+            calc(100% - 20px);
 
         grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
 
         gap: 10px;
 
-        padding-bottom: 20px;
+        padding-bottom: 22px;
     }
 
 
     /* CARD */
 
     .card {
+
         min-height: 160px;
 
-        padding: 17px 10px;
+        padding:
+            17px
+            9px;
 
         border-radius: 11px;
     }
 
     .card h3 {
+
         font-size: 16px;
 
         line-height: 1.3;
     }
 
     .card p {
-        font-size: 12px;
 
-        margin-bottom: 14px;
+        margin-bottom: 13px;
+
+        font-size: 11px;
+
+        line-height: 1.4;
     }
 
     .card button {
-        min-width: 90px;
 
-        padding: 8px 12px;
+        min-width: 85px;
+
+        padding:
+            8px
+            10px;
 
         font-size: 12px;
     }
@@ -558,7 +840,83 @@ footer {
     /* FOOTER */
 
     footer {
-        padding: 14px 10px;
+
+        padding:
+            13px
+            8px;
+
+        font-size: 10px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .header h1 {
+
+        font-size: 18px;
+    }
+
+    .header h2 {
+
+        font-size: 13px;
+    }
+
+    .header p {
+
+        font-size: 12px;
+    }
+
+    nav a {
+
+        font-size: 11px;
+
+        padding:
+            7px
+            4px;
+    }
+
+    .welcome h2 {
+
+        font-size: 20px;
+    }
+
+    .menu {
+
+        gap: 8px;
+    }
+
+    .card {
+
+        min-height: 150px;
+
+        padding:
+            14px
+            7px;
+    }
+
+    .card h3 {
+
+        font-size: 14px;
+    }
+
+    .card p {
+
+        font-size: 10px;
+    }
+
+    .card button {
+
+        min-width: 78px;
+
+        padding:
+            7px
+            8px;
 
         font-size: 11px;
     }
@@ -567,41 +925,32 @@ footer {
 
 
 /* =========================================================
-   VERY SMALL MOBILE
+   TOUCH DEVICE
 ========================================================= */
 
-@media (max-width: 380px) {
+@media (hover: none) {
 
-    .header h1 {
-        font-size: 18px;
+    .card:hover {
+
+        transform: none;
+
+        box-shadow:
+            0 5px 16px
+            rgba(0, 0, 0, 0.08);
     }
 
-    .header h2 {
-        font-size: 14px;
+    nav a:hover {
+
+        transform: none;
+
+        box-shadow: none;
     }
 
-    .menu {
-        gap: 8px;
-    }
+    .card button:hover {
 
-    .card {
-        min-height: 150px;
+        transform: none;
 
-        padding: 14px 8px;
-    }
-
-    .card h3 {
-        font-size: 14px;
-    }
-
-    .card p {
-        font-size: 11px;
-    }
-
-    .card button {
-        min-width: 82px;
-
-        font-size: 11px;
+        box-shadow: none;
     }
 
 }
