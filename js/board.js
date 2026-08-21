@@ -2085,73 +2085,191 @@ function applyStatusColour(
 }
 
 
+/* =========================================================
+   UPDATE COUNTERS
+   VERSION 15.3 FINAL FIX
+   ---------------------------------------------------------
+   TOTAL COACH  = 145 BOARD CAPACITY
+   OCCUPIED     = ACTUAL OCCUPIED BOARD CELLS
+   FREE         = 145 - OCCUPIED
+   ---------------------------------------------------------
+   IMPORTANT:
+   ✔ Count only real board cells
+   ✔ Ignore invalid Firebase records
+   ✔ Ignore pulled-out coaches
+   ✔ Ignore metadata/stale DB entries
+   ✔ Do not count coachNo from non-board objects
+========================================================= */
+
 function updateCounters() {
 
-    let totalCoach = 0;
+    const TOTAL_BOARD_CAPACITY =
+        TOTAL_CAPACITY;
+
+
     let occupiedCoach = 0;
 
+
     /*
-     * Count only actual coaches
-     * coachNo থাকলেই occupied
-     */
+       -----------------------------------------------------
+       COUNT ONLY REAL BOARD CELLS
+       -----------------------------------------------------
+       This is safer than:
+       Object.values(boardData)
 
-    Object.values(boardData || {}).forEach(lineData => {
+       because Firebase may contain old/stale records
+       which are not represented by an actual board cell.
+    */
 
-        if (!lineData || typeof lineData !== "object") return;
+    const boardCells =
+        getAllBoardCells();
 
-        Object.values(lineData).forEach(coach => {
 
-            if (!coach || typeof coach !== "object") return;
+    boardCells.forEach(
+        cell => {
 
-            const coachNo = String(
-                coach.coachNo ?? ""
-            ).trim();
+            const location =
+                getCellLocation(
+                    cell
+                );
 
-            if (coachNo !== "") {
+
+            if (!location)
+                return;
+
+
+            const coach =
+                boardData?.[
+                    location.line
+                ]?.[
+                    location.position
+                ];
+
+
+            /*
+               A valid occupied position must contain
+               a real coach object and coach number.
+            */
+
+            if (
+                coach &&
+                typeof coach === "object" &&
+                clean(
+                    coach.coachNo
+                ) !== ""
+            ) {
+
                 occupiedCoach++;
+
             }
 
-        });
+        }
+    );
 
-    });
-
-    /*
-     * TOTAL COACH = actual occupied coaches
-     */
-
-    totalCoach = occupiedCoach;
-
-    const totalEl =
-        document.getElementById("totalCoach");
-
-    const occupiedEl =
-        document.getElementById("occupiedCoach");
-
-    const freeEl =
-        document.getElementById("freeCoach");
-
-    if (totalEl)
-        totalEl.textContent = totalCoach;
-
-    if (occupiedEl)
-        occupiedEl.textContent = occupiedCoach;
 
     /*
-     * Free position should NOT be calculated
-     * as coach count.
-     * It is based on board capacity.
-     */
+       -----------------------------------------------------
+       TOTAL
+       -----------------------------------------------------
+       Total Coach means total board capacity.
+    */
 
-    const capacity = 145;
+    const totalCoach =
+        TOTAL_BOARD_CAPACITY;
+
+
+    /*
+       -----------------------------------------------------
+       FREE
+       -----------------------------------------------------
+    */
 
     const freeCoach =
-        Math.max(0, capacity - occupiedCoach);
+        Math.max(
+            0,
+            TOTAL_BOARD_CAPACITY -
+            occupiedCoach
+        );
 
-    if (freeEl)
-        freeEl.textContent = freeCoach;
+
+    /*
+       -----------------------------------------------------
+       UPDATE DOM
+       -----------------------------------------------------
+    */
+
+    const totalEl =
+        document.getElementById(
+            "totalCoach"
+        );
+
+
+    const occupiedEl =
+        document.getElementById(
+            "occupiedCoach"
+        );
+
+
+    const freeEl =
+        document.getElementById(
+            "freeCoach"
+        );
+
+
+    if (totalEl) {
+
+        totalEl.textContent =
+            String(
+                totalCoach
+            );
+
+    }
+
+
+    if (occupiedEl) {
+
+        occupiedEl.textContent =
+            String(
+                occupiedCoach
+            );
+
+    }
+
+
+    if (freeEl) {
+
+        freeEl.textContent =
+            String(
+                freeCoach
+            );
+
+    }
+
+
+    /*
+       -----------------------------------------------------
+       DEBUG
+       -----------------------------------------------------
+    */
+
+    console.log(
+        "COUNTERS:",
+        {
+            total:
+                totalCoach,
+
+            occupied:
+                occupiedCoach,
+
+            free:
+                freeCoach,
+
+            capacity:
+                TOTAL_BOARD_CAPACITY
+        }
+    );
 
 }
-
 
 /* =========================================================
    BOARD CELL INITIALIZATION
