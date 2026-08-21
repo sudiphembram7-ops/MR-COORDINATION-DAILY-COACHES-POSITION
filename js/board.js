@@ -1896,6 +1896,11 @@ function drawBoard() {
         highlightEmptyCells();
 
     }
+    /* =====================================================
+   FINAL COUNTER REFRESH
+===================================================== */
+
+updateCounters();
 
 }
 
