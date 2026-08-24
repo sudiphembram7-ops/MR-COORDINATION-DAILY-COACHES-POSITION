@@ -1,7 +1,7 @@
 /* =========================================================
    MR CO-ORDINATION DASHBOARD
    DASHBOARD.JS
-   VERSION 16.0 FINAL
+   VERSION 16.1 FINAL
    ---------------------------------------------------------
    FIREBASE STRUCTURE:
 
@@ -11,13 +11,10 @@
             coachNo
             status
             shop
-         H2
-            ...
+            createdAt
+            createdDate
 
       N3
-         ...
-
-      M2
          ...
 
    ALSO SUPPORTS:
@@ -28,7 +25,7 @@
             H1
                coach
 
-   FEATURES:
+   FEATURES
    ✔ TOTAL COACHES
    ✔ N SHOP
    ✔ M SHOP
@@ -37,10 +34,13 @@
    ✔ J SHOP
    ✔ CR SHOP
    ✔ REALTIME FIREBASE
-   ✔ N SHOP COACH LIST
+   ✔ N SHOP NEW COACH LIST
+   ✔ TODAY ONLY NEW COACHES
+   ✔ OLD COACHES NOT SHOWN IN NEW LIST
    ✔ SEARCH
    ✔ DUPLICATE PROTECTION
    ✔ CONNECTED / OFFLINE
+   ✔ REFRESH
 ========================================================= */
 
 
@@ -64,7 +64,7 @@ const BOARD_PATH =
 
 
 const VERSION =
-    "16.0 FINAL";
+    "16.1 FINAL";
 
 
 /* =========================================================
@@ -224,9 +224,13 @@ function setValue(
     const element =
         el(id);
 
+
     if(!element){
+
         return;
+
     }
+
 
     element.textContent =
         String(
@@ -251,6 +255,7 @@ function clean(value){
 
     }
 
+
     return String(
         value
     ).trim();
@@ -267,6 +272,49 @@ function upper(value){
     return clean(
         value
     ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   TODAY DATE
+   ---------------------------------------------------------
+   Returns:
+   YYYY-MM-DD
+
+   Example:
+   2026-08-24
+========================================================= */
+
+function todayDate(){
+
+    const now =
+        new Date();
+
+
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return `${year}-${month}-${day}`;
 
 }
 
@@ -289,7 +337,9 @@ function getCoachNumber(
     }
 
 
-    /* Direct value */
+    /*
+     * DIRECT VALUE
+     */
 
     if(
         typeof value === "string" ||
@@ -377,6 +427,134 @@ function getStatus(
 
 
 /* =========================================================
+   GET CREATED DATE
+   ---------------------------------------------------------
+   Supports:
+
+   createdDate:
+      2026-08-24
+
+   createdAt:
+      2026-08-24T07:30:00.000Z
+========================================================= */
+
+function getCreatedDate(
+    coach
+){
+
+    if(
+        !coach ||
+        typeof coach !== "object"
+    ){
+
+        return "";
+
+    }
+
+
+    /*
+     * Preferred field
+     */
+
+    const directDate =
+        clean(
+            coach.createdDate
+        );
+
+
+    if(directDate){
+
+        return directDate.substring(
+            0,
+            10
+        );
+
+    }
+
+
+    /*
+     * Fallback:
+     * createdAt
+     */
+
+    const createdAt =
+        clean(
+            coach.createdAt
+        );
+
+
+    if(createdAt){
+
+        /*
+         * ISO format:
+         * 2026-08-24T07:30:00.000Z
+         */
+
+        if(
+            /^\d{4}-\d{2}-\d{2}/.test(
+                createdAt
+            )
+        ){
+
+            return createdAt.substring(
+                0,
+                10
+            );
+
+        }
+
+
+        /*
+         * Try Date parser
+         */
+
+        const date =
+            new Date(
+                createdAt
+            );
+
+
+        if(
+            !Number.isNaN(
+                date.getTime()
+            )
+        ){
+
+            const year =
+                date.getFullYear();
+
+
+            const month =
+                String(
+                    date.getMonth() + 1
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const day =
+                String(
+                    date.getDate()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            return `${year}-${month}-${day}`;
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
    NORMALIZE SHOP
 ========================================================= */
 
@@ -391,7 +569,9 @@ function normalizeShop(
 
 
     if(!shop){
+
         return "";
+
     }
 
 
@@ -423,7 +603,8 @@ function normalizeShop(
         shop === "SCRSHOP" ||
         shop === "MR/SCR" ||
         shop === "MR / SCR" ||
-        shop === "MR SCR"
+        shop === "MR SCR" ||
+        shop === "MR SCR SHOP"
     ){
 
         return "SCR SHOP";
@@ -581,7 +762,9 @@ function detectShop(
     shopKey = ""
 ){
 
-    /* Explicit shop */
+    /*
+     * Explicit shop
+     */
 
     const explicit =
         normalizeShop(
@@ -596,7 +779,9 @@ function detectShop(
     }
 
 
-    /* Parent shop */
+    /*
+     * Parent shop
+     */
 
     const parent =
         normalizeShop(
@@ -611,7 +796,9 @@ function detectShop(
     }
 
 
-    /* Coach line */
+    /*
+     * Coach line
+     */
 
     const coachLine =
         clean(
@@ -632,7 +819,9 @@ function detectShop(
     }
 
 
-    /* Firebase line key */
+    /*
+     * Firebase line key
+     */
 
     const shopFromLineKey =
         detectShopFromLine(
@@ -670,7 +859,9 @@ function addCoach(
         );
 
 
-    /* Empty cell */
+    /*
+     * EMPTY CELL
+     */
 
     if(!coachNo){
 
@@ -701,6 +892,26 @@ function addCoach(
         );
 
 
+    /*
+     * CREATED DATE
+     */
+
+    const createdDate =
+        getCreatedDate(
+            coach
+        );
+
+
+    /*
+     * CREATED AT
+     */
+
+    const createdAt =
+        clean(
+            coach?.createdAt
+        );
+
+
     coaches.push({
 
         coachNo,
@@ -714,7 +925,11 @@ function addCoach(
         status:
             getStatus(
                 coach
-            )
+            ),
+
+        createdDate,
+
+        createdAt
 
     });
 
@@ -871,7 +1086,7 @@ function extractCoaches(
     ){
 
         /*
-         * Ignore shop roots.
+         * Ignore shop roots
          */
 
         if(
@@ -896,8 +1111,8 @@ function extractCoaches(
 
 
         /*
-         * Direct coach:
-         *
+         * Direct coach
+
          * N2
          *   coachNo
          *   status
@@ -926,7 +1141,7 @@ function extractCoaches(
 
         /*
          * Normal:
-         *
+
          * N2
          *   H1
          *      coach
@@ -966,8 +1181,7 @@ function extractCoaches(
         coach => {
 
             /*
-             * Firebase position is the main
-             * identity.
+             * Firebase position is main identity.
              */
 
             const positionKey =
@@ -982,7 +1196,7 @@ function extractCoaches(
 
 
             /*
-             * If same position occurs again,
+             * Same position:
              * keep only one.
              */
 
@@ -1102,11 +1316,19 @@ function setDatabaseStatus(
 
 function resetDashboard(){
 
+    /*
+     * GRAND TOTAL
+     */
+
     setValue(
         "grandTotal",
         0
     );
 
+
+    /*
+     * SHOP TOTALS
+     */
 
     Object.values(
         SHOP_CONFIG
@@ -1122,11 +1344,19 @@ function resetDashboard(){
     );
 
 
+    /*
+     * NEW N SHOP TOTAL
+     */
+
     setValue(
         "nShopNewTotal",
         0
     );
 
+
+    /*
+     * NEW N SHOP LIST
+     */
 
     const list =
         el(
@@ -1138,7 +1368,7 @@ function resetDashboard(){
 
         list.innerHTML = `
             <div class="no-coach">
-                No N SHOP coaches
+                No New N SHOP Coaches Today
             </div>
         `;
 
@@ -1216,7 +1446,23 @@ function updateShopTotals(
 
 
 /* =========================================================
-   N SHOP LIST
+   N SHOP NEW COACH LIST
+   ---------------------------------------------------------
+   IMPORTANT:
+
+   ONLY TODAY'S NEW COACHES
+
+   Example:
+   Today = 2026-08-24
+
+   createdDate = 2026-08-24
+   => SHOW
+
+   createdDate = 2026-08-23
+   => HIDE
+
+   createdDate missing
+   => HIDE
 ========================================================= */
 
 function updateNShopList(
@@ -1229,14 +1475,53 @@ function updateNShopList(
         );
 
 
+    /*
+     * TODAY
+     */
+
+    const today =
+        todayDate();
+
+
+    console.log(
+        "N SHOP NEW DATE:",
+        today
+    );
+
+
+    /*
+     * FILTER
+
+     * N SHOP
+     * +
+     * createdDate = TODAY
+     */
+
     const nCoaches =
         coaches
             .filter(
-                coach =>
-                    upper(
-                        coach.shop
-                    ) ===
-                    "N SHOP"
+                coach => {
+
+                    const isNShop =
+                        upper(
+                            coach.shop
+                        ) ===
+                        "N SHOP";
+
+
+                    const createdDate =
+                        getCreatedDate(
+                            coach
+                        );
+
+
+                    return (
+                        isNShop &&
+                        createdDate ===
+                        today
+                    );
+
+                }
             )
             .sort(
                 (a,b) =>
@@ -1254,11 +1539,19 @@ function updateNShopList(
             );
 
 
+    /*
+     * NEW N SHOP TOTAL
+     */
+
     setValue(
         "nShopNewTotal",
         nCoaches.length
     );
 
+
+    /*
+     * LIST ELEMENT NOT FOUND
+     */
 
     if(!list){
 
@@ -1267,13 +1560,17 @@ function updateNShopList(
     }
 
 
+    /*
+     * NO NEW COACH TODAY
+     */
+
     if(
         nCoaches.length === 0
     ){
 
         list.innerHTML = `
             <div class="no-coach">
-                No N SHOP coaches
+                No New N SHOP Coaches Today
             </div>
         `;
 
@@ -1282,8 +1579,16 @@ function updateNShopList(
     }
 
 
+    /*
+     * CLEAR OLD LIST
+     */
+
     list.innerHTML = "";
 
+
+    /*
+     * DISPLAY TODAY'S NEW COACHES
+     */
 
     nCoaches.forEach(
         coach => {
@@ -1307,7 +1612,8 @@ function updateNShopList(
                     coach.coachNo,
                     coach.line,
                     coach.position,
-                    coach.status
+                    coach.status,
+                    `NEW: ${today}`
                 ]
                 .filter(
                     Boolean
@@ -1329,6 +1635,8 @@ function updateNShopList(
 
 /* =========================================================
    SEARCH
+   ---------------------------------------------------------
+   Search ONLY today's NEW N SHOP list.
 ========================================================= */
 
 function initializeSearch(){
@@ -1446,19 +1754,29 @@ function loadDashboard(){
         "================================"
     );
 
+
     console.log(
         "MR CO-ORDINATION DASHBOARD"
     );
+
 
     console.log(
         "DASHBOARD.JS",
         VERSION
     );
 
+
     console.log(
         "Firebase path:",
         BOARD_PATH
     );
+
+
+    console.log(
+        "Today's New Coach Date:",
+        todayDate()
+    );
+
 
     console.log(
         "================================"
@@ -1471,11 +1789,14 @@ function loadDashboard(){
             "Firebase database not available"
         );
 
+
         setDatabaseStatus(
             false
         );
 
+
         resetDashboard();
+
 
         return;
 
@@ -1508,7 +1829,9 @@ function loadDashboard(){
                     "coachBoard is EMPTY"
                 );
 
+
                 resetDashboard();
+
 
                 return;
 
@@ -1535,29 +1858,44 @@ function loadDashboard(){
                 "================================"
             );
 
+
             console.log(
                 "EXTRACTED COACHES:",
                 coaches.length
             );
 
+
             console.table(
                 coaches
             );
+
 
             console.log(
                 "================================"
             );
 
 
+            /*
+             * ALL COACHES
+             */
+
             updateGrandTotal(
                 coaches
             );
 
 
+            /*
+             * ALL SHOP TOTALS
+             */
+
             updateShopTotals(
                 coaches
             );
 
+
+            /*
+             * ONLY TODAY'S NEW N SHOP
+             */
 
             updateNShopList(
                 coaches
@@ -1592,13 +1930,87 @@ document.addEventListener(
     "DOMContentLoaded",
     () => {
 
+        console.log(
+            "DASHBOARD V16.1 INITIALIZING..."
+        );
+
+
         resetDashboard();
+
 
         initializeSearch();
 
+
         initializeRefresh();
+
 
         loadDashboard();
 
     }
+);
+
+
+/* =========================================================
+   READY
+========================================================= */
+
+console.log(
+    "========================================"
+);
+
+console.log(
+    "MR CO-ORDINATION DASHBOARD"
+);
+
+console.log(
+    "DASHBOARD.JS VERSION 16.1 FINAL"
+);
+
+console.log(
+    "========================================"
+);
+
+console.log(
+    "GRAND TOTAL          : READY"
+);
+
+console.log(
+    "SHOP TOTALS          : READY"
+);
+
+console.log(
+    "N SHOP NEW TODAY     : READY"
+);
+
+console.log(
+    "OLD N SHOP HIDDEN    : YES"
+);
+
+console.log(
+    "BOARD OLD COACHES    : PRESERVED"
+);
+
+console.log(
+    "TODAY DATE           :",
+    todayDate()
+);
+
+console.log(
+    "REALTIME FIREBASE    : READY"
+);
+
+console.log(
+    "SEARCH               : READY"
+);
+
+console.log(
+    "DATABASE STATUS      : READY"
+);
+
+console.log(
+    "REFRESH              : READY"
+);
+
+console.log(
+    "========================================"
 );
