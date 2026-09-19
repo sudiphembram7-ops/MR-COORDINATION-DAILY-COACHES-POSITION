@@ -895,89 +895,50 @@ function initializeButtons() {
 ========================================================= */
 
 async function saveCoach() {
-
-    if (!requireAdmin())
-        return;
-
-    const el =
-        getModalElements();
-
     const coach = {
-
-        line:
-            clean(
-                el.line?.value
-            ),
-
-        position:
-            clean(
-                el.position?.value
-            ),
-
-        coachNo:
-            clean(
-                el.coachNo?.value
-            ),
-
-        coachType:
-            clean(
-                el.coachType?.value
-            ),
-
-        status:
-            clean(
-                el.status?.value
-            )
-
+        line: clean(el.line?.value),
+        position: clean(el.position?.value),
+        coachNo: clean(el.coachNo?.value),
+        coachType: clean(el.coachType?.value),
+        status: clean(el.status?.value)
     };
 
-
+    // Status is OPTIONAL
     if (
         !coach.line ||
         !coach.position ||
         !coach.coachNo ||
-        !coach.coachType ||
-        !coach.status
+        !coach.coachType
     ) {
-
         showMessage(
-            "Please fill all Coach fields.",
+            "Please fill Line, Position, Coach No. and Coach Type.",
             "warning"
         );
-
         return;
     }
 
-
     try {
-
-        await firebaseSaveCoach(
-            coach
-        );
+        await firebaseSaveCoach(coach);
 
         showMessage(
-            `Coach ${coach.coachNo} saved successfully.`,
+            "Coach saved successfully.",
             "success"
         );
 
-        closeModal();
+        // Clear form
+        if (el.line) el.line.value = "";
+        if (el.position) el.position.value = "";
+        if (el.coachNo) el.coachNo.value = "";
+        if (el.coachType) el.coachType.value = "";
+        if (el.status) el.status.value = "";
 
-    }
-    catch (error) {
-
-        console.error(
-            "SAVE ERROR:",
-            error
-        );
-
+    } catch (error) {
+        console.error("Save coach error:", error);
         showMessage(
-            error?.message ||
-            "Save failed.",
-            "danger"
+            "Failed to save coach.",
+            "error"
         );
-
     }
-
 }
 
 
