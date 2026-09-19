@@ -988,8 +988,7 @@ async function updateCoach() {
         !coach.line ||
         !coach.position ||
         !coach.coachNo ||
-        !coach.coachType ||
-        !coach.status
+        !coach.coachType
     ) {
 
         showMessage(
