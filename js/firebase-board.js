@@ -214,6 +214,10 @@ function normalizeCoach(
    VALIDATE COACH
 ========================================================= */
 
+/* =========================================================
+   VALIDATE COACH
+========================================================= */
+
 function validateCoach(
     coach
 ) {
@@ -263,14 +267,7 @@ function validateCoach(
     }
 
 
-    if (!clean(coach.status)) {
-
-        throw new Error(
-            "Status is required."
-        );
-
-    }
-
+    // STATUS IS OPTIONAL
 
     return true;
 
@@ -552,20 +549,6 @@ export async function firebaseSaveCoach(
         );
 
 
-    /*
-       Default status
-       if HTML did not send one.
-    */
-
-    if (
-        !coachData.status
-    ) {
-
-        coachData.status =
-            "PO";
-
-    }
-
 
     validateCoach(
         coachData
@@ -746,15 +729,7 @@ export async function firebaseUpdateCoach(
         );
 
 
-    if (
-        !updatedCoach.status
-    ) {
-
-        updatedCoach.status =
-            oldCoach.status ||
-            "PO";
-
-    }
+    
 
 
     validateCoach(
