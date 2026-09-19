@@ -2005,6 +2005,8 @@ function removeStatusClasses(
 ) {
 
     [
+         "status-Select",
+         "status-1",
         "status-po",
         "status-s",
         "status-lm",
@@ -2048,7 +2050,10 @@ function applyStatusColour(
 
 
     const map = {
+        
 
+1:
+            "status-1",
         PO:
             "status-po",
 
