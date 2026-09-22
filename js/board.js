@@ -1,7 +1,7 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    BOARD.JS
-   VERSION 15.5 FINAL FIXED
+   VERSION 15.6 FINAL
    ---------------------------------------------------------
    MATCHED WITH:
    ---------------------------------------------------------
@@ -9,11 +9,17 @@
    firebase-config.js V12
    firebase-board.js V12
    ---------------------------------------------------------
-   IMPORTANT FIXES V15.5
+   VERSION 15.6 FEATURES
+   ✔ CELL CLICK → COACH NO AUTO FOCUS
+   ✔ ENTER → COACH TYPE
+   ✔ ENTER → STATUS
+   ✔ STATUS OPTIONAL
+   ✔ STATUS ENTER → SAVE
+   ✔ STATUS BLANK SAVE SUPPORTED
    ✔ SAVE BUTTON FORM SUBMIT FIX
    ✔ SAVE EVENT PREVENT DEFAULT
    ✔ FIREBASE SAVE ERROR HANDLING
-   ✔ SAVE FUNCTION SIGNATURE COMPATIBILITY
+   ✔ FIREBASE SAVE SIGNATURE COMPATIBILITY
    ✔ UPDATE BUTTON FIX
    ✔ DELETE BUTTON FIX
    ✔ PULL OUT BUTTON FIX
@@ -23,6 +29,19 @@
    ✔ MODAL STATE FIX
    ✔ PULLED OUT DELETE FIX
    ✔ RETURN TO ANY EMPTY CELL
+   ✔ REALTIME BOARD
+   ✔ SEARCH
+   ✔ DRAG & DROP
+   ✔ MOBILE LONG PRESS
+   ✔ COUNTERS
+   ✔ DUPLICATE PROTECTION
+   ✔ HISTORY
+   ✔ AUDIT LOG
+   ✔ EXCEL / CSV
+   ✔ PDF / PRINT
+   ✔ FULL SCREEN
+   ✔ DATABASE STATUS
+   ✔ TOTAL CAPACITY 145
 ========================================================= */
 
 
@@ -60,7 +79,7 @@ import {
    VERSION
 ========================================================= */
 
-const BOARD_VERSION = "15.5 FINAL FIXED";
+const BOARD_VERSION = "15.6 FINAL";
 
 
 /* =========================================================
@@ -659,6 +678,10 @@ function openCoachModal(
 
 /* =========================================================
    SHOW MODAL
+   ---------------------------------------------------------
+   V15.6:
+   NEW COACH → AUTOMATIC COACH NO FOCUS
+   EDIT/PULLED OUT → NO AUTO FOCUS
 ========================================================= */
 
 function showModal() {
@@ -671,6 +694,7 @@ function showModal() {
     if (!modalElement)
         return;
 
+
     if (window.bootstrap) {
 
         modalInstance =
@@ -678,22 +702,132 @@ function showModal() {
                 modalElement
             );
 
+
+        /*
+           Modal fully visible হওয়ার পরে
+           Coach No focus করা হবে।
+        */
+
+        modalElement.addEventListener(
+            "shown.bs.modal",
+            () => {
+
+                autoFocusCoachEntry();
+
+            },
+            {
+                once: true
+            }
+        );
+
+
         modalInstance.show();
 
     }
     else {
 
         /*
-           Fallback if Bootstrap JS is unavailable.
+           Bootstrap unavailable fallback.
         */
 
         modalElement.style.display = "block";
 
         modalElement.classList.add("show");
 
-        modalElement.removeAttribute("aria-hidden");
+        modalElement.removeAttribute(
+            "aria-hidden"
+        );
+
+
+        setTimeout(
+            () => {
+
+                autoFocusCoachEntry();
+
+            },
+            150
+        );
 
     }
+
+}
+
+
+/* =========================================================
+   AUTO FOCUS COACH NUMBER
+========================================================= */
+
+function autoFocusCoachEntry() {
+
+    /*
+       Edit mode হলে automatic focus নয়।
+    */
+
+    if (editingMode)
+        return;
+
+
+    /*
+       Return mode হলে automatic focus নয়।
+    */
+
+    if (returnMode)
+        return;
+
+
+    /*
+       Pulled-out coach হলে automatic focus নয়।
+    */
+
+    if (selectedPulledOutCoach)
+        return;
+
+
+    const coachNo =
+        document.getElementById(
+            "modalCoachNo"
+        );
+
+
+    if (!coachNo)
+        return;
+
+
+    setTimeout(
+        () => {
+
+            try {
+
+                coachNo.focus();
+
+
+                /*
+                   Existing value থাকলে select করবে।
+                */
+
+                if (
+                    typeof coachNo.select ===
+                    "function" &&
+                    coachNo.value
+                ) {
+
+                    coachNo.select();
+
+                }
+
+            }
+            catch (error) {
+
+                console.warn(
+                    "Coach No focus failed:",
+                    error
+                );
+
+            }
+
+        },
+        100
+    );
 
 }
 
@@ -719,9 +853,12 @@ function closeModal() {
 
     if (modalElement) {
 
-        modalElement.classList.remove("show");
+        modalElement.classList.remove(
+            "show"
+        );
 
-        modalElement.style.display = "none";
+        modalElement.style.display =
+            "none";
 
     }
 
@@ -970,19 +1107,252 @@ function initializeButtons() {
 
     }
 
+
+    /*
+       V15.6
+       Coach entry keyboard navigation.
+    */
+
+    initializeCoachEntryKeyboard();
+
+}
+
+
+/* =========================================================
+   COACH ENTRY KEYBOARD NAVIGATION
+   ---------------------------------------------------------
+   NEW COACH:
+
+   Coach No
+       ↓ Enter
+   Coach Type
+       ↓ Enter
+   Status
+       ↓ Enter
+   SAVE
+
+   STATUS IS OPTIONAL.
+========================================================= */
+
+function initializeCoachEntryKeyboard() {
+
+    const coachNo =
+        document.getElementById(
+            "modalCoachNo"
+        );
+
+    const coachType =
+        document.getElementById(
+            "modalCoachType"
+        );
+
+    const status =
+        document.getElementById(
+            "modalStatus"
+        );
+
+
+    if (
+        !coachNo ||
+        !coachType ||
+        !status
+    ) {
+
+        console.warn(
+            "Coach entry keyboard fields not found."
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       COACH NO → COACH TYPE
+    ===================================================== */
+
+    coachNo.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !== "Enter"
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+               Prevent form submit.
+            */
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            /*
+               Only NEW COACH entry.
+            */
+
+            if (
+                editingMode ||
+                returnMode ||
+                selectedPulledOutCoach
+            ) {
+
+                return;
+
+            }
+
+
+            coachType.focus();
+
+
+            /*
+               Text input হলে existing value select করবে।
+            */
+
+            if (
+                typeof coachType.select ===
+                "function" &&
+                coachType.value
+            ) {
+
+                coachType.select();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       COACH TYPE → STATUS
+    ===================================================== */
+
+    coachType.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !== "Enter"
+            ) {
+
+                return;
+
+            }
+
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            if (
+                editingMode ||
+                returnMode ||
+                selectedPulledOutCoach
+            ) {
+
+                return;
+
+            }
+
+
+            status.focus();
+
+        }
+    );
+
+
+    /* =====================================================
+       STATUS → SAVE
+       -----------------------------------------------------
+       Status blank হলেও Save হবে।
+    ===================================================== */
+
+    status.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !== "Enter"
+            ) {
+
+                return;
+
+            }
+
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            if (
+                editingMode ||
+                returnMode ||
+                selectedPulledOutCoach
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+               Direct save call.
+               requestSubmit() ব্যবহার করা হয়নি,
+               যাতে Safari/mobile-এ accidental
+               page submit না হয়।
+            */
+
+            saveCoach(event);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   NORMALIZE COACH STATUS
+   ---------------------------------------------------------
+   Blank / Select / -- → blank
+========================================================= */
+
+function normalizeCoachStatus(
+    value
+) {
+
+    const status =
+        clean(
+            value
+        );
+
+
+    if (
+        !status ||
+        status === "Select" ||
+        status === "--"
+    ) {
+
+        return "";
+
+    }
+
+
+    return status.toUpperCase();
+
 }
 
 
 /* =========================================================
    SAVE COACH
-   V15.5 FIXED
-   ---------------------------------------------------------
-   IMPORTANT:
-   1. preventDefault()
-   2. requireAdmin()
-   3. getModalElements()
-   4. Firebase save
-   5. error handling
+   V15.6 FINAL
 ========================================================= */
 
 async function saveCoach(event) {
@@ -997,7 +1367,7 @@ async function saveCoach(event) {
 
 
     console.log(
-        "SAVE BUTTON CLICKED"
+        "SAVE BUTTON / ENTER SAVE"
     );
 
 
@@ -1096,10 +1466,16 @@ async function saveCoach(event) {
         );
 
 
+    /*
+       V15.6
+       Status optional.
+       Blank থাকলে blank save হবে।
+    */
+
     const status =
-        clean(
+        normalizeCoachStatus(
             el.status?.value
-        ) || "PO";
+        );
 
 
     const shop =
@@ -1216,17 +1592,23 @@ async function saveCoach(event) {
 
     const coach = {
 
-        shop: shop,
+        shop:
+            shop,
 
-        line: line,
+        line:
+            line,
 
-        position: position,
+        position:
+            position,
 
-        coachNo: coachNo,
+        coachNo:
+            coachNo,
 
-        coachType: coachType,
+        coachType:
+            coachType,
 
-        status: status,
+        status:
+            status,
 
         updatedAt:
             new Date().toISOString()
@@ -1242,22 +1624,10 @@ async function saveCoach(event) {
 
     try {
 
-        /*
-           firebase-board.js V12 normally
-           accepts the complete coach object.
-
-           Compatibility is also included for
-           older 3-argument implementations.
-        */
-
         await callFirebaseSaveCoach(
             coach
         );
 
-
-        /*
-           Local history.
-        */
 
         await writeLocalHistory(
             "ADD_COACH",
@@ -1378,7 +1748,7 @@ async function callFirebaseSaveCoach(
 
 
     /*
-       Most recent V12 format:
+       V12:
        firebaseSaveCoach(coach)
     */
 
@@ -1394,7 +1764,7 @@ async function callFirebaseSaveCoach(
 
 
     /*
-       Older format:
+       Older:
        firebaseSaveCoach(line, position, coach)
     */
 
@@ -1459,10 +1829,15 @@ async function updateCoach(event) {
                 el.coachType?.value
             ),
 
+        /*
+           V15.6
+           Status optional.
+        */
+
         status:
-            clean(
+            normalizeCoachStatus(
                 el.status?.value
-            ) || "PO",
+            ),
 
         updatedAt:
             new Date().toISOString()
@@ -1561,7 +1936,6 @@ async function deleteCoach(event) {
 
     /* =====================================================
        PULLED OUT DELETE
-       MUST COME FIRST
     ===================================================== */
 
     if (
@@ -1712,8 +2086,10 @@ async function deleteCoach(event) {
             "DELETE_COACH",
             {
                 ...coach,
-                line: selectedLine,
-                position: selectedPosition
+                line:
+                    selectedLine,
+                position:
+                    selectedPosition
             }
         );
 
@@ -1874,7 +2250,8 @@ async function pullOutCoach(event) {
 
         updates[
             `${PULLED_OUT_PATH}/${newPulledRef.key}`
-        ] = pulledCoach;
+        ] =
+            pulledCoach;
 
 
         await update(
@@ -2543,6 +2920,7 @@ function removeStatusClasses(
 
     [
         "status-select",
+        "status-",
         "status---",
         "status-1",
         "status-po",
@@ -2588,10 +2966,11 @@ function applyStatusColour(
 
 
     const map = {
-         "Select":
+
+        "SELECT":
             "status-",
-        
-         "--":
+
+        "--":
             "status---",
 
         "1":
@@ -2830,6 +3209,13 @@ function initializeBoardCells() {
                     }
 
 
+                    /*
+                       Empty cell:
+                       Open NEW coach modal.
+                       Modal open হওয়ার পরে
+                       Coach No auto focus হবে।
+                    */
+
                     openNewCoachModal(
                         line,
                         position
@@ -3058,9 +3444,13 @@ async function executeReturnToBoard(
     }
 
 
-    newLine = clean(newLine);
+    newLine = clean(
+        newLine
+    );
 
-    newPosition = clean(newPosition);
+    newPosition = clean(
+        newPosition
+    );
 
 
     if (!newLine || !newPosition) {
@@ -5452,10 +5842,6 @@ function showMessage(
         );
 
 
-    /*
-       Bootstrap uses danger, not error.
-    */
-
     if (type === "error") {
 
         type = "danger";
@@ -5634,7 +6020,7 @@ console.log(
 );
 
 console.log(
-    "BOARD.JS VERSION 15.5 FINAL FIXED"
+    "BOARD.JS VERSION 15.6 FINAL"
 );
 
 console.log(
@@ -5691,6 +6077,14 @@ console.log(
 
 console.log(
     "MOBILE LONG PRESS    : READY"
+);
+
+console.log(
+    "KEYBOARD ENTRY       : READY"
+);
+
+console.log(
+    "STATUS OPTIONAL      : READY"
 );
 
 console.log(
