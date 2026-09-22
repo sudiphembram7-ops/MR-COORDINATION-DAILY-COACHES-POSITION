@@ -1,7 +1,7 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    BOARD.JS
-   VERSION 15.4 FINAL
+   VERSION 15.5 FINAL FIXED
    ---------------------------------------------------------
    MATCHED WITH:
    ---------------------------------------------------------
@@ -9,28 +9,20 @@
    firebase-config.js V12
    firebase-board.js V12
    ---------------------------------------------------------
-   FEATURES
-   ✔ REALTIME BOARD
-   ✔ SAVE
-   ✔ UPDATE
-   ✔ DELETE
-   ✔ PULL OUT
-   ✔ PULLED OUT LIST
+   IMPORTANT FIXES V15.5
+   ✔ SAVE BUTTON FORM SUBMIT FIX
+   ✔ SAVE EVENT PREVENT DEFAULT
+   ✔ FIREBASE SAVE ERROR HANDLING
+   ✔ SAVE FUNCTION SIGNATURE COMPATIBILITY
+   ✔ UPDATE BUTTON FIX
+   ✔ DELETE BUTTON FIX
+   ✔ PULL OUT BUTTON FIX
+   ✔ RETURN BUTTON FIX
+   ✔ PRINT BUTTON FIX
+   ✔ SAFARI / MOBILE FIX
+   ✔ MODAL STATE FIX
+   ✔ PULLED OUT DELETE FIX
    ✔ RETURN TO ANY EMPTY CELL
-   ✔ DUPLICATE PROTECTION
-   ✔ SEARCH
-   ✔ COUNTERS
-   ✔ TOTAL CAPACITY 145
-   ✔ DATABASE STATUS
-   ✔ CLOCK
-   ✔ LAST UPDATE
-   ✔ DRAG / DROP
-   ✔ MOBILE LONG PRESS
-   ✔ EXCEL CSV
-   ✔ PDF / PRINT
-   ✔ FULL SCREEN
-   ✔ HISTORY
-   ✔ AUDIT LOG
 ========================================================= */
 
 
@@ -68,7 +60,7 @@ import {
    VERSION
 ========================================================= */
 
-const BOARD_VERSION = "15.4 FINAL";
+const BOARD_VERSION = "15.5 FINAL FIXED";
 
 
 /* =========================================================
@@ -233,6 +225,7 @@ function requireAdmin() {
     }
 
     return true;
+
 }
 
 
@@ -270,12 +263,9 @@ function initializeModal() {
 
             button.addEventListener(
                 "click",
-                () => {
+                event => {
 
-                    /*
-                       Keep pulled-out selection
-                       during return mode.
-                    */
+                    event.preventDefault();
 
                     if (!returnMode) {
 
@@ -462,13 +452,17 @@ function updateEditButtons() {
         el.save.style.display =
             adminLoggedIn ? "" : "none";
 
-        el.update.style.display = "none";
+        if (el.update)
+            el.update.style.display = "none";
 
-        el.pullOut.style.display = "none";
+        if (el.pullOut)
+            el.pullOut.style.display = "none";
 
-        el.return.style.display = "none";
+        if (el.return)
+            el.return.style.display = "none";
 
-        el.delete.style.display = "none";
+        if (el.delete)
+            el.delete.style.display = "none";
 
         return;
     }
@@ -485,16 +479,20 @@ function updateEditButtons() {
 
         el.save.style.display = "none";
 
-        el.update.style.display =
-            adminLoggedIn ? "" : "none";
+        if (el.update)
+            el.update.style.display =
+                adminLoggedIn ? "" : "none";
 
-        el.pullOut.style.display =
-            adminLoggedIn ? "" : "none";
+        if (el.pullOut)
+            el.pullOut.style.display =
+                adminLoggedIn ? "" : "none";
 
-        el.return.style.display = "none";
+        if (el.return)
+            el.return.style.display = "none";
 
-        el.delete.style.display =
-            adminLoggedIn ? "" : "none";
+        if (el.delete)
+            el.delete.style.display =
+                adminLoggedIn ? "" : "none";
 
         return;
     }
@@ -508,15 +506,19 @@ function updateEditButtons() {
 
         el.save.style.display = "none";
 
-        el.update.style.display = "none";
+        if (el.update)
+            el.update.style.display = "none";
 
-        el.pullOut.style.display = "none";
+        if (el.pullOut)
+            el.pullOut.style.display = "none";
 
-        el.return.style.display =
-            adminLoggedIn ? "" : "none";
+        if (el.return)
+            el.return.style.display =
+                adminLoggedIn ? "" : "none";
 
-        el.delete.style.display =
-            adminLoggedIn ? "" : "none";
+        if (el.delete)
+            el.delete.style.display =
+                adminLoggedIn ? "" : "none";
 
     }
 
@@ -561,6 +563,10 @@ function openNewCoachModal(
     editingMode = false;
 
     returnMode = false;
+
+    selectedPulledOutKey = "";
+
+    selectedPulledOutCoach = null;
 
     updateEditButtons();
 
@@ -675,6 +681,19 @@ function showModal() {
         modalInstance.show();
 
     }
+    else {
+
+        /*
+           Fallback if Bootstrap JS is unavailable.
+        */
+
+        modalElement.style.display = "block";
+
+        modalElement.classList.add("show");
+
+        modalElement.removeAttribute("aria-hidden");
+
+    }
 
 }
 
@@ -685,9 +704,24 @@ function showModal() {
 
 function closeModal() {
 
+    const modalElement =
+        document.getElementById(
+            "coachModal"
+        );
+
     if (modalInstance) {
 
         modalInstance.hide();
+
+        return;
+
+    }
+
+    if (modalElement) {
+
+        modalElement.classList.remove("show");
+
+        modalElement.style.display = "none";
 
     }
 
@@ -704,55 +738,119 @@ function initializeButtons() {
         getModalElements();
 
 
+    /* =====================================================
+       SAVE
+    ===================================================== */
+
     if (el.save) {
 
         el.save.addEventListener(
             "click",
-            saveCoach
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                saveCoach(event);
+
+            }
         );
 
     }
 
+
+    /* =====================================================
+       UPDATE
+    ===================================================== */
 
     if (el.update) {
 
         el.update.addEventListener(
             "click",
-            updateCoach
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                updateCoach(event);
+
+            }
         );
 
     }
 
+
+    /* =====================================================
+       DELETE
+    ===================================================== */
 
     if (el.delete) {
 
         el.delete.addEventListener(
             "click",
-            deleteCoach
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                deleteCoach(event);
+
+            }
         );
 
     }
 
+
+    /* =====================================================
+       PULL OUT
+    ===================================================== */
 
     if (el.pullOut) {
 
         el.pullOut.addEventListener(
             "click",
-            pullOutCoach
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                pullOutCoach(event);
+
+            }
         );
 
     }
 
+
+    /* =====================================================
+       RETURN
+    ===================================================== */
 
     if (el.return) {
 
         el.return.addEventListener(
             "click",
-            returnPulledOutCoach
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                returnPulledOutCoach(event);
+
+            }
         );
 
     }
 
+
+    /* =====================================================
+       REFRESH
+    ===================================================== */
 
     const refresh =
         document.getElementById(
@@ -763,7 +861,9 @@ function initializeButtons() {
 
         refresh.addEventListener(
             "click",
-            () => {
+            event => {
+
+                event.preventDefault();
 
                 loadBoardOnce();
 
@@ -775,6 +875,10 @@ function initializeButtons() {
     }
 
 
+    /* =====================================================
+       FULL SCREEN
+    ===================================================== */
+
     const fullscreen =
         document.getElementById(
             "fullscreenBtn"
@@ -784,11 +888,21 @@ function initializeButtons() {
 
         fullscreen.addEventListener(
             "click",
-            toggleFullscreen
+            event => {
+
+                event.preventDefault();
+
+                toggleFullscreen();
+
+            }
         );
 
     }
 
+
+    /* =====================================================
+       EXCEL
+    ===================================================== */
 
     const excel =
         document.getElementById(
@@ -799,11 +913,21 @@ function initializeButtons() {
 
         excel.addEventListener(
             "click",
-            exportExcel
+            event => {
+
+                event.preventDefault();
+
+                exportExcel();
+
+            }
         );
 
     }
 
+
+    /* =====================================================
+       PDF / PRINT
+    ===================================================== */
 
     const pdf =
         document.getElementById(
@@ -814,15 +938,17 @@ function initializeButtons() {
 
         pdf.addEventListener(
             "click",
-            printBoard
+            event => {
+
+                event.preventDefault();
+
+                openPrintPage();
+
+            }
         );
 
     }
 
-
-    /*
-       PRINT BUTTON
-    */
 
     const printBtn =
         document.getElementById(
@@ -833,7 +959,13 @@ function initializeButtons() {
 
         printBtn.addEventListener(
             "click",
-            openPrintPage
+            event => {
+
+                event.preventDefault();
+
+                openPrintPage();
+
+            }
         );
 
     }
@@ -843,94 +975,310 @@ function initializeButtons() {
 
 /* =========================================================
    SAVE COACH
-   FIXED V15.4
+   V15.5 FIXED
    ---------------------------------------------------------
-   Previous problem:
-   `el is not defined`
+   IMPORTANT:
+   1. preventDefault()
+   2. requireAdmin()
+   3. getModalElements()
+   4. Firebase save
+   5. error handling
 ========================================================= */
 
-async function saveCoach() {
+async function saveCoach(event) {
 
-    if (!requireAdmin())
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+    }
+
+
+    console.log(
+        "SAVE BUTTON CLICKED"
+    );
+
+
+    if (!requireAdmin()) {
+
+        console.warn(
+            "SAVE BLOCKED: USER NOT AUTHENTICATED"
+        );
+
         return;
+
+    }
 
 
     const el =
         getModalElements();
 
 
-    const coach = {
-
-        line:
-            clean(
-                el.line?.value
-            ),
-
-        position:
-            clean(
-                el.position?.value
-            ),
-
-        coachNo:
-            clean(
-                el.coachNo?.value
-            ),
-
-        coachType:
-            clean(
-                el.coachType?.value
-            ),
-
-        status:
-            clean(
-                el.status?.value
-            )
-
-    };
-
-
-    /*
-       Status is OPTIONAL.
-    */
-
-    if (
-        !coach.line ||
-        !coach.position ||
-        !coach.coachNo ||
-        !coach.coachType
-    ) {
+    if (!el.line) {
 
         showMessage(
-            "Please fill Line, Position, Coach No. and Coach Type.",
+            "Line field not found. Check board.html.",
+            "danger"
+        );
+
+        console.error(
+            "modalLine element missing"
+        );
+
+        return;
+
+    }
+
+
+    if (!el.position) {
+
+        showMessage(
+            "Position field not found. Check board.html.",
+            "danger"
+        );
+
+        console.error(
+            "modalPosition element missing"
+        );
+
+        return;
+
+    }
+
+
+    if (!el.coachNo) {
+
+        showMessage(
+            "Coach Number field not found.",
+            "danger"
+        );
+
+        return;
+
+    }
+
+
+    if (!el.coachType) {
+
+        showMessage(
+            "Coach Type field not found.",
+            "danger"
+        );
+
+        return;
+
+    }
+
+
+    const line =
+        clean(
+            el.line.value
+        );
+
+
+    const position =
+        clean(
+            el.position.value
+        );
+
+
+    const coachNo =
+        clean(
+            el.coachNo.value
+        );
+
+
+    const coachType =
+        clean(
+            el.coachType.value
+        );
+
+
+    const status =
+        clean(
+            el.status?.value
+        ) || "PO";
+
+
+    const shop =
+        getShopFromLine(
+            line
+        );
+
+
+    /* =====================================================
+       VALIDATION
+    ===================================================== */
+
+    if (!line) {
+
+        showMessage(
+            "Line is required.",
+            "warning"
+        );
+
+        el.line.focus();
+
+        return;
+
+    }
+
+
+    if (!position) {
+
+        showMessage(
+            "Position is required.",
+            "warning"
+        );
+
+        el.position.focus();
+
+        return;
+
+    }
+
+
+    if (!coachNo) {
+
+        showMessage(
+            "Coach Number is required.",
+            "warning"
+        );
+
+        el.coachNo.focus();
+
+        return;
+
+    }
+
+
+    if (!coachType) {
+
+        showMessage(
+            "Coach Type is required.",
+            "warning"
+        );
+
+        el.coachType.focus();
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       CHECK LOCAL BOARD DUPLICATE
+    ===================================================== */
+
+    const existingAtPosition =
+        boardData?.[
+            line
+        ]?.[
+            position
+        ];
+
+
+    if (existingAtPosition) {
+
+        showMessage(
+            `${line} / ${position} is already occupied by Coach ${existingAtPosition.coachNo || ""}.`,
             "warning"
         );
 
         return;
+
     }
+
+
+    /* =====================================================
+       CHECK DUPLICATE COACH NUMBER
+    ===================================================== */
+
+    const duplicate =
+        findCoachByNumber(
+            coachNo
+        );
+
+
+    if (duplicate) {
+
+        showMessage(
+            `Coach ${coachNo} already exists at ${duplicate.line} / ${duplicate.position}.`,
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    const coach = {
+
+        shop: shop,
+
+        line: line,
+
+        position: position,
+
+        coachNo: coachNo,
+
+        coachType: coachType,
+
+        status: status,
+
+        updatedAt:
+            new Date().toISOString()
+
+    };
+
+
+    console.log(
+        "SAVE DATA:",
+        coach
+    );
 
 
     try {
 
-        await firebaseSaveCoach(
+        /*
+           firebase-board.js V12 normally
+           accepts the complete coach object.
+
+           Compatibility is also included for
+           older 3-argument implementations.
+        */
+
+        await callFirebaseSaveCoach(
+            coach
+        );
+
+
+        /*
+           Local history.
+        */
+
+        await writeLocalHistory(
+            "ADD_COACH",
             coach
         );
 
 
         showMessage(
-            `Coach ${coach.coachNo} saved successfully.`,
+            `Coach ${coachNo} saved successfully.`,
             "success"
         );
 
 
+        console.log(
+            "SAVE SUCCESS:",
+            coach
+        );
+
+
         /*
-           Close modal after successful save.
-        */
-
-        closeModal();
-
-
-        /*
-           Clear selection.
+           Reset state.
         */
 
         selectedLine = "";
@@ -939,19 +1287,68 @@ async function saveCoach() {
 
         editingMode = false;
 
+        returnMode = false;
+
+        selectedPulledOutKey = "";
+
+        selectedPulledOutCoach = null;
+
+
+        /*
+           Close modal.
+        */
+
+        closeModal();
+
+
+        /*
+           Refresh immediately.
+        */
+
+        await loadBoardOnce();
+
+
+        updateEditButtons();
 
     }
     catch (error) {
 
         console.error(
-            "SAVE COACH ERROR:",
+            "================================"
+        );
+
+        console.error(
+            "SAVE COACH ERROR"
+        );
+
+        console.error(
             error
         );
 
+        console.error(
+            "================================"
+        );
+
+
+        let message =
+            error?.message ||
+            "Failed to save coach.";
+
+
+        if (
+            String(message)
+                .toLowerCase()
+                .includes("permission")
+        ) {
+
+            message =
+                "Firebase permission denied. Please login again.";
+
+        }
+
 
         showMessage(
-            error?.message ||
-            "Failed to save coach.",
+            message,
             "danger"
         );
 
@@ -961,10 +1358,69 @@ async function saveCoach() {
 
 
 /* =========================================================
+   FIREBASE SAVE COMPATIBILITY
+========================================================= */
+
+async function callFirebaseSaveCoach(
+    coach
+) {
+
+    if (
+        typeof firebaseSaveCoach !==
+        "function"
+    ) {
+
+        throw new Error(
+            "firebaseSaveCoach() is not available. Check firebase-board.js."
+        );
+
+    }
+
+
+    /*
+       Most recent V12 format:
+       firebaseSaveCoach(coach)
+    */
+
+    if (
+        firebaseSaveCoach.length <= 1
+    ) {
+
+        return await firebaseSaveCoach(
+            coach
+        );
+
+    }
+
+
+    /*
+       Older format:
+       firebaseSaveCoach(line, position, coach)
+    */
+
+    return await firebaseSaveCoach(
+        coach.line,
+        coach.position,
+        coach
+    );
+
+}
+
+
+/* =========================================================
    UPDATE COACH
 ========================================================= */
 
-async function updateCoach() {
+async function updateCoach(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+    }
+
 
     if (!requireAdmin())
         return;
@@ -975,6 +1431,13 @@ async function updateCoach() {
 
 
     const coach = {
+
+        shop:
+            getShopFromLine(
+                clean(
+                    el.line?.value
+                )
+            ),
 
         line:
             clean(
@@ -999,7 +1462,10 @@ async function updateCoach() {
         status:
             clean(
                 el.status?.value
-            )
+            ) || "PO",
+
+        updatedAt:
+            new Date().toISOString()
 
     };
 
@@ -1017,6 +1483,7 @@ async function updateCoach() {
         );
 
         return;
+
     }
 
 
@@ -1026,12 +1493,32 @@ async function updateCoach() {
             coach
         );
 
+
+        await writeLocalHistory(
+            "UPDATE_COACH",
+            coach
+        );
+
+
         showMessage(
             `Coach ${coach.coachNo} updated successfully.`,
             "success"
         );
 
+
         closeModal();
+
+
+        selectedLine = "";
+
+        selectedPosition = "";
+
+        editingMode = false;
+
+
+        await loadBoardOnce();
+
+        updateEditButtons();
 
     }
     catch (error) {
@@ -1040,6 +1527,7 @@ async function updateCoach() {
             "UPDATE ERROR:",
             error
         );
+
 
         showMessage(
             error?.message ||
@@ -1054,23 +1542,26 @@ async function updateCoach() {
 
 /* =========================================================
    DELETE COACH
-   FIXED V15.4
-   ---------------------------------------------------------
-   Pulled-out deletion must be checked BEFORE
-   selectedLine / selectedPosition validation.
 ========================================================= */
 
-async function deleteCoach() {
+async function deleteCoach(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+    }
+
 
     if (!requireAdmin())
         return;
 
 
     /* =====================================================
-       PULLED-OUT COACH DELETE
-       IMPORTANT:
-       selectedLine and selectedPosition are empty
-       for pulled-out coaches.
+       PULLED OUT DELETE
+       MUST COME FIRST
     ===================================================== */
 
     if (
@@ -1134,9 +1625,14 @@ async function deleteCoach() {
 
             editingMode = false;
 
+
             removeEmptyCellHighlight();
 
             closeModal();
+
+            await loadPulledOutOnce();
+
+            updateEditButtons();
 
         }
         catch (error) {
@@ -1162,7 +1658,7 @@ async function deleteCoach() {
 
 
     /* =====================================================
-       NORMAL BOARD COACH DELETE
+       NORMAL BOARD DELETE
     ===================================================== */
 
     if (
@@ -1212,6 +1708,16 @@ async function deleteCoach() {
         );
 
 
+        await writeLocalHistory(
+            "DELETE_COACH",
+            {
+                ...coach,
+                line: selectedLine,
+                position: selectedPosition
+            }
+        );
+
+
         showMessage(
             `Coach ${coachNo} deleted.`,
             "success"
@@ -1219,6 +1725,18 @@ async function deleteCoach() {
 
 
         closeModal();
+
+
+        selectedLine = "";
+
+        selectedPosition = "";
+
+        editingMode = false;
+
+
+        await loadBoardOnce();
+
+        updateEditButtons();
 
     }
     catch (error) {
@@ -1244,7 +1762,16 @@ async function deleteCoach() {
    PULL OUT COACH
 ========================================================= */
 
-async function pullOutCoach() {
+async function pullOutCoach(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+    }
+
 
     if (!requireAdmin())
         return;
@@ -1380,9 +1907,17 @@ async function pullOutCoach() {
 
         editingMode = false;
 
+
         removeEmptyCellHighlight();
 
         closeModal();
+
+
+        await loadBoardOnce();
+
+        await loadPulledOutOnce();
+
+        updateEditButtons();
 
     }
     catch (error) {
@@ -1491,7 +2026,16 @@ function openPulledOutCoach(
    RETURN TO BOARD
 ========================================================= */
 
-async function returnPulledOutCoach() {
+async function returnPulledOutCoach(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+    }
+
 
     if (!requireAdmin())
         return;
@@ -1508,11 +2052,6 @@ async function returnPulledOutCoach() {
 
     }
 
-
-    /*
-       FIRST CLICK:
-       Activate return mode.
-    */
 
     if (!returnMode) {
 
@@ -1539,10 +2078,6 @@ async function returnPulledOutCoach() {
 
     }
 
-
-    /*
-       Safety fallback.
-    */
 
     if (
         selectedLine &&
@@ -1605,6 +2140,7 @@ function listenBoard() {
 
 
             showMessage(
+                error?.message ||
                 "Firebase board listener error.",
                 "danger"
             );
@@ -1649,6 +2185,12 @@ async function loadBoardOnce() {
         console.error(
             "LOAD BOARD ERROR:",
             error
+        );
+
+        showMessage(
+            error?.message ||
+            "Unable to load board.",
+            "danger"
         );
 
     }
@@ -2091,10 +2633,6 @@ function applyStatusColour(
 
 /* =========================================================
    UPDATE COUNTERS
-   ---------------------------------------------------------
-   TOTAL  = 145
-   OCCUPIED = actual board cells
-   FREE = 145 - occupied
 ========================================================= */
 
 function updateCounters() {
@@ -2206,17 +2744,6 @@ function updateCounters() {
 
     }
 
-
-    console.log(
-        "COUNTERS:",
-        {
-            total: totalCoach,
-            occupied: occupiedCoach,
-            free: freeCoach,
-            capacity: TOTAL_BOARD_CAPACITY
-        }
-    );
-
 }
 
 
@@ -2262,10 +2789,6 @@ function initializeBoardCells() {
                     } = location;
 
 
-                    /*
-                       RETURN MODE HAS PRIORITY.
-                    */
-
                     if (returnMode) {
 
                         handleReturnCellClick(
@@ -2309,9 +2832,9 @@ function initializeBoardCells() {
             );
 
 
-            /*
+            /* =================================================
                MOBILE LONG PRESS
-            */
+            ================================================= */
 
             cell.addEventListener(
                 "touchstart",
@@ -2637,9 +3160,6 @@ async function executeReturnToBoard(
 
     try {
 
-        returnMode = false;
-
-
         await update(
             ref(database),
             updates
@@ -2651,6 +3171,8 @@ async function executeReturnToBoard(
             returnedCoach
         );
 
+
+        returnMode = false;
 
         selectedLine = "";
 
@@ -2674,15 +3196,6 @@ async function executeReturnToBoard(
         showMessage(
             `Coach ${coach.coachNo || ""} returned to ${newLine} / ${newPosition}.`,
             "success"
-        );
-
-
-        console.log(
-            "RETURN SUCCESS:",
-            coach.coachNo,
-            "→",
-            newLine,
-            newPosition
         );
 
     }
@@ -2869,16 +3382,19 @@ function initializeDragDrop() {
                     dragSource = location;
 
 
-                    event.dataTransfer.effectAllowed =
-                        "move";
+                    if (event.dataTransfer) {
 
+                        event.dataTransfer.effectAllowed =
+                            "move";
 
-                    event.dataTransfer.setData(
-                        "text/plain",
-                        JSON.stringify(
-                            location
-                        )
-                    );
+                        event.dataTransfer.setData(
+                            "text/plain",
+                            JSON.stringify(
+                                location
+                            )
+                        );
+
+                    }
 
 
                     cell.classList.add(
@@ -3123,12 +3639,20 @@ function startMobileDrag(
         event => {
 
             const targetElement =
-                event.target.closest(
+                event.target.closest?.(
                     "td[id]"
                 );
 
 
             if (!targetElement)
+                return;
+
+
+            if (
+                !isBoardCell(
+                    targetElement
+                )
+            )
                 return;
 
 
@@ -3167,13 +3691,17 @@ function startMobileDrag(
             }
 
 
-            moveCoachFromDrag(
-                dragSource,
-                target
-            );
+            const source =
+                dragSource;
 
 
             dragSource = null;
+
+
+            moveCoachFromDrag(
+                source,
+                target
+            );
 
         };
 
@@ -3494,7 +4022,9 @@ function showSearchResults(
 
                 button.addEventListener(
                     "click",
-                    () => {
+                    event => {
+
+                        event.preventDefault();
 
                         const line =
                             button.dataset.line;
@@ -3777,7 +4307,9 @@ function drawPulledOutList(
 
                 button.addEventListener(
                     "click",
-                    () => {
+                    event => {
+
+                        event.preventDefault();
 
                         const key =
                             button.dataset.key;
@@ -4407,6 +4939,98 @@ async function writeLocalHistory(
 
 
 /* =========================================================
+   FIND DUPLICATE COACH
+========================================================= */
+
+function findCoachByNumber(
+    coachNo
+) {
+
+    const target =
+        clean(
+            coachNo
+        ).toLowerCase();
+
+
+    if (!target)
+        return null;
+
+
+    let found = null;
+
+
+    Object.keys(
+        boardData || {}
+    ).some(
+        line => {
+
+            const lineData =
+                boardData[line];
+
+
+            if (
+                !lineData ||
+                typeof lineData !== "object"
+            ) {
+
+                return false;
+
+            }
+
+
+            return Object.keys(
+                lineData
+            ).some(
+                position => {
+
+                    const coach =
+                        lineData[position];
+
+
+                    if (!coach)
+                        return false;
+
+
+                    const current =
+                        clean(
+                            coach.coachNo
+                        ).toLowerCase();
+
+
+                    if (
+                        current === target
+                    ) {
+
+                        found = {
+
+                            line,
+
+                            position,
+
+                            coach
+
+                        };
+
+                        return true;
+
+                    }
+
+
+                    return false;
+
+                }
+            );
+
+        }
+    );
+
+
+    return found;
+
+}
+
+
+/* =========================================================
    GET ALL BOARD CELLS
 ========================================================= */
 
@@ -4427,7 +5051,9 @@ function getAllBoardCells() {
    IS BOARD CELL
 ========================================================= */
 
-function isBoardCell(cell) {
+function isBoardCell(
+    cell
+) {
 
     if (!cell)
         return false;
@@ -4819,6 +5445,17 @@ function showMessage(
         );
 
 
+    /*
+       Bootstrap uses danger, not error.
+    */
+
+    if (type === "error") {
+
+        type = "danger";
+
+    }
+
+
     const alert =
         document.createElement(
             "div"
@@ -4990,7 +5627,7 @@ console.log(
 );
 
 console.log(
-    "BOARD.JS VERSION 15.4 FINAL"
+    "BOARD.JS VERSION 15.5 FINAL FIXED"
 );
 
 console.log(
