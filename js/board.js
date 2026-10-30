@@ -296,7 +296,15 @@ function initializeModal() {
                 }
             );
 
+        }const modalElement = document.getElementById("coachModal");
+
+if (modalElement) {
+    modalElement.addEventListener("hidden.bs.modal", () => {
+        if (!returnMode) {
+            resetModal();
         }
+    });
+}
     );
 
 }
