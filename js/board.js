@@ -4375,136 +4375,86 @@ async function performSearch(
 
 /* =========================================================
    SEARCH RESULT
+   V15.7 SEARCH DETAILS VIEW ONLY
 ========================================================= */
 
-function showSearchResults(
-    results
-) {
+function showSearchResults(results) {
 
     const container =
-        document.getElementById(
-            "searchResult"
-        );
-
+        document.getElementById("searchResult");
 
     if (!container)
         return;
 
-
     if (!results.length) {
 
         container.innerHTML = `
-
             <div class="alert alert-warning py-2">
                 No coach found.
             </div>
-
         `;
 
         return;
-
     }
 
+    container.innerHTML = results.map(result => {
 
-    container.innerHTML =
-        results
-            .map(
-                result => {
+        const coach = result.coach;
 
-                    const coach =
-                        result.coach;
+        return `
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary m-1 search-result-item"
+                data-line="${escapeAttribute(result.line)}"
+                data-position="${escapeAttribute(result.position)}"
+            >
+                ${escapeHTML(coach.coachNo || "")}
+                -
+                ${escapeHTML(coach.coachType || "")}
+                -
+                ${escapeHTML(coach.status || "")}
+                |
+                ${escapeHTML(result.line)}
+                /
+                ${escapeHTML(result.position)}
+            </button>
+        `;
 
-
-                    return `
-
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-primary m-1 search-result-item"
-                            data-line="${escapeAttribute(result.line)}"
-                            data-position="${escapeAttribute(result.position)}"
-                        >
-
-                            ${escapeHTML(
-                                coach.coachNo || ""
-                            )}
-
-                            -
-
-                            ${escapeHTML(
-                                coach.coachType || ""
-                            )}
-
-                            -
-
-                            ${escapeHTML(
-                                coach.status || ""
-                            )}
-
-                            |
-
-                            ${escapeHTML(
-                                result.line
-                            )}
-
-                            /
-
-                            ${escapeHTML(
-                                result.position
-                            )}
-
-                        </button>
-
-                    `;
-
-                }
-            )
-            .join("");
-
+    }).join("");
 
     container
-        .querySelectorAll(
-            ".search-result-item"
-        )
-        .forEach(
-            button => {
+        .querySelectorAll(".search-result-item")
+        .forEach(button => {
 
-                button.addEventListener(
-                    "click",
-                    event => {
+            button.addEventListener(
+                "click",
+                event => {
 
-                        event.preventDefault();
+                    event.preventDefault();
 
-                        const line =
-                            button.dataset.line;
+                    const line =
+                        button.dataset.line;
 
+                    const position =
+                        button.dataset.position;
 
-                        const position =
-                            button.dataset.position;
+                    const coach =
+                        boardData?.[line]?.[position];
 
+                    if (coach) {
 
-                        const coach =
-                            boardData?.[
-                                line
-                            ]?.[
-                                position
-                            ];
-
-
-                        if (coach) {
-
-                            openCoachModal(
-                                line,
-                                position,
-                                coach
-                            );
-
-                        }
+                        openSearchCoachDetails(
+                            line,
+                            position,
+                            coach
+                        );
 
                     }
-                );
 
-            }
-        );
+                }
+            );
+
+        });
 
 }
 
