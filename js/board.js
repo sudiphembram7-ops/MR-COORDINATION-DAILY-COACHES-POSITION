@@ -4290,34 +4290,7 @@ async function performSearch(
     );
 
 
-    if (
-        results.length === 1
-    ) {
-
-        const cell =
-            document.getElementById(
-                makeCellId(
-                    results[0].line,
-                    results[0].position
-                )
-            );
-
-
-        if (cell) {
-
-            cell.scrollIntoView({
-
-                behavior: "smooth",
-
-                block: "center",
-
-                inline: "center"
-
-            });
-
-        }
-
-    }
+    
 
 }
 
