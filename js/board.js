@@ -249,21 +249,23 @@ function requireAdmin() {
 }
 
 
+
 /* =========================================================
-   MODAL INITIALIZE
+   MODAL INITIALIZE - FIXED
 ========================================================= */
 
 function initializeModal() {
 
     const modalElement =
-        document.getElementById(
-            "coachModal"
-        );
+        document.getElementById("coachModal");
 
-    if (
-        modalElement &&
-        window.bootstrap
-    ) {
+    if (!modalElement) {
+        console.warn("coachModal not found.");
+        return;
+    }
+
+    // Bootstrap Modal
+    if (window.bootstrap) {
 
         modalInstance =
             bootstrap.Modal.getOrCreateInstance(
@@ -272,42 +274,38 @@ function initializeModal() {
 
     }
 
-
+    // Close button handling
     const closeButtons =
-        document.querySelectorAll(
+        modalElement.querySelectorAll(
             '[data-bs-dismiss="modal"]'
         );
 
-    closeButtons.forEach(
-        button => {
+    closeButtons.forEach(button => {
 
-            button.addEventListener(
-                "click",
-                event => {
+        button.addEventListener("click", event => {
 
-                    event.preventDefault();
+            if (!returnMode) {
+                resetModal();
+            }
 
-                    if (!returnMode) {
+        });
 
-                        resetModal();
-
-                    }
-
-                }
-            );
-
-        }const modalElement = document.getElementById("coachModal");
-
-if (modalElement) {
-    modalElement.addEventListener("hidden.bs.modal", () => {
-        if (!returnMode) {
-            resetModal();
-        }
     });
-}
+
+    // Modal completely closed
+    modalElement.addEventListener(
+        "hidden.bs.modal",
+        () => {
+
+            if (!returnMode) {
+                resetModal();
+            }
+
+        }
     );
 
 }
+
 
 
 /* =========================================================
