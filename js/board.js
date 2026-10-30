@@ -119,6 +119,7 @@ let selectedLine = "";
 let selectedPosition = "";
 
 let editingMode = false;
+let searchViewMode = false;
 
 let returnMode = false;
 
@@ -385,7 +386,9 @@ function resetModal() {
 
     editingMode = false;
 
-    returnMode = false;
+searchViewMode = false;
+
+returnMode = false;
 
     selectedPulledOutKey = "";
 
@@ -428,7 +431,28 @@ function updateEditButtons() {
 
     if (!el.save)
         return;
+/* =====================================================
+   SEARCH DETAILS - VIEW ONLY MODE
+===================================================== */
 
+if (searchViewMode) {
+
+    el.save.style.display = "none";
+
+    if (el.update)
+        el.update.style.display = "none";
+
+    if (el.pullOut)
+        el.pullOut.style.display = "none";
+
+    if (el.return)
+        el.return.style.display = "none";
+
+    if (el.delete)
+        el.delete.style.display = "none";
+
+    return;
+}
 
     /* =====================================================
        RETURN MODE
@@ -674,7 +698,61 @@ function openCoachModal(
     showModal();
 
 }
+/* =========================================================
+   OPEN SEARCH COACH DETAILS
+   SEARCH RESULT → VIEW ONLY POPUP
+========================================================= */
 
+function openSearchCoachDetails(
+    line,
+    position,
+    coach
+) {
+
+    if (!coach)
+        return;
+
+    returnMode = false;
+
+    resetModal();
+
+    selectedLine = clean(line);
+
+    selectedPosition = clean(position);
+
+    editingMode = true;
+
+    searchViewMode = true;
+
+    selectedPulledOutKey = "";
+
+    selectedPulledOutCoach = null;
+
+    const el = getModalElements();
+
+    if (el.shop)
+        el.shop.value = getShopFromLine(line);
+
+    if (el.line)
+        el.line.value = line;
+
+    if (el.position)
+        el.position.value = position;
+
+    if (el.coachNo)
+        el.coachNo.value = coach.coachNo || "";
+
+    if (el.coachType)
+        el.coachType.value = coach.coachType || "";
+
+    if (el.status)
+        el.status.value = coach.status || "";
+
+    updateEditButtons();
+
+    showModal();
+
+}
 
 /* =========================================================
    SHOW MODAL
