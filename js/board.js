@@ -4380,10 +4380,12 @@ async function performSearch(
 
 
 
+
 /* =========================================================
    SEARCH DETAILS DISPLAY
    VERSION 15.7
-   SEARCH → LARGE COACH DETAILS
+   COMPACT COACH DETAILS
+   LINE / POSITION = N7/D1
    NO POPUP / NO CLICK REQUIRED
 ========================================================= */
 
@@ -4392,14 +4394,13 @@ function showSearchResults(results) {
     const container =
         document.getElementById("searchResult");
 
-    if (!container)
-        return;
+    if (!container) return;
 
     // No result
-    if (!results.length) {
+    if (!results || !results.length) {
 
         container.innerHTML = `
-            <div class="alert alert-warning mt-2">
+            <div class="alert alert-warning mt-2 mb-2">
                 <strong>No Coach Found</strong>
             </div>
         `;
@@ -4407,131 +4408,136 @@ function showSearchResults(results) {
         return;
     }
 
-    // Show all matching coach details
-    container.innerHTML = results.map(result => {
+    // Show compact coach details
+    container.innerHTML = `
+        <div class="card shadow-sm border-primary mt-2 mb-2">
 
-        const coach = result.coach || {};
+            <div class="card-header bg-primary text-white py-2 px-3
+                        d-flex justify-content-between align-items-center">
 
-        const coachNo =
-            escapeHTML(coach.coachNo || "");
+                <strong>
+                    <i class="bi bi-train-front"></i>
+                    SEARCH RESULTS
+                </strong>
 
-        const coachType =
-            escapeHTML(coach.coachType || "");
-
-        const status =
-            escapeHTML(coach.status || "Not Available");
-
-        const shop =
-            escapeHTML(
-                coach.shop || getShopFromLine(result.line)
-            );
-
-        const line =
-            escapeHTML(result.line || "");
-
-        const position =
-            escapeHTML(result.position || "");
-
-        return `
-            <div class="card shadow-sm border-primary mt-3 mb-3">
-
-                <div class="card-header bg-primary text-white">
-                    <strong>
-                        <i class="bi bi-train-front"></i>
-                        COACH DETAILS
-                    </strong>
-                    <span class="float-end">
-                        FOUND
-                    </span>
-                </div>
-
-                <div class="card-body">
-
-                    <div class="text-center mb-3">
-
-                        <div class="text-muted small">
-                            COACH NUMBER
-                        </div>
-
-                        <div class="display-6 fw-bold text-primary">
-                            ${coachNo}
-                        </div>
-
-                    </div>
-
-                    <hr>
-
-                    <div class="row g-3">
-
-                        <div class="col-6">
-
-                            <div class="text-muted small">
-                                SHOP
-                            </div>
-
-                            <div class="fs-5 fw-bold">
-                                ${shop}
-                            </div>
-
-                        </div>
-
-                        <div class="col-6">
-
-                            <div class="text-muted small">
-                                LINE
-                            </div>
-
-                            <div class="fs-5 fw-bold">
-                                ${line}
-                            </div>
-
-                        </div>
-
-                        <div class="col-6">
-
-                            <div class="text-muted small">
-                                POSITION
-                            </div>
-
-                            <div class="fs-5 fw-bold">
-                                ${position}
-                            </div>
-
-                        </div>
-
-                        <div class="col-6">
-
-                            <div class="text-muted small">
-                                COACH TYPE
-                            </div>
-
-                            <div class="fs-5 fw-bold">
-                                ${coachType}
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <hr>
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <strong>STATUS</strong>
-
-                        <span class="badge bg-success fs-6 px-3 py-2">
-                            ${status}
-                        </span>
-
-                    </div>
-
-                </div>
+                <span class="badge bg-light text-primary">
+                    ${results.length} FOUND
+                </span>
 
             </div>
-        `;
 
-    }).join("");
+            <div class="card-body p-2">
 
+                ${results.map(result => {
+
+                    const coach = result.coach || {};
+
+                    const coachNo =
+                        escapeHTML(coach.coachNo || "");
+
+                    const coachType =
+                        escapeHTML(coach.coachType || "");
+
+                    const status =
+                        escapeHTML(coach.status || "Not Available");
+
+                    const shop =
+                        escapeHTML(
+                            coach.shop || getShopFromLine(result.line)
+                        );
+
+                    const line =
+                        escapeHTML(result.line || "");
+
+                    const position =
+                        escapeHTML(result.position || "");
+
+                    const linePosition =
+                        [line, position].filter(Boolean).join("/");
+
+                    return `
+                        <div class="border border-primary rounded-3
+                                    p-2 mb-2 bg-white">
+
+                            <!-- COACH NUMBER -->
+                            <div class="d-flex justify-content-between
+                                        align-items-center pb-2">
+
+                                <div>
+                                    <div class="text-muted small">
+                                        COACH NUMBER
+                                    </div>
+
+                                    <div class="fs-4 fw-bold text-primary
+                                                text-break">
+                                        ${coachNo}
+                                    </div>
+                                </div>
+
+                                <i class="bi bi-train-front
+                                          text-primary fs-2"></i>
+
+                            </div>
+
+                            <hr class="my-2">
+
+                            <!-- COMPACT DETAILS -->
+                            <div class="row g-2">
+
+                                <div class="col-4">
+                                    <div class="text-muted small">
+                                        SHOP
+                                    </div>
+
+                                    <div class="fw-bold">
+                                        ${shop}
+                                    </div>
+                                </div>
+
+                                <div class="col-4">
+                                    <div class="text-muted small">
+                                        LINE/POSITION
+                                    </div>
+
+                                    <div class="fw-bold">
+                                        ${linePosition}
+                                    </div>
+                                </div>
+
+                                <div class="col-4">
+                                    <div class="text-muted small">
+                                        COACH TYPE
+                                    </div>
+
+                                    <div class="fw-bold">
+                                        ${coachType}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <hr class="my-2">
+
+                            <!-- STATUS -->
+                            <div class="d-flex justify-content-between
+                                        align-items-center">
+
+                                <strong>STATUS</strong>
+
+                                <span class="badge bg-success px-3 py-2">
+                                    ${status}
+                                </span>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                }).join("")}
+
+            </div>
+        </div>
+    `;
 }
 
 
