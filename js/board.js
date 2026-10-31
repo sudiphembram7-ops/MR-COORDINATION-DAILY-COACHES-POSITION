@@ -4481,7 +4481,7 @@ function showSearchResults(results) {
                                             flex-shrink:0;
                                          ">
 
-                                        <i class="bi bi-train-front-fill fs-2"></i>
+                                     <span style="font-size:30px;">🚆</span>
 
                                     </div>
 
