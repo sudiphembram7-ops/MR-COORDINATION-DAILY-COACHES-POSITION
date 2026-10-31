@@ -4381,49 +4381,50 @@ async function performSearch(
 
 
 
+
 /* =========================================================
    SEARCH DETAILS DISPLAY
-   VERSION 15.7
-   COMPACT COACH DETAILS
+   VERSION 15.7 PREMIUM DESIGN
+   COMPACT COACH CARD
    LINE / POSITION = N7/D1
    NO POPUP / NO CLICK REQUIRED
 ========================================================= */
 
 function showSearchResults(results) {
 
-    const container =
-        document.getElementById("searchResult");
+    const container = document.getElementById("searchResult");
 
     if (!container) return;
 
-    // No result
     if (!results || !results.length) {
-
         container.innerHTML = `
             <div class="alert alert-warning mt-2 mb-2">
                 <strong>No Coach Found</strong>
             </div>
         `;
-
         return;
     }
 
-    // Show compact coach details
     container.innerHTML = `
-        <div class="card shadow-sm border-primary mt-2 mb-2">
+        <div class="card border-primary shadow mt-2 mb-3"
+             style="border-radius:16px; overflow:hidden;">
 
-            <div class="card-header bg-primary text-white py-2 px-3
-                        d-flex justify-content-between align-items-center">
+            <!-- BLUE HEADER -->
+            <div class="card-header text-white px-3 py-3"
+                 style="background:linear-gradient(120deg,#1684ff,#0047d9);">
 
-                <strong>
-                    <i class="bi bi-train-front"></i>
-                    SEARCH RESULTS
-                </strong>
+                <div class="d-flex justify-content-between align-items-center">
 
-                <span class="badge bg-light text-primary">
-                    ${results.length} FOUND
-                </span>
+                    <strong class="fs-5">
+                        <i class="bi bi-search me-2"></i>
+                        SEARCH RESULTS
+                    </strong>
 
+                    <span class="badge rounded-pill bg-light text-primary px-3 py-2">
+                        ${results.length} FOUND
+                    </span>
+
+                </div>
             </div>
 
             <div class="card-body p-2">
@@ -4433,17 +4434,17 @@ function showSearchResults(results) {
                     const coach = result.coach || {};
 
                     const coachNo =
-                        escapeHTML(coach.coachNo || "");
+                        escapeHTML(coach.coachNo || "N/A");
 
                     const coachType =
-                        escapeHTML(coach.coachType || "");
+                        escapeHTML(coach.coachType || "N/A");
 
                     const status =
                         escapeHTML(coach.status || "Not Available");
 
                     const shop =
                         escapeHTML(
-                            coach.shop || getShopFromLine(result.line)
+                            coach.shop || getShopFromLine(result.line) || "N/A"
                         );
 
                     const line =
@@ -4453,84 +4454,126 @@ function showSearchResults(results) {
                         escapeHTML(result.position || "");
 
                     const linePosition =
-                        [line, position].filter(Boolean).join("/");
+                        [line, position].filter(Boolean).join("/") || "N/A";
 
                     return `
-                        <div class="border border-primary rounded-3
-                                    p-2 mb-2 bg-white">
+
+                        <div class="rounded-4 p-3 mb-2"
+                             style="
+                                background:#ffffff;
+                                border:1.5px solid #c9ddff;
+                                box-shadow:0 3px 10px rgba(0,80,180,.10);
+                             ">
 
                             <!-- COACH NUMBER -->
                             <div class="d-flex justify-content-between
-                                        align-items-center pb-2">
+                                        align-items-center mb-3">
 
-                                <div>
-                                    <div class="text-muted small">
-                                        COACH NUMBER
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <div class="rounded-circle d-flex
+                                                align-items-center justify-content-center"
+                                         style="
+                                            width:55px;
+                                            height:55px;
+                                            background:#e5efff;
+                                            color:#0758d8;
+                                            flex-shrink:0;
+                                         ">
+
+                                        <i class="bi bi-train-front-fill fs-2"></i>
+
                                     </div>
 
-                                    <div class="fs-4 fw-bold text-primary
-                                                text-break">
-                                        ${coachNo}
+                                    <div>
+                                        <div class="text-muted small">
+                                            COACH NUMBER
+                                        </div>
+
+                                        <div class="fw-bold text-primary"
+                                             style="
+                                                font-size:clamp(22px,5vw,34px);
+                                                line-height:1.2;
+                                                overflow-wrap:anywhere;
+                                             ">
+                                            ${coachNo}
+                                        </div>
                                     </div>
+
                                 </div>
 
-                                <i class="bi bi-train-front
-                                          text-primary fs-2"></i>
+                                <span class="badge bg-primary rounded-pill px-3 py-2">
+                                    FOUND
+                                </span>
 
                             </div>
 
-                            <hr class="my-2">
+                            <!-- DETAILS ROW -->
+                            <div class="row g-0 rounded-3 py-3"
+                                 style="background:#edf4ff;">
 
-                            <!-- COMPACT DETAILS -->
-                            <div class="row g-2">
+                                <div class="col-4 px-2 border-end">
 
-                                <div class="col-4">
                                     <div class="text-muted small">
                                         SHOP
                                     </div>
 
-                                    <div class="fw-bold">
+                                    <div class="fw-bold text-dark"
+                                         style="font-size:clamp(13px,3.5vw,19px);
+                                                overflow-wrap:anywhere;">
                                         ${shop}
                                     </div>
+
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-4 px-2 border-end">
+
                                     <div class="text-muted small">
                                         LINE/POSITION
                                     </div>
 
-                                    <div class="fw-bold">
+                                    <div class="fw-bold text-primary"
+                                         style="font-size:clamp(13px,3.5vw,19px);
+                                                overflow-wrap:anywhere;">
                                         ${linePosition}
                                     </div>
+
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-4 px-2">
+
                                     <div class="text-muted small">
                                         COACH TYPE
                                     </div>
 
-                                    <div class="fw-bold">
+                                    <div class="fw-bold text-dark"
+                                         style="font-size:clamp(13px,3.5vw,19px);
+                                                overflow-wrap:anywhere;">
                                         ${coachType}
                                     </div>
+
                                 </div>
 
                             </div>
 
-                            <hr class="my-2">
-
-                            <!-- STATUS -->
+                            <!-- STATUS STRIP -->
                             <div class="d-flex justify-content-between
-                                        align-items-center">
+                                        align-items-center rounded-3 mt-2 px-3 py-2"
+                                 style="background:#dcf8e8;">
 
-                                <strong>STATUS</strong>
+                                <strong class="text-success fs-6">
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    STATUS
+                                </strong>
 
-                                <span class="badge bg-success px-3 py-2">
+                                <span class="badge bg-success px-3 py-2 fs-6">
                                     ${status}
                                 </span>
 
                             </div>
 
                         </div>
+
                     `;
 
                 }).join("")}
