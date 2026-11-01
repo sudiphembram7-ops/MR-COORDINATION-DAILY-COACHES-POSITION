@@ -1,16 +1,7 @@
 /* =====================================================
    MR CO-ORDINATION
    ADMIN.JS
-   PRODUCTION VERSION
-   -----------------------------------------------------
-   Features:
-   1. Firebase Authentication Protection
-   2. Admin Login Check
-   3. Recent Coach Entry
-   4. Firebase Database Status
-   5. Refresh
-   6. Logout
-   7. Realtime History
+   FIXED PRODUCTION VERSION
 ===================================================== */
 
 
@@ -39,7 +30,6 @@ import {
 ===================================================== */
 
 let currentUser = null;
-
 let historyListenerStarted = false;
 
 
@@ -88,64 +78,45 @@ function setupAuthProtection() {
 
     onAuthStateChanged(auth, (user) => {
 
+        const loginStatus =
+            document.getElementById("loginStatus");
+
         if (!user) {
 
-            console.warn(
-                "No Admin Login Found"
-            );
+            console.warn("No Admin Login Found");
 
             currentUser = null;
-
-            const loginStatus =
-                document.getElementById("loginStatus");
 
             if (loginStatus) {
 
                 loginStatus.innerHTML =
-                    '<span class="text-danger">â Not Logged In</span>';
+                    '<i class="bi bi-x-circle-fill text-danger"></i> Not Logged In';
 
             }
 
-            /*
-             * Prevent direct access to admin.html
-             */
-
-            window.location.replace(
-                "./login.html"
-            );
+            window.location.replace("./login.html");
 
             return;
 
         }
 
 
-        /* ==========================
-           USER LOGGED IN
-        ========================== */
+        /* USER LOGGED IN */
 
         currentUser = user;
 
-        console.log(
-            "Admin Logged In:",
-            user.email
-        );
-
-
-        const loginStatus =
-            document.getElementById("loginStatus");
+        console.log("Admin Logged In:", user.email);
 
 
         if (loginStatus) {
 
             loginStatus.innerHTML =
-                '<span class="text-success">â Admin Logged In</span>';
+                '<i class="bi bi-check-circle-fill text-success"></i> Admin Logged In';
 
         }
 
 
-        /*
-         * Start history only after authentication
-         */
+        /* START HISTORY */
 
         loadRecentEntries();
 
@@ -175,15 +146,10 @@ function setupDatabaseStatus() {
 
 
             const databaseStatus =
-                document.getElementById(
-                    "databaseStatus"
-                );
-
+                document.getElementById("databaseStatus");
 
             const footerDatabase =
-                document.getElementById(
-                    "footerDatabase"
-                );
+                document.getElementById("footerDatabase");
 
 
             if (connected) {
@@ -191,34 +157,36 @@ function setupDatabaseStatus() {
                 if (databaseStatus) {
 
                     databaseStatus.innerHTML =
-                        '<span class="text-success">â Connected</span>';
+                        '<i class="bi bi-check-circle-fill text-success"></i> Connected';
 
                 }
-
 
                 if (footerDatabase) {
 
                     footerDatabase.innerHTML =
-                        '<span class="text-success">â Connected</span>';
+                        '<i class="bi bi-check-circle-fill text-success"></i> Connected';
 
                 }
+
+                console.log("Firebase Connected");
 
             } else {
 
                 if (databaseStatus) {
 
                     databaseStatus.innerHTML =
-                        '<span class="text-danger">â Offline</span>';
+                        '<i class="bi bi-x-circle-fill text-danger"></i> Offline';
 
                 }
-
 
                 if (footerDatabase) {
 
                     footerDatabase.innerHTML =
-                        '<span class="text-danger">â Offline</span>';
+                        '<i class="bi bi-x-circle-fill text-danger"></i> Offline';
 
                 }
+
+                console.warn("Firebase Offline");
 
             }
 
@@ -226,10 +194,27 @@ function setupDatabaseStatus() {
 
         (error) => {
 
-            console.error(
-                "Database Status Error:",
-                error
-            );
+            console.error("Database Status Error:", error);
+
+            const databaseStatus =
+                document.getElementById("databaseStatus");
+
+            const footerDatabase =
+                document.getElementById("footerDatabase");
+
+            if (databaseStatus) {
+
+                databaseStatus.innerHTML =
+                    '<i class="bi bi-exclamation-triangle-fill text-danger"></i> Error';
+
+            }
+
+            if (footerDatabase) {
+
+                footerDatabase.innerHTML =
+                    '<i class="bi bi-exclamation-triangle-fill text-danger"></i> Error';
+
+            }
 
         }
 
@@ -253,12 +238,6 @@ function loadRecentEntries() {
     historyListenerStarted = true;
 
 
-    /*
-     * Firebase path
-     *
-     * history/
-     */
-
     const historyRef =
         ref(database, "history");
 
@@ -274,9 +253,7 @@ function loadRecentEntries() {
                 ? snapshot.val()
                 : {};
 
-
             renderHistory(historyData);
-
 
             updateLastUpdate();
 
@@ -284,10 +261,7 @@ function loadRecentEntries() {
 
         (error) => {
 
-            console.error(
-                "History Load Error:",
-                error
-            );
+            console.error("History Load Error:", error);
 
         }
 
@@ -303,16 +277,12 @@ function loadRecentEntries() {
 function renderHistory(historyData) {
 
     const tbody =
-        document.getElementById(
-            "historyBody"
-        );
+        document.getElementById("historyBody");
 
 
     if (!tbody) {
 
-        console.warn(
-            "#historyBody not found"
-        );
+        console.warn("#historyBody not found");
 
         return;
 
@@ -323,12 +293,10 @@ function renderHistory(historyData) {
 
 
     const entries =
-        Object.entries(historyData);
+        Object.entries(historyData || {});
 
 
-    /*
-     * Latest entries first
-     */
+    /* LATEST ENTRIES FIRST */
 
     entries.sort((a, b) => {
 
@@ -343,9 +311,7 @@ function renderHistory(historyData) {
     });
 
 
-    /*
-     * Show latest 20 entries
-     */
+    /* LATEST 20 ENTRIES */
 
     const recentEntries =
         entries.slice(0, 20);
@@ -354,19 +320,12 @@ function renderHistory(historyData) {
     if (recentEntries.length === 0) {
 
         tbody.innerHTML = `
-
             <tr>
-
-                <td
-                    colspan="7"
+                <td colspan="7"
                     class="text-center text-muted p-4">
-
                     No Recent Coach Entry
-
                 </td>
-
             </tr>
-
         `;
 
         return;
@@ -374,87 +333,66 @@ function renderHistory(historyData) {
     }
 
 
-    recentEntries.forEach(
-        ([key, entry]) => {
+    recentEntries.forEach(([key, entry]) => {
 
-            const tr =
-                document.createElement("tr");
-
-
-            const shop =
-                entry.shop || "-";
+        const tr =
+            document.createElement("tr");
 
 
-            const line =
-                entry.line || "-";
+        const shop =
+            entry.shop || "-";
+
+        const line =
+            entry.line || "-";
+
+        const position =
+            entry.position || "-";
+
+        const coachNo =
+            entry.coachNo || "-";
+
+        const coachType =
+            entry.coachType || "-";
+
+        const status =
+            entry.status || "-";
+
+        const action =
+            entry.action || "ENTRY";
 
 
-            const position =
-                entry.position || "-";
+        tr.innerHTML = `
+
+            <td>${escapeHTML(shop)}</td>
+
+            <td>${escapeHTML(line)}</td>
+
+            <td>${escapeHTML(position)}</td>
+
+            <td>
+                <strong>${escapeHTML(coachNo)}</strong>
+            </td>
+
+            <td>${escapeHTML(coachType)}</td>
+
+            <td>
+                <span class="badge bg-primary">
+                    ${escapeHTML(status)}
+                </span>
+            </td>
+
+            <td>
+                <span class="badge bg-secondary">
+                    ${escapeHTML(action)}
+                </span>
+            </td>
+
+        `;
 
 
-            const coachNo =
-                entry.coachNo || "-";
+        tbody.appendChild(tr);
 
-
-            const coachType =
-                entry.coachType || "-";
-
-
-            const status =
-                entry.status || "-";
-
-
-            const action =
-                entry.action || "ENTRY";
-
-
-            tr.innerHTML = `
-
-                <td>
-                    ${escapeHTML(shop)}
-                </td>
-
-                <td>
-                    ${escapeHTML(line)}
-                </td>
-
-                <td>
-                    ${escapeHTML(position)}
-                </td>
-
-                <td>
-                    <strong>
-                        ${escapeHTML(coachNo)}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escapeHTML(coachType)}
-                </td>
-
-                <td>
-                    <span class="badge bg-primary">
-                        ${escapeHTML(status)}
-                    </span>
-                </td>
-
-                <td>
-
-                    <span class="badge bg-secondary">
-                        ${escapeHTML(action)}
-                    </span>
-
-                </td>
-
-            `;
-
-
-            tbody.appendChild(tr);
-
-        }
-
-    );
+    });
 
 }
 
@@ -482,9 +420,7 @@ function escapeHTML(value) {
 function updateLastUpdate() {
 
     const element =
-        document.getElementById(
-            "lastUpdate"
-        );
+        document.getElementById("lastUpdate");
 
 
     if (!element) {
@@ -495,9 +431,7 @@ function updateLastUpdate() {
 
 
     element.textContent =
-        new Date().toLocaleTimeString(
-            "en-IN"
-        );
+        new Date().toLocaleTimeString("en-IN");
 
 }
 
@@ -508,38 +442,27 @@ function updateLastUpdate() {
 
 function setupButtons() {
 
-    /*
-     * REFRESH
-     */
+    /* REFRESH */
 
     const refreshBtn =
-        document.getElementById(
-            "refreshBtn"
-        );
+        document.getElementById("refreshBtn");
 
 
     if (refreshBtn) {
 
-        refreshBtn.addEventListener(
-            "click",
-            () => {
+        refreshBtn.addEventListener("click", () => {
 
-                location.reload();
+            location.reload();
 
-            }
-        );
+        });
 
     }
 
 
-    /*
-     * LOGOUT
-     */
+    /* LOGOUT */
 
     const logoutBtn =
-        document.getElementById(
-            "logoutBtn"
-        );
+        document.getElementById("logoutBtn");
 
 
     if (logoutBtn) {
@@ -562,9 +485,7 @@ async function logoutAdmin() {
 
     if (!currentUser) {
 
-        window.location.replace(
-            "./login.html"
-        );
+        window.location.replace("./login.html");
 
         return;
 
@@ -572,9 +493,7 @@ async function logoutAdmin() {
 
 
     const confirmed =
-        confirm(
-            "Are you sure you want to logout?"
-        );
+        confirm("Are you sure you want to logout?");
 
 
     if (!confirmed) {
@@ -585,9 +504,7 @@ async function logoutAdmin() {
 
 
     const logoutBtn =
-        document.getElementById(
-            "logoutBtn"
-        );
+        document.getElementById("logoutBtn");
 
 
     try {
@@ -605,22 +522,15 @@ async function logoutAdmin() {
         await signOut(auth);
 
 
-        console.log(
-            "Admin Logout Successful"
-        );
+        console.log("Admin Logout Successful");
 
 
-        window.location.replace(
-            "./login.html"
-        );
+        window.location.replace("./login.html");
 
 
     } catch (error) {
 
-        console.error(
-            "Logout Error:",
-            error
-        );
+        console.error("Logout Error:", error);
 
 
         alert(
@@ -647,58 +557,42 @@ async function logoutAdmin() {
    NETWORK STATUS
 ===================================================== */
 
-window.addEventListener(
-    "online",
-    () => {
+window.addEventListener("online", () => {
 
-        console.log(
-            "Internet Connected"
-        );
+    console.log("Internet Connected");
 
-    }
-);
+});
 
 
-window.addEventListener(
-    "offline",
-    () => {
+window.addEventListener("offline", () => {
 
-        console.warn(
-            "Internet Disconnected"
-        );
+    console.warn("Internet Disconnected");
 
-    }
-);
+});
 
 
 /* =====================================================
    GLOBAL ERROR HANDLER
 ===================================================== */
 
-window.addEventListener(
-    "error",
-    (event) => {
+window.addEventListener("error", (event) => {
 
-        console.error(
-            "Admin JS Error:",
-            event.error || event.message
-        );
+    console.error(
+        "Admin JS Error:",
+        event.error || event.message
+    );
 
-    }
-);
+});
 
 
-window.addEventListener(
-    "unhandledrejection",
-    (event) => {
+window.addEventListener("unhandledrejection", (event) => {
 
-        console.error(
-            "Admin Promise Error:",
-            event.reason
-        );
+    console.error(
+        "Admin Promise Error:",
+        event.reason
+    );
 
-    }
-);
+});
 
 
 /* =====================================================
@@ -720,6 +614,4 @@ window.adminPanel = {
    READY
 ===================================================== */
 
-console.log(
-    "MR CO-ORDINATION ADMIN PANEL READY"
-);
+console.log("MR CO-ORDINATION ADMIN PANEL READY");
