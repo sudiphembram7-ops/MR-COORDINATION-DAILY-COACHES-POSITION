@@ -4630,237 +4630,250 @@ function clearCellHighlights() {
 
 /* =========================================================
    PULLED OUT LIST
+   VERSION 15.7
+   RETURN + DELETE BUTTON
 ========================================================= */
 
-function drawPulledOutList(
-    filter = ""
-) {
+function drawPulledOutList(filter = "") {
 
     const tbody =
-        document.getElementById(
-            "pulledOutList"
-        );
-
+        document.getElementById("pulledOutList");
 
     const countElement =
-        document.getElementById(
-            "pulledOutCount"
-        );
-
+        document.getElementById("pulledOutCount");
 
     const searchCount =
-        document.getElementById(
-            "pulledOutSearchCount"
-        );
+        document.getElementById("pulledOutSearchCount");
 
+    if (!tbody) return;
 
-    if (!tbody)
-        return;
-
-
-    const all =
-        Object.entries(
-            pulledOutData || {}
-        );
-
+    const all = Object.entries(pulledOutData || {});
 
     if (countElement) {
-
-        countElement.textContent =
-            all.length;
-
+        countElement.textContent = all.length;
     }
 
+    const keyword = clean(filter).toLowerCase();
 
-    const keyword =
-        clean(
-            filter
-        ).toLowerCase();
+    const filtered = all.filter(([key, coach]) => {
 
+        if (!keyword) return true;
 
-    const filtered =
-        all.filter(
-            ([key, coach]) => {
+        const text = [
+            coach?.coachNo,
+            coach?.coachType,
+            coach?.status,
+            coach?.originalShop,
+            coach?.originalLine,
+            coach?.originalPosition,
+            key
+        ].join(" ").toLowerCase();
 
-                if (!keyword)
-                    return true;
-
-
-                const text = [
-
-                    coach?.coachNo,
-
-                    coach?.coachType,
-
-                    coach?.status,
-
-                    coach?.originalShop,
-
-                    coach?.originalLine,
-
-                    coach?.originalPosition,
-
-                    key
-
-                ]
-                    .join(" ")
-                    .toLowerCase();
-
-
-                return text.includes(
-                    keyword
-                );
-
-            }
-        );
-
+        return text.includes(keyword);
+    });
 
     if (searchCount) {
-
         searchCount.textContent =
-            keyword
-                ? `${filtered.length} found`
-                : "";
-
+            keyword ? `${filtered.length} found` : "";
     }
-
 
     if (!filtered.length) {
 
         tbody.innerHTML = `
-
             <tr>
-
-                <td
-                    colspan="7"
-                    class="text-center text-muted"
-                >
+                <td colspan="7"
+                    class="text-center text-muted">
                     No pulled-out coaches.
                 </td>
-
             </tr>
-
         `;
 
         return;
-
     }
 
+    tbody.innerHTML = filtered.map(([key, coach]) => {
 
-    tbody.innerHTML =
-        filtered
-            .map(
-                ([key, coach]) => {
+        const time = formatDateTime(coach?.pulledOutAt);
 
-                    const time =
-                        formatDateTime(
-                            coach?.pulledOutAt
-                        );
+        return `
+            <tr>
 
+                <td>
+                    <strong>
+                        ${escapeHTML(coach?.coachNo || "")}
+                    </strong>
+                </td>
 
-                    return `
+                <td>
+                    ${escapeHTML(coach?.coachType || "")}
+                </td>
 
-                        <tr>
+                <td>
+                    ${escapeHTML(coach?.status || "")}
+                </td>
 
-                            <td>
-                                <strong>
-                                    ${escapeHTML(
-                                        coach?.coachNo || ""
-                                    )}
-                                </strong>
-                            </td>
+                <td>
+                    ${escapeHTML(coach?.originalShop || "")}
+                </td>
 
-                            <td>
-                                ${escapeHTML(
-                                    coach?.coachType || ""
-                                )}
-                            </td>
+                <td>
+                    ${escapeHTML(
+                        `${coach?.originalLine || ""} / ${coach?.originalPosition || ""}`
+                    )}
+                </td>
 
-                            <td>
-                                ${escapeHTML(
-                                    coach?.status || ""
-                                )}
-                            </td>
+                <td>
+                    ${escapeHTML(time)}
+                </td>
 
-                            <td>
-                                ${escapeHTML(
-                                    coach?.originalShop || ""
-                                )}
-                            </td>
+                <td class="text-nowrap">
 
-                            <td>
-                                ${escapeHTML(
-                                    `${coach?.originalLine || ""} / ${coach?.originalPosition || ""}`
-                                )}
-                            </td>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-success pulled-return-btn"
+                        data-key="${escapeAttribute(key)}">
+                        ↩ RETURN
+                    </button>
 
-                            <td>
-                                ${escapeHTML(
-                                    time
-                                )}
-                            </td>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-danger pulled-delete-btn"
+                        data-key="${escapeAttribute(key)}">
+                        <i class="bi bi-trash"></i>
+                        DELETE
+                    </button>
 
-                            <td>
+                </td>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-success pulled-return-btn"
-                                    data-key="${escapeAttribute(key)}"
-                                >
-                                    ↩ RETURN
-                                </button>
+            </tr>
+        `;
 
-                            </td>
-
-                        </tr>
-
-                    `;
-
-                }
-            )
-            .join("");
+    }).join("");
 
 
-    tbody
-        .querySelectorAll(
-            ".pulled-return-btn"
-        )
-        .forEach(
-            button => {
+    /* RETURN BUTTON */
 
-                button.addEventListener(
-                    "click",
-                    event => {
+    tbody.querySelectorAll(".pulled-return-btn").forEach(button => {
 
-                        event.preventDefault();
+        button.addEventListener("click", event => {
 
-                        const key =
-                            button.dataset.key;
+            event.preventDefault();
 
+            const key = button.dataset.key;
 
-                        const coach =
-                            pulledOutData?.[
-                                key
-                            ];
+            const coach = pulledOutData?.[key];
+
+            if (!coach) return;
+
+            openPulledOutCoach(key, coach);
+
+        });
+
+    });
 
 
-                        if (!coach)
-                            return;
+    /* DELETE BUTTON */
 
+    tbody.querySelectorAll(".pulled-delete-btn").forEach(button => {
 
-                        openPulledOutCoach(
-                            key,
-                            coach
-                        );
+        button.addEventListener("click", event => {
 
-                    }
-                );
+            event.preventDefault();
 
-            }
-        );
+            const key = button.dataset.key;
+
+            deletePulledOutFromList(key);
+
+        });
+
+    });
 
 }
 
+
+/* =========================================================
+   DELETE PULLED OUT COACH FROM LIST
+   VERSION 15.7
+========================================================= */
+
+async function deletePulledOutFromList(key) {
+
+    if (!requireAdmin()) return;
+
+    const coach = pulledOutData?.[key];
+
+    if (!coach) {
+
+        showMessage(
+            "Pulled Out Coach not found.",
+            "warning"
+        );
+
+        return;
+    }
+
+    const coachNo = coach.coachNo || "Unknown";
+
+    if (!confirm(
+        `Are you sure you want to permanently DELETE Coach ${coachNo}?`
+    )) {
+        return;
+    }
+
+    try {
+
+        const updates = {};
+
+        updates[
+            `${PULLED_OUT_PATH}/${key}`
+        ] = null;
+
+        await update(ref(database), updates);
+
+        await writeLocalHistory(
+            "DELETE_PULLED_OUT",
+            coach
+        );
+
+        if (selectedPulledOutKey === key) {
+
+            returnMode = false;
+            selectedPulledOutKey = "";
+            selectedPulledOutCoach = null;
+            selectedLine = "";
+            selectedPosition = "";
+            editingMode = false;
+
+            removeEmptyCellHighlight();
+
+            closeModal();
+
+            updateEditButtons();
+        }
+
+        await loadPulledOutOnce();
+
+        showMessage(
+            `Coach ${coachNo} permanently deleted.`,
+            "success"
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "PULLED OUT LIST DELETE ERROR:",
+            error
+        );
+
+        showMessage(
+            error?.message || "Delete failed.",
+            "danger"
+        );
+
+    }
+
+}
 
 /* =========================================================
    PULLED OUT SEARCH
