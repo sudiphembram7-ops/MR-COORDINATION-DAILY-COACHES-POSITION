@@ -658,6 +658,208 @@ footer {
 
 }
 
+/* =====================================
+   PREMIUM CENTER DESIGN
+   MR COORDINATION HOMEPAGE
+===================================== */
+
+/* HEADER CENTER */
+
+.header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.header h1,
+.header h2,
+.header p {
+    text-align: center;
+}
+
+/* NAVIGATION CENTER */
+
+nav {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+}
+
+nav a {
+    text-align: center;
+}
+
+/* WELCOME CENTER */
+
+.welcome {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30px 15px;
+}
+
+.welcome h2 {
+    text-align: center;
+}
+
+.welcome p {
+    text-align: center;
+    line-height: 1.35;
+}
+
+/* MENU CARDS CENTER */
+
+.menu {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 0 15px;
+    justify-content: center;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 220px;
+    padding: 20px;
+    transition: 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px #a9c4ec;
+}
+
+.card::before {
+    position: static;
+    display: block;
+    flex-shrink: 0;
+    margin: 0 auto 12px;
+}
+
+.card h3,
+.card p {
+    margin: 0;
+    text-align: center;
+}
+
+.card p {
+    margin-top: 5px;
+}
+
+.card button {
+    margin: 15px auto 0;
+    min-width: 150px;
+}
+
+/* HISTORY CARD CENTER */
+
+.card:nth-child(5) {
+    grid-column: 1 / -1;
+}
+
+/* TEAM SECTION CENTER */
+
+.team {
+    max-width: 1200px;
+    margin: 25px auto;
+}
+
+.team-title {
+    text-align: center;
+}
+
+.team-list {
+    justify-content: center;
+    align-items: stretch;
+}
+
+.person {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 15px 8px;
+}
+
+.person-photo {
+    width: 100%;
+    max-width: 160px;
+    margin: 0 auto 12px;
+}
+
+.person h3,
+.person p {
+    text-align: center;
+}
+
+.person button {
+    margin-top: auto;
+}
+
+/* FOOTER CENTER */
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* MOBILE CENTER */
+
+@media(max-width:700px) {
+
+    .header {
+        text-align: center;
+    }
+
+    nav {
+        gap: 5px;
+    }
+
+    nav a {
+        padding: 8px;
+        border: none;
+        font-size: 14px;
+    }
+
+    .menu {
+        grid-template-columns: 1fr;
+        padding: 0 12px;
+    }
+
+    .card {
+        min-height: 190px;
+    }
+
+    .card:nth-child(5) {
+        grid-column: auto;
+    }
+
+    .team-list {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .person {
+        min-width: 0;
+    }
+
+    .person button {
+        font-size: 12px;
+    }
+}
+
+
 </style>
 
 </head>
