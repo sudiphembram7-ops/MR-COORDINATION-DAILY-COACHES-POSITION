@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MR COACH STOCK DASHBOARD</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
+header{background:#102b50;color:white;padding:20px;text-align:center}
+header h1{font-size:23px}
+header p{margin-top:6px;color:#dbeafe}
+.container{max-width:1500px;margin:auto;padding:15px}
+.notice{padding:12px;background:#dbeafe;color:#123b68;border-radius:8px;margin-bottom:14px;font-weight:bold}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:15px}
+.card{background:white;padding:17px;border-radius:10px;box-shadow:0 2px 8px #0001}
+.card span{font-size:13px;color:#64748b}
+.card strong{display:block;font-size:26px;margin-top:8px;color:#123b68}
+.panel{background:white;border-radius:10px;padding:16px;margin-bottom:15px;box-shadow:0 2px 8px #0001}
+.panel h2{font-size:18px;color:#123b68;margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+label{font-size:13px;font-weight:bold;display:block;margin-bottom:5px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;background:white}
+textarea{min-height:40px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button,.file-label{border:0;border-radius:6px;padding:10px 14px;background:#1456a0;color:white;font-weight:bold;cursor:pointer;font-size:13px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.secondary{background:#475569}
+.danger{background:#b42318}
+.green{background:#15803d}
+.file-label input{display:none}
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.table-wrap{overflow:auto;width:100%}
+table{width:100%;border-collapse:collapse;min-width:1200px;font-size:13px}
+th{background:#123b68;color:white;position:sticky;top:0}
+th,td{padding:9px 8px;border:1px solid #dbe2ea;text-align:left;white-space:nowrap}
+tbody tr:nth-child(even){background:#f8fafc}
+.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#e0edff;color:#17477c;font-size:11px}
+.rowbtn{padding:6px 9px;margin:2px}
+#countLabel{font-size:13px;color:#64748b;margin-bottom:8px}
+.empty{text-align:center;padding:25px;color:#64748b}
+.footer{text-align:center;padding:15px;color:#64748b;font-size:12px}
+@media(max-width:800px){
+ .cards{grid-template-columns:repeat(2,1fr)}
+ .form-grid{grid-template-columns:repeat(2,1fr)}
+ .toolbar{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+ header h1{font-size:18px}
+ .container{padding:9px}
+ .form-grid{grid-template-columns:1fr}
+ .card strong{font-size:22px}
+}
+@media print{
+ header{background:white;color:black}
+ .no-print,.actions,.toolbar{display:none!important}
+ body{background:white}
+ .panel,.card{box-shadow:none}
+ table{font-size:10px;min-width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>MR CO-ORDINATION DAILY COACH STOCK</h1>
+    <p>LILUAH WORKSHOP | MR CO-ORDINATION SECTION</p>
+</header>
+
+<div class="container">
+
+    <div class="notice" id="notice">
+        Connecting to Firebase...
+    </div>
+
+    <section class="cards">
+        <div class="card">
+            <span>TOTAL COACHES</span>
+            <strong id="total">0</strong>
+        </div>
+        <div class="card">
+            <span>PENDING</span>
+            <strong id="pending">0</strong>
+        </div>
+        <div class="card">
+            <span>TRAFFIC OUT / MOVEMENT</span>
+            <strong id="movement">0</strong>
+        </div>
+        <div class="card">
+            <span>FINAL CONDEMN / SUMMARY</span>
+            <strong id="final">0</strong>
+        </div>
+    </section>
+
+    <section class="panel no-print">
+        <h2 id="formTitle">ADD COACH STOCK RECORD</h2>
+
+        <form id="coachForm">
+            <input type="hidden" id="editIndex" value="-1">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Shop</label>
+                    <input id="shop" list="shopList" required>
+                    <datalist id="shopList"></datalist>
+                </div>
+
+                <div>
+                    <label>Work Section / Location</label>
+                    <input id="location" list="locations" required>
+                    <datalist id="locations"></datalist>
+                </div>
+
+                <div>
+                    <label>Date Placed</label>
+                    <input type="date" id="datePlaced">
+                </div>
+
+                <div>
+                    <label>Coach No</label>
+                    <input id="coachNo" required>
+                </div>
+
+                <div>
+                    <label>Coach Code</label>
+                    <input id="coachCode">
+                </div>
+
+                <div>
+                    <label>Date In</label>
+                    <input type="date" id="dateIn">
+                </div>
+
+                <div>
+                    <label>PDF Detention Days</label>
+                    <input type="number" id="pdfDays" min="0">
+                </div>
+
+                <div>
+                    <label>Detention Days (Calculated)</label>
+                    <input type="number" id="calcDays" min="0">
+                </div>
+
+                <div>
+                    <label>Status</label>
+                    <select id="status">
+                        <option value="Pending">Pending</option>
+                        <option value="Traffic Out / Movement">Traffic Out / Movement</option>
+                        <option value="Final Condemn / Summary">Final Condemn / Summary</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Remarks / Verify</label>
+                    <input id="remarks">
+                </div>
+
+            </div>
+
+            <div class="actions">
+                <button type="submit" id="saveBtn">SAVE RECORD</button>
+                <button type="button" class="secondary" id="clearBtn">CLEAR</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>COACH STOCK DETAILS</h2>
+
+        <div class="toolbar no-print">
+            <input id="search" placeholder="Search Coach / Shop / Location / Status">
+            <select id="shopFilter">
+                <option value="">All Shops</option>
+            </select>
+            <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Traffic Out / Movement">Traffic Out / Movement</option>
+                <option value="Final Condemn / Summary">Final Condemn / Summary</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+
+        <div class="actions no-print">
+            <button type="button" id="exportBtn" class="green">EXPORT CSV</button>
+
+            <label class="file-label">
+                IMPORT CSV
+                <input type="file" id="csvFile" accept=".csv">
+            </label>
+
+            <button type="button" id="backupBtn" class="secondary">JSON BACKUP</button>
+
+            <label class="file-label secondary">
+                RESTORE JSON
+                <input type="file" id="jsonFile" accept=".json">
+            </label>
+
+            <button type="button" id="printBtn" class="secondary">PRINT</button>
+        </div>
+
+        <p id="countLabel">Showing 0 records</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>SL</th>
+                        <th>Shop</th>
+                        <th>Location</th>
+                        <th>Date Placed</th>
+                        <th>Coach No</th>
+                        <th>Coach Code</th>
+                        <th>Date In</th>
+                        <th>PDF Days</th>
+                        <th>Calculated Days</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                        <th class="no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="12" class="empty">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="actions no-print">
+        <button type="button" id="resetBtn" class="danger">
+            RESET ORIGINAL DATA
+        </button>
+    </section>
+
+    <div class="footer">
+        MR CO-ORDINATION SECTION | LILUAH WORKSHOP
+    </div>
+
+</div>
+
+<script type="module" src="./coach-stock.js"></script>
+</body>
+</html>
