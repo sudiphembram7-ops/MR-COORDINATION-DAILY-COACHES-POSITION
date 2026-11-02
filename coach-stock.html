@@ -243,6 +243,54 @@ tbody tr:nth-child(even){background:#f8fafc}
 
 </div>
 
-<script type="module" src="./coach-stock.js"></script>
+<!-- MODULE ERROR DIAGNOSTIC -->
+<script>
+window.addEventListener("error", function(event) {
+
+    console.error("PAGE ERROR:", event.message);
+
+    const notice = document.getElementById("notice");
+
+    if (notice) {
+        notice.textContent =
+            "JAVASCRIPT ERROR: " + event.message;
+        notice.style.background = "#fee2e2";
+        notice.style.color = "#991b1b";
+    }
+
+});
+
+window.addEventListener("unhandledrejection", function(event) {
+
+    console.error("PROMISE ERROR:", event.reason);
+
+    const notice = document.getElementById("notice");
+
+    if (notice) {
+        notice.textContent =
+            "PROMISE ERROR: " + event.reason;
+    }
+
+});
+</script>
+
+<!-- COACH STOCK MODULE -->
+<script
+    id="coachStockModule"
+    type="module"
+    src="./coach-stock.js">
+</script>
+
+<script>
+document
+    .getElementById("coachStockModule")
+    .addEventListener("error", function() {
+
+        document.getElementById("notice").textContent =
+            "MODULE LOAD ERROR: coach-stock.js or firebase-config.js not found.";
+
+    });
+</script>
+
 </body>
 </html>
