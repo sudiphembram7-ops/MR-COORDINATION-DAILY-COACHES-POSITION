@@ -26,7 +26,7 @@ import {
 ========================================================= */
 
 // Paste the UID of your designated Admin here.
-const ADMIN_UID = "PASTE_ADMIN_UID_HERE";
+const ADMIN_UID = "jHNrX5UaJla30nwGA48QHf87oaz2";
 
 const DB_PATH = "teamDuty/records";
 
