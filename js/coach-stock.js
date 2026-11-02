@@ -326,36 +326,64 @@ function startPublicFirebaseListener() {
 
 
 /* =========================================================
-   FIREBASE REALTIME LISTENER
+   FIREBASE CONNECTION DIAGNOSTIC — V2.3
 ========================================================= */
+
+let firebaseConnected = false;
 
 function listenFirebaseRecords() {
 
-    console.log(
-        "COACH STOCK: Starting Firebase connection..."
-    );
+    console.log("Starting Firebase diagnostic...");
 
     showNotice("Connecting to Firebase...");
 
-    try {
+    if (!database) {
+        showNotice("ERROR: Firebase Database not initialized.", true);
+        return;
+    }
 
-        if (!database) {
+    // CHECK REALTIME DATABASE CONNECTION
 
-            throw new Error(
-                "Firebase Database is not initialized."
+    const connectionRef = ref(database, ".info/connected");
+
+    onValue(
+        connectionRef,
+
+        snapshot => {
+
+            firebaseConnected = snapshot.val() === true;
+
+            console.log(
+                "Firebase Server Connection:",
+                firebaseConnected
+            );
+
+            if (firebaseConnected) {
+                showNotice("Firebase server connected. Loading coach records...");
+            } else {
+                showNotice("Connecting to Firebase server...");
+            }
+
+        },
+
+        error => {
+
+            console.error("CONNECTION ERROR:", error);
+
+            showNotice(
+                "CONNECTION ERROR: " + error.message,
+                true
             );
 
         }
+    );
 
-        const recordsRef = ref(
-            database,
-            DB_PATH
-        );
 
-        console.log(
-            "Firebase Database Path:",
-            DB_PATH
-        );
+    // LOAD COACH RECORDS
+
+    try {
+
+        const recordsRef = ref(database, DB_PATH);
 
         onValue(
 
@@ -363,9 +391,7 @@ function listenFirebaseRecords() {
 
             snapshot => {
 
-                console.log(
-                    "Firebase Connected Successfully"
-                );
+                console.log("Coach records received.");
 
                 const data = snapshot.val() || {};
 
@@ -375,32 +401,20 @@ function listenFirebaseRecords() {
 
                         id,
 
-                        order: Number(
-                            item?.order || 0
-                        ),
+                        order: Number(item?.order || 0),
 
-                        row: normalizeRow(
-                            item?.values
-                        )
+                        row: normalizeRow(item?.values)
 
                     }))
 
-                    .sort(
-                        (a, b) => a.order - b.order
-                    );
+                    .sort((a, b) => a.order - b.order);
 
 
-                records = sorted.map(
-                    item => item.row
-                );
+                records = sorted.map(item => item.row);
 
-                recordIds = sorted.map(
-                    item => item.id
-                );
+                recordIds = sorted.map(item => item.id);
 
-                recordOrders = sorted.map(
-                    item => item.order
-                );
+                recordOrders = sorted.map(item => item.order);
 
 
                 updateFilters();
@@ -418,14 +432,10 @@ function listenFirebaseRecords() {
 
             error => {
 
-                console.error(
-                    "FIREBASE LISTENER ERROR:",
-                    error
-                );
+                console.error("RECORD LISTENER ERROR:", error);
 
                 showNotice(
-                    "FIREBASE ERROR: " +
-                    error.message,
+                    "DATABASE READ ERROR: " + error.message,
                     true
                 );
 
@@ -435,27 +445,16 @@ function listenFirebaseRecords() {
 
     } catch (error) {
 
-        console.error(
-            "FIREBASE STARTUP ERROR:",
-            error
-        );
+        console.error("FIREBASE STARTUP ERROR:", error);
 
         showNotice(
-            "STARTUP ERROR: " +
-            error.message,
+            "STARTUP ERROR: " + error.message,
             true
         );
 
     }
 
 }
-
-
-// Start public connection immediately.
-
-startPublicFirebaseListener();
-
-
 /* =========================================================
    AUTH STATE LISTENER
 ========================================================= */
@@ -532,16 +531,12 @@ onAuthStateChanged(
 
         } else {
 
-            setText(
-                "adminLoginStatus",
-                "PUBLIC VIEWER MODE"
-            );
+    setText(
+        "adminLoginStatus",
+        "PUBLIC VIEWER MODE"
+    );
 
-            showNotice(
-                "Public Viewer Mode — Login not required."
-            );
-
-        }
+}
 
     },
 
