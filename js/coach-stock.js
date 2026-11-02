@@ -1,27 +1,30 @@
+
 /* =========================================================
    MR COACH STOCK DASHBOARD
    FILE: coach-stock.js
-   VERSION: 2.1 FINAL
+   VERSION: 2.2 FINAL
    DATABASE: teamDuty/records
 
    PUBLIC VIEWER:
-   ✔ View all records without login
-   ✔ Search and filter
-   ✔ CSV export
-   ✔ JSON backup
+   ✔ Public Dashboard
+   ✔ Realtime Firebase Listener
+   ✔ Search / Filter
+   ✔ CSV Export
+   ✔ JSON Backup
    ✔ Print
 
    DESIGNATED ADMIN:
-   ✔ Email / Password login
+   ✔ Email / Password Login
    ✔ Add / Edit / Delete
-   ✔ CSV import
-   ✔ JSON restore
-   ✔ Reset original data
+   ✔ CSV Import
+   ✔ JSON Restore
+   ✔ Reset Original Data
 
    SECURITY:
+   ✔ Admin UID Verification
    ✔ Stable Firebase Record ID
-   ✔ Admin UID verification
-   ✔ Public Firebase listener
+   ✔ Public Read Listener
+   ✔ Admin-only Write (also enforced by RTDB Rules)
 ========================================================= */
 
 import { database, auth } from "./firebase-config.js";
@@ -67,14 +70,16 @@ const HEADERS = [
 /* =========================================================
    ORIGINAL PDF DATA
 
-   Paste original PDF data here.
+   Add original PDF rows here.
    Each row must contain exactly 10 values.
+
+   Example:
+   ["N SHOP","N2","2026-10-01",
+    "ER123456","LHB","2026-10-02",
+    5,5,"Pending",""]
 ========================================================= */
 
 const ORIGINAL_DATA = [
-
-    // Example:
-    // ["N SHOP","N2","2026-10-01","ER123456","LHB","2026-10-02",5,5,"Pending",""]
 
 ];
 
@@ -110,29 +115,35 @@ const FORM_IDS = [
 
 
 /* =========================================================
-   SAFE ELEMENT CHECK
+   SAFE ELEMENT FUNCTIONS
 ========================================================= */
 
 function setText(id, value) {
+
     const element = $(id);
-    if (element) element.textContent = value;
+
+    if (element) {
+        element.textContent = value;
+    }
 }
 
 function setDisabled(id, value) {
+
     const element = $(id);
-    if (element) element.disabled = value;
+
+    if (element) {
+        element.disabled = value;
+    }
 }
-
-
-/* =========================================================
-   NOTICE
-========================================================= */
 
 function showNotice(message, error = false) {
 
     const notice = $("notice");
 
-    if (!notice) return;
+    if (!notice) {
+        console.log(message);
+        return;
+    }
 
     notice.textContent = message;
 
@@ -141,247 +152,34 @@ function showNotice(message, error = false) {
 
     notice.style.color =
         error ? "#991b1b" : "#123b68";
+
+    notice.style.display = "block";
 }
 
 
 /* =========================================================
-   AUTHENTICATION
+   GLOBAL JAVASCRIPT ERROR DIAGNOSTIC
 ========================================================= */
 
-// ADMIN LOGIN
+window.addEventListener("error", event => {
 
-if ($("adminLoginBtn")) {
+    console.error(
+        "COACH STOCK JAVASCRIPT ERROR:",
+        event.message,
+        event.filename,
+        event.lineno
+    );
 
-    $("adminLoginBtn").addEventListener("click", async () => {
-
-        const email = $("adminEmail")?.value.trim();
-        const password = $("adminPassword")?.value;
-
-        if (!email || !password) {
-            alert("Please enter Admin Email and Password.");
-            return;
-        }
-
-        $("adminLoginBtn").disabled = true;
-
-        try {
-
-            await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
-
-            showNotice("Login successful. Checking Admin permission...");
-
-        } catch (error) {
-
-            alert("Login Failed: " + error.message);
-
-        } finally {
-
-            $("adminLoginBtn").disabled = false;
-        }
-    });
-}
-
-
-// ADMIN LOGOUT
-
-if ($("adminLogoutBtn")) {
-
-    $("adminLogoutBtn").addEventListener("click", async () => {
-
-        try {
-
-            await signOut(auth);
-
-            showNotice("Admin logged out successfully.");
-
-        } catch (error) {
-
-            alert("Logout Error: " + error.message);
-        }
-    });
-}
-
-
-/* =========================================================
-   PUBLIC FIREBASE LISTENER
-
-   IMPORTANT:
-   This starts without login.
-========================================================= */
-
-function startPublicFirebaseListener() {
-
-    if (firebaseListenerStarted) return;
-
-    firebaseListenerStarted = true;
-
-    listenFirebaseRecords();
-}
-
-startPublicFirebaseListener();
-
-
-/* =========================================================
-   AUTH STATE LISTENER
-========================================================= */
-
-onAuthStateChanged(auth, async user => {
-
-    currentUser = user;
-
-    isAdmin =
-        !!user &&
-        user.uid === ADMIN_UID;
-
-    applyPermission();
-
-    // Login panel
-
-    if ($("adminLoginBtn")) {
-        $("adminLoginBtn").style.display =
-            user ? "none" : "inline-block";
-    }
-
-    if ($("adminLogoutBtn")) {
-        $("adminLogoutBtn").style.display =
-            user ? "inline-block" : "none";
-    }
-
-    if ($("adminEmail")) {
-        $("adminEmail").style.display =
-            user ? "none" : "inline-block";
-    }
-
-    if ($("adminPassword")) {
-        $("adminPassword").style.display =
-            user ? "none" : "inline-block";
-    }
-
-    if (isAdmin) {
-
-        setText("adminLoginStatus", "ADMIN MODE ACTIVE");
-
-        showNotice("Admin Login Successful.");
-
-        await seedOriginalDataIfEmpty();
-
-    } else if (user) {
-
-        setText(
-            "adminLoginStatus",
-            "VIEWER MODE — ADMIN ACCESS DENIED"
-        );
-
-        showNotice(
-            "This account is not the designated Admin. Viewer Mode active.",
-            true
-        );
-
-    } else {
-
-        setText("adminLoginStatus", "PUBLIC VIEWER MODE");
-
-        showNotice(
-            "Public Viewer Mode — Login not required."
-        );
-    }
 });
 
+window.addEventListener("unhandledrejection", event => {
 
-/* =========================================================
-   PERMISSION CONTROL
-========================================================= */
+    console.error(
+        "COACH STOCK PROMISE ERROR:",
+        event.reason
+    );
 
-function applyPermission() {
-
-    const adminOnlyIds = [
-        "saveBtn",
-        "resetBtn",
-        "csvFile",
-        "jsonFile"
-    ];
-
-    adminOnlyIds.forEach(id => {
-        setDisabled(id, !isAdmin);
-    });
-
-    FORM_IDS.forEach(id => {
-        setDisabled(id, !isAdmin);
-    });
-
-    document.querySelectorAll(
-        ".edit-action, .delete-action"
-    ).forEach(button => {
-        button.disabled = !isAdmin;
-    });
-
-    // Clear form is available to everyone.
-
-    setDisabled("clearBtn", false);
-
-    // Update edit/delete visibility.
-
-    document.querySelectorAll(
-        ".edit-action, .delete-action"
-    ).forEach(button => {
-        button.style.display =
-            isAdmin ? "inline-block" : "none";
-    });
-}
-
-
-/* =========================================================
-   FIREBASE REALTIME LISTENER
-========================================================= */
-
-function listenFirebaseRecords() {
-
-    const recordsRef = ref(database, DB_PATH);
-
-    onValue(recordsRef, snapshot => {
-
-        const data = snapshot.val() || {};
-
-        const sorted = Object.entries(data)
-            .map(([id, item]) => ({
-
-                id,
-
-                order: Number(item.order || 0),
-
-                row: normalizeRow(item.values)
-
-            }))
-            .sort((a, b) => a.order - b.order);
-
-        records = sorted.map(item => item.row);
-
-        recordIds = sorted.map(item => item.id);
-
-        recordOrders = sorted.map(item => item.order);
-
-        updateFilters();
-
-        render();
-
-        showNotice(
-            "Firebase Online — " +
-            records.length +
-            " Coach Records Loaded"
-        );
-
-    }, error => {
-
-        showNotice(
-            "Firebase Error: " + error.message,
-            true
-        );
-    });
-}
+});
 
 
 /* =========================================================
@@ -395,6 +193,7 @@ function normalizeRow(values) {
         return HEADERS.map((_, index) =>
             values[index] ?? ""
         );
+
     }
 
     if (values && typeof values === "object") {
@@ -411,9 +210,410 @@ function normalizeRow(values) {
             values.status ?? "",
             values.remarks ?? ""
         ];
+
     }
 
     return Array(10).fill("");
+
+}
+
+
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
+
+// ADMIN LOGIN
+
+if ($("adminLoginBtn")) {
+
+    $("adminLoginBtn").addEventListener(
+        "click",
+        async () => {
+
+            const email =
+                $("adminEmail")?.value.trim();
+
+            const password =
+                $("adminPassword")?.value;
+
+            if (!email || !password) {
+
+                alert(
+                    "Please enter Admin Email and Password."
+                );
+
+                return;
+            }
+
+            setDisabled("adminLoginBtn", true);
+
+            try {
+
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+                showNotice(
+                    "Login successful. Checking Admin permission..."
+                );
+
+            } catch (error) {
+
+                console.error("LOGIN ERROR:", error);
+
+                alert(
+                    "Login Failed: " + error.message
+                );
+
+            } finally {
+
+                setDisabled("adminLoginBtn", false);
+
+            }
+
+        }
+    );
+
+}
+
+
+// ADMIN LOGOUT
+
+if ($("adminLogoutBtn")) {
+
+    $("adminLogoutBtn").addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                await signOut(auth);
+
+                showNotice(
+                    "Admin logged out successfully."
+                );
+
+            } catch (error) {
+
+                alert(
+                    "Logout Error: " + error.message
+                );
+
+            }
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PUBLIC FIREBASE LISTENER
+
+   Starts without login.
+========================================================= */
+
+function startPublicFirebaseListener() {
+
+    if (firebaseListenerStarted) return;
+
+    firebaseListenerStarted = true;
+
+    listenFirebaseRecords();
+
+}
+
+
+/* =========================================================
+   FIREBASE REALTIME LISTENER
+========================================================= */
+
+function listenFirebaseRecords() {
+
+    console.log(
+        "COACH STOCK: Starting Firebase connection..."
+    );
+
+    showNotice("Connecting to Firebase...");
+
+    try {
+
+        if (!database) {
+
+            throw new Error(
+                "Firebase Database is not initialized."
+            );
+
+        }
+
+        const recordsRef = ref(
+            database,
+            DB_PATH
+        );
+
+        console.log(
+            "Firebase Database Path:",
+            DB_PATH
+        );
+
+        onValue(
+
+            recordsRef,
+
+            snapshot => {
+
+                console.log(
+                    "Firebase Connected Successfully"
+                );
+
+                const data = snapshot.val() || {};
+
+                const sorted = Object.entries(data)
+
+                    .map(([id, item]) => ({
+
+                        id,
+
+                        order: Number(
+                            item?.order || 0
+                        ),
+
+                        row: normalizeRow(
+                            item?.values
+                        )
+
+                    }))
+
+                    .sort(
+                        (a, b) => a.order - b.order
+                    );
+
+
+                records = sorted.map(
+                    item => item.row
+                );
+
+                recordIds = sorted.map(
+                    item => item.id
+                );
+
+                recordOrders = sorted.map(
+                    item => item.order
+                );
+
+
+                updateFilters();
+
+                render();
+
+
+                showNotice(
+                    "FIREBASE CONNECTED — " +
+                    records.length +
+                    " COACH RECORDS LOADED"
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "FIREBASE LISTENER ERROR:",
+                    error
+                );
+
+                showNotice(
+                    "FIREBASE ERROR: " +
+                    error.message,
+                    true
+                );
+
+            }
+
+        );
+
+    } catch (error) {
+
+        console.error(
+            "FIREBASE STARTUP ERROR:",
+            error
+        );
+
+        showNotice(
+            "STARTUP ERROR: " +
+            error.message,
+            true
+        );
+
+    }
+
+}
+
+
+// Start public connection immediately.
+
+startPublicFirebaseListener();
+
+
+/* =========================================================
+   AUTH STATE LISTENER
+========================================================= */
+
+onAuthStateChanged(
+
+    auth,
+
+    async user => {
+
+        currentUser = user;
+
+        isAdmin =
+            !!user &&
+            user.uid === ADMIN_UID;
+
+
+        applyPermission();
+
+
+        if ($("adminLoginBtn")) {
+
+            $("adminLoginBtn").style.display =
+                user ? "none" : "inline-block";
+
+        }
+
+        if ($("adminLogoutBtn")) {
+
+            $("adminLogoutBtn").style.display =
+                user ? "inline-block" : "none";
+
+        }
+
+        if ($("adminEmail")) {
+
+            $("adminEmail").style.display =
+                user ? "none" : "inline-block";
+
+        }
+
+        if ($("adminPassword")) {
+
+            $("adminPassword").style.display =
+                user ? "none" : "inline-block";
+
+        }
+
+
+        if (isAdmin) {
+
+            setText(
+                "adminLoginStatus",
+                "ADMIN MODE ACTIVE"
+            );
+
+            showNotice(
+                "Admin Login Successful."
+            );
+
+            await seedOriginalDataIfEmpty();
+
+        } else if (user) {
+
+            setText(
+                "adminLoginStatus",
+                "VIEWER MODE — ADMIN ACCESS DENIED"
+            );
+
+            showNotice(
+                "This account is not the designated Admin. Viewer Mode active.",
+                true
+            );
+
+        } else {
+
+            setText(
+                "adminLoginStatus",
+                "PUBLIC VIEWER MODE"
+            );
+
+            showNotice(
+                "Public Viewer Mode — Login not required."
+            );
+
+        }
+
+    },
+
+    error => {
+
+        console.error(
+            "AUTH STATE ERROR:",
+            error
+        );
+
+        showNotice(
+            "Authentication Error: " + error.message,
+            true
+        );
+
+    }
+
+);
+
+
+/* =========================================================
+   PERMISSION CONTROL
+========================================================= */
+
+function applyPermission() {
+
+    const adminOnlyIds = [
+        "saveBtn",
+        "resetBtn",
+        "csvFile",
+        "jsonFile"
+    ];
+
+    adminOnlyIds.forEach(id => {
+
+        setDisabled(id, !isAdmin);
+
+    });
+
+
+    FORM_IDS.forEach(id => {
+
+        setDisabled(id, !isAdmin);
+
+    });
+
+
+    document.querySelectorAll(
+        ".edit-action, .delete-action"
+    ).forEach(button => {
+
+        button.disabled = !isAdmin;
+
+        button.style.display =
+            isAdmin ? "inline-block" : "none";
+
+    });
+
+
+    setDisabled("clearBtn", false);
+
+    renderIfReady();
+
+}
+
+
+function renderIfReady() {
+
+    if ($("tableBody")) {
+        render();
+    }
+
 }
 
 
@@ -423,14 +623,24 @@ function normalizeRow(values) {
 
 async function seedOriginalDataIfEmpty() {
 
-    if (!isAdmin || ORIGINAL_DATA.length === 0) return;
+    if (
+        !isAdmin ||
+        ORIGINAL_DATA.length === 0
+    ) {
+        return;
+    }
 
     try {
 
-        const recordsRef = ref(database, DB_PATH);
+        const recordsRef = ref(
+            database,
+            DB_PATH
+        );
 
         const result = await runTransaction(
+
             recordsRef,
+
             current => {
 
                 if (
@@ -442,42 +652,59 @@ async function seedOriginalDataIfEmpty() {
 
                 const initialData = {};
 
-                ORIGINAL_DATA.forEach((row, index) => {
+                ORIGINAL_DATA.forEach(
+                    (row, index) => {
 
-                    const id =
-                        "original_" +
-                        String(index + 1).padStart(4, "0");
+                        const id =
+                            "original_" +
+                            String(index + 1).padStart(4, "0");
 
-                    initialData[id] = {
+                        initialData[id] = {
 
-                        values: normalizeRow(row),
+                            values: normalizeRow(row),
 
-                        order: index + 1,
+                            order: index + 1,
 
-                        updatedAt: Date.now(),
+                            updatedAt: Date.now(),
 
-                        updatedBy: currentUser?.uid || ""
-                    };
-                });
+                            updatedBy:
+                                currentUser?.uid || ""
+
+                        };
+
+                    }
+                );
 
                 return initialData;
+
             }
+
         );
+
 
         if (result.committed) {
 
             showNotice(
                 "Original records uploaded to Firebase."
             );
+
         }
 
     } catch (error) {
 
+        console.error(
+            "INITIAL DATA ERROR:",
+            error
+        );
+
         showNotice(
-            "Initial Upload Error: " + error.message,
+            "Initial Upload Error: " +
+            error.message,
             true
         );
+
     }
+
 }
 
 
@@ -487,26 +714,32 @@ async function seedOriginalDataIfEmpty() {
 
 function updateDashboard() {
 
-    setText("total", records.length);
+    setText(
+        "total",
+        records.length
+    );
 
     setText(
         "pending",
-        records.filter(row => row[8] === "Pending").length
+        records.filter(
+            row => row[8] === "Pending"
+        ).length
     );
 
     setText(
         "movement",
-        records.filter(row =>
-            row[8] === "Traffic Out / Movement"
+        records.filter(
+            row => row[8] === "Traffic Out / Movement"
         ).length
     );
 
     setText(
         "final",
-        records.filter(row =>
-            row[8] === "Final Condemn / Summary"
+        records.filter(
+            row => row[8] === "Final Condemn / Summary"
         ).length
     );
+
 }
 
 
@@ -522,24 +755,35 @@ function updateFilters() {
 
     const oldShop = shopFilter.value;
 
-    const shops = [...new Set(
-        records.map(row => row[0]).filter(Boolean)
-    )].sort();
+    const shops = [
+        ...new Set(
+            records
+                .map(row => row[0])
+                .filter(Boolean)
+        )
+    ].sort();
+
 
     shopFilter.innerHTML =
         '<option value="">All Shops</option>';
 
+
     shops.forEach(shop => {
 
-        const option = document.createElement("option");
+        const option =
+            document.createElement("option");
 
         option.value = shop;
+
         option.textContent = shop;
 
         shopFilter.appendChild(option);
+
     });
 
+
     shopFilter.value = oldShop;
+
 
     const shopList = $("shopList");
 
@@ -549,17 +793,26 @@ function updateFilters() {
 
         shops.forEach(shop => {
 
-            const option = document.createElement("option");
+            const option =
+                document.createElement("option");
 
             option.value = shop;
 
             shopList.appendChild(option);
+
         });
+
     }
 
-    const locations = [...new Set(
-        records.map(row => row[1]).filter(Boolean)
-    )].sort();
+
+    const locations = [
+        ...new Set(
+            records
+                .map(row => row[1])
+                .filter(Boolean)
+        )
+    ].sort();
+
 
     const locationList = $("locations");
 
@@ -569,13 +822,17 @@ function updateFilters() {
 
         locations.forEach(location => {
 
-            const option = document.createElement("option");
+            const option =
+                document.createElement("option");
 
             option.value = location;
 
             locationList.appendChild(option);
+
         });
+
     }
+
 }
 
 
@@ -589,6 +846,7 @@ function render() {
 
     if (!body) return;
 
+
     const keyword =
         $("search")?.value.trim().toLowerCase() || "";
 
@@ -598,16 +856,25 @@ function render() {
     const status =
         $("statusFilter")?.value || "";
 
+
     const filtered = records
+
         .map((row, index) => ({
+
             row,
+
             index,
+
             id: recordIds[index]
+
         }))
+
         .filter(({ row }) => {
 
             const matchesSearch =
-                row.join(" ").toLowerCase().includes(keyword);
+                row.join(" ")
+                    .toLowerCase()
+                    .includes(keyword);
 
             const matchesShop =
                 !shop || row[0] === shop;
@@ -620,14 +887,18 @@ function render() {
                 matchesShop &&
                 matchesStatus
             );
+
         });
 
+
     body.innerHTML = "";
+
 
     setText(
         "countLabel",
         `Showing ${filtered.length} of ${records.length} records`
     );
+
 
     if (filtered.length === 0) {
 
@@ -638,82 +909,108 @@ function render() {
                 </td>
             </tr>
         `;
+
     }
 
-    filtered.forEach(({ row, index, id }) => {
 
-        const tr = document.createElement("tr");
+    filtered.forEach(
+        ({ row, index, id }) => {
 
-        const sl = document.createElement("td");
+            const tr =
+                document.createElement("tr");
 
-        sl.textContent = index + 1;
 
-        tr.appendChild(sl);
+            const sl =
+                document.createElement("td");
 
-        row.forEach((value, column) => {
+            sl.textContent = index + 1;
 
-            const td = document.createElement("td");
+            tr.appendChild(sl);
 
-            if (column === 8) {
 
-                const span = document.createElement("span");
+            row.forEach((value, column) => {
 
-                span.className = "pill";
+                const td =
+                    document.createElement("td");
 
-                span.textContent = value || "";
+                if (column === 8) {
 
-                td.appendChild(span);
+                    const span =
+                        document.createElement("span");
 
-            } else {
+                    span.className = "pill";
 
-                td.textContent = value ?? "";
-            }
+                    span.textContent = value || "";
 
-            tr.appendChild(td);
-        });
+                    td.appendChild(span);
 
-        const action = document.createElement("td");
+                } else {
 
-        action.className = "no-print";
+                    td.textContent = value ?? "";
 
-        const edit = document.createElement("button");
+                }
 
-        edit.className = "rowbtn edit-action";
+                tr.appendChild(td);
 
-        edit.textContent = "EDIT";
+            });
 
-        edit.disabled = !isAdmin;
 
-        edit.style.display =
-            isAdmin ? "inline-block" : "none";
+            const action =
+                document.createElement("td");
 
-        edit.addEventListener("click", () => {
-            editRecord(id);
-        });
+            action.className = "no-print";
 
-        const del = document.createElement("button");
 
-        del.className = "rowbtn danger delete-action";
+            const edit =
+                document.createElement("button");
 
-        del.textContent = "DELETE";
+            edit.className =
+                "rowbtn edit-action";
 
-        del.disabled = !isAdmin;
+            edit.textContent = "EDIT";
 
-        del.style.display =
-            isAdmin ? "inline-block" : "none";
+            edit.disabled = !isAdmin;
 
-        del.addEventListener("click", () => {
-            deleteRecord(id);
-        });
+            edit.style.display =
+                isAdmin ? "inline-block" : "none";
 
-        action.append(edit, del);
+            edit.addEventListener(
+                "click",
+                () => editRecord(id)
+            );
 
-        tr.appendChild(action);
 
-        body.appendChild(tr);
-    });
+            const del =
+                document.createElement("button");
+
+            del.className =
+                "rowbtn danger delete-action";
+
+            del.textContent = "DELETE";
+
+            del.disabled = !isAdmin;
+
+            del.style.display =
+                isAdmin ? "inline-block" : "none";
+
+            del.addEventListener(
+                "click",
+                () => deleteRecord(id)
+            );
+
+
+            action.append(edit, del);
+
+            tr.appendChild(action);
+
+            body.appendChild(tr);
+
+        }
+    );
+
 
     updateDashboard();
+
 }
 
 
@@ -724,21 +1021,33 @@ function render() {
 function getFormData() {
 
     return [
-        $("shop").value.trim(),
-        $("location").value.trim(),
-        $("datePlaced").value,
-        $("coachNo").value.trim(),
-        $("coachCode").value.trim(),
-        $("dateIn").value,
-        $("pdfDays").value === ""
+
+        $("shop")?.value.trim() || "",
+
+        $("location")?.value.trim() || "",
+
+        $("datePlaced")?.value || "",
+
+        $("coachNo")?.value.trim() || "",
+
+        $("coachCode")?.value.trim() || "",
+
+        $("dateIn")?.value || "",
+
+        $("pdfDays")?.value === ""
             ? ""
             : Number($("pdfDays").value),
-        $("calcDays").value === ""
+
+        $("calcDays")?.value === ""
             ? ""
             : Number($("calcDays").value),
-        $("status").value,
-        $("remarks").value.trim()
+
+        $("status")?.value || "",
+
+        $("remarks")?.value.trim() || ""
+
     ];
+
 }
 
 
@@ -748,9 +1057,7 @@ function getFormData() {
 
 function clearForm() {
 
-    if ($("coachForm")) {
-        $("coachForm").reset();
-    }
+    $("coachForm")?.reset();
 
     editingRecordId = null;
 
@@ -758,200 +1065,226 @@ function clearForm() {
         $("editIndex").value = "-1";
     }
 
-    setText("formTitle", "ADD COACH STOCK RECORD");
+    setText(
+        "formTitle",
+        "ADD COACH STOCK RECORD"
+    );
 
-    setText("saveBtn", "SAVE RECORD");
+    setText(
+        "saveBtn",
+        "SAVE RECORD"
+    );
 
-    setDisabled("saveBtn", !isAdmin);
+    setDisabled(
+        "saveBtn",
+        !isAdmin
+    );
+
 }
+
 
 if ($("clearBtn")) {
 
-    $("clearBtn").addEventListener("click", clearForm);
+    $("clearBtn").addEventListener(
+        "click",
+        clearForm
+    );
+
 }
 
 
 /* =========================================================
    SAVE / UPDATE RECORD
-   STABLE RECORD ID
 ========================================================= */
 
 if ($("coachForm")) {
 
-    $("coachForm").addEventListener("submit", async event => {
+    $("coachForm").addEventListener(
+        "submit",
+        async event => {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        if (!isAdmin || !currentUser) {
+            if (!isAdmin || !currentUser) {
 
-            alert("Only designated Admin can save records.");
-
-            return;
-        }
-
-        const row = getFormData();
-
-        const coachNo = row[3];
-
-        if (!coachNo) {
-
-            alert("Coach Number is required.");
-
-            return;
-        }
-
-        const duplicate = records.some((record, index) => {
-
-            const sameCoach =
-                String(record[3]).trim().toLowerCase() ===
-                coachNo.toLowerCase();
-
-            const sameRecord =
-                recordIds[index] === editingRecordId;
-
-            return sameCoach && !sameRecord;
-        });
-
-        if (duplicate) {
-
-            alert("This Coach Number already exists.");
-
-            return;
-        }
-
-        try {
-
-            setDisabled("saveBtn", true);
-
-            const now = Date.now();
-
-            if (editingRecordId) {
-
-                const index =
-                    recordIds.indexOf(editingRecordId);
-
-                if (index < 0) {
-                    throw new Error(
-                        "Record not found. Please refresh and try again."
-                    );
-                }
-
-                const recordData = {
-
-                    values: row,
-
-                    order: recordOrders[index],
-
-                    updatedAt: now,
-
-                    updatedBy: currentUser.uid
-                };
-
-                await set(
-                    ref(
-                        database,
-                        `${DB_PATH}/${editingRecordId}`
-                    ),
-                    recordData
+                alert(
+                    "Only designated Admin can save records."
                 );
 
-                showNotice(
-                    "Coach record updated successfully."
-                );
-
-            } else {
-
-                const newRecord =
-                    push(ref(database, DB_PATH));
-
-                const recordData = {
-
-                    values: row,
-
-                    order: now,
-
-                    updatedAt: now,
-
-                    updatedBy: currentUser.uid
-                };
-
-                await set(newRecord, recordData);
-
-                showNotice(
-                    "New Coach record saved successfully."
-                );
+                return;
             }
 
-            clearForm();
 
-        } catch (error) {
+            const row = getFormData();
 
-            alert(
-                "Firebase Save Error: " + error.message
+            const coachNo = row[3];
+
+            if (!coachNo) {
+
+                alert(
+                    "Coach Number is required."
+                );
+
+                return;
+            }
+
+
+            const duplicate = records.some(
+                (record, index) => {
+
+                    const sameCoach =
+                        String(record[3])
+                            .trim()
+                            .toLowerCase() ===
+                        coachNo.toLowerCase();
+
+                    const sameRecord =
+                        recordIds[index] ===
+                        editingRecordId;
+
+                    return (
+                        sameCoach &&
+                        !sameRecord
+                    );
+
+                }
             );
 
-        } finally {
 
-            setDisabled("saveBtn", !isAdmin);
+            if (duplicate) {
+
+                alert(
+                    "This Coach Number already exists."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                setDisabled("saveBtn", true);
+
+                const now = Date.now();
+
+
+                if (editingRecordId) {
+
+                    const index =
+                        recordIds.indexOf(
+                            editingRecordId
+                        );
+
+                    if (index < 0) {
+
+                        throw new Error(
+                            "Record not found. Refresh and try again."
+                        );
+
+                    }
+
+
+                    const recordData = {
+
+                        values: row,
+
+                        order: recordOrders[index],
+
+                        updatedAt: now,
+
+                        updatedBy: currentUser.uid
+
+                    };
+
+
+                    await set(
+                        ref(
+                            database,
+                            `${DB_PATH}/${editingRecordId}`
+                        ),
+                        recordData
+                    );
+
+
+                    showNotice(
+                        "Coach record updated successfully."
+                    );
+
+
+                } else {
+
+                    const newRecord =
+                        push(
+                            ref(database, DB_PATH)
+                        );
+
+
+                    const recordData = {
+
+                        values: row,
+
+                        order: now,
+
+                        updatedAt: now,
+
+                        updatedBy: currentUser.uid
+
+                    };
+
+
+                    await set(
+                        newRecord,
+                        recordData
+                    );
+
+
+                    showNotice(
+                        "New Coach record saved successfully."
+                    );
+
+                }
+
+
+                clearForm();
+
+
+            } catch (error) {
+
+                console.error(
+                    "SAVE ERROR:",
+                    error
+                );
+
+                alert(
+                    "Firebase Save Error: " +
+                    error.message
+                );
+
+            } finally {
+
+                setDisabled(
+                    "saveBtn",
+                    !isAdmin
+                );
+
+            }
+
         }
-    });
+    );
+
 }
 
 
 /* =========================================================
    EDIT RECORD
-   USE FIREBASE ID, NOT ARRAY INDEX
 ========================================================= */
 
 function editRecord(recordId) {
 
     if (!isAdmin) return;
 
-    const index = recordIds.indexOf(recordId);
-
-    if (index < 0) {
-
-        alert("Record not found. Refresh the Dashboard.");
-
-        return;
-    }
-
-    const row = records[index];
-
-    FORM_IDS.forEach((id, column) => {
-
-        if ($(id)) {
-            $(id).value = row[column] ?? "";
-        }
-    });
-
-    editingRecordId = recordId;
-
-    if ($("editIndex")) {
-        $("editIndex").value = index;
-    }
-
-    setText("formTitle", "EDIT COACH STOCK RECORD");
-
-    setText("saveBtn", "UPDATE RECORD");
-
-    $("coachForm")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-}
-
-
-/* =========================================================
-   DELETE RECORD
-   USE FIREBASE ID
-========================================================= */
-
-async function deleteRecord(recordId) {
-
-    if (!isAdmin) return;
-
-    const index = recordIds.indexOf(recordId);
+    const index =
+        recordIds.indexOf(recordId);
 
     if (index < 0) {
 
@@ -960,28 +1293,122 @@ async function deleteRecord(recordId) {
         return;
     }
 
-    const coachNo = records[index][3];
 
-    if (!confirm(`Delete Coach ${coachNo}?`)) return;
+    const row = records[index];
+
+
+    FORM_IDS.forEach(
+        (id, column) => {
+
+            if ($(id)) {
+
+                $(id).value =
+                    row[column] ?? "";
+
+            }
+
+        }
+    );
+
+
+    editingRecordId = recordId;
+
+
+    if ($("editIndex")) {
+
+        $("editIndex").value = index;
+
+    }
+
+
+    setText(
+        "formTitle",
+        "EDIT COACH STOCK RECORD"
+    );
+
+    setText(
+        "saveBtn",
+        "UPDATE RECORD"
+    );
+
+
+    $("coachForm")?.scrollIntoView({
+
+        behavior: "smooth",
+
+        block: "start"
+
+    });
+
+}
+
+
+/* =========================================================
+   DELETE RECORD
+========================================================= */
+
+async function deleteRecord(recordId) {
+
+    if (!isAdmin) return;
+
+    const index =
+        recordIds.indexOf(recordId);
+
+    if (index < 0) {
+
+        alert("Record not found.");
+
+        return;
+    }
+
+
+    const coachNo =
+        records[index][3];
+
+
+    if (!confirm(
+        `Delete Coach ${coachNo}?`
+    )) {
+        return;
+    }
+
 
     try {
 
         await remove(
-            ref(database, `${DB_PATH}/${recordId}`)
+            ref(
+                database,
+                `${DB_PATH}/${recordId}`
+            )
         );
 
-        showNotice("Coach record deleted.");
+
+        showNotice(
+            "Coach record deleted successfully."
+        );
+
 
         if (editingRecordId === recordId) {
+
             clearForm();
+
         }
+
 
     } catch (error) {
 
-        alert(
-            "Firebase Delete Error: " + error.message
+        console.error(
+            "DELETE ERROR:",
+            error
         );
+
+        alert(
+            "Firebase Delete Error: " +
+            error.message
+        );
+
     }
+
 }
 
 
@@ -990,15 +1417,30 @@ async function deleteRecord(recordId) {
 ========================================================= */
 
 if ($("search")) {
-    $("search").addEventListener("input", render);
+
+    $("search").addEventListener(
+        "input",
+        render
+    );
+
 }
 
 if ($("shopFilter")) {
-    $("shopFilter").addEventListener("change", render);
+
+    $("shopFilter").addEventListener(
+        "change",
+        render
+    );
+
 }
 
 if ($("statusFilter")) {
-    $("statusFilter").addEventListener("change", render);
+
+    $("statusFilter").addEventListener(
+        "change",
+        render
+    );
+
 }
 
 
@@ -1006,18 +1448,25 @@ if ($("statusFilter")) {
    DOWNLOAD FILE
 ========================================================= */
 
-function downloadFile(content, filename, mimeType) {
+function downloadFile(
+    content,
+    filename,
+    mimeType
+) {
 
     const blob = new Blob(
         [content],
         { type: mimeType }
     );
 
-    const url = URL.createObjectURL(blob);
+    const url =
+        URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
+    const link =
+        document.createElement("a");
 
     link.href = url;
+
     link.download = filename;
 
     document.body.appendChild(link);
@@ -1026,15 +1475,16 @@ function downloadFile(content, filename, mimeType) {
 
     link.remove();
 
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 1000);
+    setTimeout(
+        () => URL.revokeObjectURL(url),
+        1000
+    );
+
 }
 
 
 /* =========================================================
-   CSV EXPORT
-   AVAILABLE TO EVERYONE
+   CSV EXPORT — EVERYONE
 ========================================================= */
 
 function exportCSV() {
@@ -1044,24 +1494,31 @@ function exportCSV() {
         ...records
     ];
 
-    const csv = csvRows.map(row =>
 
-        row.map(value =>
+    const csv = csvRows.map(
+        row =>
 
-            '"' +
-            String(value ?? "").replace(/"/g, '""') +
-            '"'
+            row.map(
+                value =>
 
-        ).join(",")
+                    '"' +
+                    String(value ?? "")
+                        .replace(/"/g, '""') +
+                    '"'
+
+            ).join(",")
 
     ).join("\r\n");
+
 
     downloadFile(
         "\uFEFF" + csv,
         "MR_COACH_STOCK.csv",
         "text/csv;charset=utf-8"
     );
+
 }
+
 
 if ($("exportBtn")) {
 
@@ -1069,6 +1526,7 @@ if ($("exportBtn")) {
         "click",
         exportCSV
     );
+
 }
 
 
@@ -1086,13 +1544,22 @@ function parseCSV(text) {
 
     let quoted = false;
 
-    for (let i = 0; i < text.length; i++) {
+
+    for (
+        let i = 0;
+        i < text.length;
+        i++
+    ) {
 
         const char = text[i];
 
+
         if (char === '"') {
 
-            if (quoted && text[i + 1] === '"') {
+            if (
+                quoted &&
+                text[i + 1] === '"'
+            ) {
 
                 field += '"';
 
@@ -1101,16 +1568,23 @@ function parseCSV(text) {
             } else {
 
                 quoted = !quoted;
+
             }
 
-        } else if (char === "," && !quoted) {
+        } else if (
+            char === "," &&
+            !quoted
+        ) {
 
             row.push(field);
 
             field = "";
 
         } else if (
-            (char === "\n" || char === "\r") &&
+            (
+                char === "\n" ||
+                char === "\r"
+            ) &&
             !quoted
         ) {
 
@@ -1121,11 +1595,16 @@ function parseCSV(text) {
                 i++;
             }
 
+
             row.push(field);
 
-            if (row.some(value => value !== "")) {
+
+            if (
+                row.some(value => value !== "")
+            ) {
                 rows.push(row);
             }
+
 
             row = [];
 
@@ -1134,22 +1613,29 @@ function parseCSV(text) {
         } else {
 
             field += char;
+
         }
+
     }
+
 
     row.push(field);
 
-    if (row.some(value => value !== "")) {
+
+    if (
+        row.some(value => value !== "")
+    ) {
         rows.push(row);
     }
 
+
     return rows;
+
 }
 
 
 /* =========================================================
-   CSV IMPORT
-   ADMIN ONLY
+   CSV IMPORT — ADMIN ONLY
 ========================================================= */
 
 if ($("csvFile")) {
@@ -1160,36 +1646,50 @@ if ($("csvFile")) {
 
             if (!isAdmin) {
 
-                alert("Admin permission required.");
+                alert(
+                    "Admin permission required."
+                );
 
                 event.target.value = "";
 
                 return;
             }
 
-            const file = event.target.files[0];
+
+            const file =
+                event.target.files[0];
 
             if (!file) return;
 
+
             try {
 
-                const text = await file.text();
+                const text =
+                    await file.text();
+
 
                 const parsed = parseCSV(
                     text.replace(/^\uFEFF/, "")
                 );
 
+
                 const imported = parsed
+
                     .slice(1)
+
                     .filter(row => row[3])
+
                     .map(row => normalizeRow(row));
+
 
                 if (!imported.length) {
 
                     throw new Error(
                         "No valid coach records found."
                     );
+
                 }
+
 
                 if (!confirm(
                     `Replace all Firebase records with ${imported.length} imported records?`
@@ -1197,47 +1697,62 @@ if ($("csvFile")) {
                     return;
                 }
 
+
                 await replaceAllRecords(imported);
+
 
                 showNotice(
                     "CSV records imported successfully."
                 );
 
+
             } catch (error) {
 
                 alert(
-                    "CSV Import Error: " + error.message
+                    "CSV Import Error: " +
+                    error.message
                 );
 
             } finally {
 
                 event.target.value = "";
+
             }
+
         }
     );
+
 }
 
 
 /* =========================================================
-   JSON BACKUP
-   AVAILABLE TO EVERYONE
+   JSON BACKUP — EVERYONE
 ========================================================= */
 
 function downloadBackup() {
 
     const backup = {
 
-        backupDate: new Date().toISOString(),
+        backupDate:
+            new Date().toISOString(),
 
         records: records
+
     };
 
+
     downloadFile(
-        JSON.stringify(backup, null, 2),
+        JSON.stringify(
+            backup,
+            null,
+            2
+        ),
         "MR_COACH_STOCK_BACKUP.json",
         "application/json"
     );
+
 }
+
 
 if ($("backupBtn")) {
 
@@ -1245,12 +1760,12 @@ if ($("backupBtn")) {
         "click",
         downloadBackup
     );
+
 }
 
 
 /* =========================================================
-   JSON RESTORE
-   ADMIN ONLY
+   JSON RESTORE — ADMIN ONLY
 ========================================================= */
 
 if ($("jsonFile")) {
@@ -1261,16 +1776,21 @@ if ($("jsonFile")) {
 
             if (!isAdmin) {
 
-                alert("Admin permission required.");
+                alert(
+                    "Admin permission required."
+                );
 
                 event.target.value = "";
 
                 return;
             }
 
-            const file = event.target.files[0];
+
+            const file =
+                event.target.files[0];
 
             if (!file) return;
+
 
             try {
 
@@ -1278,22 +1798,28 @@ if ($("jsonFile")) {
                     await file.text()
                 );
 
-                const rows = Array.isArray(backup)
-                    ? backup
-                    : backup.records;
+
+                const rows =
+                    Array.isArray(backup)
+                        ? backup
+                        : backup.records;
+
 
                 if (
                     !Array.isArray(rows) ||
-                    !rows.every(row =>
-                        Array.isArray(row) &&
-                        row.length === 10
+                    !rows.every(
+                        row =>
+                            Array.isArray(row) &&
+                            row.length === 10
                     )
                 ) {
 
                     throw new Error(
                         "Invalid JSON backup format."
                     );
+
                 }
+
 
                 if (!confirm(
                     `Restore ${rows.length} records to Firebase?`
@@ -1301,30 +1827,36 @@ if ($("jsonFile")) {
                     return;
                 }
 
+
                 await replaceAllRecords(rows);
+
 
                 showNotice(
                     "JSON backup restored successfully."
                 );
 
+
             } catch (error) {
 
                 alert(
-                    "JSON Restore Error: " + error.message
+                    "JSON Restore Error: " +
+                    error.message
                 );
 
             } finally {
 
                 event.target.value = "";
+
             }
+
         }
     );
+
 }
 
 
 /* =========================================================
-   REPLACE ALL RECORDS
-   ADMIN ONLY
+   REPLACE ALL RECORDS — ADMIN ONLY
 ========================================================= */
 
 async function replaceAllRecords(rows) {
@@ -1334,54 +1866,66 @@ async function replaceAllRecords(rows) {
         throw new Error(
             "Admin permission required."
         );
+
     }
+
 
     const data = {};
 
-    rows.forEach((row, index) => {
 
-        const id =
-            "record_" +
-            String(index + 1).padStart(4, "0");
+    rows.forEach(
+        (row, index) => {
 
-        data[id] = {
+            const id =
+                "record_" +
+                String(index + 1).padStart(4, "0");
 
-            values: normalizeRow(row),
 
-            order: index + 1,
+            data[id] = {
 
-            updatedAt: Date.now(),
+                values: normalizeRow(row),
 
-            updatedBy: currentUser.uid
-        };
-    });
+                order: index + 1,
+
+                updatedAt: Date.now(),
+
+                updatedBy: currentUser.uid
+
+            };
+
+        }
+    );
+
 
     await set(
         ref(database, DB_PATH),
         data
     );
 
+
     clearForm();
+
 }
 
 
 /* =========================================================
-   RESET ORIGINAL DATA
-   ADMIN ONLY
+   RESET ORIGINAL DATA — ADMIN ONLY
 ========================================================= */
 
 async function resetOriginal() {
 
     if (!isAdmin) return;
 
+
     if (!ORIGINAL_DATA.length) {
 
         alert(
-            "Original data is not added in coach-stock.js yet."
+            "Original PDF data is not added in coach-stock.js yet."
         );
 
         return;
     }
+
 
     if (!confirm(
         "Reset Firebase records to original PDF data? Current records will be replaced."
@@ -1389,21 +1933,30 @@ async function resetOriginal() {
         return;
     }
 
+
     try {
 
-        await replaceAllRecords(ORIGINAL_DATA);
+        await replaceAllRecords(
+            ORIGINAL_DATA
+        );
+
 
         showNotice(
             "Original PDF records restored."
         );
 
+
     } catch (error) {
 
         alert(
-            "Reset Error: " + error.message
+            "Reset Error: " +
+            error.message
         );
+
     }
+
 }
+
 
 if ($("resetBtn")) {
 
@@ -1411,6 +1964,7 @@ if ($("resetBtn")) {
         "click",
         resetOriginal
     );
+
 }
 
 
@@ -1424,6 +1978,7 @@ if ($("printBtn")) {
         "click",
         () => window.print()
     );
+
 }
 
 
@@ -1447,3 +2002,8 @@ window.exportCSV = exportCSV;
 window.downloadBackup = downloadBackup;
 
 window.resetOriginal = resetOriginal;
+
+
+/* =========================================================
+   END OF COACH STOCK JS V2.2 FINAL
+========================================================= */
