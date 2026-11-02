@@ -3,294 +3,385 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MR COACH STOCK DASHBOARD</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DAILY COACH STOCK - LILUAH</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
-header{background:#102b50;color:white;padding:20px;text-align:center}
-header h1{font-size:23px}
-header p{margin-top:6px;color:#dbeafe}
-.container{max-width:1500px;margin:auto;padding:15px}
-.notice{padding:12px;background:#dbeafe;color:#123b68;border-radius:8px;margin-bottom:14px;font-weight:bold}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:15px}
-.card{background:white;padding:17px;border-radius:10px;box-shadow:0 2px 8px #0001}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7;color:#172033;font-family:Arial}
+header{background:#102b50;color:white;text-align:center;padding:20px}
+header h1{margin:0;font-size:24px}
+header p{margin:7px 0 0}
+.container{max-width:1600px;margin:auto;padding:14px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card,.panel{background:white;border-radius:10px;padding:15px;
+margin-bottom:14px;box-shadow:0 2px 8px #0001}
 .card span{font-size:13px;color:#64748b}
-.card strong{display:block;font-size:26px;margin-top:8px;color:#123b68}
-.panel{background:white;border-radius:10px;padding:16px;margin-bottom:15px;box-shadow:0 2px 8px #0001}
-.panel h2{font-size:18px;color:#123b68;margin-bottom:14px}
-.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card strong{display:block;font-size:26px;color:#123b68;margin-top:8px}
+h2{font-size:18px;color:#123b68;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 label{font-size:13px;font-weight:bold;display:block;margin-bottom:5px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;background:white}
-textarea{min-height:40px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-button,.file-label{border:0;border-radius:6px;padding:10px 14px;background:#1456a0;color:white;font-weight:bold;cursor:pointer;font-size:13px}
-button:disabled{opacity:.45;cursor:not-allowed}
-.secondary{background:#475569}
-.danger{background:#b42318}
-.green{background:#15803d}
-.file-label input{display:none}
-.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:12px}
-.table-wrap{overflow:auto;width:100%}
-table{width:100%;border-collapse:collapse;min-width:1200px;font-size:13px}
+input,select{width:100%;padding:10px;border:1px solid #cbd5e1;
+border-radius:6px;background:white;font-size:14px}
+button{padding:10px 13px;border:0;border-radius:6px;
+background:#1456a0;color:white;font-weight:bold;cursor:pointer;margin:3px}
+.green{background:#15803d}.red{background:#b42318}.gray{background:#475569}
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.actions{margin:12px 0}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:1250px;font-size:13px}
 th{background:#123b68;color:white;position:sticky;top:0}
-th,td{padding:9px 8px;border:1px solid #dbe2ea;text-align:left;white-space:nowrap}
+td,th{padding:9px;border:1px solid #dbe2ea;text-align:left}
 tbody tr:nth-child(even){background:#f8fafc}
-.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#e0edff;color:#17477c;font-size:11px}
-.rowbtn{padding:6px 9px;margin:2px}
-#countLabel{font-size:13px;color:#64748b;margin-bottom:8px}
-.empty{text-align:center;padding:25px;color:#64748b}
-.footer{text-align:center;padding:15px;color:#64748b;font-size:12px}
+#countLabel{color:#64748b;font-size:13px;margin:12px 0}
 @media(max-width:800px){
- .cards{grid-template-columns:repeat(2,1fr)}
- .form-grid{grid-template-columns:repeat(2,1fr)}
- .toolbar{grid-template-columns:1fr}
+.cards{grid-template-columns:repeat(2,1fr)}
+.grid{grid-template-columns:repeat(2,1fr)}
+.toolbar{grid-template-columns:1fr}
 }
-@media(max-width:480px){
- header h1{font-size:18px}
- .container{padding:9px}
- .form-grid{grid-template-columns:1fr}
- .card strong{font-size:22px}
-}
-@media print{
- header{background:white;color:black}
- .no-print,.actions,.toolbar{display:none!important}
- body{background:white}
- .panel,.card{box-shadow:none}
- table{font-size:10px;min-width:100%}
-}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
-
 <body>
 
 <header>
-    <h1>DAILY COACH STOCK</h1>
-    <p>LILUAH WORKSHOP | MR CO-ORDINATION SECTION</p>
+<h1>DAILY COACH STOCK</h1>
+<p>LILUAH WORKSHOP | MR CO-ORDINATION SECTION</p>
 </header>
 
 <div class="container">
 
-    <div class="notice" id="notice">
-        Connecting to Firebase...
-    </div>
+<div class="cards">
+<div class="card"><span>TOTAL COACHES</span><strong id="total">0</strong></div>
+<div class="card"><span>LM</span><strong id="lm">0</strong></div>
+<div class="card"><span>L</span><strong id="l">0</strong></div>
+<div class="card"><span>COMPLETED</span><strong id="completed">0</strong></div>
+</div>
 
-    <section class="cards">
-        <div class="card">
-            <span>TOTAL COACHES</span>
-            <strong id="total">0</strong>
-        </div>
-        <div class="card">
-            <span>PENDING</span>
-            <strong id="pending">0</strong>
-        </div>
-        <div class="card">
-            <span>TRAFFIC OUT / MOVEMENT</span>
-            <strong id="movement">0</strong>
-        </div>
-        <div class="card">
-            <span>FINAL CONDEMN / SUMMARY</span>
-            <strong id="final">0</strong>
-        </div>
-    </section>
+<div class="panel">
+<h2 id="formTitle">ADD COACH STOCK RECORD</h2>
+<form id="coachForm">
+<input type="hidden" id="editId">
+<div class="grid">
 
-    <section class="panel no-print">
-        <h2 id="formTitle">ADD COACH STOCK RECORD</h2>
+<div><label>SHOP</label>
+<select id="shop" required>
+<option value="">SELECT SHOP</option>
+<option>LIFTING BAY POH LHB</option>
+<option>LIFTING BAY POH NONLHB</option>
+<option>AW CORROSION POH LHB</option>
+<option>AW CORROSION POH NONLHB</option>
+<option>POH NOMINATION FOR MLR</option>
+<option>POWER CAR POH</option>
+<option>CORROSION POH SCR NAC</option>
+<option>CORROSION POH SCR AC</option>
+<option>PAINT POH LHB</option>
+<option>PAINT POH NONLHB</option>
+<option>CORROSION POH M SHOP</option>
+<option>CORROSION POH CR SHOP</option>
+<option>LHB POH BAHAR LINE</option>
+<option>BAHAR LINE POH NONLHB</option>
+<option>CORROSION CONV RCC/NMG</option>
+<option>POH NOMINATION CONV RCC/NMG</option>
+<option>WIP MLR LHB</option>
+<option>CORROSION POH L SHOP</option>
+<option>TRAFFIC OUT ON 30 OCT 26</option>
+<option>AW/FINAL CONDEMN COACHES</option>
+</select></div>
 
-        <form id="coachForm">
-            <input type="hidden" id="editIndex" value="-1">
+<div><label>WORK SECTION / LOCATION</label>
+<input id="location"></div>
 
-            <div class="form-grid">
+<div><label>DATE PLACED</label>
+<input type="date" id="datePlaced"></div>
 
-                <div>
-                    <label>Shop</label>
-                    <input id="shop" list="shopList" required>
-                    <datalist id="shopList"></datalist>
-                </div>
+<div><label>COACH NO</label>
+<input id="coachNo" required></div>
 
-                <div>
-                    <label>Work Section / Location</label>
-                    <input id="location" list="locations" required>
-                    <datalist id="locations"></datalist>
-                </div>
+<div><label>COACH CODE</label>
+<select id="coachCode">
+<option value="">SELECT COACH CODE</option>
+<option>LWACCN</option><option>LWLRRM</option>
+<option>LWSCN</option><option>LWACCW2</option>
+<option>LWACCW</option><option>LWCBAC</option>
+<option>LWFCWAC</option><option>LWACCNE</option>
+<option>LWACCN2</option><option>LSLRDAA</option>
+<option>LWSCZ</option><option>LWFAC</option>
+<option>LRAAC</option><option>TSDTC</option>
+<option>TSMC2</option><option>TSMC</option>
+<option>TSTCEC</option><option>RA</option>
+<option>NMG</option><option>GS</option>
+<option>WGCB</option><option>WGACCW</option>
+<option>WGS/C</option><option>WGSCN/C</option>
+<option>GSLRD/C</option><option>GSLRD</option>
+<option>NMGHS</option><option>AR/AC</option>
+<option>WGSCN</option><option>RS</option>
+<option>LWS</option><option>LWSCNA</option>
+<option>RCC</option><option>NMGHSR</option>
+</select></div>
 
-                <div>
-                    <label>Date Placed</label>
-                    <input type="date" id="datePlaced">
-                </div>
+<div><label>DATE IN</label>
+<input type="date" id="dateIn"></div>
 
-                <div>
-                    <label>Coach No</label>
-                    <input id="coachNo" required>
-                </div>
+<div><label>PDF DETENTION DAYS</label>
+<input type="number" id="pdfDays" min="0"></div>
 
-                <div>
-                    <label>Coach Code</label>
-                    <input id="coachCode">
-                </div>
+<div><label>CALCULATED DAYS</label>
+<input type="number" id="calcDays" min="0"></div>
 
-                <div>
-                    <label>Date In</label>
-                    <input type="date" id="dateIn">
-                </div>
+<div><label>STATUS</label>
+<select id="status" required>
+<option value="">SELECT STATUS</option>
+<option value="LM">LM</option>
+<option value="L">L</option>
+</select></div>
 
-                <div>
-                    <label>PDF Detention Days</label>
-                    <input type="number" id="pdfDays" min="0">
-                </div>
+<div><label>REMARKS / VERIFY</label>
+<input id="remarks"></div>
 
-                <div>
-                    <label>Detention Days (Calculated)</label>
-                    <input type="number" id="calcDays" min="0">
-                </div>
+</div>
+<div class="actions">
+<button type="submit" id="saveBtn">SAVE RECORD</button>
+<button type="button" class="gray" onclick="clearForm()">CLEAR</button>
+</div>
+</form>
+</div>
 
-                <div>
-                    <label>Status</label>
-                    <select id="status">
-                        <option value="Pending">Pending</option>
-                        <option value="Traffic Out / Movement">Traffic Out / Movement</option>
-                        <option value="Final Condemn / Summary">Final Condemn / Summary</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                </div>
+<div class="panel">
+<h2>COACH STOCK DETAILS</h2>
+<div class="toolbar">
+<input id="search" placeholder="Search Coach Number / Shop / Code">
+<select id="shopFilter">
+<option value="">ALL SHOPS</option>
+</select>
+<select id="statusFilter">
+<option value="">ALL STATUS</option>
+<option>LM</option><option>L</option>
+</select>
+</div>
 
-                <div>
-                    <label>Remarks / Verify</label>
-                    <input id="remarks">
-                </div>
+<div class="actions">
+<button class="green" onclick="exportCSV()">EXPORT CSV</button>
+<button class="gray" onclick="backupJSON()">JSON BACKUP</button>
+<button class="gray" onclick="document.getElementById('restoreFile').click()">RESTORE JSON</button>
+<input type="file" id="restoreFile" accept=".json" hidden>
+<button class="gray" onclick="window.print()">PRINT</button>
+</div>
 
-            </div>
-
-            <div class="actions">
-                <button type="submit" id="saveBtn">SAVE RECORD</button>
-                <button type="button" class="secondary" id="clearBtn">CLEAR</button>
-            </div>
-        </form>
-    </section>
-
-    <section class="panel">
-        <h2>COACH STOCK DETAILS</h2>
-
-        <div class="toolbar no-print">
-            <input id="search" placeholder="Search Coach / Shop / Location / Status">
-            <select id="shopFilter">
-                <option value="">All Shops</option>
-            </select>
-            <select id="statusFilter">
-                <option value="">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Traffic Out / Movement">Traffic Out / Movement</option>
-                <option value="Final Condemn / Summary">Final Condemn / Summary</option>
-                <option value="Completed">Completed</option>
-            </select>
-        </div>
-
-        <div class="actions no-print">
-            <button type="button" id="exportBtn" class="green">EXPORT CSV</button>
-
-            <label class="file-label">
-                IMPORT CSV
-                <input type="file" id="csvFile" accept=".csv">
-            </label>
-
-            <button type="button" id="backupBtn" class="secondary">JSON BACKUP</button>
-
-            <label class="file-label secondary">
-                RESTORE JSON
-                <input type="file" id="jsonFile" accept=".json">
-            </label>
-
-            <button type="button" id="printBtn" class="secondary">PRINT</button>
-        </div>
-
-        <p id="countLabel">Showing 0 records</p>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>SL</th>
-                        <th>Shop</th>
-                        <th>Location</th>
-                        <th>Date Placed</th>
-                        <th>Coach No</th>
-                        <th>Coach Code</th>
-                        <th>Date In</th>
-                        <th>PDF Days</th>
-                        <th>Calculated Days</th>
-                        <th>Status</th>
-                        <th>Remarks</th>
-                        <th class="no-print">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="12" class="empty">Loading...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section class="actions no-print">
-        <button type="button" id="resetBtn" class="danger">
-            RESET ORIGINAL DATA
-        </button>
-    </section>
-
-    <div class="footer">
-        MR CO-ORDINATION SECTION | LILUAH WORKSHOP
-    </div>
+<p id="countLabel">Showing 0 records</p>
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>SL</th><th>SHOP</th><th>LOCATION</th>
+<th>DATE PLACED</th><th>COACH NO</th><th>COACH CODE</th>
+<th>DATE IN</th><th>PDF DAYS</th><th>CALCULATED DAYS</th>
+<th>STATUS</th><th>REMARKS</th><th>MOVE SHOP</th><th>ACTION</th>
+</tr></thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+</div>
 
 </div>
 
-<!-- MODULE ERROR DIAGNOSTIC -->
 <script>
-window.addEventListener("error", function(event) {
+const KEY="LILUAH_COACH_STOCK_V1";
 
-    console.error("PAGE ERROR:", event.message);
+const shops=[
+"LIFTING BAY POH LHB",
+"LIFTING BAY POH NONLHB",
+"AW CORROSION POH LHB",
+"AW CORROSION POH NONLHB",
+"POH NOMINATION FOR MLR",
+"POWER CAR POH",
+"CORROSION POH SCR NAC",
+"CORROSION POH SCR AC",
+"PAINT POH LHB",
+"PAINT POH NONLHB",
+"CORROSION POH M SHOP",
+"CORROSION POH CR SHOP",
+"LHB POH BAHAR LINE",
+"BAHAR LINE POH NONLHB",
+"CORROSION CONV RCC/NMG",
+"POH NOMINATION CONV RCC/NMG",
+"WIP MLR LHB",
+"CORROSION POH L SHOP",
+"TRAFFIC OUT ON 30 OCT 26",
+"AW/FINAL CONDEMN COACHES"
+];
 
-    const notice = document.getElementById("notice");
+const fields=[
+"shop","location","datePlaced","coachNo","coachCode",
+"dateIn","pdfDays","calcDays","status","remarks"
+];
 
-    if (notice) {
-        notice.textContent =
-            "JAVASCRIPT ERROR: " + event.message;
-        notice.style.background = "#fee2e2";
-        notice.style.color = "#991b1b";
-    }
+let records=[];
+try{
+ records=JSON.parse(localStorage.getItem(KEY)||"[]");
+ if(!Array.isArray(records))records=[];
+}catch(e){records=[];}
 
+function persist(){
+ localStorage.setItem(KEY,JSON.stringify(records));
+}
+
+function shopOptions(selected){
+ return '<option value="">SELECT SHOP</option>'+
+ shops.map(s=>'<option value="'+esc(s)+'" '+
+ (s===selected?'selected':'')+'>'+esc(s)+'</option>').join('');
+}
+
+function esc(v){
+ return String(v??"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ })[c]);
+}
+
+function clearForm(){
+ document.getElementById("coachForm").reset();
+ document.getElementById("editId").value="";
+ document.getElementById("formTitle").textContent="ADD COACH STOCK RECORD";
+ document.getElementById("saveBtn").textContent="SAVE RECORD";
+}
+
+document.getElementById("coachForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const obj={};
+ fields.forEach(f=>obj[f]=document.getElementById(f).value.trim());
+ const id=document.getElementById("editId").value;
+
+ if(!obj.coachNo){alert("Enter Coach Number");return;}
+
+ if(id){
+  const i=records.findIndex(r=>r.id===id);
+  if(i>=0)records[i]={...records[i],...obj};
+ }else{
+  if(records.some(r=>r.coachNo.toLowerCase()===obj.coachNo.toLowerCase())){
+   alert("Coach Number already exists");return;
+  }
+  obj.id=Date.now().toString()+Math.random().toString(16).slice(2);
+  records.push(obj);
+ }
+ persist();clearForm();render();
 });
 
-window.addEventListener("unhandledrejection", function(event) {
+function editRecord(id){
+ const r=records.find(x=>x.id===id);
+ if(!r)return;
+ fields.forEach(f=>document.getElementById(f).value=r[f]||"");
+ document.getElementById("editId").value=id;
+ document.getElementById("formTitle").textContent="EDIT COACH RECORD";
+ document.getElementById("saveBtn").textContent="UPDATE RECORD";
+ window.scrollTo({top:0,behavior:"smooth"});
+}
 
-    console.error("PROMISE ERROR:", event.reason);
+function moveShop(id,value){
+ const r=records.find(x=>x.id===id);
+ if(!r||!shops.includes(value))return;
+ r.shop=value;
+ persist();render();
+}
 
-    const notice = document.getElementById("notice");
+function deleteRecord(id){
+ if(!confirm("Delete this coach record?"))return;
+ records=records.filter(r=>r.id!==id);
+ persist();render();
+}
 
-    if (notice) {
-        notice.textContent =
-            "PROMISE ERROR: " + event.reason;
-    }
+function render(){
+ const sf=document.getElementById("shopFilter");
+ const old=sf.value;
+ sf.innerHTML='<option value="">ALL SHOPS</option>'+
+ shops.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
+ sf.value=old;
 
+ const q=document.getElementById("search").value.toLowerCase();
+ const shop=document.getElementById("shopFilter").value;
+ const status=document.getElementById("statusFilter").value;
+
+ const filtered=records.filter(r=>
+  fields.some(f=>String(r[f]||"").toLowerCase().includes(q))&&
+  (!shop||r.shop===shop)&&(!status||r.status===status)
+ );
+
+ document.getElementById("total").textContent=records.length;
+ document.getElementById("lm").textContent=records.filter(r=>r.status==="LM").length;
+ document.getElementById("l").textContent=records.filter(r=>r.status==="L").length;
+ document.getElementById("completed").textContent=records.filter(r=>r.status==="COMPLETED").length;
+ document.getElementById("countLabel").textContent="Showing "+filtered.length+" records";
+
+ const body=document.getElementById("tableBody");
+ body.innerHTML="";
+
+ filtered.forEach((r,i)=>{
+  const tr=document.createElement("tr");
+  [i+1,...fields.map(f=>r[f]||"")].forEach(v=>{
+   const td=document.createElement("td");
+   td.textContent=v;
+   tr.appendChild(td);
+  });
+
+  const moveTd=document.createElement("td");
+  const select=document.createElement("select");
+  select.innerHTML=shopOptions(r.shop);
+  const btn=document.createElement("button");
+  btn.textContent="MOVE";
+  btn.onclick=()=>moveShop(r.id,select.value);
+  moveTd.append(select,btn);
+  tr.appendChild(moveTd);
+
+  const action=document.createElement("td");
+  const edit=document.createElement("button");
+  edit.textContent="EDIT";
+  edit.onclick=()=>editRecord(r.id);
+  const del=document.createElement("button");
+  del.textContent="DELETE";del.className="red";
+  del.onclick=()=>deleteRecord(r.id);
+  action.append(edit,del);
+  tr.appendChild(action);
+  body.appendChild(tr);
+ });
+}
+
+["search","shopFilter","statusFilter"].forEach(id=>{
+ document.getElementById(id).addEventListener("input",render);
 });
+
+function download(content,name,type){
+ const blob=new Blob([content],{type});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download=name;a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function exportCSV(){
+ const header=["Shop","Location","Date Placed","Coach No","Coach Code",
+ "Date In","PDF Days","Calculated Days","Status","Remarks"];
+ const rows=records.map(r=>fields.map(f=>r[f]||""));
+ const csv=[header,...rows].map(row=>row.map(v=>
+ '"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ download("\uFEFF"+csv,"coach_stock.csv","text/csv;charset=utf-8");
+}
+
+function backupJSON(){
+ download(JSON.stringify(records,null,2),"coach_stock_backup.json","application/json");
+}
+
+document.getElementById("restoreFile").addEventListener("change",e=>{
+ const file=e.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const data=JSON.parse(reader.result);
+   if(!Array.isArray(data))throw Error();
+   records=data;persist();render();alert("Backup restored");
+  }catch(err){alert("Invalid JSON backup");}
+  e.target.value="";
+ };
+ reader.readAsText(file);
+});
+
+render();
 </script>
-
-<!-- COACH STOCK MODULE -->
-<script
-    id="coachStockModule"
-    type="module"
-    src="js/coach-stock.js">
-</script>
-
-<script>
-document
-    .getElementById("coachStockModule")
-    .addEventListener("error", function() {
-
-        document.getElementById("notice").textContent =
-            "MODULE LOAD ERROR: coach-stock.js or firebase-config.js not found.";
-
-    });
-</script>
-
 </body>
 </html>
