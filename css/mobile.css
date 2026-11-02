@@ -1,823 +1,172 @@
-/* =========================================================
-   MR CO-ORDINATION BOARD
-   MOBILE CELL EQUAL WIDTH + FULL TOUCH SCROLL FIX
-   VERSION 11.0 FINAL
-   ---------------------------------------------------------
-   FIXED:
-   ✔ VERTICAL SCROLL
-   ✔ HORIZONTAL SCROLL
-   ✔ EQUAL CELL WIDTH
-   ✔ SCR / CR TABLE
-   ✔ MOBILE TOUCH
-   ✔ COACH CARD
-   ✔ NO TABLE SQUEEZE
-========================================================= */
 
+/* =========================================
+   MOBILE RESPONSIVE DESIGN
+========================================= */
 
-/* =========================================================
-   01. GLOBAL TABLE SCROLL WRAPPER
-========================================================= */
+@media (max-width: 768px) {
 
-.table-responsive {
-
-    display: block !important;
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    overflow-x: auto !important;
-
-    overflow-y: visible !important;
-
-    -webkit-overflow-scrolling: touch !important;
-
-    overscroll-behavior-x: contain !important;
-
-    overscroll-behavior-y: auto !important;
-
-    touch-action: pan-x pan-y !important;
-
-    box-sizing: border-box !important;
-
-}
-
-
-/* =========================================================
-   02. BOARD TABLE WRAPPER
-========================================================= */
-
-.board-table-wrapper {
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    overflow-x: auto !important;
-
-    overflow-y: visible !important;
-
-    -webkit-overflow-scrolling: touch !important;
-
-    overscroll-behavior-x: contain !important;
-
-    overscroll-behavior-y: auto !important;
-
-    touch-action: pan-x pan-y !important;
-
-    box-sizing: border-box !important;
-
-}
-
-
-/* =========================================================
-   03. SHOP TABLE WRAPPER
-========================================================= */
-
-.shop-card .table-responsive {
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    overflow-x: auto !important;
-
-    overflow-y: visible !important;
-
-    -webkit-overflow-scrolling: touch !important;
-
-    overscroll-behavior-x: contain !important;
-
-    overscroll-behavior-y: auto !important;
-
-    touch-action: pan-x pan-y !important;
-
-}
-
-
-/* =========================================================
-   04. ALL COACH TABLES
-========================================================= */
-
-.coach-table {
-
-    width: max-content !important;
-
-    min-width: max-content !important;
-
-    max-width: none !important;
-
-    table-layout: fixed !important;
-
-    border-collapse: collapse !important;
-
-    margin: 0 !important;
-
-}
-
-
-/* =========================================================
-   05. ALL CELLS
-   EXACT SAME WIDTH
-========================================================= */
-
-.coach-table th,
-.coach-table td {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-    box-sizing: border-box !important;
-
-    padding: 4px !important;
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-    white-space: nowrap !important;
-
-}
-
-
-/* =========================================================
-   06. HEADER
-========================================================= */
-
-.coach-table thead th {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-    height: 48px !important;
-
-    padding: 4px 2px !important;
-
-    font-size: 14px !important;
-
-    font-weight: 800 !important;
-
-    line-height: 1.1 !important;
-
-    white-space: nowrap !important;
-
-    overflow: hidden !important;
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-}
-
-
-/* =========================================================
-   07. FIRST / POSITION COLUMN
-   ALSO SAME WIDTH
-========================================================= */
-
-.coach-table th:first-child,
-.coach-table td:first-child {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-}
-
-
-/* =========================================================
-   08. BODY CELLS
-========================================================= */
-
-.coach-table tbody td,
-.coach-table tbody th {
-
-    width: 82px !important;
-
-    min-width: 82px !important;
-
-    max-width: 82px !important;
-
-    height: 82px !important;
-
-    min-height: 82px !important;
-
-    padding: 3px !important;
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-    overflow: hidden !important;
-
-    box-sizing: border-box !important;
-
-}
-
-
-/* =========================================================
-   09. COACH CARD
-========================================================= */
-
-.coach-table .coach-card {
-
-    width: 74px !important;
-
-    min-width: 74px !important;
-
-    max-width: 74px !important;
-
-    height: 72px !important;
-
-    min-height: 72px !important;
-
-    max-height: 72px !important;
-
-    margin: 0 auto !important;
-
-    padding: 3px 1px !important;
-
-    display: flex !important;
-
-    flex-direction: column !important;
-
-    justify-content: center !important;
-
-    align-items: center !important;
-
-    text-align: center !important;
-
-    box-sizing: border-box !important;
-
-    overflow: hidden !important;
-
-}
-
-
-/* =========================================================
-   10. COACH NUMBER
-========================================================= */
-
-.coach-table .coach-number,
-.coach-table .coach-no {
-
-    display: block !important;
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    font-size: 15px !important;
-
-    font-weight: 900 !important;
-
-    line-height: 1.15 !important;
-
-    text-align: center !important;
-
-    white-space: nowrap !important;
-
-    overflow: visible !important;
-
-    text-overflow: clip !important;
-
-    word-break: normal !important;
-
-}
-
-
-/* =========================================================
-   11. COACH TYPE
-========================================================= */
-
-.coach-table .coach-type {
-
-    display: block !important;
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    font-size: 9px !important;
-
-    line-height: 1.1 !important;
-
-    font-weight: 700 !important;
-
-    white-space: nowrap !important;
-
-    overflow: hidden !important;
-
-    text-overflow: ellipsis !important;
-
-}
-
-
-/* =========================================================
-   12. COACH STATUS
-========================================================= */
-
-.coach-table .coach-status {
-
-    display: block !important;
-
-    width: 100% !important;
-
-    max-width: 100% !important;
-
-    font-size: 9px !important;
-
-    line-height: 1.1 !important;
-
-    font-weight: 800 !important;
-
-    white-space: nowrap !important;
-
-    overflow: hidden !important;
-
-    text-overflow: ellipsis !important;
-
-}
-
-
-/* =========================================================
-   13. EMPTY CELL
-========================================================= */
-
-.coach-table td:empty {
-
-    height: 82px !important;
-
-    min-height: 82px !important;
-
-}
-
-
-/* =========================================================
-   14. MOBILE <= 576px
-========================================================= */
-
-@media (max-width: 576px) {
-
-    /* -----------------------------------------------------
-       PAGE VERTICAL SCROLL
-    ----------------------------------------------------- */
-
-    html,
     body {
-
-        width: 100% !important;
-
-        min-height: 100% !important;
-
-        height: auto !important;
-
-        overflow-x: hidden !important;
-
-        overflow-y: auto !important;
-
-        touch-action: pan-y !important;
-
-        -webkit-overflow-scrolling: touch !important;
-
+        font-size: 12px;
     }
 
-
-    /* -----------------------------------------------------
-       TABLE WRAPPERS
-    ----------------------------------------------------- */
-
-    .table-responsive,
-    .board-table-wrapper,
-    .shop-card .table-responsive,
-    .pulled-out-table-wrapper,
-    .history-wrapper {
-
-        overflow-x: auto !important;
-
-        overflow-y: visible !important;
-
-        -webkit-overflow-scrolling: touch !important;
-
-        touch-action: pan-x pan-y !important;
-
-        overscroll-behavior-x: contain !important;
-
-        overscroll-behavior-y: auto !important;
-
+    .header {
+        padding: 16px 8px !important;
     }
 
+    .header h3 {
+        font-size: 17px;
+        line-height: 1.5;
+    }
 
-    /* -----------------------------------------------------
-       TABLE
-    ----------------------------------------------------- */
+    .header h5 {
+        font-size: 13px;
+        letter-spacing: 2px;
+    }
+
+    .header .d-flex {
+        flex-wrap: wrap;
+        gap: 10px !important;
+        font-size: 11px;
+    }
+
+    .navbar-brand {
+        font-size: 15px;
+    }
+
+    .nav-link {
+        padding: 9px 12px !important;
+    }
+
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #searchBox {
+        margin-bottom: 10px;
+    }
+
+    .container-fluid .btn {
+        margin: 3px 1px;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .container-fluid .col-md-7 {
+        text-align: left !important;
+        line-height: 2.3;
+    }
+
+    .shop-card {
+        margin: 14px 7px !important;
+        border-radius: 9px;
+    }
+
+    .shop-title {
+        font-size: 16px;
+        padding: 11px !important;
+    }
 
     .coach-table {
-
-        width: max-content !important;
-
-        min-width: max-content !important;
-
-        max-width: none !important;
-
-        table-layout: fixed !important;
-
+        min-width: max-content;
     }
 
+    .coach-table th {
+        font-size: 11px;
+        padding: 9px 7px;
+    }
 
-    /* -----------------------------------------------------
-       CELLS
-    ----------------------------------------------------- */
-
-    .coach-table th,
     .coach-table td {
-
-        width: 78px !important;
-
-        min-width: 78px !important;
-
-        max-width: 78px !important;
-
+        min-width: 90px;
+        padding: 5px;
     }
 
-
-    /* -----------------------------------------------------
-       HEADER
-    ----------------------------------------------------- */
-
-    .coach-table thead th {
-
-        width: 78px !important;
-
-        min-width: 78px !important;
-
-        max-width: 78px !important;
-
-        height: 46px !important;
-
-        font-size: 13px !important;
-
-        padding: 3px 1px !important;
-
+    .coach-card {
+        min-height: 42px;
+        font-size: 11px;
     }
 
-
-    /* -----------------------------------------------------
-       POSITION COLUMN
-    ----------------------------------------------------- */
-
-    .coach-table th:first-child,
-    .coach-table td:first-child {
-
-        width: 78px !important;
-
-        min-width: 78px !important;
-
-        max-width: 78px !important;
-
+    .card {
+        margin-left: 7px;
+        margin-right: 7px;
     }
 
-
-    /* -----------------------------------------------------
-       BODY
-    ----------------------------------------------------- */
-
-    .coach-table tbody td,
-    .coach-table tbody th {
-
-        width: 78px !important;
-
-        min-width: 78px !important;
-
-        max-width: 78px !important;
-
-        height: 78px !important;
-
-        min-height: 78px !important;
-
+    .card-header {
+        font-size: 14px;
+        padding: 11px;
     }
 
-
-    /* -----------------------------------------------------
-       COACH CARD
-    ----------------------------------------------------- */
-
-    .coach-table .coach-card {
-
-        width: 72px !important;
-
-        min-width: 72px !important;
-
-        max-width: 72px !important;
-
-        height: 70px !important;
-
-        min-height: 70px !important;
-
-        max-height: 70px !important;
-
+    .pulled-out-search-row {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-
-    /* -----------------------------------------------------
-       COACH NUMBER
-    ----------------------------------------------------- */
-
-    .coach-table .coach-number,
-    .coach-table .coach-no {
-
-        font-size: 14px !important;
-
-        font-weight: 900 !important;
-
-        line-height: 1.1 !important;
-
-        white-space: nowrap !important;
-
-        overflow: visible !important;
-
+    .pulled-out-search-count {
+        text-align: right;
     }
 
-
-    /* -----------------------------------------------------
-       TYPE
-    ----------------------------------------------------- */
-
-    .coach-table .coach-type {
-
-        font-size: 8px !important;
-
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
-
-    /* -----------------------------------------------------
-       STATUS
-    ----------------------------------------------------- */
-
-    .coach-table .coach-status {
-
-        font-size: 8px !important;
-
+    .table-responsive table {
+        white-space: nowrap;
     }
 
+    .card-body .badge {
+        margin: 3px 1px;
+        padding: 7px 9px;
+        font-size: 11px;
+    }
+
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-footer {
+        gap: 5px;
+    }
+
+    .modal-footer .btn {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+
+    footer {
+        font-size: 12px;
+        text-align: center;
+    }
+
+    footer .col-md-4 {
+        margin-bottom: 10px;
+        text-align: center !important;
+    }
 }
 
-
-/* =========================================================
-   15. VERY SMALL PHONE <= 400px
-========================================================= */
+/* SMALL MOBILE */
 
 @media (max-width: 400px) {
 
-    .coach-table th,
-    .coach-table td {
-
-        width: 74px !important;
-
-        min-width: 74px !important;
-
-        max-width: 74px !important;
-
+    .header h3 {
+        font-size: 15px;
     }
 
-
-    .coach-table thead th {
-
-        width: 74px !important;
-
-        min-width: 74px !important;
-
-        max-width: 74px !important;
-
-        height: 44px !important;
-
-        font-size: 12px !important;
-
+    .shop-title {
+        font-size: 14px;
     }
 
-
-    .coach-table th:first-child,
-    .coach-table td:first-child {
-
-        width: 74px !important;
-
-        min-width: 74px !important;
-
-        max-width: 74px !important;
-
+    .container-fluid .btn {
+        font-size: 11px;
+        padding: 7px 8px;
     }
-
-
-    .coach-table tbody td,
-    .coach-table tbody th {
-
-        width: 74px !important;
-
-        min-width: 74px !important;
-
-        max-width: 74px !important;
-
-        height: 74px !important;
-
-        min-height: 74px !important;
-
-    }
-
-
-    .coach-table .coach-card {
-
-        width: 68px !important;
-
-        min-width: 68px !important;
-
-        max-width: 68px !important;
-
-        height: 66px !important;
-
-        min-height: 66px !important;
-
-        max-height: 66px !important;
-
-    }
-
-
-    .coach-table .coach-number,
-    .coach-table .coach-no {
-
-        font-size: 13px !important;
-
-    }
-
-
-    .coach-table .coach-type,
-    .coach-table .coach-status {
-
-        font-size: 7px !important;
-
-    }
-
-}
-
-
-/* =========================================================
-   16. TOUCH DEVICE
-   IMPORTANT:
-   ALLOW BOTH X + Y SCROLL
-========================================================= */
-
-@media (hover: none) and (pointer: coarse) {
-
-    html,
-    body {
-
-        overflow-x: hidden !important;
-
-        overflow-y: auto !important;
-
-        height: auto !important;
-
-        min-height: 100% !important;
-
-        touch-action: pan-y !important;
-
-    }
-
-
-    .table-responsive,
-    .board-table-wrapper,
-    .shop-card .table-responsive,
-    .pulled-out-table-wrapper,
-    .history-wrapper {
-
-        touch-action: pan-x pan-y !important;
-
-        overflow-x: auto !important;
-
-        overflow-y: visible !important;
-
-        -webkit-overflow-scrolling: touch !important;
-
-    }
-
 
     .coach-table td {
-
-        -webkit-tap-highlight-color:
-            rgba(13, 110, 253, 0.12);
-
-    }
-
-
-    .coach-table .coach-card {
-
-        -webkit-tap-highlight-color:
-            rgba(13, 110, 253, 0.12);
-
-    }
-
-
-    button {
-
-        -webkit-tap-highlight-color:
-            transparent;
-
+        min-width: 82px;
     }
 
 }
-
-
-/* =========================================================
-   17. PREVENT OLD CSS FROM BLOCKING VERTICAL SCROLL
-========================================================= */
-
-/*
-   This overrides the previous style.css rule:
-
-   .board-table-wrapper,
-   .shop-card .table-responsive,
-   .pulled-out-table-wrapper,
-   .history-wrapper {
-       touch-action: pan-x;
-   }
-
-   BOTH directions are now allowed.
-*/
-
-.board-table-wrapper,
-.shop-card .table-responsive,
-.table-responsive {
-
-    touch-action: pan-x pan-y !important;
-
-}
-
-
-/* =========================================================
-   18. PULLED OUT / HISTORY
-========================================================= */
-
-.pulled-out-table-wrapper,
-.history-wrapper {
-
-    overflow-x: auto !important;
-
-    overflow-y: visible !important;
-
-    -webkit-overflow-scrolling: touch !important;
-
-    touch-action: pan-x pan-y !important;
-
-}
-
-
-/* =========================================================
-   19. DO NOT SQUEEZE SCR / CR
-========================================================= */
-
-.coach-table th,
-.coach-table td {
-
-    white-space: nowrap !important;
-
-}
-
-
-/* =========================================================
-   20. RETURN TARGET
-========================================================= */
-
-.return-target {
-
-    outline: 3px dashed #198754 !important;
-
-    outline-offset: -3px;
-
-    cursor: pointer !important;
-
-}
-
-
-/* =========================================================
-   21. SELECTED RETURN CELL
-========================================================= */
-
-.return-selected {
-
-    outline: 4px solid #0d6efd !important;
-
-    outline-offset: -4px;
-
-}
-
-
-/* =========================================================
-   22. END
-========================================================= */
