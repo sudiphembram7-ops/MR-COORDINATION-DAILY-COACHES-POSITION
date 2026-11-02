@@ -2,561 +2,525 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>MR CO-ORDINATION DASHBOARD</title>
 
 <style>
 
-/* =====================================================
-   GLOBAL
-===================================================== */
+/* ================= GLOBAL ================= */
 
-*{
-    box-sizing:border-box;
+* {
+    box-sizing: border-box;
 }
 
-html,
-body{
-    margin:0;
-    padding:0;
-    min-height:100%;
+html {
+    scroll-behavior: smooth;
 }
 
-body{
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background:#f1f4f8;
-    color:#222;
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f2f5fa;
+    color: #202b3c;
 }
 
+/* ================= HEADER ================= */
 
-/* =====================================================
-   HEADER
-===================================================== */
-
-.dashboard-header{
-    background:
-        linear-gradient(
-            135deg,
-            #003366,
-            #0056a6
-        );
-
-    color:white;
-    padding:18px 15px;
-    text-align:center;
-
-    box-shadow:
-        0 3px 10px
-        rgba(0,0,0,.20);
+.dashboard-header {
+    background: linear-gradient(120deg, #001d3d, #004b87, #0874b9);
+    color: white;
+    padding: 27px 15px;
+    text-align: center;
+    box-shadow: 0 5px 18px rgba(0, 30, 65, .22);
+    position: relative;
+    overflow: hidden;
 }
 
-.dashboard-header h1{
-    margin:0;
-    font-size:28px;
-    font-weight:800;
-    letter-spacing:1px;
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 2px;
 }
 
-.dashboard-header h2{
-    margin:5px 0 0;
-    font-size:17px;
-    font-weight:600;
+.dashboard-header h2 {
+    margin: 9px 0 0;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .5px;
 }
 
-.dashboard-date{
-    margin-top:7px;
-    font-size:14px;
-    opacity:.9;
+.dashboard-date {
+    display: inline-block;
+    margin-top: 13px;
+    padding: 7px 16px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.15);
+    font-size: 13px;
+    font-weight: 600;
 }
 
+/* ================= NAVIGATION ================= */
 
-/* =====================================================
-   DATABASE
-===================================================== */
-
-.status-bar{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
-
-    margin:15px auto;
-
-    font-weight:bold;
+.navbar {
+    background: #101f33;
+    padding: 0 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 55px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 3px 10px rgba(0,0,0,.12);
 }
 
-#databaseStatus{
-    padding:7px 16px;
-    min-width:105px;
-
-    text-align:center;
-
-    border-radius:20px;
-
-    background:#ffc107;
-    color:#000;
-
-    font-size:13px;
+.navbar-brand {
+    color: white;
+    font-weight: 900;
+    font-size: 17px;
+    text-decoration: none;
+    letter-spacing: 1px;
 }
 
-
-/* =====================================================
-   GRAND TOTAL
-===================================================== */
-
-.grand-total-card{
-    width:calc(100% - 20px);
-    max-width:900px;
-
-    margin:10px auto 20px;
-
-    padding:20px;
-
-    background:white;
-
-    border-radius:14px;
-
-    text-align:center;
-
-    box-shadow:
-        0 4px 12px
-        rgba(0,0,0,.12);
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.grand-total-title{
-    font-size:17px;
-    font-weight:700;
-    color:#555;
+.navbar-links a {
+    display: block;
+    color: #dce7f4;
+    text-decoration: none;
+    padding: 19px 15px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: .2s;
 }
 
-#grandTotal{
-    font-size:42px;
-    font-weight:900;
-
-    color:#003366;
-
-    margin-top:5px;
+.navbar-links a:hover {
+    background: #0874b9;
+    color: white;
 }
 
-
-/* =====================================================
-   SHOP GRID
-===================================================== */
-
-.shop-grid{
-    display:grid;
-
-    grid-template-columns:
-        repeat(5,1fr);
-
-    gap:15px;
-
-    max-width:1400px;
-
-    margin:auto;
-
-    padding:0 15px;
+.nav-toggle {
+    display: none;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.4);
+    color: white;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 22px;
+    cursor: pointer;
 }
 
-.shop-card{
-    background:white;
+/* ================= MAIN CONTAINER ================= */
 
-    border-radius:14px;
-
-    padding:18px;
-
-    text-align:center;
-
-    min-height:150px;
-
-    box-shadow:
-        0 4px 12px
-        rgba(0,0,0,.12);
-
-    transition:
-        transform .2s,
-        box-shadow .2s;
+.dashboard-container {
+    max-width: 1450px;
+    margin: auto;
+    padding: 20px;
 }
 
-.shop-card:hover{
-    transform:translateY(-3px);
+/* ================= DATABASE STATUS ================= */
 
-    box-shadow:
-        0 7px 18px
-        rgba(0,0,0,.18);
+.status-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 5px auto 22px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #536174;
 }
 
-.shop-name{
-    font-size:19px;
-
-    font-weight:800;
-
-    color:#003366;
-
-    margin-bottom:10px;
+#databaseStatus {
+    min-width: 115px;
+    text-align: center;
+    padding: 8px 17px;
+    border-radius: 30px;
+    background: #fff0c2;
+    color: #805900;
+    font-size: 12px;
+    box-shadow: 0 2px 7px rgba(0,0,0,.06);
 }
 
-.shop-total{
-    font-size:40px;
+/* ================= GRAND TOTAL ================= */
 
-    font-weight:900;
-
-    color:#198754;
+.grand-total-card {
+    background: linear-gradient(120deg, #ffffff, #eaf3ff);
+    border: 1px solid #d8e7f7;
+    border-left: 6px solid #0874b9;
+    border-radius: 15px;
+    padding: 24px;
+    text-align: center;
+    margin: 0 auto 25px;
+    max-width: 900px;
+    box-shadow: 0 5px 18px rgba(20,60,100,.09);
 }
 
-.coach-label{
-    font-size:13px;
-
-    color:#666;
-
-    font-weight:600;
+.grand-total-title {
+    color: #526174;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
 }
 
-
-/* =====================================================
-   N SHOP
-===================================================== */
-
-.n-shop-section{
-    max-width:1400px;
-
-    margin:25px auto;
-
-    padding:0 15px;
+#grandTotal {
+    color: #003b70;
+    font-size: 49px;
+    font-weight: 900;
+    margin-top: 6px;
 }
 
-.n-shop-box{
-    background:white;
+/* ================= SHOP GRID ================= */
 
-    border-radius:14px;
-
-    box-shadow:
-        0 4px 12px
-        rgba(0,0,0,.12);
-
-    overflow:hidden;
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 30px;
 }
 
-.n-shop-header{
-    background:
-        linear-gradient(
-            135deg,
-            #198754,
-            #157347
-        );
-
-    color:white;
-
-    padding:15px 20px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:10px;
-
-    flex-wrap:wrap;
+.shop-card {
+    position: relative;
+    background: white;
+    border: 1px solid #e5ebf2;
+    border-radius: 15px;
+    padding: 23px 15px;
+    text-align: center;
+    min-height: 155px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(25,50,80,.07);
+    transition: transform .25s, box-shadow .25s;
 }
 
-.n-shop-header h3{
-    margin:0;
-
-    font-size:20px;
-
-    font-weight:800;
+.shop-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 100%;
+    background: linear-gradient(90deg,#0056a6,#28a5e8);
 }
 
-.n-shop-new-total{
-    background:white;
-
-    color:#198754;
-
-    border-radius:20px;
-
-    padding:5px 14px;
-
-    font-weight:800;
-
-    font-size:14px;
+.shop-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 9px 22px rgba(25,50,80,.13);
 }
 
-
-/* =====================================================
-   SEARCH
-===================================================== */
-
-.search-area{
-    padding:15px;
-
-    background:#f8f9fa;
-
-    border-bottom:1px solid #ddd;
+.shop-name {
+    font-size: 18px;
+    font-weight: 900;
+    color: #173b61;
+    margin-bottom: 12px;
 }
 
-#nShopSearch{
-    width:100%;
-
-    padding:11px 14px;
-
-    border:1px solid #bbb;
-
-    border-radius:8px;
-
-    font-size:15px;
-
-    outline:none;
+.shop-total {
+    font-size: 41px;
+    font-weight: 900;
+    color: #168653;
+    line-height: 1.1;
 }
 
-#nShopSearch:focus{
-    border-color:#198754;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(25,135,84,.12);
+.coach-label {
+    margin-top: 8px;
+    color: #8793a3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
 }
 
+/* ================= N SHOP SECTION ================= */
 
-/* =====================================================
-   N SHOP LIST
-===================================================== */
-
-#nShopCoachList{
-    display:grid;
-
-    grid-template-columns:
-        repeat(auto-fill,minmax(120px,1fr));
-
-    gap:10px;
-
-    padding:18px;
+.n-shop-section {
+    margin: 30px 0;
 }
 
-.coach-item{
-    background:#e9f7ef;
-
-    border:1px solid #b7dfc6;
-
-    border-radius:8px;
-
-    padding:10px;
-
-    text-align:center;
-
-    font-size:18px;
-
-    font-weight:900;
-
-    color:#146c43;
+.n-shop-box {
+    background: white;
+    border-radius: 15px;
+    border: 1px solid #e2e9ef;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(25,50,80,.08);
 }
 
-.coach-item:hover{
-    background:#d1e7dd;
+.n-shop-header {
+    background: linear-gradient(120deg,#087548,#159b65);
+    color: white;
+    padding: 19px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.no-coach{
-    grid-column:1 / -1;
-
-    text-align:center;
-
-    padding:25px;
-
-    color:#777;
-
-    font-weight:600;
+.n-shop-header h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 900;
 }
 
-
-/* =====================================================
-   REFRESH
-===================================================== */
-
-.control-area{
-    text-align:center;
-
-    margin:20px 0;
+.n-shop-new-total {
+    background: white;
+    color: #087548;
+    padding: 9px 17px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 900;
 }
 
-#refreshDashboardBtn{
-    border:none;
+/* ================= SEARCH ================= */
 
-    background:#003366;
-
-    color:white;
-
-    padding:10px 22px;
-
-    border-radius:8px;
-
-    font-weight:700;
-
-    cursor:pointer;
+.search-area {
+    padding: 17px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5eaf0;
 }
 
-#refreshDashboardBtn:disabled{
-    opacity:.7;
-
-    cursor:wait;
+#nShopSearch {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1px solid #ccd5df;
+    border-radius: 9px;
+    background: white;
+    font-size: 15px;
+    outline: none;
+    transition: .2s;
 }
 
-
-/* =====================================================
-   FOOTER
-===================================================== */
-
-.dashboard-footer{
-    text-align:center;
-
-    margin-top:30px;
-
-    padding:15px;
-
-    background:#003366;
-
-    color:white;
-
-    font-size:13px;
+#nShopSearch:focus {
+    border-color: #159b65;
+    box-shadow: 0 0 0 3px rgba(21,155,101,.13);
 }
 
+/* ================= COACH LIST ================= */
 
-/* =====================================================
-   TABLET
-===================================================== */
+#nShopCoachList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(120px,1fr));
+    gap: 11px;
+    padding: 22px;
+    min-height: 100px;
+}
 
-@media(max-width:1000px){
+.coach-item {
+    background: #eaf8f0;
+    border: 1px solid #c3e6d0;
+    border-radius: 9px;
+    padding: 13px 7px;
+    text-align: center;
+    color: #087548;
+    font-size: 17px;
+    font-weight: 900;
+    transition: .2s;
+}
 
-    .shop-grid{
-        grid-template-columns:
-            repeat(3,1fr);
+.coach-item:hover {
+    background: #d2f0df;
+    transform: translateY(-2px);
+}
+
+.no-coach {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    color: #8995a3;
+    font-weight: 700;
+}
+
+/* ================= REFRESH ================= */
+
+.control-area {
+    text-align: center;
+    margin: 30px 0;
+}
+
+#refreshDashboardBtn {
+    border: none;
+    background: linear-gradient(120deg,#003366,#0874b9);
+    color: white;
+    padding: 13px 27px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .5px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,65,125,.2);
+    transition: .2s;
+}
+
+#refreshDashboardBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 17px rgba(0,65,125,.3);
+}
+
+#refreshDashboardBtn:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+/* ================= FOOTER ================= */
+
+.dashboard-footer {
+    background: #101f33;
+    color: #dce7f4;
+    text-align: center;
+    padding: 23px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.9;
+}
+
+/* ================= TABLET ================= */
+
+@media(max-width:900px) {
+
+    .shop-grid {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .dashboard-container {
+        padding: 15px;
     }
 
 }
 
+/* ================= MOBILE ================= */
 
-/* =====================================================
-   MOBILE
-===================================================== */
+@media(max-width:650px) {
 
-@media(max-width:650px){
-
-    .dashboard-header{
-        padding:16px 10px;
+    .dashboard-header {
+        padding: 21px 10px;
     }
 
-    .dashboard-header h1{
-        font-size:21px;
+    .dashboard-header h1 {
+        font-size: 23px;
     }
 
-    .dashboard-header h2{
-        font-size:14px;
-        line-height:1.3;
+    .dashboard-header h2 {
+        font-size: 13px;
+        line-height: 1.5;
     }
 
-    .dashboard-date{
-        font-size:12px;
+    .dashboard-date {
+        font-size: 11px;
     }
 
-    .grand-total-card{
-        width:calc(100% - 0px);
-
-        margin:
-            10px 0 20px;
-
-        border-radius:14px;
-
-        padding:18px;
+    .navbar {
+        padding: 0 15px;
+        min-height: 52px;
+        flex-wrap: wrap;
     }
 
-    #grandTotal{
-        font-size:36px;
+    .nav-toggle {
+        display: block;
     }
 
-    .shop-grid{
-        grid-template-columns:
-            repeat(2,1fr);
-
-        gap:10px;
-
-        padding:0 10px;
+    .navbar-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 5px 0 12px;
     }
 
-    .shop-card{
-        min-height:125px;
-
-        padding:13px;
+    .navbar-links.show {
+        display: flex;
     }
 
-    .shop-name{
-        font-size:16px;
+    .navbar-links a {
+        padding: 12px;
+        border-radius: 5px;
     }
 
-    .shop-total{
-        font-size:32px;
+    .dashboard-container {
+        padding: 12px;
     }
 
-    .coach-label{
-        font-size:12px;
+    .grand-total-card {
+        padding: 19px 10px;
+        margin-bottom: 20px;
     }
 
-    .n-shop-section{
-        padding:0 10px;
+    .grand-total-title {
+        font-size: 13px;
     }
 
-    .n-shop-header{
-        padding:13px;
+    #grandTotal {
+        font-size: 39px;
     }
 
-    .n-shop-header h3{
-        font-size:17px;
+    .shop-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 11px;
     }
 
-    #nShopCoachList{
-        grid-template-columns:
-            repeat(3,1fr);
-
-        padding:12px;
-
-        gap:8px;
+    .shop-card {
+        min-height: 130px;
+        padding: 17px 7px;
     }
 
-    .coach-item{
-        font-size:15px;
+    .shop-name {
+        font-size: 15px;
+    }
 
-        padding:8px 4px;
+    .shop-total {
+        font-size: 34px;
+    }
+
+    .coach-label {
+        font-size: 10px;
+    }
+
+    .n-shop-header {
+        padding: 15px;
+    }
+
+    .n-shop-header h3 {
+        font-size: 16px;
+    }
+
+    #nShopCoachList {
+        grid-template-columns: repeat(3,minmax(0,1fr));
+        padding: 13px;
+        gap: 8px;
+    }
+
+    .coach-item {
+        font-size: 14px;
+        padding: 10px 3px;
     }
 
 }
 
+/* ================= SMALL MOBILE ================= */
 
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
+@media(max-width:380px) {
 
-@media(max-width:400px){
-
-    #nShopCoachList{
-        grid-template-columns:
-            repeat(2,1fr);
+    .shop-grid {
+        gap: 8px;
     }
 
-    .shop-card{
-        min-height:120px;
+    .shop-card {
+        padding: 14px 5px;
     }
 
-    .shop-total{
-        font-size:30px;
+    .shop-total {
+        font-size: 29px;
+    }
+
+    #nShopCoachList {
+        grid-template-columns: repeat(2,1fr);
     }
 
 }
@@ -565,468 +529,269 @@ body{
 
 </head>
 
-
-
 <body>
 
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
+<!-- HEADER -->
 
 <header class="dashboard-header">
 
-    <h1>
-        INDIAN RAILWAYS
-    </h1>
+    <h1>INDIAN RAILWAYS</h1>
 
-    <h2>
-        MR CO-ORDINATION DAILY COACHES POSITION
-    </h2>
+    <h2>MR CO-ORDINATION DAILY COACHES POSITION</h2>
 
-    <div
-        class="dashboard-date"
-        id="currentDateTime">
-
+    <div id="currentDateTime" class="dashboard-date">
         Loading date &amp; time...
-
     </div>
-   
-
 
 </header>
-<!-- =====================================================
-     NAVIGATION
-===================================================== -->
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<!-- NAVIGATION -->
 
-    <div class="container-fluid">
+<nav class="navbar">
 
-        <a
-            class="navbar-brand"
-            href="#"
-        >
-        MENU
-        </a>
+    <a href="index.html" class="navbar-brand">
+        ☰ MENU
+    </a>
 
+    <button
+        class="nav-toggle"
+        id="navToggle"
+        aria-label="Toggle navigation"
+        aria-expanded="false">
+        ☰
+    </button>
 
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#menu"
-            aria-controls="menu"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-        >
+    <ul class="navbar-links" id="navbarLinks">
 
-            <span class="navbar-toggler-icon"></span>
+        <li><a href="index.html">HOME</a></li>
 
-        </button>
+        <li><a href="board.html">BOARD</a></li>
 
+        <li><a href="admin.html">LOGIN</a></li>
 
-        <div
-            class="collapse navbar-collapse"
-            id="menu"
-        >
+        <li><a href="history.html">HISTORY</a></li>
 
-            <ul class="navbar-nav ms-auto">
+        <li><a href="reports.html">REPORTS</a></li>
 
-                <li class="nav-item">
-                    <a
-                        class="nav-link"
-                        href="index.html"
-                    >
-                        Home
-                    </a>
-   <li class="nav-item">
-                    <a
-                        class="nav-link"
-                        href="board.html"
-                    >
-                        Board
-                    </a>
-
-                </li>
-
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link"
-                        href="admin.html"
-                    >
-                        Login
-                    </a>
-
-                </li>
-
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link"
-                        href="history.html"
-                    >
-                        History
-                    </a>
-
-                </li>
-
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link"
-                        href="reports.html"
-                    >
-                        Reports
-                    </a>
-
-                </li>
-
-            </ul>
-
-        </div>
-
-    </div>
+    </ul>
 
 </nav>
 
-<!-- =====================================================
-     DATABASE STATUS
-===================================================== -->
+<main class="dashboard-container">
 
-<div class="status-bar">
+    <!-- DATABASE STATUS -->
 
-    <span>
-        DATABASE:
-    </span>
+    <div class="status-bar">
 
-    <span id="databaseStatus">
-        Connecting...
-    </span>
+        <span>DATABASE STATUS</span>
 
-</div>
+        <span id="databaseStatus">
+            Connecting...
+        </span>
 
-
-<!-- =====================================================
-     GRAND TOTAL
-===================================================== -->
-
-<div class="grand-total-card">
-
-    <div class="grand-total-title">
-        TOTAL COACHES
     </div>
 
-    <div id="grandTotal">
-        0
-    </div>
+    <!-- GRAND TOTAL -->
 
-</div>
+    <section class="grand-total-card">
 
-
-<!-- =====================================================
-     SHOP TOTALS
-===================================================== -->
-
-<section class="shop-grid">
-
-
-    <!-- N SHOP -->
-
-    <div class="shop-card">
-
-        <div class="shop-name">
-            N SHOP
-        </div>
-
-        <div
-            id="nShopTotal"
-            class="shop-total">
-
-            0
-
-        </div>
-
-        <div class="coach-label">
+        <div class="grand-total-title">
             TOTAL COACHES
         </div>
 
-    </div>
-
-
-    <!-- M SHOP -->
-
-    <div class="shop-card">
-
-        <div class="shop-name">
-            M SHOP
-        </div>
-
-        <div
-            id="mShopTotal"
-            class="shop-total">
-
+        <div id="grandTotal">
             0
-
         </div>
 
-        <div class="coach-label">
-            TOTAL COACHES
+    </section>
+
+    <!-- SHOP TOTALS -->
+
+    <section class="shop-grid">
+
+        <div class="shop-card">
+            <div class="shop-name">N SHOP</div>
+            <div id="nShopTotal" class="shop-total">0</div>
+            <div class="coach-label">TOTAL COACHES</div>
         </div>
 
-    </div>
-
-
-    <!-- MR / SCR -->
-
-    <div class="shop-card">
-
-        <div class="shop-name">
-            MR / SCR
+        <div class="shop-card">
+            <div class="shop-name">M SHOP</div>
+            <div id="mShopTotal" class="shop-total">0</div>
+            <div class="coach-label">TOTAL COACHES</div>
         </div>
 
-        <div
-            id="mrScrTotal"
-            class="shop-total">
-
-            0
-
+        <div class="shop-card">
+            <div class="shop-name">MR / SCR</div>
+            <div id="mrScrTotal" class="shop-total">0</div>
+            <div class="coach-label">TOTAL COACHES</div>
         </div>
 
-        <div class="coach-label">
-            TOTAL COACHES
+        <div class="shop-card">
+            <div class="shop-name">LIFTING BAY</div>
+            <div id="liftingBayTotal" class="shop-total">0</div>
+            <div class="coach-label">TOTAL COACHES</div>
         </div>
 
-    </div>
-
-
-    <!-- LIFTING BAY -->
-
-    <div class="shop-card">
-
-        <div class="shop-name">
-            LIFTING BAY
+        <div class="shop-card">
+            <div class="shop-name">J SHOP</div>
+            <div id="jShopTotal" class="shop-total">0</div>
+            <div class="coach-label">TOTAL COACHES</div>
         </div>
 
-        <div
-            id="liftingBayTotal"
-            class="shop-total">
-
-            0
-
+        <div class="shop-card">
+            <div class="shop-name">CR SHOP</div>
+            <div id="crShopTotal" class="shop-total">0</div>
+            <div class="coach-label">TOTAL COACHES</div>
         </div>
 
-        <div class="coach-label">
-            TOTAL COACHES
-        </div>
+    </section>
 
-    </div>
+    <!-- N SHOP COACH LIST -->
 
+    <section class="n-shop-section">
 
-    <!-- J SHOP -->
+        <div class="n-shop-box">
 
-    <div class="shop-card">
+            <div class="n-shop-header">
 
-        <div class="shop-name">
-            J SHOP
-        </div>
+                <h3>N SHOP — NEW COACHES</h3>
 
-        <div
-            id="jShopTotal"
-            class="shop-total">
+                <span class="n-shop-new-total">
 
-            0
+                    TOTAL:
+                    <span id="nShopNewTotal">0</span>
 
-        </div>
-
-        <div class="coach-label">
-            TOTAL COACHES
-        </div>
-
-    </div>
-
-
-    <!-- CR SHOP -->
-
-    <div class="shop-card">
-
-        <div class="shop-name">
-            CR SHOP
-        </div>
-
-        <div
-            id="crShopTotal"
-            class="shop-total">
-
-            0
-
-        </div>
-
-        <div class="coach-label">
-            TOTAL COACHES
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     N SHOP COACH LIST
-===================================================== -->
-
-<section class="n-shop-section">
-
-    <div class="n-shop-box">
-
-        <div class="n-shop-header">
-
-            <h3>
-                N SHOP — NEW COACHES
-            </h3>
-
-            <span class="n-shop-new-total">
-
-                Total:
-
-                <span id="nShopNewTotal">
-                    0
                 </span>
 
-            </span>
+            </div>
 
-        </div>
+            <div class="search-area">
 
+                <input
+                    type="search"
+                    id="nShopSearch"
+                    placeholder="🔍 Search N Shop Coach Number..."
+                    autocomplete="off">
 
-        <div class="search-area">
+            </div>
 
-            <input
-                type="search"
-                id="nShopSearch"
-                placeholder="Search N Shop Coach Number..."
-                autocomplete="off"
-            >
+            <div id="nShopCoachList">
 
-        </div>
+                <div class="no-coach">
+                    Loading N SHOP coaches...
+                </div>
 
-
-        <div id="nShopCoachList">
-
-            <div class="no-coach">
-                Loading N SHOP coaches...
             </div>
 
         </div>
 
+    </section>
+
+    <!-- REFRESH -->
+
+    <div class="control-area">
+
+        <button
+            type="button"
+            id="refreshDashboardBtn">
+
+            ↻ REFRESH DASHBOARD
+
+        </button>
+
     </div>
 
-</section>
+</main>
 
-
-<!-- =====================================================
-     REFRESH
-===================================================== -->
-
-<div class="control-area">
-
-    <button
-        type="button"
-        id="refreshDashboardBtn">
-
-        ↻ REFRESH DASHBOARD
-
-    </button>
-
-</div>
-
-
-<!-- =====================================================
-     FOOTER
-===================================================== -->
+<!-- FOOTER -->
 
 <footer class="dashboard-footer">
 
-    MR CO-ORDINATION / LILUAH WORKSHOP
+    INDIAN RAILWAYS<br>
 
-    <br>
+    MR CO-ORDINATION / LILUAH WORKSHOP<br>
 
     Live Firebase Dashboard
 
 </footer>
 
+<!-- EXISTING FIREBASE DASHBOARD SCRIPT -->
 
-<!-- =====================================================
-     DASHBOARD JS
-===================================================== -->
+<script type="module" src="./js/dashboard.js"></script>
 
-<script
-    type="module"
-    src="./js/dashboard.js">
-</script>
-
-
-<!-- =====================================================
-     DATE / TIME
-===================================================== -->
+<!-- DATE AND TIME -->
 
 <script>
 
-function updateDateTime(){
+function updateDateTime() {
 
     const element =
-        document.getElementById(
-            "currentDateTime"
-        );
+        document.getElementById("currentDateTime");
 
-    if(!element){
-        return;
-    }
+    if (!element) return;
 
-    const now =
-        new Date();
+    const now = new Date();
 
-    const date =
-        now.toLocaleDateString(
-            "en-IN",
-            {
-                day:"2-digit",
-                month:"2-digit",
-                year:"numeric"
-            }
-        );
+    const date = now.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
 
-    const time =
-        now.toLocaleTimeString(
-            "en-IN",
-            {
-                hour:"2-digit",
-                minute:"2-digit",
-                second:"2-digit",
-                hour12:true
-            }
-        );
+    const time = now.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
 
-    element.textContent =
-        date +
-        " | " +
-        time;
+    element.textContent = date + " | " + time;
 
 }
 
 updateDateTime();
 
-setInterval(
-    updateDateTime,
-    1000
-);
+setInterval(updateDateTime, 1000);
+
+// MOBILE NAVIGATION
+
+const navToggle =
+    document.getElementById("navToggle");
+
+const navbarLinks =
+    document.getElementById("navbarLinks");
+
+navToggle.addEventListener("click", function() {
+
+    const isOpen =
+        navbarLinks.classList.toggle("show");
+
+    navToggle.setAttribute(
+        "aria-expanded",
+        String(isOpen)
+    );
+
+});
+
+// CLOSE MENU AFTER NAVIGATION
+
+navbarLinks.querySelectorAll("a").forEach(link => {
+
+    link.addEventListener("click", function() {
+
+        navbarLinks.classList.remove("show");
+
+        navToggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    });
+
+});
 
 </script>
 
-
 </body>
-
 </html>
