@@ -12,7 +12,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
 header{background:#102b50;color:white;padding:18px;text-align:center}
 header h1{font-size:23px}
 header p{margin-top:6px;color:#dce8f5}
-.container{max-width:1400px;margin:auto;padding:16px}
+.container{max-width:1500px;margin:auto;padding:16px}
 .panel{background:white;padding:18px;border-radius:10px;margin-bottom:16px;box-shadow:0 2px 9px #00000012}
 h2{font-size:18px;margin-bottom:14px;color:#17365d}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
@@ -24,6 +24,7 @@ textarea{min-height:70px;resize:vertical}
 .field{margin-bottom:12px}
 button{border:0;border-radius:6px;padding:10px 14px;font-weight:bold;cursor:pointer;background:#174d83;color:white}
 button:hover{opacity:.9}
+button:disabled{opacity:.6;cursor:not-allowed}
 .btn-green{background:#16834a}
 .btn-red{background:#bd3030}
 .btn-orange{background:#c47b16}
@@ -49,7 +50,7 @@ tbody tr:nth-child(even){background:#f5f8fc}
 .detail-item{background:#f1f5f9;padding:10px;border-radius:6px;overflow-wrap:anywhere}
 .detail-item small{display:block;color:#64748b;margin-bottom:5px}
 .history-item{border-left:4px solid #245b96;padding:10px;margin:10px 0;background:#f5f8fc}
-.hidden{display:none!important}
+.note{font-size:12px;color:#64748b;margin-top:6px}
 @media(max-width:600px){
  header h1{font-size:18px}
  .container{padding:9px}
@@ -72,17 +73,21 @@ tbody tr:nth-child(even){background:#f5f8fc}
 <!-- LOGIN -->
 <section id="loginSection" class="panel">
 <h2>ADMIN / EDITOR LOGIN</h2>
+
 <div class="field">
-<label>Email</label>
+<label>EMAIL</label>
 <input type="email" id="loginEmail" placeholder="Enter email" autocomplete="username">
 </div>
+
 <div class="field">
-<label>Password</label>
+<label>PASSWORD</label>
 <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
 </div>
+
 <button id="loginBtn" type="button">LOGIN</button>
 <p id="loginMessage" class="message"></p>
 </section>
+
 
 <!-- MAIN APP -->
 <section id="appSection">
@@ -95,15 +100,17 @@ tbody tr:nth-child(even){background:#f5f8fc}
 <p id="message" class="message"></p>
 </div>
 
+
 <!-- DASHBOARD -->
 <div class="grid panel">
 <div class="stat">TOTAL COACHES<strong id="totalCoaches">0</strong></div>
-<div class="stat">TOTAL SHOPS<strong id="totalShops">15</strong></div>
+<div class="stat">TOTAL SHOPS<strong id="totalShops">18</strong></div>
 <div class="stat">PENDING<strong id="pendingCoaches">0</strong></div>
 <div class="stat">COMPLETED<strong id="completedCoaches">0</strong></div>
 </div>
 
-<!-- COACH FORM -->
+
+<!-- ADD / UPDATE COACH -->
 <div class="panel">
 <h2 id="formTitle">ADD NEW COACH</h2>
 
@@ -131,13 +138,16 @@ tbody tr:nth-child(even){background:#f5f8fc}
 </div>
 
 <div class="field">
-<label>CURRENT SHOP *</label>
+<label>SHOP *</label>
 <select id="shop" required>
 <option value="">Select Shop</option>
 <option>L SHOP</option>
 <option>PAINT SHOP</option>
 <option>BAHAR LINE</option>
 <option>YARD</option>
+<option>YARD POH LHB</option>
+<option>YARD POH NON-LHB</option>
+<option>YARD NPO</option>
 <option>CORROSION M SHOP</option>
 <option>CORROSION CR SHOP</option>
 <option>CORROSION SCR NAC</option>
@@ -153,18 +163,9 @@ tbody tr:nth-child(even){background:#f5f8fc}
 </div>
 
 <div class="field">
-<label>WORKSHOP 1ST IN DATE *</label>
+<label>WORKSHOP IN DATE *</label>
 <input type="date" id="workshopFirstInDate" required>
-</div>
-
-<div class="field">
-<label>DATE PLACED *</label>
-<input type="date" id="datePlaced" required>
-</div>
-
-<div class="field">
-<label>DATE IN</label>
-<input type="date" id="dateIn">
+<p class="note">First entry only. This date will automatically become the first Shop Date Placed.</p>
 </div>
 
 <div class="field">
@@ -183,25 +184,36 @@ tbody tr:nth-child(even){background:#f5f8fc}
 
 </div>
 
-<div class="actions">
+<p class="note">
+Date Placed and Date Out will be generated automatically.
+No manual Date In entry is required.
+</p>
+
+<div class="actions" style="margin-top:12px">
 <button type="submit" id="saveBtn" class="btn-green">SAVE COACH</button>
 <button type="button" id="resetBtn" class="btn-gray">RESET</button>
 </div>
+
 </form>
 </div>
 
-<!-- STOCK TABLE -->
+
+<!-- STOCK REGISTER -->
 <div class="panel">
 <h2>COACH STOCK REGISTER</h2>
 
 <div class="toolbar">
 <input id="searchInput" placeholder="Search Coach / Shop / Type / Status">
+
 <select id="shopFilter">
 <option value="">ALL SHOPS</option>
 <option>L SHOP</option>
 <option>PAINT SHOP</option>
 <option>BAHAR LINE</option>
 <option>YARD</option>
+<option>YARD POH LHB</option>
+<option>YARD POH NON-LHB</option>
+<option>YARD NPO</option>
 <option>CORROSION M SHOP</option>
 <option>CORROSION CR SHOP</option>
 <option>CORROSION SCR NAC</option>
@@ -224,17 +236,17 @@ tbody tr:nth-child(even){background:#f5f8fc}
 <th>CURRENT SHOP</th>
 <th>COACH NO</th>
 <th>COACH TYPE</th>
-<th>WORKSHOP 1ST IN DATE</th>
+<th>WORKSHOP IN DATE</th>
 <th>DATE PLACED</th>
-<th>DATE IN</th>
 <th>DATE OUT</th>
 <th>DETENTION DAY</th>
 <th>STATUS</th>
 <th>ACTION</th>
 </tr>
 </thead>
+
 <tbody id="stockTable">
-<tr><td colspan="11">Loading...</td></tr>
+<tr><td colspan="10">Loading...</td></tr>
 </tbody>
 </table>
 </div>
@@ -243,9 +255,11 @@ tbody tr:nth-child(even){background:#f5f8fc}
 </section>
 </div>
 
-<!-- MOVE MODAL -->
+
+<!-- MOVE COACH MODAL -->
 <div id="moveModal" class="modal">
 <div class="modal-box">
+
 <div class="modal-head">
 <h2>MOVE COACH</h2>
 <button type="button" class="btn-red" onclick="closeModal('moveModal')">X</button>
@@ -261,6 +275,9 @@ tbody tr:nth-child(even){background:#f5f8fc}
 <option>PAINT SHOP</option>
 <option>BAHAR LINE</option>
 <option>YARD</option>
+<option>YARD POH LHB</option>
+<option>YARD POH NON-LHB</option>
+<option>YARD NPO</option>
 <option>CORROSION M SHOP</option>
 <option>CORROSION CR SHOP</option>
 <option>CORROSION SCR NAC</option>
@@ -276,13 +293,9 @@ tbody tr:nth-child(even){background:#f5f8fc}
 </div>
 
 <div class="field">
-<label>DATE OF MOVEMENT</label>
+<label>MOVEMENT DATE</label>
 <input type="date" id="moveDate" readonly>
-</div>
-
-<div class="field">
-<label>NEW SHOP DATE IN</label>
-<input type="date" id="moveDateIn">
+<p class="note">Automatically set to today's date when Move is opened.</p>
 </div>
 
 <div class="field">
@@ -300,23 +313,30 @@ tbody tr:nth-child(even){background:#f5f8fc}
 </div>
 
 <button type="button" id="confirmMoveBtn" class="btn-green">CONFIRM MOVE</button>
+
 </div>
 </div>
 
-<!-- HISTORY / DETAILS MODAL -->
+
+<!-- COACH DETAILS AND HISTORY -->
 <div id="historyModal" class="modal">
 <div class="modal-box">
+
 <div class="modal-head">
 <h2>COACH DETAILS & HISTORY</h2>
 <button type="button" class="btn-red" onclick="closeModal('historyModal')">X</button>
 </div>
+
 <div id="historyContent"></div>
+
 </div>
 </div>
 
+
 <script>
-window.closeModal = function(id){
-document.getElementById(id).style.display="none";
+window.closeModal = function(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = "none";
 };
 </script>
 
