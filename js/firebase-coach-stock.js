@@ -2,13 +2,15 @@
 /* =========================================================
    MR CO-ORDINATION COACH STOCK
    FIREBASE-COACH-STOCK.JS
-   VERSION 2.0 FINAL
+   VERSION 3.0 FINAL
 
-   DATABASE PATH:
+   DATE IN REMOVED
+   AUTOMATIC DATE PLACED
+   AUTOMATIC DATE OUT
+   AUTOMATIC DETENTION DAY
+
+   DATABASE:
    coachStock/records
-
-   IMPORT FROM:
-   js/firebase-config.js
 ========================================================= */
 
 import { database } from "./firebase-config.js";
@@ -26,7 +28,7 @@ import {
 
 
 /* =========================================================
-   DATABASE REFERENCE
+   DATABASE REFERENCES
 ========================================================= */
 
 const STOCK_PATH = "coachStock/records";
@@ -41,13 +43,17 @@ function recordRef(id) {
 
 
 /* =========================================================
-   DATE HELPERS
+   LOCAL DATE
 ========================================================= */
 
 function getLocalDate() {
+
     const now = new Date();
+
     const year = now.getFullYear();
+
     const month = String(now.getMonth() + 1).padStart(2, "0");
+
     const day = String(now.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
@@ -55,31 +61,31 @@ function getLocalDate() {
 
 
 /* =========================================================
-   DETENTION DAY CALCULATION
+   DETENTION DAY
 
-   DATE PLACED → DATE OUT
-   If DATE OUT is blank → TODAY
+   DATE PLACED TO DATE OUT
+   DATE OUT BLANK = TODAY
 ========================================================= */
 
 export function calculateDetentionDay(datePlaced, dateOut = "") {
 
     if (!datePlaced) return 0;
 
-    const start = new Date(`${datePlaced}T00:00:00Z`);
+    const start = new Date(`${datePlaced}T00:00:00`);
 
     const endDate = dateOut || getLocalDate();
-    const end = new Date(`${endDate}T00:00:00Z`);
 
-    if (Number.isNaN(start.getTime()) ||
-        Number.isNaN(end.getTime())) {
+    const end = new Date(`${endDate}T00:00:00`);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         return 0;
     }
 
-    const difference = Math.floor(
+    const days = Math.floor(
         (end.getTime() - start.getTime()) / 86400000
     );
 
-    return Math.max(0, difference);
+    return Math.max(0, days);
 }
 
 
@@ -91,7 +97,8 @@ export function listenCoachStock(callback, errorCallback = null) {
 
     return onValue(
         stockRef(),
-        (snapshot) => {
+
+        snapshot => {
 
             const data = snapshot.val() || {};
 
@@ -101,7 +108,9 @@ export function listenCoachStock(callback, errorCallback = null) {
             }));
 
             records.sort((a, b) => {
+
                 const dateA = a.currentVisit?.datePlaced || "";
+
                 const dateB = b.currentVisit?.datePlaced || "";
 
                 return dateB.localeCompare(dateA);
@@ -109,8 +118,10 @@ export function listenCoachStock(callback, errorCallback = null) {
 
             callback(records);
         },
-        (error) => {
-            console.error("Coach Stock Firebase Error:", error);
+
+        error => {
+
+            console.error("Coach Stock Database Error:", error);
 
             if (typeof errorCallback === "function") {
                 errorCallback(error);
@@ -122,58 +133,67 @@ export function listenCoachStock(callback, errorCallback = null) {
 
 /* =========================================================
    ADD NEW COACH
+
+   FIRST DATE PLACED = WORKSHOP IN DATE
+
+   DATE OUT = BLANK
 ========================================================= */
 
 export async function addCoach(data) {
 
-    if (!data.coachNo ||
-        !data.coachCode ||
-        !data.shop ||
-        !data.workshopFirstInDate ||
-        !data.datePlaced) {
+    const coachNo = String(data.coachNo || "")
+        .trim()
+        .toUpperCase();
+
+    const coachCode = data.coachCode || "";
+
+    const shop = data.shop || "";
+
+    const workshopDate = data.workshopFirstInDate || "";
+
+    if (!coachNo || !coachCode || !shop || !workshopDate) {
 
         throw new Error("Please fill all required fields.");
     }
 
     const snapshot = await get(stockRef());
+
     const existing = snapshot.val() || {};
 
-    const coachNumber = String(data.coachNo)
-        .trim()
-        .toUpperCase();
-
     const duplicate = Object.values(existing).some(item => {
+
         return String(item.coachNo || "")
             .trim()
-            .toUpperCase() === coachNumber;
+            .toUpperCase() === coachNo;
     });
 
     if (duplicate) {
+
         throw new Error("This Coach Number already exists.");
     }
 
-    const newRecordRef = push(stockRef());
+    const newRef = push(stockRef());
 
     const now = Date.now();
 
     const record = {
 
-        coachNo: coachNumber,
+        coachNo: coachNo,
 
-        coachCode: data.coachCode,
+        coachCode: coachCode,
 
-        workshopFirstInDate: data.workshopFirstInDate,
+        workshopFirstInDate: workshopDate,
 
-        currentShop: data.shop,
+        currentShop: shop,
 
         currentVisit: {
 
-            shop: data.shop,
+            shop: shop,
 
-            datePlaced: data.datePlaced,
+            // First Date Placed = Workshop In Date
+            datePlaced: workshopDate,
 
-            dateIn: data.dateIn || "",
-
+            // Date Out remains blank until next movement
             dateOut: "",
 
             status: data.status || "Pending",
@@ -188,17 +208,19 @@ export async function addCoach(data) {
         updatedAt: now
     };
 
-    await set(newRecordRef, record);
+    await set(newRef, record);
 
-    return newRecordRef.key;
+    return newRef.key;
 }
 
 
 /* =========================================================
    UPDATE COACH
 
-   WORKSHOP FIRST IN DATE WILL NOT CHANGE
-   CURRENT VISIT DATE OUT WILL NOT CHANGE
+   SHOP CHANGE MUST BE DONE USING MOVE BUTTON.
+
+   WORKSHOP IN DATE NEVER CHANGES.
+   DATE PLACED NEVER CHANGES DURING EDIT.
 ========================================================= */
 
 export async function updateCoach(id, data) {
@@ -217,40 +239,65 @@ export async function updateCoach(id, data) {
 
     const oldVisit = oldRecord.currentVisit || {};
 
-    const newShop = data.shop || oldRecord.currentShop;
+    const coachNo = String(data.coachNo || "")
+        .trim()
+        .toUpperCase();
 
-    const updatedVisit = {
+    if (!coachNo) {
+        throw new Error("Coach Number is required.");
+    }
 
-        ...oldVisit,
+    // Check duplicate Coach Number
+    const allSnapshot = await get(stockRef());
 
-        shop: newShop,
+    const allRecords = allSnapshot.val() || {};
 
-        datePlaced: data.datePlaced || oldVisit.datePlaced || "",
+    const duplicate = Object.entries(allRecords).some(([key, item]) => {
 
-        dateIn: data.dateIn || "",
+        if (key === id) return false;
 
-        status: data.status || "Pending",
-
-        remarks: data.remarks || ""
-    };
-
-    const changes = {
-
-        coachNo: String(data.coachNo || oldRecord.coachNo)
+        return String(item.coachNo || "")
             .trim()
-            .toUpperCase(),
+            .toUpperCase() === coachNo;
+    });
+
+    if (duplicate) {
+        throw new Error("This Coach Number already exists.");
+    }
+
+    const updatedRecord = {
+
+        ...oldRecord,
+
+        coachNo: coachNo,
 
         coachCode: data.coachCode || oldRecord.coachCode,
 
-        currentShop: newShop,
+        // Keep original Workshop In Date
+        workshopFirstInDate: oldRecord.workshopFirstInDate || "",
 
-        currentVisit: updatedVisit,
+        // Keep existing shop and Date Placed
+        currentShop: oldRecord.currentShop || oldVisit.shop,
+
+        currentVisit: {
+
+            ...oldVisit,
+
+            shop: oldRecord.currentShop || oldVisit.shop,
+
+            datePlaced: oldVisit.datePlaced || "",
+
+            dateOut: oldVisit.dateOut || "",
+
+            status: data.status || oldVisit.status || "Pending",
+
+            remarks: data.remarks || ""
+        },
 
         updatedAt: Date.now()
     };
 
-    // Intentionally do not update workshopFirstInDate.
-    await update(recordRef(id), changes);
+    await set(recordRef(id), updatedRecord);
 
     return true;
 }
@@ -260,16 +307,16 @@ export async function updateCoach(id, data) {
    MOVE COACH
 
    OLD SHOP:
-   DATE OUT = MOVEMENT DATE
+   DATE OUT = AUTOMATIC MOVEMENT DATE
 
    NEW SHOP:
-   DATE PLACED = MOVEMENT DATE
+   DATE PLACED = SAME MOVEMENT DATE
 
-   WORKSHOP FIRST IN DATE:
-   PERMANENT / UNCHANGED
+   WORKSHOP IN DATE:
+   NEVER CHANGES
 
-   OLD VISIT:
-   SAVED IN HISTORY
+   DATE IN:
+   NOT USED
 ========================================================= */
 
 export async function moveCoach(id, moveData) {
@@ -282,34 +329,42 @@ export async function moveCoach(id, moveData) {
         throw new Error("Please select the new shop.");
     }
 
-    const movementDate = moveData.date || getLocalDate();
+    const movementDate = getLocalDate();
 
     let validationError = "";
 
     const result = await runTransaction(
         recordRef(id),
-        (record) => {
+
+        record => {
 
             validationError = "";
 
             if (!record) {
+
                 validationError = "Coach record not found.";
+
                 return;
             }
 
             const oldVisit = record.currentVisit || {};
 
-            const oldShop = oldVisit.shop || record.currentShop;
+            const oldShop = record.currentShop || oldVisit.shop || "";
 
             if (oldShop === moveData.shop) {
+
                 validationError = "Coach is already in this shop.";
+
                 return;
             }
 
-            const history = Array.isArray(record.history)
-                ? [...record.history]
-                : [];
+            const oldHistory = record.history || {};
 
+            const history = Array.isArray(oldHistory)
+                ? [...oldHistory]
+                : Object.values(oldHistory);
+
+            // Close old shop visit
             const closedVisit = {
 
                 ...oldVisit,
@@ -323,26 +378,30 @@ export async function moveCoach(id, moveData) {
 
             history.push(closedVisit);
 
+            // Create new shop visit
+            const newVisit = {
+
+                shop: moveData.shop,
+
+                datePlaced: movementDate,
+
+                dateOut: "",
+
+                status: moveData.status || "Pending",
+
+                remarks: moveData.remarks || ""
+            };
+
             return {
 
                 ...record,
 
+                // Permanent original Workshop In Date
+                workshopFirstInDate: record.workshopFirstInDate || "",
+
                 currentShop: moveData.shop,
 
-                currentVisit: {
-
-                    shop: moveData.shop,
-
-                    datePlaced: movementDate,
-
-                    dateIn: moveData.dateIn || "",
-
-                    dateOut: "",
-
-                    status: moveData.status || "Pending",
-
-                    remarks: moveData.remarks || ""
-                },
+                currentVisit: newVisit,
 
                 history: history,
 
@@ -405,5 +464,5 @@ export async function getCoach(id) {
 
 
 /* =========================================================
-   END OF FIREBASE COACH STOCK V2.0
+   END OF FIREBASE COACH STOCK V3.0
 ========================================================= */
