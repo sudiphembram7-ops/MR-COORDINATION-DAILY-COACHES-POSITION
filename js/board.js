@@ -3008,6 +3008,7 @@ function removeStatusClasses(
         "status---",
         "status-1",
         "status-po",
+        "status-npo",
         "status-s",
         "status-lm",
         "status-med",
@@ -3062,6 +3063,8 @@ function applyStatusColour(
 
         PO:
             "status-po",
+            NPO:
+            "status-npo",
 
         S:
             "status-s",
