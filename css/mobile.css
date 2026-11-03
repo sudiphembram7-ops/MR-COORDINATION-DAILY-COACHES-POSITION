@@ -1,122 +1,136 @@
-
-/* =========================================
+/* =====================================================
    MOBILE RESPONSIVE DESIGN
-========================================= */
+===================================================== */
 
 @media (max-width: 768px) {
 
     body {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .header {
-        padding: 16px 8px !important;
+        padding: 16px 9px !important;
     }
 
     .header h3 {
         font-size: 17px;
-        line-height: 1.5;
+        line-height: 1.4;
     }
 
     .header h5 {
-        font-size: 13px;
-        letter-spacing: 2px;
+        font-size: 12px;
+        letter-spacing: 1.5px;
     }
 
     .header .d-flex {
-        flex-wrap: wrap;
-        gap: 10px !important;
         font-size: 11px;
+        gap: 5px 12px !important;
     }
 
     .navbar-brand {
-        font-size: 15px;
+        font-size: 14px;
     }
 
-    .nav-link {
+    .navbar .nav-link {
         padding: 9px 12px !important;
     }
 
-    .container-fluid {
+    .container-fluid.mt-3 {
         padding-left: 10px;
         padding-right: 10px;
     }
 
     #searchBox {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
-    .container-fluid .btn {
-        margin: 3px 1px;
-        padding: 8px 10px;
-        font-size: 12px;
-    }
-
-    .container-fluid .col-md-7 {
+    .col-md-7.text-md-end {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 7px;
         text-align: left !important;
-        line-height: 2.3;
+    }
+
+    .col-md-7.text-md-end .btn {
+        flex: 1 1 42%;
+        min-height: 40px;
+        font-size: 12px;
+        padding: 7px 8px;
+    }
+
+    .col-md-7.text-md-end span {
+        font-size: 12px;
+        margin-left: 0 !important;
     }
 
     .shop-card {
-        margin: 14px 7px !important;
-        border-radius: 9px;
+        margin: 12px 8px;
+        padding: 0 7px 8px;
+        border-radius: 10px;
     }
 
     .shop-title {
-        font-size: 16px;
+        margin-left: -7px;
+        margin-right: -7px;
+        margin-bottom: 8px;
         padding: 11px !important;
+        font-size: 15px;
     }
 
     .coach-table {
-        min-width: max-content;
+        min-width: 620px;
     }
 
-    .coach-table th {
+    .coach-table thead th {
+        padding: 9px 6px;
         font-size: 11px;
-        padding: 9px 7px;
+    }
+
+    .coach-table tbody th {
+        min-width: 55px;
+        padding: 8px 5px;
+        font-size: 11px;
     }
 
     .coach-table td {
-        min-width: 90px;
-        padding: 5px;
+        min-width: 95px;
+        height: 68px;
+        padding: 4px;
     }
 
     .coach-card {
-        min-height: 42px;
+        min-height: 52px;
+        padding: 5px 3px;
         font-size: 11px;
+        border-radius: 6px;
+        touch-action: manipulation;
     }
 
     .card {
-        margin-left: 7px;
-        margin-right: 7px;
+        margin-left: 8px;
+        margin-right: 8px;
+        border-radius: 10px;
     }
 
     .card-header {
-        font-size: 14px;
         padding: 11px;
+        font-size: 13px;
     }
 
-    .pulled-out-search-row {
-        flex-direction: column;
-        align-items: stretch;
+    .card-body {
+        padding: 9px !important;
     }
 
-    .pulled-out-search-count {
-        text-align: right;
+    #pulledOutSearchBox {
+        min-height: 42px;
+        font-size: 13px;
     }
 
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .table-responsive table {
-        white-space: nowrap;
-    }
-
-    .card-body .badge {
-        margin: 3px 1px;
-        padding: 7px 9px;
+    #pulledOutList td,
+    #pulledOutList th {
+        padding: 8px;
         font-size: 11px;
     }
 
@@ -129,44 +143,55 @@
     }
 
     .modal-footer {
-        gap: 5px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
     }
 
     .modal-footer .btn {
+        width: 100%;
+        margin: 0;
         font-size: 12px;
-        padding: 8px 10px;
     }
 
     footer {
-        font-size: 12px;
+        padding: 14px !important;
         text-align: center;
+        font-size: 12px;
     }
 
-    footer .col-md-4 {
-        margin-bottom: 10px;
+    footer .row > div {
+        margin-bottom: 8px;
         text-align: center !important;
     }
 }
 
 /* SMALL MOBILE */
 
-@media (max-width: 400px) {
+@media (max-width: 420px) {
 
     .header h3 {
         font-size: 15px;
     }
 
-    .shop-title {
-        font-size: 14px;
+    .header .d-flex {
+        flex-direction: column;
+        gap: 3px !important;
     }
 
-    .container-fluid .btn {
-        font-size: 11px;
-        padding: 7px 8px;
+    .col-md-7.text-md-end .btn {
+        flex: 1 1 45%;
+    }
+
+    .coach-table {
+        min-width: 580px;
     }
 
     .coach-table td {
-        min-width: 82px;
+        min-width: 88px;
     }
 
+    .modal-footer {
+        grid-template-columns: 1fr 1fr;
+    }
 }
