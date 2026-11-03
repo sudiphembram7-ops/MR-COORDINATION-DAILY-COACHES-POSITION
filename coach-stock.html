@@ -4,225 +4,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>MR COACH STOCK DASHBOARD</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
+header{background:#142b4a;color:white;padding:18px;text-align:center}
+header h2{font-size:22px}
+header p{margin-top:6px;font-size:13px}
+.container{max-width:1400px;margin:auto;padding:15px}
+.panel{background:white;padding:16px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 8px #00000012}
+h3{margin-bottom:12px;color:#173b63}
+input,select,button{font:inherit;padding:10px;border:1px solid #ccd5df;border-radius:6px}
+input,select{width:100%;background:white}
+button{cursor:pointer;border:0;font-weight:bold}
+button:disabled{opacity:.5;cursor:not-allowed}
+.primary{background:#1769aa;color:white}
+.success{background:#198754;color:white}
+.warning{background:#e69a13;color:white}
+.danger{background:#c83232;color:white}
+.secondary{background:#64748b;color:white}
+.form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:5px;color:#475569}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.actions button{font-size:12px;padding:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{padding:15px;border-radius:9px;background:#e9f2ff;text-align:center}
+.stat strong{display:block;font-size:25px;color:#14518a}
+.stat span{font-size:12px;color:#475569}
+.toolbar{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:950px}
+th,td{border:1px solid #dce3eb;padding:9px;text-align:center;font-size:13px}
+th{background:#173b63;color:white;position:sticky;top:0}
+tr:nth-child(even){background:#f7f9fc}
+.badge{padding:4px 8px;border-radius:20px;background:#e5edf7;color:#173b63;font-size:11px}
+.modal{display:none;position:fixed;inset:0;background:#0009;z-index:1000;overflow:auto;padding:15px}
+.modal-content{background:white;max-width:650px;margin:35px auto;padding:20px;border-radius:12px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.close{background:#e5e7eb;color:#111;padding:7px 12px}
+.login-box{max-width:400px;margin:70px auto}
+.login-box input{margin-bottom:10px}
+#appSection{display:none}
+#message{padding:10px;margin-bottom:10px;border-radius:6px;display:none}
+@media(max-width:800px){
+ .form-grid{grid-template-columns:repeat(2,1fr)}
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .toolbar{grid-template-columns:1fr}
 }
-
-body {
-    font-family: Arial, sans-serif;
-    background: #eef2f7;
-    color: #172033;
-}
-
-header {
-    background: #102b50;
-    color: white;
-    padding: 18px 12px;
-    text-align: center;
-}
-
-header h2 {
-    font-size: 23px;
-    letter-spacing: 1px;
-}
-
-header p {
-    margin-top: 6px;
-    font-size: 13px;
-    color: #d7e5f5;
-}
-
-.container {
-    max-width: 1400px;
-    margin: auto;
-    padding: 15px;
-}
-
-.panel {
-    background: white;
-    padding: 16px;
-    border-radius: 9px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 8px #00000012;
-}
-
-.panel h3 {
-    margin-bottom: 14px;
-    color: #12345a;
-}
-
-input, select {
-    width: 100%;
-    padding: 11px;
-    border: 1px solid #cbd5e1;
-    border-radius: 5px;
-    font-size: 14px;
-    background: white;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-}
-
-.field label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-button {
-    padding: 11px 17px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin: 5px 3px 0 0;
-}
-
-.btn-primary {
-    background: #1261a0;
-    color: white;
-}
-
-.btn-success {
-    background: #16834b;
-    color: white;
-}
-
-.btn-danger {
-    background: #c52b35;
-    color: white;
-}
-
-.btn-secondary {
-    background: #526174;
-    color: white;
-}
-
-.btn-warning {
-    background: #e6a323;
-    color: #172033;
-}
-
-.summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.summary-card {
-    background: white;
-    padding: 17px;
-    border-radius: 8px;
-    border-left: 5px solid #1261a0;
-    box-shadow: 0 2px 8px #00000010;
-}
-
-.summary-card p {
-    color: #64748b;
-    font-size: 13px;
-}
-
-.summary-card h2 {
-    margin-top: 8px;
-    font-size: 25px;
-    color: #102b50;
-}
-
-.search-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 10px;
-}
-
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    min-width: 1000px;
-    border-collapse: collapse;
-    background: white;
-}
-
-th {
-    background: #173c65;
-    color: white;
-    padding: 12px 9px;
-    font-size: 13px;
-    white-space: nowrap;
-}
-
-td {
-    padding: 11px 9px;
-    border-bottom: 1px solid #e2e8f0;
-    text-align: center;
-    font-size: 13px;
-}
-
-tbody tr:nth-child(even) {
-    background: #f5f8fc;
-}
-
-.status {
-    font-weight: bold;
-}
-
-#loginSection {
-    max-width: 400px;
-    margin: 60px auto;
-}
-
-#dashboardSection {
-    display: none;
-}
-
-#message {
-    margin-top: 10px;
-    font-size: 13px;
-}
-
-footer {
-    text-align: center;
-    padding: 18px;
-    color: #64748b;
-    font-size: 12px;
-}
-
-@media(max-width: 700px) {
-    .form-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .summary {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .search-grid {
-        grid-template-columns: 1fr;
-    }
-
-    header h2 {
-        font-size: 19px;
-    }
-}
-
-@media(max-width: 400px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
+@media(max-width:480px){
+ .form-grid{grid-template-columns:1fr}
+ header h2{font-size:18px}
+ .container{padding:8px}
 }
 </style>
 </head>
@@ -230,311 +63,241 @@ footer {
 <body>
 
 <header>
-    <h2>MR COACH STOCK DASHBOARD</h2>
-    <p>LILUAH WORKSHOP | MR CO-ORDINATION SECTION</p>
-    <p>COACH STOCK MONITORING SYSTEM</p>
+<h2>MR CO-ORDINATION DAILY COACH STOCK</h2>
+<p>LILUAH WORKSHOP | MR CO-ORDINATION SECTION</p>
 </header>
-
-<!-- LOGIN SECTION -->
-
-<section id="loginSection" class="panel">
-
-    <h3>ADMIN / EDITOR LOGIN</h3>
-
-    <div class="field">
-        <label>Email ID</label>
-        <input type="email" id="loginEmail"
-               placeholder="Enter Email">
-    </div>
-
-    <br>
-
-    <div class="field">
-        <label>Password</label>
-        <input type="password" id="loginPassword"
-               placeholder="Enter Password">
-    </div>
-
-    <br>
-
-    <button class="btn-primary" id="loginBtn">
-        LOGIN
-    </button>
-
-    <p id="loginMessage"></p>
-
-</section>
-
-
-<!-- MAIN DASHBOARD -->
-
-<main id="dashboardSection">
 
 <div class="container">
 
-    <div class="panel">
-        <div style="display:flex;justify-content:space-between;
-                    align-items:center;flex-wrap:wrap;gap:10px;">
-
-            <h3>COACH STOCK REGISTER</h3>
-
-            <div>
-                <span id="userInfo"></span>
-                <button class="btn-danger" id="logoutBtn">
-                    LOGOUT
-                </button>
-            </div>
-
-        </div>
-
-        <p id="databaseStatus">Connecting Database...</p>
-        <p id="offlineStatus"></p>
-    </div>
-
-
-    <!-- SUMMARY -->
-
-    <div class="summary">
-
-        <div class="summary-card">
-            <p>TOTAL COACH</p>
-            <h2 id="totalCoach">0</h2>
-        </div>
-
-        <div class="summary-card">
-            <p>IN SHOP</p>
-            <h2 id="inShop">0</h2>
-        </div>
-
-        <div class="summary-card">
-            <p>RETURNED</p>
-            <h2 id="returnedCoach">0</h2>
-        </div>
-
-        <div class="summary-card">
-            <p>AVERAGE DETENTION</p>
-            <h2 id="averageDetention">0</h2>
-        </div>
-
-    </div>
-
-
-    <!-- ADD COACH FORM -->
-
-    <div class="panel">
-
-        <h3>ADD / UPDATE COACH</h3>
-
-        <form id="coachForm">
-
-            <input type="hidden" id="recordId">
-
-            <div class="form-grid">
-
-                <div class="form-group">
-    <label for="shop">Shop</label>
-    <select id="shop" name="shop" required>
-        <option value="">Select Shop</option>
-        <option value="L SHOP">L SHOP</option>
-        <option value="PAINT SHOP">PAINT SHOP</option>
-        <option value="BAHAR LINE">BAHAR LINE</option>
-        <option value="YARD">YARD</option>
-        <option value="CORROSION M SHOP">CORROSION M SHOP</option>
-        <option value="CORROSION CR SHOP">CORROSION CR SHOP</option>
-        <option value="CORROSION SCR NAC">CORROSION SCR NAC</option>
-        <option value="CORROSION SCR AC">CORROSION SCR AC</option>
-        <option value="CORROSION RCC/NMG">CORROSION RCC/NMG</option>
-        <option value="NOMINATION RCC/NMG">NOMINATION RCC/NMG</option>
-        <option value="CORROSION L SHOP">CORROSION L SHOP</option>
-        <option value="AW CORROSION LHB">AW CORROSION LHB</option>
-        <option value="AW CORROSION NON-LHB">AW CORROSION NON-LHB</option>
-        <option value="LIFTING BAY LHB">LIFTING BAY LHB</option>
-        <option value="LIFTING BAY NON-LHB">LIFTING BAY NON-LHB</option>
-    </select>
+<!-- LOGIN -->
+<div id="loginSection" class="panel login-box">
+<h3>Admin / Editor Login</h3>
+<input type="email" id="loginEmail" placeholder="Email Address">
+<input type="password" id="loginPassword" placeholder="Password">
+<button class="primary" id="loginBtn" style="width:100%">LOGIN</button>
+<p id="loginMessage" style="margin-top:10px;color:#c83232"></p>
 </div>
-                <div class="field">
-                    <label>Coach No</label>
-                    <input type="text" id="coachNo"
-                           placeholder="Enter Coach Number"
-                           required>
-                </div>
-                <div class="field">
 
-    <label for="coachCode">Coach Code</label>
+<!-- MAIN APP -->
+<div id="appSection">
 
-    <select id="coachCode" name="coachCode" required>
+<div class="panel">
+<div class="actions" style="justify-content:space-between">
+<div>
+<strong id="userEmail"></strong>
+<p style="font-size:12px;color:#64748b;margin-top:5px">Firebase Connected Dashboard</p>
+</div>
+<button class="danger" id="logoutBtn">LOGOUT</button>
+</div>
+</div>
 
-        <option value="">Select Coach Code</option>
+<div id="message"></div>
 
-        <option value="LHB">LHB</option>
+<div class="stats">
+<div class="stat"><strong id="totalCoaches">0</strong><span>TOTAL CURRENT COACHES</span></div>
+<div class="stat"><strong id="totalShops">0</strong><span>SHOPS IN USE</span></div>
+<div class="stat"><strong id="pendingCoaches">0</strong><span>PENDING</span></div>
+<div class="stat"><strong id="completedCoaches">0</strong><span>COMPLETED</span></div>
+</div>
 
-        <option value="ICF">ICF</option>
+<!-- ADD / EDIT COACH -->
+<div class="panel" style="margin-top:15px">
+<h3 id="formTitle">ADD COACH TO STOCK</h3>
 
-        <option value="MEMU">MEMU</option>
+<form id="coachForm">
+<div class="form-grid">
 
-        <option value="DEMU">DEMU</option>
+<div class="field">
+<label>COACH NUMBER *</label>
+<input id="coachNo" required placeholder="Enter Coach Number">
+</div>
 
-        <option value="EMU">EMU</option>
+<div class="field">
+<label>COACH TYPE / CODE</label>
+<input id="coachCode" placeholder="LHB / ICF / Other">
+</div>
 
-        <option value="VANDE BHARAT">VANDE BHARAT</option>
+<div class="field">
+<label>SHOP *</label>
+<select id="shop" required>
+<option value="">Select Shop</option>
+<option>L SHOP</option>
+<option>PAINT SHOP</option>
+<option>BAHAR LINE</option>
+<option>YARD</option>
+<option>CORROSION M SHOP</option>
+<option>CORROSION CR SHOP</option>
+<option>CORROSION SCR NAC</option>
+<option>CORROSION SCR AC</option>
+<option>CORROSION RCC/NMG</option>
+<option>NOMINATION RCC/NMG</option>
+<option>CORROSION L SHOP</option>
+<option>AW CORROSION LHB</option>
+<option>AW CORROSION NON-LHB</option>
+<option>LIFTING BAY LHB</option>
+<option>LIFTING BAY NON-LHB</option>
+</select>
+</div>
 
-        <option value="NMG">NMG</option>
+<div class="field">
+<label>DATE PLACED *</label>
+<input type="date" id="datePlaced" required>
+</div>
 
-        <option value="RCC">RCC</option>
+<div class="field">
+<label>DATE IN</label>
+<input type="date" id="dateIn">
+</div>
 
-    </select>
+<div class="field">
+<label>STATUS</label>
+<select id="status">
+<option value="Pending">Pending</option>
+<option value="Under Work">Under Work</option>
+<option value="Completed">Completed</option>
+<option value="On Hold">On Hold</option>
+</select>
+</div>
+
+<div class="field" style="grid-column:span 2">
+<label>REMARKS</label>
+<input id="remarks" placeholder="Optional remarks">
+</div>
 
 </div>
 
-                <div class="field">
-                    <label>Date Placed</label>
-                    <input type="date" id="datePlaced" required>
-                </div>
-
-                <div class="field">
-                    <label>Date In</label>
-                    <input type="date" id="dateIn">
-                </div>
-
-                <div class="field">
-                    <label>Detention Day</label>
-                    <input type="text" id="detentionDay"
-                           value="0" readonly>
-                </div>
-
-                <div class="field">
-                    <label>Status</label>
-                    <select id="status">
-                        <option value="">Select Status</option>
-                        <option value="500">500</option>
-                        <option value="600">600</option>
-                        <option value="700">700</option>
-                        <option value="800">800</option>
-                         <option value="900">900</option>
-                         <option value="L">L</option>
-                         <option value="LM">LM</option>
-                         <option value="MED">MED</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <br>
-
-            <button type="submit" class="btn-success"
-                    id="saveBtn">
-                SAVE COACH
-            </button>
-
-            <button type="button" class="btn-warning"
-                    id="resetBtn">
-                RESET
-            </button>
-
-        </form>
-
-        <p id="message"></p>
-
-    </div>
-
-
-    <!-- SEARCH -->
-
-    <div class="panel">
-
-        <h3>SEARCH COACH STOCK</h3>
-
-        <div class="search-grid">
-
-            <input type="search" id="searchInput"
-                   placeholder="Search Coach No / Shop / Status">
-
-            <select id="shopFilter">
-                <option value="">ALL SHOPS</option>
-                
-        <option value="L SHOP">L SHOP</option>
-        <option value="PAINT SHOP">PAINT SHOP</option>
-        <option value="BAHAR LINE">BAHAR LINE</option>
-        <option value="YARD">YARD</option>
-        <option value="CORROSION M SHOP">CORROSION M SHOP</option>
-        <option value="CORROSION CR SHOP">CORROSION CR SHOP</option>
-        <option value="CORROSION SCR NAC">CORROSION SCR NAC</option>
-        <option value="CORROSION SCR AC">CORROSION SCR AC</option>
-        <option value="CORROSION RCC/NMG">CORROSION RCC/NMG</option>
-        <option value="NOMINATION RCC/NMG">NOMINATION RCC/NMG</option>
-        <option value="CORROSION L SHOP">CORROSION L SHOP</option>
-        <option value="AW CORROSION LHB">AW CORROSION LHB</option>
-        <option value="AW CORROSION NON-LHB">AW CORROSION NON-LHB</option>
-        <option value="LIFTING BAY LHB">LIFTING BAY LHB</option>
-        <option value="LIFTING BAY NON-LHB">LIFTING BAY NON-LHB</option>
-    </select>
-            </select>
-
-        </div>
-
-    </div>
-
-
-    <!-- STOCK TABLE -->
-
-    <div class="panel">
-
-        <div style="display:flex;justify-content:space-between;
-                    align-items:center;flex-wrap:wrap;">
-
-            <h3>DAILY COACH STOCK POSITION</h3>
-
-            <button class="btn-success" id="exportBtn">
-                EXPORT EXCEL
-            </button>
-
-        </div>
-
-        <div class="table-container">
-
-            <table id="coachTable">
-
-                <thead>
-                    <tr>
-                        <th>SL</th>
-                        <th>SHOP</th>
-                        <th>COACH NO</th>
-                          <th>COACH CODE</th>
-                        <th>DATE PLACED</th>
-                        <th>DATE IN</th>
-                        <th>DETENTION DAY</th>
-                        <th>STATUS</th>
-                        <th>ACTION</th>
-                    </tr>
-                </thead>
-
-                <tbody id="coachTableBody">
-                    <tr>
-                        <td colspan="8">Loading Coach Stock...</td>
-                    </tr>
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
+<div class="actions" style="margin-top:15px">
+<button class="success" type="submit" id="saveBtn">SAVE COACH</button>
+<button class="secondary" type="button" id="resetBtn">CLEAR</button>
+</div>
+</form>
 </div>
 
-</main>
+<!-- CURRENT STOCK -->
+<div class="panel">
+<h3>CURRENT COACH STOCK</h3>
 
+<div class="toolbar">
+<input id="searchInput" placeholder="Search Coach No / Shop / Coach Type">
+<select id="shopFilter">
+<option value="">ALL SHOPS</option>
+<option>L SHOP</option>
+<option>PAINT SHOP</option>
+<option>BAHAR LINE</option>
+<option>YARD</option>
+<option>CORROSION M SHOP</option>
+<option>CORROSION CR SHOP</option>
+<option>CORROSION SCR NAC</option>
+<option>CORROSION SCR AC</option>
+<option>CORROSION RCC/NMG</option>
+<option>NOMINATION RCC/NMG</option>
+<option>CORROSION L SHOP</option>
+<option>AW CORROSION LHB</option>
+<option>AW CORROSION NON-LHB</option>
+<option>LIFTING BAY LHB</option>
+<option>LIFTING BAY NON-LHB</option>
+</select>
+</div>
 
-<footer>
-    MR CO-ORDINATION SECTION | LILUAH WORKSHOP
-    <br>
-    MR COACH STOCK MANAGEMENT SYSTEM
-</footer>
+<div class="table-wrap" style="margin-top:12px">
+<table>
+<thead>
+<tr>
+<th>SL</th>
+<th>CURRENT SHOP</th>
+<th>COACH NO</th>
+<th>COACH TYPE</th>
+<th>DATE PLACED</th>
+<th>DATE IN</th>
+<th>DETENTION DAY</th>
+<th>STATUS</th>
+<th>ACTION</th>
+</tr>
+</thead>
+<tbody id="stockTable">
+<tr><td colspan="9">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
 
+</div>
+</div>
 
-<!-- JAVASCRIPT MODULE -->
+<!-- MOVE MODAL -->
+<div class="modal" id="moveModal">
+<div class="modal-content">
+<div class="modal-head">
+<h3>MOVE COACH</h3>
+<button class="close" onclick="closeModal('moveModal')">CLOSE</button>
+</div>
 
-<script type="module" src="js/coach-stock.js"></script>
+<p id="moveCoachLabel" style="margin-bottom:12px;font-weight:bold"></p>
 
+<div class="field">
+<label>NEW SHOP *</label>
+<select id="moveShop" required>
+<option value="">Select Destination Shop</option>
+<option>L SHOP</option>
+<option>PAINT SHOP</option>
+<option>BAHAR LINE</option>
+<option>YARD</option>
+<option>CORROSION M SHOP</option>
+<option>CORROSION CR SHOP</option>
+<option>CORROSION SCR NAC</option>
+<option>CORROSION SCR AC</option>
+<option>CORROSION RCC/NMG</option>
+<option>NOMINATION RCC/NMG</option>
+<option>CORROSION L SHOP</option>
+<option>AW CORROSION LHB</option>
+<option>AW CORROSION NON-LHB</option>
+<option>LIFTING BAY LHB</option>
+<option>LIFTING BAY NON-LHB</option>
+</select>
+</div>
+
+<div class="field" style="margin-top:10px">
+<label>MOVEMENT / NEW DATE PLACED *</label>
+<input type="date" id="moveDate" required>
+</div>
+
+<div class="field" style="margin-top:10px">
+<label>DATE IN</label>
+<input type="date" id="moveDateIn">
+</div>
+
+<div class="field" style="margin-top:10px">
+<label>NEW STATUS</label>
+<select id="moveStatus">
+<option>Pending</option>
+<option>Under Work</option>
+<option>Completed</option>
+<option>On Hold</option>
+</select>
+</div>
+
+<div class="field" style="margin-top:10px">
+<label>REMARKS</label>
+<input id="moveRemarks" placeholder="Optional remarks">
+</div>
+
+<button class="warning" id="confirmMoveBtn" style="width:100%;margin-top:15px">
+CONFIRM MOVE COACH
+</button>
+</div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal" id="historyModal">
+<div class="modal-content" style="max-width:850px">
+<div class="modal-head">
+<h3>COACH MOVEMENT HISTORY</h3>
+<button class="close" onclick="closeModal('historyModal')">CLOSE</button>
+</div>
+<div id="historyContent"></div>
+</div>
+</div>
+
+<script type="module" src="Js/coach-stock.js"></script>
 </body>
 </html>
