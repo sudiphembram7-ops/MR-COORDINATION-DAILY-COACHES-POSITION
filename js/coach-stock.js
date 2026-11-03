@@ -153,62 +153,58 @@ function showMessage(text, type = "success") {
 }
 
 
+
 /* =========================================================
-   LOGIN
+   FIXED FIREBASE LOGIN
 ========================================================= */
 
-loginBtn.addEventListener("click", async () => {
+loginBtn.addEventListener("click", async (event) => {
+
+    event.preventDefault();
 
     const email = loginEmail.value.trim();
-
     const password = loginPassword.value;
 
     if (!email || !password) {
-
-        loginMessage.textContent =
-            "Please enter Email and Password.";
-
+        loginMessage.textContent = "Email and Password required";
         loginMessage.style.color = "red";
-
         return;
-
     }
 
     loginBtn.disabled = true;
-
-    loginBtn.textContent = "LOGGING IN...";
-
-    loginMessage.textContent = "";
+    loginBtn.textContent = "PLEASE WAIT...";
 
     try {
 
-        await signInWithEmailAndPassword(
+        const result = await signInWithEmailAndPassword(
             auth,
             email,
             password
         );
 
         loginMessage.textContent =
-            "Login successful.";
+            "LOGIN SUCCESS: " + result.user.email;
 
         loginMessage.style.color = "green";
 
     } catch (error) {
 
+        console.error("LOGIN ERROR:", error);
+
         loginMessage.textContent =
-            "Login Failed: " + error.message;
+            error.code + " : " + error.message;
 
         loginMessage.style.color = "red";
 
     } finally {
 
         loginBtn.disabled = false;
-
         loginBtn.textContent = "LOGIN";
 
     }
 
 });
+
 
 
 /* =========================================================
