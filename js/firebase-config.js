@@ -92,11 +92,24 @@ const auth =
    EXPORT
 ========================================================= */
 
+
+/* =========================================================
+   EXPORT - COMPATIBLE WITH OLD BOARD AND NEW STOCK
+========================================================= */
+
+const db = database;
+
 export {
     app,
     database,
+    db,
     auth
 };
+
+console.log("Firebase Initialized Successfully");
+console.log("Database READY:", !!db);
+console.log("Authentication READY:", !!auth);
+
 
 
 /* =========================================================
