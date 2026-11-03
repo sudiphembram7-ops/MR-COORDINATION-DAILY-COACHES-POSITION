@@ -1,35 +1,493 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Coach Shop Movement Dashboard</title>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MR COACH STOCK DASHBOARD</title>
+
 <style>
-:root{font-family:Arial,sans-serif;color:#172033;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.top{background:#173b68;color:white;padding:22px 4vw}.top h1{margin:0 0 6px;font-size:24px}.top p{margin:0;color:#dbe8f8}.wrap{max-width:1500px;margin:22px auto;padding:0 18px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}.stat,.panel{background:white;border:1px solid #e1e7f0;border-radius:12px;padding:16px}.stat b{font-size:26px;display:block;margin-top:5px}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.controls input,.controls select,.controls button,.move select{padding:10px 12px;border:1px solid #ccd5e2;border-radius:8px;background:white;font-size:14px}.controls input{flex:1;min-width:220px}.controls button,.move button{background:#1d5b99;color:white;border:0;cursor:pointer}.tablewrap{overflow:auto;border:1px solid #e1e7f0;border-radius:10px}table{border-collapse:collapse;width:100%;min-width:1050px;background:white}th,td{padding:10px 11px;border-bottom:1px solid #edf0f5;text-align:left;font-size:13px}th{background:#eaf0f8;position:sticky;top:0;z-index:1}tr:hover td{background:#f8fbff}.muted{color:#667085}.tag{background:#edf4ff;color:#214e7c;padding:4px 7px;border-radius:20px;white-space:nowrap}.move{display:flex;gap:6px;min-width:230px}.move select{min-width:150px;max-width:190px}.note{font-size:12px;color:#667085;margin:12px 0}.empty{text-align:center;padding:28px;color:#667085}@media(max-width:700px){.stats{grid-template-columns:1fr}.top h1{font-size:20px}}
-</style></head><body>
-<header class="top"><h1>Coach Shop Movement Dashboard</h1><p>Search by Coach Number, filter by shop, and move coaches between shops.</p></header>
-<main class="wrap"><section class="stats"><div class="stat"><span class="muted">Total coaches</span><b id="total">0</b></div><div class="stat"><span class="muted">Assigned to a shop</span><b id="assigned">0</b></div><div class="stat"><span class="muted">Not assigned</span><b id="unassigned">0</b></div></section>
-<section class="panel">
-<div class="controls"><input id="search" placeholder="Search Coach Number / Coach Code…" aria-label="Search coach"><select id="filter"><option value="">All shops</option></select><button id="export">Export CSV</button><button id="reset">Reset original data</button></div>
-<div class="tablewrap"><table><thead><tr><th>Coach No.</th><th>Coach Code</th><th>Current Shop</th><th>Work Section / Location</th><th>Date Placed</th><th>Date In</th><th>PDF Detention Days</th><th>Status</th><th>Move to shop</th></tr></thead><tbody id="body"></tbody></table></div>
-<p class="note">Changes are saved in this browser on this device. This standalone page does not write back to your Google Sheet. Use Export CSV to save the updated list.</p></section></main>
-<script>
-const original = [{"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "26/10", "coachNo": "ER131781", "coachCode": "LWFCZAC", "dateIn": "05/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 5"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "28/09", "coachNo": "SC085116", "coachCode": "MWGSCN", "dateIn": "09/09", "pdfDays": "32", "status": "Pending", "remarks": "Verify source row 5"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "16/10", "coachNo": "ER042126", "coachCode": "LWACCN", "dateIn": "01/09", "pdfDays": "14", "status": "Pending", "remarks": "Verify source row 5"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "17/09", "coachNo": "ER183357", "coachCode": "LWACCN", "dateIn": "17/09", "pdfDays": "43", "status": "Pending", "remarks": "Verify source row 5"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "26/10", "coachNo": "ER194110", "coachCode": "LWACCW2", "dateIn": "16/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 6"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "06/10", "coachNo": "EC196505C", "coachCode": "LWSCNA", "dateIn": "18/07", "pdfDays": "24", "status": "Pending", "remarks": "Verify source row 6"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "28/10", "coachNo": "EC121730", "coachCode": "LWACCW", "dateIn": "08/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 7"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "14/10", "coachNo": "ER092604", "coachCode": "WGSCZ", "dateIn": "10/10", "pdfDays": "16", "status": "Pending", "remarks": "Verify source row 7"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "29/10", "coachNo": "ER197874", "coachCode": "LWLRRM", "dateIn": "05/10", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 7"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "03/10", "coachNo": "ER171781", "coachCode": "LWACCN", "dateIn": "29/09", "pdfDays": "27", "status": "Pending", "remarks": "Verify source row 7"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "10/10", "coachNo": "ER196931", "coachCode": "LWLRRM", "dateIn": "10/10", "pdfDays": "20", "status": "Pending", "remarks": "Verify source row 9"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "29/10", "coachNo": "ER132154", "coachCode": "LWSCZAC", "dateIn": "22/08", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 13"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "24/10", "coachNo": "ER142401", "coachCode": "GS", "dateIn": "16/10", "pdfDays": "6", "status": "Pending", "remarks": "Verify source row 13"}, {"shop": "Not specified in PDF", "workSection": "PAINT :POH:LHB", "datePlaced": "30/10", "coachNo": "ER232131", "coachCode": "LWACCNE", "dateIn": "23/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 13"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "17/10", "coachNo": "ER162852", "coachCode": "LWLRRM", "dateIn": "17/10", "pdfDays": "13", "status": "Pending", "remarks": "Verify source row 13"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "29/10", "coachNo": "ER196963", "coachCode": "LWACCN", "dateIn": "10/07", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 14"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "23/10", "coachNo": "ER052114", "coachCode": "LWACCN", "dateIn": "23/10", "pdfDays": "7", "status": "Pending", "remarks": "Verify source row 14"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "29/10", "coachNo": "ER203957", "coachCode": "LWACCW2", "dateIn": "27/10", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 16"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "26/10", "coachNo": "ER193647", "coachCode": "LWSCNA", "dateIn": "17/08", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 16"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "23/10", "coachNo": "ER172202", "coachCode": "LWSCN", "dateIn": "23/10", "pdfDays": "7", "status": "Pending", "remarks": "Verify source row 16"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "30/10", "coachNo": "ER112103", "coachCode": "LWACCN", "dateIn": "13/08", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 18"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "26/10", "coachNo": "ER194288", "coachCode": "LWSCNA", "dateIn": "03/09", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 18"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "23/10", "coachNo": "ER194512", "coachCode": "LWLRRM", "dateIn": "23/10", "pdfDays": "7", "status": "Pending", "remarks": "Verify source row 18"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "30/10", "coachNo": "ER172150", "coachCode": "LWACCN", "dateIn": "15/09", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 20"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "26/10", "coachNo": "ER203942", "coachCode": "LWS", "dateIn": "12/09", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 20"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "26/10", "coachNo": "ER194108", "coachCode": "LWACCW2", "dateIn": "26/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 20"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:LHB", "datePlaced": "30/10", "coachNo": "ER197818", "coachCode": "LWFAC2", "dateIn": "27/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 21"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "27/10", "coachNo": "ER122512", "coachCode": "GS", "dateIn": "24/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 21"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "27/10", "coachNo": "ER162148", "coachCode": "LWACCN", "dateIn": "27/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 21"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "27/10", "coachNo": "ER142455", "coachCode": "GS", "dateIn": "24/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 24"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "27/10", "coachNo": "ER172110", "coachCode": "LWACCN", "dateIn": "27/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 24"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION:CONV:RCC/NMG", "datePlaced": "07/10", "coachNo": "NRX019042", "coachCode": "NMG", "dateIn": "03/07", "pdfDays": "23", "status": "Pending", "remarks": "Verify source row 26"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "28/10", "coachNo": "ER112442", "coachCode": "GS", "dateIn": "24/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 27"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "27/10", "coachNo": "ER194244", "coachCode": "LWLRRMA", "dateIn": "27/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 27"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION:CONV:RCC/NMG", "datePlaced": "07/10", "coachNo": "NRX019058", "coachCode": "NMG", "dateIn": "24/04", "pdfDays": "23", "status": "Pending", "remarks": "Verify source row 28"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION:CONV:RCC/NMG", "datePlaced": "29/10", "coachNo": "ER122101", "coachCode": "WGACCN", "dateIn": "17/10", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 28"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "28/10", "coachNo": "ER122464", "coachCode": "GS", "dateIn": "24/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 28"}, {"shop": "Not specified in PDF", "workSection": "PAINT:POH:NON LHB", "datePlaced": "29/10", "coachNo": "ER152715", "coachCode": "GSLRD", "dateIn": "11/09", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 28"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "27/10", "coachNo": "ER194506", "coachCode": "LWACCW", "dateIn": "27/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 28"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION:CONV:RCC/NMG", "datePlaced": "07/10", "coachNo": "NRX097624", "coachCode": "NMG", "dateIn": "02/07", "pdfDays": "23", "status": "Pending", "remarks": "Verify source row 29"}, {"shop": "Not specified in PDF", "workSection": "PAINT:POH:NON LHB", "datePlaced": "29/10", "coachNo": "WRX987252", "coachCode": "NMG", "dateIn": "13/10", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 29"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "28/10", "coachNo": "ER203947", "coachCode": "LWS", "dateIn": "10/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 30"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "27/10", "coachNo": "ER194509", "coachCode": "LWACCW", "dateIn": "27/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 30"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION:CONV:RCC/NMG", "datePlaced": "07/10", "coachNo": "SRX094886", "coachCode": "NMG", "dateIn": "27/07", "pdfDays": "23", "status": "Pending", "remarks": "Verify source row 31"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "29/10", "coachNo": "ER201145", "coachCode": "LWS", "dateIn": "12/09", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 31"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION:CONV:RCC/NMG", "datePlaced": "07/10", "coachNo": "SRX095406", "coachCode": "NMG", "dateIn": "03/07", "pdfDays": "23", "status": "Pending", "remarks": "Verify source row 32"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:NONLHB", "datePlaced": "30/10", "coachNo": "ER091081", "coachCode": "WGACCN", "dateIn": "21/09", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 32"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "30/10", "coachNo": "ER094354", "coachCode": "WGSCZ", "dateIn": "10/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 33"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "28/10", "coachNo": "ER193939", "coachCode": "LWFCWAC", "dateIn": "28/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 33"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION:CONV:RCC/NMG", "datePlaced": "07/10", "coachNo": "SRX096206", "coachCode": "NMG", "dateIn": "01/07", "pdfDays": "23", "status": "Pending", "remarks": "Verify source row 34"}, {"shop": "Not specified in PDF", "workSection": "LIFTING BAY:POH:NONLHB", "datePlaced": "30/10", "coachNo": "ER112247", "coachCode": "WGSCN", "dateIn": "30/09", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 34"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "30/10", "coachNo": "NRX004276", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 34"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "28/10", "coachNo": "ER232138", "coachCode": "LWACCNE", "dateIn": "28/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 34"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR NAC", "datePlaced": "30/10", "coachNo": "NRX964207", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 36"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "30/06", "coachNo": "ER194361", "coachCode": "LWACCN", "dateIn": "20/01", "pdfDays": "122", "status": "Pending", "remarks": "Verify source row 36"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "29/10", "coachNo": "ER204652", "coachCode": "LSLRDAA", "dateIn": "29/10", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 36"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "12/08", "coachNo": "ER193428", "coachCode": "LWSCZ", "dateIn": "20/06", "pdfDays": "79", "status": "Pending", "remarks": "Verify source row 37"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: LHB I N", "datePlaced": "30/10", "coachNo": "ER223787", "coachCode": "LWACCN2", "dateIn": "30/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 37"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "22/09", "coachNo": "ER223811", "coachCode": "LWFAC2", "dateIn": "07/09", "pdfDays": "38", "status": "Pending", "remarks": "Verify source row 39"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "30/10", "coachNo": "ER232133", "coachCode": "LWACCNE", "dateIn": "30/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 39"}, {"shop": "Not specified in PDF", "workSection": "W IP:MLR:LHB", "datePlaced": "06/09", "coachNo": "ER052116M", "coachCode": "LWACCN", "dateIn": "22/10", "pdfDays": "419", "status": "Pending", "remarks": "Verify source row 41"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "10/08", "coachNo": "ER196936C", "coachCode": "LWACCNA", "dateIn": "23/06", "pdfDays": "81", "status": "Pending", "remarks": "Verify source row 41"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "06/10", "coachNo": "ER194145C", "coachCode": "LWACCN2", "dateIn": "22/07", "pdfDays": "24", "status": "Pending", "remarks": "Verify source row 41"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "06/10", "coachNo": "ER197817", "coachCode": "LWFAC", "dateIn": "21/07", "pdfDays": "24", "status": "Pending", "remarks": "Verify source row 41"}, {"shop": "Not specified in PDF", "workSection": "W IP:MLR:LHB", "datePlaced": "06/09", "coachNo": "ER112052M", "coachCode": "LWACCW", "dateIn": "13/06", "pdfDays": "419", "status": "Pending", "remarks": "Verify source row 42"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "22/09", "coachNo": "ER194373", "coachCode": "LWFCWAC", "dateIn": "12/09", "pdfDays": "38", "status": "Pending", "remarks": "Verify source row 42"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "09/10", "coachNo": "ER232135", "coachCode": "LWACCNE", "dateIn": "28/09", "pdfDays": "21", "status": "Pending", "remarks": "Verify source row 42"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "09/10", "coachNo": "ER072900", "coachCode": "RA/AC", "dateIn": "01/10", "pdfDays": "21", "status": "Pending", "remarks": "Verify source row 43"}, {"shop": "Not specified in PDF", "workSection": "W IP:MLR:LHB", "datePlaced": "22/11", "coachNo": "ER112801M", "coachCode": "LWCBAC", "dateIn": "03/09", "pdfDays": "342", "status": "Pending", "remarks": "Verify source row 44"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "24/09", "coachNo": "ER194210", "coachCode": "LWS", "dateIn": "22/08", "pdfDays": "36", "status": "Pending", "remarks": "Verify source row 44"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "10/10", "coachNo": "ER196966", "coachCode": "LWACCN2", "dateIn": "20/07", "pdfDays": "20", "status": "Pending", "remarks": "Verify source row 44"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "08/11", "coachNo": "NF065064", "coachCode": "GSRD/C", "dateIn": "08/11", "pdfDays": "356", "status": "Pending", "remarks": "Verify source row 45"}, {"shop": "Not specified in PDF", "workSection": "W IP:MLR:LHB", "datePlaced": "08/04", "coachNo": "ER061312M", "coachCode": "LWACCN", "dateIn": "12/11", "pdfDays": "205", "status": "Pending", "remarks": "Verify source row 46"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "30/09", "coachNo": "EC182361F", "coachCode": "LWS", "dateIn": "06/06", "pdfDays": "30", "status": "Pending", "remarks": "Verify source row 46"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "10/10", "coachNo": "NF095001", "coachCode": "LWFAC", "dateIn": "21/07", "pdfDays": "20", "status": "Pending", "remarks": "Verify source row 46"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "10/10", "coachNo": "ER122111", "coachCode": "WGACCN", "dateIn": "26/09", "pdfDays": "20", "status": "Pending", "remarks": "Verify source row 47"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "11/09", "coachNo": "ER904017", "coachCode": "RA", "dateIn": "11/09", "pdfDays": "49", "status": "Pending", "remarks": "Verify source row 47"}, {"shop": "Not specified in PDF", "workSection": "W IP:MLR:LHB", "datePlaced": "22/04", "coachNo": "ER052125M", "coachCode": "LWACCN", "dateIn": "02/12", "pdfDays": "191", "status": "Pending", "remarks": "Verify source row 48"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "30/09", "coachNo": "ER162207C", "coachCode": "LWSCN", "dateIn": "16/04", "pdfDays": "30", "status": "Pending", "remarks": "Verify source row 48"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "10/10", "coachNo": "ER172167C", "coachCode": "LWACCN", "dateIn": "22/07", "pdfDays": "20", "status": "Pending", "remarks": "Verify source row 48"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "13/10", "coachNo": "ER232141", "coachCode": "LWACCNE", "dateIn": "05/10", "pdfDays": "17", "status": "Pending", "remarks": "Verify source row 48"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "14/09", "coachNo": "EC174336", "coachCode": "WGS/C", "dateIn": "14/09", "pdfDays": "46", "status": "Pending", "remarks": "Verify source row 48"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "06/10", "coachNo": "ER197823", "coachCode": "LWSCNAA", "dateIn": "28/09", "pdfDays": "24", "status": "Pending", "remarks": "Verify source row 49"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "15/10", "coachNo": "ER194139", "coachCode": "LWACCN", "dateIn": "08/07", "pdfDays": "15", "status": "Pending", "remarks": "Verify source row 49"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "12/10", "coachNo": "ER052062", "coachCode": "LWACCW", "dateIn": "12/09", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 50"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "14/09", "coachNo": "NE174405", "coachCode": "WGSCN/C", "dateIn": "14/09", "pdfDays": "46", "status": "Pending", "remarks": "Verify source row 50"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "09/10", "coachNo": "ER194538", "coachCode": "LWACCN", "dateIn": "16/09", "pdfDays": "21", "status": "Pending", "remarks": "Verify source row 51"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "16/10", "coachNo": "ER194524", "coachCode": "LWACCN", "dateIn": "29/09", "pdfDays": "14", "status": "Pending", "remarks": "Verify source row 51"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "15/10", "coachNo": "ER232181", "coachCode": "LRAAC", "dateIn": "05/10", "pdfDays": "15", "status": "Pending", "remarks": "Verify source row 51"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "14/09", "coachNo": "SE098215", "coachCode": "WGSCN/C", "dateIn": "14/09", "pdfDays": "46", "status": "Pending", "remarks": "Verify source row 51"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "12/10", "coachNo": "EC197312", "coachCode": "LWSCNA", "dateIn": "06/10", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 52"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "17/10", "coachNo": "EC221908", "coachCode": "LWACCNE", "dateIn": "08/10", "pdfDays": "13", "status": "Pending", "remarks": "Verify source row 52"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "23/10", "coachNo": "NF095802C", "coachCode": "LWCBAC", "dateIn": "10/10", "pdfDays": "7", "status": "Pending", "remarks": "Verify source row 53"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "14/09", "coachNo": "SE098217", "coachCode": "WGSCN/C", "dateIn": "14/09", "pdfDays": "46", "status": "Pending", "remarks": "Verify source row 53"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "17/10", "coachNo": "ER194529", "coachCode": "LWACCN", "dateIn": "22/09", "pdfDays": "13", "status": "Pending", "remarks": "Verify source row 54"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "24/10", "coachNo": "ER082102", "coachCode": "WGACCN", "dateIn": "05/10", "pdfDays": "6", "status": "Pending", "remarks": "Verify source row 54"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "17/10", "coachNo": "EC232197", "coachCode": "LWACCNE", "dateIn": "08/10", "pdfDays": "13", "status": "Pending", "remarks": "Verify source row 54"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "14/09", "coachNo": "SE108250", "coachCode": "WGSCN/C", "dateIn": "14/09", "pdfDays": "46", "status": "Pending", "remarks": "Verify source row 54"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "22/09", "coachNo": "ER162607", "coachCode": "WGSCZ", "dateIn": "09/09", "pdfDays": "38", "status": "Pending", "remarks": "Verify source row 55"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "30/09", "coachNo": "ER081261", "coachCode": "GSLRD", "dateIn": "11/09", "pdfDays": "30", "status": "Pending", "remarks": "Verify source row 56"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "24/10", "coachNo": "ER132156", "coachCode": "LWSCZAC", "dateIn": "28/09", "pdfDays": "6", "status": "Pending", "remarks": "Verify source row 56"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "14/09", "coachNo": "SR086114", "coachCode": "WGACCN/", "dateIn": "14/09", "pdfDays": "46", "status": "Pending", "remarks": "Verify source row 56"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "28/10", "coachNo": "ER194112", "coachCode": "LWACCW2", "dateIn": "16/09", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 57"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "26/10", "coachNo": "ER092056", "coachCode": "WGACCW", "dateIn": "15/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 57"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "23/10", "coachNo": "EC221910", "coachCode": "LWACCNE", "dateIn": "08/10", "pdfDays": "7", "status": "Pending", "remarks": "Verify source row 57"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "01/10", "coachNo": "SE178216", "coachCode": "WGSCN/C", "dateIn": "14/09", "pdfDays": "29", "status": "Pending", "remarks": "Verify source row 57"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "30/09", "coachNo": "ER112609", "coachCode": "WGSCZ", "dateIn": "24/09", "pdfDays": "30", "status": "Pending", "remarks": "Verify source row 58"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "28/10", "coachNo": "ER194306", "coachCode": "LWSCNA", "dateIn": "16/09", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 58"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "23/10", "coachNo": "EC231038", "coachCode": "LWACCNE", "dateIn": "08/10", "pdfDays": "7", "status": "Pending", "remarks": "Verify source row 58"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "06/10", "coachNo": "ER052117", "coachCode": "LWACCN", "dateIn": "08/10", "pdfDays": "24", "status": "Pending", "remarks": "Verify source row 59"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "26/10", "coachNo": "ER201322", "coachCode": "LWACCN2", "dateIn": "16/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 59"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "09/10", "coachNo": "ER092703", "coachCode": "GSLRD/C", "dateIn": "09/10", "pdfDays": "21", "status": "Pending", "remarks": "Verify source row 59"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "28/10", "coachNo": "ER194536", "coachCode": "LWACCN", "dateIn": "15/09", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 60"}, {"shop": "Not specified in PDF", "workSection": "CORROSION:POH:SCR AC", "datePlaced": "28/10", "coachNo": "ER122130", "coachCode": "WGACCN", "dateIn": "16/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 60"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "24/10", "coachNo": "EC221916", "coachCode": "LWACCNE", "dateIn": "09/10", "pdfDays": "6", "status": "Pending", "remarks": "Verify source row 60"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "10/10", "coachNo": "ER082991", "coachCode": "RA", "dateIn": "10/10", "pdfDays": "20", "status": "Pending", "remarks": "Verify source row 60"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "12/10", "coachNo": "ER062856", "coachCode": "LWLRRM", "dateIn": "25/08", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 61"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "12/10", "coachNo": "ERX971049", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 62"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "13/10", "coachNo": "ER102751", "coachCode": "GSLRD", "dateIn": "01/10", "pdfDays": "17", "status": "Pending", "remarks": "Verify source row 63"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "24/10", "coachNo": "ECO235690", "coachCode": "TSMC2", "dateIn": "06/10", "pdfDays": "6", "status": "Pending", "remarks": "Verify source row 64"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "14/10", "coachNo": "ER102705", "coachCode": "GSLRD", "dateIn": "12/10", "pdfDays": "", "status": "Pending", "remarks": "Verify source row 65"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "26/10", "coachNo": "EC221915", "coachCode": "LWACCNE", "dateIn": "08/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 66"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "22/10", "coachNo": "ER197838", "coachCode": "LWS", "dateIn": "06/08", "pdfDays": "8", "status": "Pending", "remarks": "Verify source row 67"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "12/10", "coachNo": "NRX964223", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 67"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:LHB", "datePlaced": "30/10", "coachNo": "ER196938", "coachCode": "LWACCN2", "dateIn": "05/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 68"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "26/10", "coachNo": "EC227187", "coachCode": "LWACCNA", "dateIn": "09/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 68"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "12/10", "coachNo": "NRX994320", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 68"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "23/10", "coachNo": "ER081158", "coachCode": "GSLRD", "dateIn": "21/09", "pdfDays": "7", "status": "Pending", "remarks": "Verify source row 69"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "27/10", "coachNo": "EC131662", "coachCode": "LWACCW", "dateIn": "08/08", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 70"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "27/10", "coachNo": "ER194591", "coachCode": "LWSCNA", "dateIn": "17/08", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 71"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "12/10", "coachNo": "SCX964145", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 71"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "04/09", "coachNo": "ER195548", "coachCode": "LWACCW", "dateIn": "22/07", "pdfDays": "56", "status": "Pending", "remarks": "Verify source row 72"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "27/10", "coachNo": "ECO235688", "coachCode": "TSMC", "dateIn": "06/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 72"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "12/10", "coachNo": "SCX974255", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 72"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "27/10", "coachNo": "ER196977", "coachCode": "LWSCNA", "dateIn": "01/09", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 73"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "21/09", "coachNo": "ER052104", "coachCode": "LWACCN", "dateIn": "10/08", "pdfDays": "39", "status": "Pending", "remarks": "Verify source row 73"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "27/10", "coachNo": "ECO235692", "coachCode": "TSTC", "dateIn": "06/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 73"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "27/10", "coachNo": "ER99273", "coachCode": "RCC", "dateIn": "24/08", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 74"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "19/05", "coachNo": "NRX974243", "coachCode": "NMGHS", "dateIn": "24/04", "pdfDays": "164", "status": "Pending", "remarks": "Verify source row 74"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "12/10", "coachNo": "SEX988601", "coachCode": "NMG", "dateIn": "12/10", "pdfDays": "18", "status": "Pending", "remarks": "Verify source row 74"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "22/09", "coachNo": "ER194530", "coachCode": "LWACCN", "dateIn": "17/08", "pdfDays": "38", "status": "Pending", "remarks": "Verify source row 75"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "27/10", "coachNo": "ER195561C", "coachCode": "LWSCNA", "dateIn": "22/07", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 75"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "13/10", "coachNo": "ERX984271", "coachCode": "NMG", "dateIn": "13/10", "pdfDays": "17", "status": "Pending", "remarks": "Verify source row 75"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "28/10", "coachNo": "ER001087", "coachCode": "RS", "dateIn": "07/09", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 77"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "22/07", "coachNo": "SRX006727", "coachCode": "NMGHSR", "dateIn": "02/07", "pdfDays": "100", "status": "Pending", "remarks": "Verify source row 77"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "13/10", "coachNo": "NEX974159", "coachCode": "NMG", "dateIn": "13/10", "pdfDays": "17", "status": "Pending", "remarks": "Verify source row 77"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "25/09", "coachNo": "ER196967", "coachCode": "LWACCNA", "dateIn": "13/08", "pdfDays": "35", "status": "Pending", "remarks": "Verify source row 78"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "27/10", "coachNo": "ER232137", "coachCode": "LWACCNE", "dateIn": "10/10", "pdfDays": "3", "status": "Pending", "remarks": "Verify source row 78"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "28/10", "coachNo": "ER194207", "coachCode": "LWS", "dateIn": "28/09", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 79"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "16/10", "coachNo": "ER96908", "coachCode": "RCC", "dateIn": "26/06", "pdfDays": "14", "status": "Pending", "remarks": "Verify source row 79"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "29/09", "coachNo": "ERXA992248", "coachCode": "ART", "dateIn": "13/10", "pdfDays": "17", "status": "Pending", "remarks": "Verify source row 79"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "28/10", "coachNo": "ECO235689", "coachCode": "TSMC2", "dateIn": "06/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 80"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "16/10", "coachNo": "ER974029", "coachCode": "RCC", "dateIn": "27/08", "pdfDays": "14", "status": "Pending", "remarks": "Verify source row 81"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "13/10", "coachNo": "SEX958881", "coachCode": "NMG", "dateIn": "13/10", "pdfDays": "17", "status": "Pending", "remarks": "Verify source row 81"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "08/10", "coachNo": "ER102738", "coachCode": "GSLRD", "dateIn": "19/09", "pdfDays": "22", "status": "Pending", "remarks": "Verify source row 82"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "28/10", "coachNo": "ECO235691", "coachCode": "TSTCEC", "dateIn": "06/10", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 82"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "13/10", "coachNo": "SWX994192", "coachCode": "NMG", "dateIn": "13/10", "pdfDays": "17", "status": "Pending", "remarks": "Verify source row 82"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "16/10", "coachNo": "ER984038", "coachCode": "RCC", "dateIn": "26/06", "pdfDays": "14", "status": "Traffic Out / Movement", "remarks": "Verify source row 83"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "08/10", "coachNo": "ER122409", "coachCode": "GS", "dateIn": "30/09", "pdfDays": "22", "status": "Traffic Out / Movement", "remarks": "Verify source row 83"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "28/10", "coachNo": "ER201325", "coachCode": "LWACCN2", "dateIn": "16/10", "pdfDays": "2", "status": "Traffic Out / Movement", "remarks": "Verify source row 83"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "24/10", "coachNo": "ER102749", "coachCode": "GSLRD", "dateIn": "16/10", "pdfDays": "6", "status": "Pending", "remarks": "Verify source row 84"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "14/10", "coachNo": "NEX984265", "coachCode": "NMG", "dateIn": "14/10", "pdfDays": "16", "status": "Pending", "remarks": "Verify source row 84"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "14/10", "coachNo": "NRX994203", "coachCode": "NMG", "dateIn": "14/10", "pdfDays": "16", "status": "Pending", "remarks": "Verify source row 85"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "26/10", "coachNo": "ER97909", "coachCode": "RCC", "dateIn": "27/08", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 86"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "09/10", "coachNo": "NF165408", "coachCode": "GS", "dateIn": "25/09", "pdfDays": "21", "status": "Pending", "remarks": "Verify source row 86"}, {"shop": "Not specified in PDF", "workSection": "LHB:POH:BAHAR LINE", "datePlaced": "29/10", "coachNo": "ECO235687", "coachCode": "TSMC", "dateIn": "06/10", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 86"}, {"shop": "Not specified in PDF", "workSection": "AW CORROSION:POH:NON LHB", "datePlaced": "30/10", "coachNo": "ER104389", "coachCode": "GS", "dateIn": "24/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 89"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "26/10", "coachNo": "ER102803", "coachCode": "WGCB", "dateIn": "26/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 92"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "15/10", "coachNo": "ER194330", "coachCode": "LWACCW", "dateIn": "01/09", "pdfDays": "15", "status": "Pending", "remarks": "Verify source row 93"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "26/10", "coachNo": "ER122064", "coachCode": "WGACCW", "dateIn": "26/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 94"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "15/10", "coachNo": "ER990025", "coachCode": "RCC", "dateIn": "10/09", "pdfDays": "15", "status": "Pending", "remarks": "Verify source row 95"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "28/10", "coachNo": "ER112430", "coachCode": "GS", "dateIn": "07/09", "pdfDays": "2", "status": "Pending", "remarks": "Verify source row 98"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "26/10", "coachNo": "ER142051", "coachCode": "WGACCW", "dateIn": "26/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 98"}, {"shop": "M SHOP", "workSection": "CORROSION:POH:M SHOP", "datePlaced": "26/10", "coachNo": "EC034342", "coachCode": "RA", "dateIn": "21/08", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 99"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "29/10", "coachNo": "ER104294", "coachCode": "WGSCN", "dateIn": "30/09", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 100"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION FOR MLR", "datePlaced": "13/12", "coachNo": "ER142108", "coachCode": "LWACCN", "dateIn": "24/09", "pdfDays": "686", "status": "Pending", "remarks": "Verify source row 104"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "30/10", "coachNo": "ER094286", "coachCode": "WGSCN", "dateIn": "10/09", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 104"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION FOR MLR", "datePlaced": "25/02", "coachNo": "ER062115", "coachCode": "LWACCN", "dateIn": "16/01", "pdfDays": "612", "status": "Pending", "remarks": "Verify source row 106"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "30/10", "coachNo": "ER102243", "coachCode": "WGSCN", "dateIn": "24/08", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 106"}, {"shop": "Not specified in PDF", "workSection": "YARD: POH: NON LHB", "datePlaced": "29/10", "coachNo": "ER122110", "coachCode": "WGACCN", "dateIn": "29/10", "pdfDays": "1", "status": "Pending", "remarks": "Verify source row 106"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION FOR MLR", "datePlaced": "25/02", "coachNo": "ER062147", "coachCode": "LWACCN", "dateIn": "17/12", "pdfDays": "612", "status": "Final Condemn / Summary", "remarks": "Verify source row 108"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "30/10", "coachNo": "ER102494", "coachCode": "GS", "dateIn": "25/09", "pdfDays": "0", "status": "Final Condemn / Summary", "remarks": "Verify source row 108"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION FOR MLR", "datePlaced": "25/03", "coachNo": "EC111329M", "coachCode": "LWACCW", "dateIn": "19/12", "pdfDays": "584", "status": "Pending", "remarks": "Verify source row 110"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "30/10", "coachNo": "ER111138", "coachCode": "WGACCW", "dateIn": "21/09", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 110"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "30/10", "coachNo": "ER112411", "coachCode": "GS", "dateIn": "19/09", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 111"}, {"shop": "L-SHOP", "workSection": "CORROSION:POH: L-SHOP", "datePlaced": "04/06", "coachNo": "ER062116M", "coachCode": "LWACCN", "dateIn": "11/02", "pdfDays": "513", "status": "Pending", "remarks": "Verify source row 112"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION FOR MLR", "datePlaced": "31/12", "coachNo": "ER052108M", "coachCode": "LWACCN", "dateIn": "26/08", "pdfDays": "303", "status": "Pending", "remarks": "Verify source row 113"}, {"shop": "CR SHOP", "workSection": "CORROSION:POH:CR SHOP", "datePlaced": "11/09", "coachNo": "ER101182", "coachCode": "WGFAC", "dateIn": "30/07", "pdfDays": "49", "status": "Pending", "remarks": "Verify source row 113"}, {"shop": "CR SHOP", "workSection": "CORROSION:POH:CR SHOP", "datePlaced": "30/10", "coachNo": "ER112492", "coachCode": "GS", "dateIn": "01/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 113"}, {"shop": "CR SHOP", "workSection": "CORROSION:POH:CR SHOP", "datePlaced": "21/09", "coachNo": "SE158112", "coachCode": "WGACCN", "dateIn": "14/08", "pdfDays": "39", "status": "Pending", "remarks": "Verify source row 115"}, {"shop": "CR SHOP", "workSection": "CORROSION:POH:CR SHOP", "datePlaced": "30/10", "coachNo": "ER94930", "coachCode": "RCC", "dateIn": "11/06", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 115"}, {"shop": "Not specified in PDF", "workSection": "BAHAR LINE:POH:NON LHB", "datePlaced": "30/10", "coachNo": "NRX998272", "coachCode": "NMGHS", "dateIn": "13/10", "pdfDays": "0", "status": "Pending", "remarks": "Verify source row 116"}, {"shop": "CR SHOP", "workSection": "CORROSION:POH:CR SHOP", "datePlaced": "14/10", "coachNo": "ER122603", "coachCode": "WGSCZ", "dateIn": "26/09", "pdfDays": "16", "status": "Pending", "remarks": "Verify source row 118"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION FOR MLR", "datePlaced": "10/08", "coachNo": "EC151687", "coachCode": "LWLRRM", "dateIn": "18/07", "pdfDays": "81", "status": "Pending", "remarks": "Verify source row 119"}, {"shop": "Not specified in PDF", "workSection": "POH:NOMINATION FOR MLR", "datePlaced": "15/10", "coachNo": "ER152900", "coachCode": "RA/AC", "dateIn": "16/09", "pdfDays": "15", "status": "Pending", "remarks": "Verify source row 119"}, {"shop": "CR SHOP", "workSection": "CORROSION:POH:CR SHOP", "datePlaced": "26/10", "coachNo": "ER091174", "coachCode": "WGSCN", "dateIn": "02/03", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 120"}, {"shop": "CR SHOP", "workSection": "CORROSION:POH:CR SHOP", "datePlaced": "26/10", "coachNo": "ER102402", "coachCode": "GS", "dateIn": "16/10", "pdfDays": "4", "status": "Pending", "remarks": "Verify source row 121"}, {"shop": "Not specified in PDF", "workSection": "YARD: NPOH", "datePlaced": "30/06", "coachNo": "ER992181", "coachCode": "CE/AC2", "dateIn": "30/06", "pdfDays": "122", "status": "Pending", "remarks": "Verify source row 122"}, {"shop": "Not specified in PDF", "workSection": "YARD: NPOH", "datePlaced": "09/07", "coachNo": "SE098851", "coachCode": "LWLRRM", "dateIn": "09/07", "pdfDays": "113", "status": "Pending", "remarks": "Verify source row 123"}, {"shop": "L-SHOP", "workSection": "NPO: L-SHOP CORROSION", "datePlaced": "30/09", "coachNo": "ER022408", "coachCode": "ART", "dateIn": "07/09", "pdfDays": "30", "status": "Pending", "remarks": "Verify source row 124"}, {"shop": "Not specified in PDF", "workSection": "SURPLUS COACHES", "datePlaced": "01/12", "coachNo": "NR09409", "coachCode": "SGS", "dateIn": "11/11", "pdfDays": "333", "status": "Pending", "remarks": "Verify source row 127"}];
-const shops = ["Lifting bay poh lhb", "Lifting bay poh nonlhb", "aw corrosion poh lhb", "aw corrosion poh nonlhb", "poh nomination for mlr", "power car poh", "corrosion poh scr nac", "corrosion poh scr ac", "paint poh lhb", "paint poh nonlhb", "corrosion poh m shop", "corrosion poh cr shop", "lhb poh bahar line", "bahar line poh nonlhb", "corrosion conv rcc/nmg", "poh nomination conv rcc/nmg", "wip mlr lhb", "corrosion poh l shop", "traffic out on 30 oct 26", "aw/final condemn coaches"];
-let records = JSON.parse(localStorage.getItem('coachShopMovementData') || 'null') || structuredClone(original);
-const body=document.getElementById('body'), search=document.getElementById('search'), filter=document.getElementById('filter');
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function save(){localStorage.setItem('coachShopMovementData',JSON.stringify(records));render();}
-function shopOptions(selected){return '<option value="">Select shop…</option>'+shops.map(s=>`<option ${s===selected?'selected':''} value="${esc(s)}">${esc(s)}</option>`).join('');}
-shops.forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=s;filter.appendChild(o)});
-function render(){
- const q=search.value.trim().toLowerCase(), f=filter.value;
- const shown=records.map((r,i)=>({...r,_i:i})).filter(r=>(!f||r.shop===f)&&(!q||[r.coachNo,r.coachCode,r.workSection,r.shop].join(' ').toLowerCase().includes(q)));
- document.getElementById('total').textContent=records.length;
- document.getElementById('assigned').textContent=records.filter(r=>r.shop&&r.shop!=='Not assigned').length;
- document.getElementById('unassigned').textContent=records.filter(r=>!r.shop||r.shop==='Not assigned'||r.shop==='Not specified in PDF').length;
- body.innerHTML=shown.length?shown.map(r=>`<tr><td><b>${esc(r.coachNo)}</b></td><td>${esc(r.coachCode)}</td><td><span class="tag">${esc(r.shop||'Not assigned')}</span></td><td>${esc(r.workSection)}</td><td>${esc(r.datePlaced)}</td><td>${esc(r.dateIn)}</td><td>${esc(r.pdfDays)}</td><td>${esc(r.status)}</td><td><div class="move"><select id="shop-${r._i}">${shopOptions(r.shop)}</select><button onclick="moveCoach(${r._i})">Move</button></div></td></tr>`).join(''):'<tr><td class="empty" colspan="9">No matching coaches found.</td></tr>';
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-window.moveCoach=function(i){const v=document.getElementById('shop-'+i).value;if(!v){alert('Please select a shop.');return;}records[i].shop=v;save();};
-search.addEventListener('input',render);filter.addEventListener('change',render);
-document.getElementById('reset').onclick=()=>{if(confirm('Discard browser changes and restore the uploaded Excel data?')){records=structuredClone(original);localStorage.removeItem('coachShopMovementData');render();}};
-document.getElementById('export').onclick=()=>{const cols=['shop','workSection','datePlaced','coachNo','coachCode','dateIn','pdfDays','status','remarks'];const csv=[cols.join(','),...records.map(r=>cols.map(k=>'"'+String(r[k]??'').replace(/"/g,'""')+'"').join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='coach_shop_movement_updated.csv';a.click();URL.revokeObjectURL(a.href);};
-render();
-</script></body></html>
+
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    color: #172033;
+}
+
+header {
+    background: #102b50;
+    color: white;
+    padding: 18px 12px;
+    text-align: center;
+}
+
+header h2 {
+    font-size: 23px;
+    letter-spacing: 1px;
+}
+
+header p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #d7e5f5;
+}
+
+.container {
+    max-width: 1400px;
+    margin: auto;
+    padding: 15px;
+}
+
+.panel {
+    background: white;
+    padding: 16px;
+    border-radius: 9px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px #00000012;
+}
+
+.panel h3 {
+    margin-bottom: 14px;
+    color: #12345a;
+}
+
+input, select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 14px;
+    background: white;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+button {
+    padding: 11px 17px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 5px 3px 0 0;
+}
+
+.btn-primary {
+    background: #1261a0;
+    color: white;
+}
+
+.btn-success {
+    background: #16834b;
+    color: white;
+}
+
+.btn-danger {
+    background: #c52b35;
+    color: white;
+}
+
+.btn-secondary {
+    background: #526174;
+    color: white;
+}
+
+.btn-warning {
+    background: #e6a323;
+    color: #172033;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.summary-card {
+    background: white;
+    padding: 17px;
+    border-radius: 8px;
+    border-left: 5px solid #1261a0;
+    box-shadow: 0 2px 8px #00000010;
+}
+
+.summary-card p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.summary-card h2 {
+    margin-top: 8px;
+    font-size: 25px;
+    color: #102b50;
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: collapse;
+    background: white;
+}
+
+th {
+    background: #173c65;
+    color: white;
+    padding: 12px 9px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+td {
+    padding: 11px 9px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center;
+    font-size: 13px;
+}
+
+tbody tr:nth-child(even) {
+    background: #f5f8fc;
+}
+
+.status {
+    font-weight: bold;
+}
+
+#loginSection {
+    max-width: 400px;
+    margin: 60px auto;
+}
+
+#dashboardSection {
+    display: none;
+}
+
+#message {
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+footer {
+    text-align: center;
+    padding: 18px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+@media(max-width: 700px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .search-grid {
+        grid-template-columns: 1fr;
+    }
+
+    header h2 {
+        font-size: 19px;
+    }
+}
+
+@media(max-width: 400px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>MR COACH STOCK DASHBOARD</h2>
+    <p>LILUAH WORKSHOP | MR CO-ORDINATION SECTION</p>
+    <p>COACH STOCK MONITORING SYSTEM</p>
+</header>
+
+<!-- LOGIN SECTION -->
+
+<section id="loginSection" class="panel">
+
+    <h3>ADMIN / EDITOR LOGIN</h3>
+
+    <div class="field">
+        <label>Email ID</label>
+        <input type="email" id="loginEmail"
+               placeholder="Enter Email">
+    </div>
+
+    <br>
+
+    <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword"
+               placeholder="Enter Password">
+    </div>
+
+    <br>
+
+    <button class="btn-primary" id="loginBtn">
+        LOGIN
+    </button>
+
+    <p id="loginMessage"></p>
+
+</section>
+
+
+<!-- MAIN DASHBOARD -->
+
+<main id="dashboardSection">
+
+<div class="container">
+
+    <div class="panel">
+        <div style="display:flex;justify-content:space-between;
+                    align-items:center;flex-wrap:wrap;gap:10px;">
+
+            <h3>COACH STOCK REGISTER</h3>
+
+            <div>
+                <span id="userInfo"></span>
+                <button class="btn-danger" id="logoutBtn">
+                    LOGOUT
+                </button>
+            </div>
+
+        </div>
+
+        <p id="databaseStatus">Connecting Database...</p>
+        <p id="offlineStatus"></p>
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary">
+
+        <div class="summary-card">
+            <p>TOTAL COACH</p>
+            <h2 id="totalCoach">0</h2>
+        </div>
+
+        <div class="summary-card">
+            <p>IN SHOP</p>
+            <h2 id="inShop">0</h2>
+        </div>
+
+        <div class="summary-card">
+            <p>RETURNED</p>
+            <h2 id="returnedCoach">0</h2>
+        </div>
+
+        <div class="summary-card">
+            <p>AVERAGE DETENTION</p>
+            <h2 id="averageDetention">0</h2>
+        </div>
+
+    </div>
+
+
+    <!-- ADD COACH FORM -->
+
+    <div class="panel">
+
+        <h3>ADD / UPDATE COACH</h3>
+
+        <form id="coachForm">
+
+            <input type="hidden" id="recordId">
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label>Shop</label>
+                    <select id="shop" required>
+                        <option value="">Select Shop</option>
+                        <option value="N SHOP">N SHOP</option>
+                        <option value="M SHOP">M SHOP</option>
+                        <option value="CR SHOP">CR SHOP</option>
+                        <option value="J SHOP">J SHOP</option>
+                        <option value="MR SCR SHOP">MR SCR SHOP</option>
+                        <option value="LIFTING BAY">LIFTING BAY</option>
+                        <option value="L SHOP">L SHOP</option>
+                        <option value="OTHER">OTHER</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Coach No</label>
+                    <input type="text" id="coachNo"
+                           placeholder="Enter Coach Number"
+                           required>
+                </div>
+
+                <div class="field">
+                    <label>Date Placed</label>
+                    <input type="date" id="datePlaced" required>
+                </div>
+
+                <div class="field">
+                    <label>Date In</label>
+                    <input type="date" id="dateIn">
+                </div>
+
+                <div class="field">
+                    <label>Detention Day</label>
+                    <input type="text" id="detentionDay"
+                           value="0" readonly>
+                </div>
+
+                <div class="field">
+                    <label>Status</label>
+                    <select id="status">
+                        <option value="">Select Status</option>
+                        <option value="IN SHOP">IN SHOP</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="RETURNED">RETURNED</option>
+                        <option value="PENDING">PENDING</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <br>
+
+            <button type="submit" class="btn-success"
+                    id="saveBtn">
+                SAVE COACH
+            </button>
+
+            <button type="button" class="btn-warning"
+                    id="resetBtn">
+                RESET
+            </button>
+
+        </form>
+
+        <p id="message"></p>
+
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="panel">
+
+        <h3>SEARCH COACH STOCK</h3>
+
+        <div class="search-grid">
+
+            <input type="search" id="searchInput"
+                   placeholder="Search Coach No / Shop / Status">
+
+            <select id="shopFilter">
+                <option value="">ALL SHOPS</option>
+                <option value="N SHOP">N SHOP</option>
+                <option value="M SHOP">M SHOP</option>
+                <option value="CR SHOP">CR SHOP</option>
+                <option value="J SHOP">J SHOP</option>
+                <option value="MR SCR SHOP">MR SCR SHOP</option>
+                <option value="LIFTING BAY">LIFTING BAY</option>
+                <option value="L SHOP">L SHOP</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <!-- STOCK TABLE -->
+
+    <div class="panel">
+
+        <div style="display:flex;justify-content:space-between;
+                    align-items:center;flex-wrap:wrap;">
+
+            <h3>DAILY COACH STOCK POSITION</h3>
+
+            <button class="btn-success" id="exportBtn">
+                EXPORT EXCEL
+            </button>
+
+        </div>
+
+        <div class="table-container">
+
+            <table id="coachTable">
+
+                <thead>
+                    <tr>
+                        <th>SL</th>
+                        <th>SHOP</th>
+                        <th>COACH NO</th>
+                        <th>DATE PLACED</th>
+                        <th>DATE IN</th>
+                        <th>DETENTION DAY</th>
+                        <th>STATUS</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+
+                <tbody id="coachTableBody">
+                    <tr>
+                        <td colspan="8">Loading Coach Stock...</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</main>
+
+
+<footer>
+    MR CO-ORDINATION SECTION | LILUAH WORKSHOP
+    <br>
+    MR COACH STOCK MANAGEMENT SYSTEM
+</footer>
+
+
+<!-- JAVASCRIPT MODULE -->
+
+<script type="module" src="./Js/coach-stock.js"></script>
+
+</body>
+</html>
