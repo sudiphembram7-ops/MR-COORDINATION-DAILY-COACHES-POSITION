@@ -1,1068 +1,373 @@
-/* =========================================================
-   MR CO-ORDINATION BOARD
-   STYLE.CSS
-   VERSION 15.1 FINAL
-   ---------------------------------------------------------
-   DESKTOP + TABLET + MOBILE
-   BOARD + SHOP + PULLED OUT + RETURN
-   SEARCH + COUNTERS + MODAL + HISTORY
-   VERTICAL SCROLL FIX
-========================================================= */
+/* =====================================================
+   MR CO-ORDINATION - PROFESSIONAL CONTROL ROOM THEME
+===================================================== */
 
-
-/* =========================================================
-   01. GLOBAL
-========================================================= */
+:root {
+    --navy: #10243a;
+    --navy-light: #183a5b;
+    --blue: #1769aa;
+    --gold: #f2b632;
+    --page: #eef2f7;
+    --surface: #ffffff;
+    --border: #d8e0e9;
+    --text: #243447;
+    --muted: #718096;
+    --shadow: 0 5px 18px rgba(16, 36, 58, .08);
+}
 
 * {
     box-sizing: border-box;
 }
 
-html {
-    scroll-behavior: smooth;
-    width: 100%;
-    min-height: 100%;
-
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
 body {
     margin: 0;
-    padding: 0;
-
-    width: 100%;
-    min-height: 100vh;
-
-    background: #f4f6f8;
-    color: #151515;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 16px;
-
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    -webkit-overflow-scrolling: touch;
+    background: var(--page);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
 }
 
-button,
-input,
-select,
-textarea {
-    font-family: inherit;
+/* HEADER */
+
+.header {
+    background: linear-gradient(120deg, #10243a, #174c78) !important;
+    padding: 22px 14px !important;
+    border-bottom: 4px solid var(--gold);
+    box-shadow: 0 4px 15px rgba(0,0,0,.15);
 }
 
-button {
-    cursor: pointer;
-}
-
-img {
-    max-width: 100%;
-    height: auto;
-}
-
-
-/* =========================================================
-   02. MAIN CONTAINER
-========================================================= */
-
-.container,
-.board-container,
-.main-container {
-    width: 100%;
-    max-width: 1600px;
-
-    margin: 0 auto;
-    padding: 15px;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   03. HEADER
-========================================================= */
-
-header,
-.main-header,
-.board-header {
-    width: 100%;
-
-    background: #212529;
-    color: #ffffff;
-
-    padding: 18px 22px;
-
-    border-radius: 0 0 8px 8px;
-
-    margin-bottom: 15px;
-}
-
-header h1,
-.main-header h1,
-.board-header h1 {
+.header h3 {
     margin: 0;
-
-    font-size: 30px;
+    font-size: clamp(17px, 2.2vw, 25px);
     font-weight: 800;
+    letter-spacing: .7px;
 }
 
-header h2,
-.main-header h2,
-.board-header h2 {
-    margin: 5px 0 0;
-
-    font-size: 20px;
-    font-weight: 600;
+.header h5 {
+    margin: 7px 0 0;
+    color: #f6c85f;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
 }
 
+.header .d-flex {
+    flex-wrap: wrap;
+    gap: 8px 22px !important;
+    font-size: 12px;
+    color: #e5edf5;
+}
 
-/* =========================================================
-   04. NAVBAR
-========================================================= */
+/* NAVIGATION */
 
 .navbar {
-    background: #212529 !important;
+    background: #0b1928 !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,.12);
 }
 
 .navbar-brand {
-    font-size: 25px;
     font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--gold) !important;
 }
 
-.navbar-toggler {
-    border: 2px solid #555;
+.navbar .nav-link {
+    color: #e5edf5 !important;
+    padding: 10px 16px !important;
+    margin: 2px 3px;
+    border-radius: 7px;
+    font-weight: 600;
+    transition: .2s ease;
 }
 
-.navbar-toggler-icon {
-    filter: invert(1);
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+    color: #fff !important;
+    background: #244b70;
 }
 
+/* TOP CONTROL AREA */
 
-/* =========================================================
-   05. BUTTONS
-========================================================= */
+.container-fluid.mt-3 {
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+#searchBox,
+#pulledOutSearchBox {
+    min-height: 43px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    box-shadow: none;
+}
+
+#searchBox:focus,
+#pulledOutSearchBox:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(23,105,170,.12);
+}
 
 .btn {
-    border-radius: 10px;
-    font-weight: 700;
-
-    transition:
-        transform 0.2s ease,
-        background 0.2s ease;
+    border-radius: 8px;
+    font-weight: 650;
+    padding: 8px 15px;
+    transition: .2s ease;
 }
 
 .btn:hover {
     transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,.12);
 }
 
-.btn:active {
-    transform: scale(0.98);
-}
-
-.btn-primary {
-    background: #336df3;
-    border-color: #336df3;
-}
-
-.btn-danger {
-    background: #dc3545;
-    border-color: #dc3545;
-}
-
-.btn-success {
-    background: #198754;
-    border-color: #198754;
-}
-
-.btn-warning {
-    background: #ffc107;
-    border-color: #ffc107;
-    color: #111;
-}
-
-
-/* =========================================================
-   06. COUNTERS
-========================================================= */
-
-.counter-container {
-    display: flex;
-    flex-wrap: wrap;
-
-    gap: 12px;
-
-    width: 100%;
-
-    margin: 15px 0;
-}
-
-.counter-card {
-    flex: 1 1 180px;
-
-    min-width: 0;
-
-    background: #ffffff;
-
-    border: 1px solid #d7dce1;
-
-    border-radius: 12px;
-
-    padding: 15px;
-
-    text-align: center;
-
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.counter-card .counter-number {
-    font-size: 30px;
-    font-weight: 800;
-}
-
-.counter-card .counter-label {
-    font-size: 14px;
+#databaseStatus,
+#footerDatabase {
     font-weight: 700;
-
-    color: #666;
 }
 
+#totalCoach,
+#occupiedCoach,
+#freeCoach {
+    display: inline-block;
+    min-width: 25px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    background: #dce8f4;
+    color: #123b61;
+}
 
-/* =========================================================
-   07. DATABASE STATUS
-========================================================= */
+/* SHOP CARDS */
 
-#databaseStatus {
+.shop-card {
+    margin: 18px;
+    padding: 0 12px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.shop-title {
+    margin: 0 -12px 12px;
+    padding: 13px !important;
+    color: #fff !important;
+    background: linear-gradient(100deg, #183a5b, #24618d) !important;
+    border-bottom: 3px solid var(--gold);
+    font-size: 17px;
     font-weight: 800;
+    letter-spacing: 1px;
 }
 
-.text-success {
-    color: #198754 !important;
+/* Retain special shop identity without harsh colours */
+.shop-card:nth-of-type(2) .shop-title {
+    background: linear-gradient(100deg, #183a5b, #24618d) !important;
 }
 
-.text-danger {
-    color: #dc3545 !important;
+.shop-card .table-responsive {
+    border-radius: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #9aabba #edf1f5;
 }
 
-
-/* =========================================================
-   08. SEARCH
-========================================================= */
-
-#searchBox,
-#pulledOutSearch,
-#pulledOutSearchBox,
-#searchPulledOut {
-    width: 100%;
-
-    min-height: 58px;
-
-    padding: 10px 18px;
-
-    border: 2px solid #d8dde2;
-
-    border-radius: 12px;
-
-    background: #ffffff;
-    color: #333;
-
-    font-size: 20px;
-
-    outline: none;
-}
-
-#searchBox:focus,
-#pulledOutSearch:focus,
-#pulledOutSearchBox:focus,
-#searchPulledOut:focus {
-    border-color: #336df3;
-
-    box-shadow:
-        0 0 0 3px rgba(51, 109, 243, 0.12);
-}
-
-
-/* =========================================================
-   09. ACTION BAR
-========================================================= */
-
-.action-bar {
-    display: flex;
-    flex-wrap: wrap;
-
-    gap: 10px;
-
-    width: 100%;
-
-    margin: 15px 0;
-}
-
-.action-bar button {
-    min-height: 45px;
-}
-
-
-/* =========================================================
-   10. MAIN BOARD TABLE WRAPPER
-   IMPORTANT:
-   HORIZONTAL SCROLL ONLY
-   VERTICAL SCROLL REMAINS PAGE LEVEL
-========================================================= */
-
-.board-table-wrapper {
-    width: 100%;
-
-    overflow-x: auto;
-    overflow-y: visible;
-
-    -webkit-overflow-scrolling: touch;
-
-    background: #ffffff;
-
-    border-radius: 10px;
-
-    margin-bottom: 20px;
-
-    position: relative;
-}
-
-
-/* =========================================================
-   11. MAIN COACH TABLE
-========================================================= */
+/* COACH TABLES */
 
 .coach-table {
-    width: 100%;
-
-    min-width: 850px;
-
-    border-collapse: collapse;
-
-    table-layout: fixed;
+    min-width: 650px;
+    margin-bottom: 0;
+    border-color: #d5dee8;
+    vertical-align: middle;
 }
 
-.coach-table th {
-    background: #212529;
-    color: #ffffff;
+.coach-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 11px 8px;
+    background: #263c52 !important;
+    color: #fff !important;
+    border-color: #50657a;
+    font-size: 12px;
+    font-weight: 750;
+    white-space: nowrap;
+}
 
-    border: 2px solid #454a4f;
-
-    padding: 10px 6px;
-
-    text-align: center;
-    vertical-align: middle;
-
-    font-size: 15px;
+.coach-table tbody th {
+    min-width: 65px;
+    padding: 10px 8px;
+    background: #e7edf4;
+    color: #183a5b;
     font-weight: 800;
-
     white-space: nowrap;
 }
 
 .coach-table td {
-    height: 70px;
-    min-height: 70px;
-
-    border: 2px solid #d4d9de;
-
-    padding: 4px;
-
-    text-align: center;
+    min-width: 105px;
+    height: 76px;
+    padding: 5px;
+    background: #fff;
+    border-color: #d5dee8;
     vertical-align: middle;
-
-    background: #ffffff;
-
-    position: relative;
+    transition: background .15s ease;
 }
 
-.coach-table td:empty {
-    background: #ffffff;
+.coach-table td:hover {
+    background: #f0f7ff;
 }
 
-
-/* =========================================================
-   12. COACH CARD
-========================================================= */
+/* COACH CARD */
 
 .coach-card {
+    min-height: 56px;
     width: 100%;
-
-    min-height: 58px;
-
     display: flex;
-
     flex-direction: column;
-
     justify-content: center;
     align-items: center;
+    gap: 3px;
+    padding: 6px 4px;
+    border: 1px dashed #c5d0dc;
+    border-radius: 7px;
+    background: #f8fafc;
+    color: #26384a;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    transition: .15s ease;
+}
 
-    line-height: 1.15;
+.coach-table td:hover .coach-card {
+    border-color: #7da9d2;
+    background: #edf6ff;
+}
 
-    user-select: none;
+/* STATUS COLOURS
+   These selectors support common status class naming.
+*/
 
+.coach-card.status-1,
+.coach-card.status-PO,
+.coach-card.status-S {
+    background: #e2f5e9;
+    border: 1px solid #8ccba2;
+    color: #176536;
+}
+
+.coach-card.status-LM {
+    background: #fff4d7;
+    border: 1px solid #e8c66b;
+    color: #805900;
+}
+
+.coach-card.status-MED {
+    background: #fde5e5;
+    border: 1px solid #e8a0a0;
+    color: #a32323;
+}
+
+.coach-card.status-RL {
+    background: #e2edff;
+    border: 1px solid #9bb9ed;
+    color: #174b9a;
+}
+
+.coach-card.status-R1 {
+    background: #dff6fa;
+    border: 1px solid #8bd2df;
+    color: #126171;
+}
+
+.coach-card.status-L,
+.coach-card.status-RS {
+    background: #edf0f3;
+    border: 1px solid #c2cbd4;
+    color: #4d5965;
+}
+
+.coach-card.status-HVY {
+    background: #e5e7eb;
+    border: 1px solid #9ca3af;
+    color: #252a31;
+}
+
+/* PULLED OUT SECTION */
+
+.card {
+    margin-left: 18px;
+    margin-right: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
     overflow: hidden;
 }
 
-.coach-no {
-    font-size: 19px;
-    font-weight: 900;
-
-    white-space: nowrap;
+.card-header {
+    padding: 13px 16px;
+    font-weight: 750;
 }
 
-.coach-type {
-    font-size: 14px;
+.card-body {
+    background: #fff;
+}
+
+.pulled-out-search-count {
+    color: var(--muted);
+    font-size: 12px;
     font-weight: 700;
+}
 
+#pulledOutList td,
+#pulledOutList th {
+    padding: 10px 9px;
+    vertical-align: middle;
     white-space: nowrap;
 }
 
-.coach-status {
-    font-size: 13px;
-    font-weight: 800;
-
-    white-space: nowrap;
+#pulledOutList tr:hover {
+    background: #f2f7fc;
 }
 
+/* SEARCH RESULTS */
 
-/* =========================================================
-   13. STATUS COLOURS
-========================================================= */
-
-.status-po {
-    background: #fff3cd !important;
-}
-
-.status-s {
-    background: #d1e7dd !important;
-}
-
-.status-lm {
-    background: #cfe2ff !important;
-}
-
-.status-med {
-    background: #f8d7da !important;
-}
-
-.status-rl {
-    background: #e2d9f3 !important;
-}
-
-.status-r1 {
-    background: #d9f0ff !important;
-}
-
-.status-rs {
-    background: #fde2b8 !important;
-}
-
-.status-l {
-    background: #d7f9e9 !important;
-}
-
-.status-hvy {
-    background: #ffcdd2 !important;
-}
-
-
-/* =========================================================
-   14. SEARCH MATCH
-========================================================= */
-
-.search-match {
-    outline: 4px solid #ff9800 !important;
-
-    outline-offset: -4px;
-
-    box-shadow:
-        0 0 15px rgba(255, 152, 0, 0.65);
-
+#searchResult {
+    position: relative;
     z-index: 5;
 }
 
-
-/* =========================================================
-   15. DRAG & DROP
-========================================================= */
-
-.mobile-drag-source {
-    opacity: 0.55 !important;
-
-    outline: 4px dashed #0d6efd !important;
+#searchResult > * {
+    margin-bottom: 7px;
 }
 
-.mobile-drag-target,
-.table-info {
-    background: #cfe2ff !important;
-
-    outline: 4px dashed #0d6efd !important;
+#searchResult .card,
+#searchResult .search-result,
+#searchResult .coach-result {
+    margin: 0 0 7px;
+    border-radius: 9px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.07);
 }
 
-
-/* =========================================================
-   16. SHOP CARD
-========================================================= */
-
-.shop-card {
-    display: block;
-
-    width: 100%;
-    max-width: 100%;
-
-    margin: 0 0 20px 0;
-
-    padding: 0;
-
-    box-sizing: border-box;
-}
-
-.shop-card .shop-title {
-    display: block;
-
-    width: 100%;
-    max-width: 100%;
-
-    margin: 0;
-
-    padding: 10px;
-
-    text-align: center;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   17. SHOP TABLE RESPONSIVE WRAPPER
-   HORIZONTAL SCROLL ONLY
-========================================================= */
-
-.shop-card .table-responsive {
-    display: block;
-
-    width: 100%;
-    max-width: 100%;
-
-    margin: 0;
-    padding: 0;
-
-    overflow-x: auto;
-    overflow-y: visible;
-
-    -webkit-overflow-scrolling: touch;
-
-    box-sizing: border-box;
-
-    position: relative;
-}
-
-
-/* =========================================================
-   18. SHOP COACH TABLE
-========================================================= */
-
-.shop-card .coach-table {
-    display: table;
-
-    width: 100%;
-
-    min-width: 0;
-
-    max-width: none;
-
-    margin: 0;
-    padding: 0;
-
-    table-layout: fixed;
-
-    border-collapse: collapse;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   19. SHOP TABLE CELLS
-========================================================= */
-
-.shop-card .coach-table th,
-.shop-card .coach-table td {
-    box-sizing: border-box;
-
-    text-align: center;
-    vertical-align: middle;
-
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   20. SHOP POSITION COLUMN
-========================================================= */
-
-.shop-card .coach-table th:first-child,
-.shop-card .coach-table td:first-child {
-    width: 90px;
-
-    min-width: 90px;
-    max-width: 90px;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   21. SHOP OTHER COLUMNS
-========================================================= */
-
-.shop-card .coach-table th:not(:first-child),
-.shop-card .coach-table td:not(:first-child) {
-    width: auto;
-
-    min-width: 0;
-    max-width: none;
-}
-
-
-/* =========================================================
-   22. SHOP TABLE HEADER
-========================================================= */
-
-.shop-card .coach-table thead th {
-    height: 38px;
-
-    padding: 5px 3px;
-
-    font-size: 14px;
-
-    white-space: nowrap;
-
-    text-align: center;
-}
-
-
-/* =========================================================
-   23. SHOP TABLE BODY
-========================================================= */
-
-.shop-card .coach-table td {
-    height: 100px;
-
-    min-height: 100px;
-
-    padding: 3px;
-}
-
-
-/* =========================================================
-   24. SHOP COACH CARD
-========================================================= */
-
-.shop-card .coach-card {
-    width: 100%;
-    max-width: 100%;
-
-    height: 100%;
-
-    min-height: 90px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    overflow: hidden;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   25. SHOP COACH NUMBER
-========================================================= */
-
-.shop-card .coach-no {
-    max-width: 100%;
-
-    font-size: 18px;
-
-    font-weight: 900;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: clip;
-}
-
-
-/* =========================================================
-   26. SHOP COACH TYPE
-========================================================= */
-
-.shop-card .coach-type {
-    max-width: 100%;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   27. SHOP COACH STATUS
-========================================================= */
-
-.shop-card .coach-status {
-    max-width: 100%;
-
+/* STATUS LEGEND */
+
+.card .badge {
+    margin: 3px 4px 3px 0;
+    min-width: 34px;
+    padding: 7px 10px;
     font-size: 11px;
-
-    font-weight: 800;
-
-    white-space: nowrap;
-
-    overflow: hidden;
+    border-radius: 6px;
 }
 
-
-/* =========================================================
-   28. PULLED OUT SECTION
-========================================================= */
-
-.pulled-out-section {
-    width: 100%;
-
-    margin: 25px 0;
-
-    background: #ffffff;
-
-    border: 1px solid #d6dbe0;
-
-    border-radius: 14px;
-
-    overflow: visible;
-
-    box-shadow:
-        0 3px 12px rgba(0, 0, 0, 0.10);
-}
-
-
-/* =========================================================
-   29. PULLED OUT HEADER
-========================================================= */
-
-.pulled-out-header {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 15px;
-
-    min-height: 80px;
-
-    padding: 15px 25px;
-
-    background: #f9c744;
-
-    color: #171717;
-
-    border-bottom: 2px solid #dda900;
-}
-
-.pulled-out-header h2,
-.pulled-out-header h3 {
-    margin: 0;
-
-    font-size: 28px;
-
-    font-weight: 900;
-}
-
-.pulled-out-total,
-#pulledOutCount,
-#pulledOutTotal,
-#pulledOutCoachCount {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    min-width: 72px;
-    min-height: 40px;
-
-    padding: 5px 15px;
-
-    border-radius: 14px;
-
-    background: #212529;
-
-    color: #ffffff;
-
-    font-size: 18px;
-
-    font-weight: 900;
-}
-
-
-/* =========================================================
-   30. PULLED OUT SEARCH
-========================================================= */
-
-.pulled-out-search {
-    width: 100%;
-
-    padding: 15px 20px;
-
-    background: #ffffff;
-}
-
-
-/* =========================================================
-   31. PULLED OUT TABLE WRAPPER
-   HORIZONTAL SCROLL ONLY
-========================================================= */
-
-.pulled-out-table-wrapper {
-    width: 100%;
-
-    overflow-x: auto;
-    overflow-y: visible;
-
-    -webkit-overflow-scrolling: touch;
-
-    padding: 0 20px 20px;
-
-    position: relative;
-}
-
-
-/* =========================================================
-   32. PULLED OUT TABLE
-========================================================= */
-
-.pulled-out-table {
-    width: 100%;
-
-    min-width: 950px;
-
-    border-collapse: collapse;
-
-    background: #ffffff;
-}
-
-.pulled-out-table th {
-    background: #212529;
-    color: #ffffff;
-
-    border: 2px solid #4b5054;
-
-    padding: 13px 10px;
-
-    text-align: center;
-    vertical-align: middle;
-
-    font-size: 18px;
-
-    font-weight: 900;
-
-    white-space: nowrap;
-}
-
-.pulled-out-table td {
-    border: 2px solid #d7dce1;
-
-    padding: 12px 10px;
-
-    text-align: center;
-    vertical-align: middle;
-
-    background: #ffffff;
-
-    font-size: 17px;
-
-    line-height: 1.3;
-}
-
-.pulled-out-table tbody tr:nth-child(even) td {
-    background: #f5f6f7;
-}
-
-.pulled-out-table tbody tr:hover td {
-    background: #eaf2ff;
-}
-
-
-/* =========================================================
-   33. PULLED OUT COLUMN WIDTH
-========================================================= */
-
-.pulled-out-table th:nth-child(1),
-.pulled-out-table td:nth-child(1) {
-    min-width: 125px;
-    font-weight: 800;
-}
-
-.pulled-out-table th:nth-child(2),
-.pulled-out-table td:nth-child(2) {
-    min-width: 90px;
-}
-
-.pulled-out-table th:nth-child(3),
-.pulled-out-table td:nth-child(3) {
-    min-width: 90px;
-}
-
-.pulled-out-table th:nth-child(4),
-.pulled-out-table td:nth-child(4) {
-    min-width: 150px;
-}
-
-.pulled-out-table th:nth-child(5),
-.pulled-out-table td:nth-child(5) {
-    min-width: 140px;
-}
-
-.pulled-out-table th:nth-child(6),
-.pulled-out-table td:nth-child(6) {
-    min-width: 180px;
-}
-
-.pulled-out-table th:nth-child(7),
-.pulled-out-table td:nth-child(7) {
-    min-width: 120px;
-}
-
-
-/* =========================================================
-   34. RETURN BUTTON
-========================================================= */
-
-.return-pulled-btn {
-    min-width: 100px;
-
-    padding: 10px 18px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    background: #336df3;
-
-    color: #ffffff;
-
-    font-size: 17px;
-
-    font-weight: 800;
-
-    box-shadow:
-        0 2px 5px rgba(0, 0, 0, 0.15);
-
-    transition:
-        transform 0.15s ease,
-        background 0.15s ease;
-}
-
-.return-pulled-btn:hover {
-    background: #2458d8;
-
-    transform: translateY(-1px);
-}
-
-.return-pulled-btn:active {
-    transform: scale(0.96);
-}
-
-.return-pulled-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-
-/* =========================================================
-   35. PULLED OUT CARDS
-========================================================= */
-
-.pulled-out-card {
-    width: 100%;
-
-    background: #ffffff;
-
-    border: 1px solid #d8dde2;
-
-    border-radius: 12px;
-
-    padding: 18px;
-
-    margin-bottom: 12px;
-
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.pulled-out-card > div {
-    margin-bottom: 10px;
-}
-
-.pulled-out-card strong {
-    display: block;
-
-    margin-bottom: 3px;
-
-    color: #555;
-
-    font-size: 13px;
-
-    text-transform: uppercase;
-}
-
-.pulled-out-card > div > div {
-    font-size: 18px;
-
-    font-weight: 600;
-}
-
-
-/* =========================================================
-   36. NO DATA
-========================================================= */
-
-.pulled-out-table td.text-center,
-.pulled-out-card.text-center {
-    color: #666;
-
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   37. MODAL
-========================================================= */
+/* MODAL */
 
 .modal-content {
-    border: none;
-
-    border-radius: 15px;
-
+    border: 0;
+    border-radius: 14px;
     overflow: hidden;
+    box-shadow: 0 15px 45px rgba(0,0,0,.22);
 }
 
 .modal-header {
-    background: #212529;
-
-    color: #ffffff;
+    background: linear-gradient(110deg, #10243a, #1769aa) !important;
+    border-bottom: 3px solid var(--gold);
 }
 
 .modal-title {
@@ -1073,1074 +378,81 @@ header h2,
     padding: 20px;
 }
 
+.modal-body .form-label {
+    margin-bottom: 5px;
+    color: #34495e;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    min-height: 40px;
+    border-radius: 8px;
+}
+
 .modal-footer {
-    gap: 8px;
+    gap: 5px;
+    background: #f5f7fa;
 }
 
-.form-control,
-.form-select {
-    min-height: 48px;
+/* FOOTER */
 
-    border-radius: 9px;
-
-    border: 2px solid #d7dce1;
+footer {
+    padding: 18px !important;
+    background: #0b1928 !important;
+    border-top: 3px solid var(--gold);
+    font-size: 13px;
+    line-height: 1.8;
 }
 
-.form-control:focus,
-.form-select:focus {
-    border-color: #336df3;
+/* SCROLLBAR */
 
-    box-shadow:
-        0 0 0 3px rgba(51, 109, 243, 0.12);
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
 }
 
-
-/* =========================================================
-   38. CLOCK
-========================================================= */
-
-#liveDate,
-#liveTime {
-    font-weight: 800;
-}
-
-
-/* =========================================================
-   39. HISTORY TABLE
-========================================================= */
-
-.history-wrapper {
-    width: 100%;
-
-    overflow-x: auto;
-    overflow-y: visible;
-
-    -webkit-overflow-scrolling: touch;
-
-    position: relative;
-}
-
-.history-table {
-    width: 100%;
-
-    min-width: 1000px;
-
-    border-collapse: collapse;
-}
-
-.history-table th {
-    background: #212529;
-
-    color: #ffffff;
-
-    padding: 13px;
-
-    border: 2px solid #454a4f;
-
-    text-align: center;
-
-    font-weight: 800;
-}
-
-.history-table td {
-    padding: 11px;
-
-    border: 2px solid #d8dde2;
-
-    text-align: center;
-}
-
-.history-table tr:nth-child(even) td {
-    background: #f2f2f2;
-}
-
-
-/* =========================================================
-   40. FULL SCREEN
-========================================================= */
-
-:fullscreen {
-    background: #f4f6f8;
-
-    overflow-y: auto !important;
-}
-
-:fullscreen .board-container {
-    width: 100%;
-    max-width: none;
-}
-
-
-/* =========================================================
-   41. ADMIN
-========================================================= */
-
-body:not(.admin-logged-in) #saveCoachBtn,
-body:not(.admin-logged-in) #updateCoachBtn,
-body:not(.admin-logged-in) #deleteCoachBtn,
-body:not(.admin-logged-in) #pullOutCoachBtn {
-    opacity: 0.65;
-}
-
-
-/* =========================================================
-   42. SCROLLBAR
-========================================================= */
-
-.board-table-wrapper::-webkit-scrollbar,
-.shop-card .table-responsive::-webkit-scrollbar,
-.pulled-out-table-wrapper::-webkit-scrollbar,
-.history-wrapper::-webkit-scrollbar {
-    height: 9px;
-}
-
-.board-table-wrapper::-webkit-scrollbar-track,
-.shop-card .table-responsive::-webkit-scrollbar-track,
-.pulled-out-table-wrapper::-webkit-scrollbar-track,
-.history-wrapper::-webkit-scrollbar-track {
-    background: #e9ecef;
-
+.table-responsive::-webkit-scrollbar-track {
+    background: #edf1f5;
     border-radius: 10px;
 }
 
-.board-table-wrapper::-webkit-scrollbar-thumb,
-.shop-card .table-responsive::-webkit-scrollbar-thumb,
-.pulled-out-table-wrapper::-webkit-scrollbar-thumb,
-.history-wrapper::-webkit-scrollbar-thumb {
-    background: #7d858d;
-
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #aab8c7;
     border-radius: 10px;
 }
 
-
-/* =========================================================
-   43. DESKTOP
-========================================================= */
-
-@media (min-width: 769px) {
-
-    html,
-    body {
-        width: 100%;
-        max-width: 100%;
-
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    .container,
-    .board-container,
-    .main-container {
-        width: 100%;
-        max-width: 1600px;
-    }
-
-    .shop-card {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    .shop-card .table-responsive {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-    }
-
-    .shop-card .coach-table {
-        width: 100% !important;
-
-        min-width: 0 !important;
-
-        max-width: none !important;
-
-        table-layout: fixed !important;
-    }
-
-    .shop-card .coach-table th:first-child,
-    .shop-card .coach-table td:first-child {
-        width: 90px !important;
-
-        min-width: 90px !important;
-
-        max-width: 90px !important;
-    }
-
-    .shop-card .coach-table th:not(:first-child),
-    .shop-card .coach-table td:not(:first-child) {
-        width: auto !important;
-
-        min-width: 0 !important;
-
-        max-width: none !important;
-    }
-
-    .shop-card .coach-table td {
-        height: 100px !important;
-
-        min-height: 100px !important;
-    }
-
-    .shop-card .coach-card {
-        min-height: 90px !important;
-    }
-}
-
-
-/* =========================================================
-   44. LARGE DESKTOP
-========================================================= */
-
-@media (min-width: 1400px) {
-
-    .container,
-    .board-container,
-    .main-container {
-        max-width: 100%;
-
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
-    .shop-card .coach-table td {
-        height: 105px !important;
-    }
-
-    .shop-card .coach-card {
-        min-height: 95px !important;
-    }
-
-    .shop-card .coach-no {
-        font-size: 20px;
-    }
-
-    .shop-card .coach-type {
-        font-size: 13px;
-    }
-
-    .shop-card .coach-status {
-        font-size: 12px;
-    }
-}
-
-
-/* =========================================================
-   45. TABLET
-========================================================= */
-
-@media (min-width: 769px) and (max-width: 1100px) {
-
-    .container,
-    .board-container,
-    .main-container {
-        padding: 8px;
-    }
-
-    .shop-card .coach-table {
-        min-width: 850px !important;
-    }
-
-    .shop-card .coach-table th {
-        font-size: 13px;
-    }
-
-    .shop-card .coach-table td {
-        height: 85px !important;
-    }
-}
-
-
-/* =========================================================
-   46. MOBILE
-========================================================= */
-
-@media (max-width: 768px) {
-
-    html {
-        overflow-x: hidden;
-        overflow-y: auto !important;
-
-        height: auto;
-        min-height: 100%;
-    }
-
-    body {
-        font-size: 15px;
-
-        overflow-x: hidden;
-        overflow-y: auto !important;
-
-        height: auto;
-        min-height: 100vh;
-
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .container,
-    .board-container,
-    .main-container {
-        width: 100%;
-
-        max-width: 100%;
-
-        padding: 6px;
-
-        height: auto;
-    }
-
-
-    /* -----------------------------------------------------
-       HEADER
-    ----------------------------------------------------- */
-
-    header,
-    .main-header,
-    .board-header {
-        padding: 14px;
-        margin-bottom: 10px;
-    }
-
-    header h1,
-    .main-header h1,
-    .board-header h1 {
-        font-size: 23px;
-    }
-
-    header h2,
-    .main-header h2,
-    .board-header h2 {
-        font-size: 16px;
-    }
-
-
-    /* -----------------------------------------------------
-       SEARCH
-    ----------------------------------------------------- */
-
-    #searchBox,
-    #pulledOutSearch,
-    #pulledOutSearchBox,
-    #searchPulledOut {
-        min-height: 52px;
-
-        font-size: 18px;
-    }
-
-
-    /* -----------------------------------------------------
-       COUNTERS
-    ----------------------------------------------------- */
-
-    .counter-container {
-        display: grid;
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-        gap: 8px;
-    }
-
-    .counter-card {
-        width: 100%;
-        padding: 10px;
-    }
-
-    .counter-card .counter-number {
-        font-size: 24px;
-    }
-
-
-    /* -----------------------------------------------------
-       ACTION BAR
-    ----------------------------------------------------- */
-
-    .action-bar {
-        display: grid;
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-        gap: 8px;
-    }
-
-    .action-bar button {
-        width: 100%;
-        min-height: 48px;
-    }
-
-
-    /* -----------------------------------------------------
-       MAIN BOARD
-    ----------------------------------------------------- */
-
-    .board-table-wrapper {
-        width: 100%;
-
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-
-        border-radius: 8px;
-
-        touch-action: pan-x pan-y;
-    }
-
-    .coach-table {
-        min-width: 760px;
-    }
-
-    .coach-table th {
-        font-size: 13px;
-        padding: 8px 5px;
-    }
-
-    .coach-table td {
-        height: 65px;
-        min-width: 85px;
-    }
-
-    .coach-no {
-        font-size: 16px;
-    }
-
-    .coach-type {
-        font-size: 12px;
-    }
-
-    .coach-status {
-        font-size: 11px;
-    }
-
-
-    /* -----------------------------------------------------
-       SHOP TABLE
-    ----------------------------------------------------- */
-
-    .shop-card {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        height: auto !important;
-    }
-
-    .shop-card .table-responsive {
-        width: 100% !important;
-
-        max-width: 100% !important;
-
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-
-        -webkit-overflow-scrolling: touch;
-
-        touch-action: pan-x pan-y;
-    }
-
-    .shop-card .coach-table {
-        width: 900px !important;
-
-        min-width: 900px !important;
-
-        max-width: none !important;
-
-        table-layout: fixed !important;
-    }
-
-    .shop-card .coach-table th:first-child,
-    .shop-card .coach-table td:first-child {
-        width: 80px !important;
-
-        min-width: 80px !important;
-
-        max-width: 80px !important;
-    }
-
-    .shop-card .coach-table th:not(:first-child),
-    .shop-card .coach-table td:not(:first-child) {
-        width: 115px !important;
-
-        min-width: 115px !important;
-
-        max-width: 115px !important;
-    }
-
-    .shop-card .coach-table thead th {
-        height: 40px !important;
-
-        padding: 7px 4px !important;
-
-        font-size: 13px !important;
-    }
-
-    .shop-card .coach-table td {
-        height: 70px !important;
-
-        min-height: 70px !important;
-
-        padding: 3px !important;
-    }
-
-    .shop-card .coach-card {
-        min-height: 62px !important;
-    }
-
-    .shop-card .coach-no {
-        font-size: 16px;
-    }
-
-    .shop-card .coach-type {
-        font-size: 11px;
-    }
-
-    .shop-card .coach-status {
-        font-size: 10px;
-    }
-
-
-    /* -----------------------------------------------------
-       PULLED OUT
-    ----------------------------------------------------- */
-
-    .pulled-out-section {
-        margin-top: 18px;
-
-        border-radius: 10px;
-
-        overflow: visible !important;
-    }
-
-    .pulled-out-header {
-        min-height: 65px;
-
-        padding: 12px 15px;
-
-        gap: 10px;
-    }
-
-    .pulled-out-header h2,
-    .pulled-out-header h3 {
-        font-size: 21px;
-    }
-
-    .pulled-out-total,
-    #pulledOutCount,
-    #pulledOutTotal,
-    #pulledOutCoachCount {
-        min-width: 60px;
-
-        min-height: 36px;
-
-        font-size: 15px;
-
-        padding: 4px 10px;
-    }
-
-    .pulled-out-search {
-        padding: 10px;
-    }
-
-    .pulled-out-table-wrapper {
-        padding: 0 10px 12px;
-
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-
-        touch-action: pan-x pan-y;
-    }
-
-    .pulled-out-table {
-        min-width: 950px;
-    }
-
-    .pulled-out-table th {
-        font-size: 15px;
-        padding: 10px 8px;
-    }
-
-    .pulled-out-table td {
-        font-size: 15px;
-        padding: 10px 8px;
-    }
-
-    .return-pulled-btn {
-        min-width: 85px;
-
-        min-height: 46px;
-
-        padding: 9px 14px;
-
-        font-size: 15px;
-    }
-
-
-    /* -----------------------------------------------------
-       PULLED OUT CARD
-    ----------------------------------------------------- */
-
-    .pulled-out-card {
-        padding: 14px;
-    }
-
-    .pulled-out-card > div > div {
-        font-size: 16px;
-    }
-
-
-    /* -----------------------------------------------------
-       MODAL
-    ----------------------------------------------------- */
-
-    .modal-dialog {
-        width: calc(100% - 16px);
-
-        max-width: none;
-
-        margin: 8px auto;
-    }
-
-    .modal-body {
-        padding: 15px;
-    }
-}
-
-
-/* =========================================================
-   47. SMALL MOBILE
-========================================================= */
-
-@media (max-width: 480px) {
-
-    .container,
-    .board-container,
-    .main-container {
-        padding: 4px;
-    }
-
-    header,
-    .main-header,
-    .board-header {
-        padding: 12px;
-    }
-
-    header h1,
-    .main-header h1,
-    .board-header h1 {
-        font-size: 20px;
-    }
-
-    header h2,
-    .main-header h2,
-    .board-header h2 {
-        font-size: 14px;
-    }
-
-    .counter-card .counter-number {
-        font-size: 21px;
-    }
-
-    .counter-card .counter-label {
-        font-size: 12px;
-    }
-
-
-    /* SHOP */
-
-    .shop-card .coach-table {
-        width: 850px !important;
-
-        min-width: 850px !important;
-    }
-
-    .shop-card .coach-table th:first-child,
-    .shop-card .coach-table td:first-child {
-        width: 70px !important;
-
-        min-width: 70px !important;
-
-        max-width: 70px !important;
-    }
-
-    .shop-card .coach-table th:not(:first-child),
-    .shop-card .coach-table td:not(:first-child) {
-        width: 110px !important;
-
-        min-width: 110px !important;
-
-        max-width: 110px !important;
-    }
-
-    .shop-card .coach-table td {
-        height: 65px !important;
-    }
-
-    .shop-card .coach-no {
-        font-size: 15px;
-    }
-
-    .shop-card .coach-type {
-        font-size: 10px;
-    }
-
-    .shop-card .coach-status {
-        font-size: 9px;
-    }
-
-
-    /* PULLED OUT */
-
-    .pulled-out-header {
-        padding: 10px 12px;
-    }
-
-    .pulled-out-header h2,
-    .pulled-out-header h3 {
-        font-size: 18px;
-    }
-
-    .pulled-out-total,
-    #pulledOutCount,
-    #pulledOutTotal,
-    #pulledOutCoachCount {
-        font-size: 14px;
-
-        min-width: 55px;
-    }
-
-    #pulledOutSearch,
-    #pulledOutSearchBox,
-    #searchPulledOut {
-        font-size: 16px;
-    }
-}
-
-
-/* =========================================================
-   48. TOUCH DEVICES
-========================================================= */
-
-@media (hover: none) and (pointer: coarse) {
-
-    html,
-    body {
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-
-        height: auto !important;
-        min-height: 100vh !important;
-    }
-
-    .board-table-wrapper,
-    .shop-card .table-responsive,
-    .pulled-out-table-wrapper,
-    .history-wrapper {
-        touch-action: pan-x pan-y;
-
-        overscroll-behavior-x: contain;
-
-        overflow-y: visible !important;
-    }
-
-    .coach-table td {
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    button {
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    .return-pulled-btn {
-        min-height: 46px;
-    }
-}
-
-
-/* =========================================================
-   49. RETURN TO BOARD TARGET
-========================================================= */
-
-.return-target {
-    outline: 3px dashed #198754 !important;
-
-    outline-offset: -3px;
-
-    cursor: pointer !important;
-}
-
-.return-selected {
-    outline: 4px solid #0d6efd !important;
-
-    outline-offset: -4px;
-}
-
-
-/* =========================================================
-   50. PRINT / A4 LANDSCAPE
-========================================================= */
+/* PRINT */
 
 @media print {
-
-    @page {
-        size: A4 landscape;
-        margin: 7mm;
-    }
-
-    html,
     body {
-        width: 100% !important;
-
-        margin: 0 !important;
-
-        padding: 0 !important;
-
-        background: #ffffff !important;
-
-        color: #000000 !important;
-
-        overflow: visible !important;
+        background: #fff !important;
     }
 
-    body {
-        font-size: 8px;
-    }
-
-
-    /* -----------------------------------------------------
-       HIDE NON PRINT
-    ----------------------------------------------------- */
-
-    .no-print,
-    nav,
     .navbar,
-    header,
-    .main-header,
-    .board-header,
-    .action-bar,
     #searchBox,
-    #pulledOutSearch,
-    #pulledOutSearchBox,
-    #searchPulledOut,
-    .pulled-out-section,
+    #searchResult,
+    #excelBtn,
+    #printBtn,
+    #refreshBtn,
+    #fullscreenBtn,
     .modal,
-    button {
+    footer {
         display: none !important;
     }
 
-
-    /* -----------------------------------------------------
-       CONTAINER
-    ----------------------------------------------------- */
-
-    .container,
-    .board-container,
-    .main-container {
-        width: 100% !important;
-
-        max-width: none !important;
-
-        margin: 0 !important;
-
-        padding: 0 !important;
-    }
-
-
-    /* -----------------------------------------------------
-       SHOP
-    ----------------------------------------------------- */
-
-    .shop-card {
-        width: 100% !important;
-
-        max-width: none !important;
-
-        margin: 0 !important;
-
-        padding: 0 !important;
-
+    .shop-card,
+    .card {
+        box-shadow: none !important;
         break-inside: avoid;
     }
 
-    .shop-card .shop-title {
-        display: block !important;
-
-        width: 100% !important;
-
-        margin: 0 0 3mm !important;
-
-        padding: 2mm !important;
-
-        font-size: 14px !important;
-
-        color: #000000 !important;
-
-        background: #ffffff !important;
+    .coach-table {
+        min-width: 0;
+        font-size: 9px;
     }
 
-
-    /* -----------------------------------------------------
-       TABLE WRAPPER
-    ----------------------------------------------------- */
-
-    .board-table-wrapper,
-    .shop-card .table-responsive {
-        width: 100% !important;
-
-        overflow: visible !important;
-
-        padding: 0 !important;
-
-        margin: 0 !important;
-    }
-
-
-    /* -----------------------------------------------------
-       TABLE
-    ----------------------------------------------------- */
-
-    .coach-table,
-    .shop-card .coach-table {
-        width: 100% !important;
-
-        min-width: 0 !important;
-
-        max-width: none !important;
-
-        table-layout: fixed !important;
-
-        border-collapse: collapse !important;
-    }
-
-
-    /* -----------------------------------------------------
-       HEADER
-    ----------------------------------------------------- */
-
-    .coach-table th,
-    .shop-card .coach-table th {
-        background: #eeeeee !important;
-
-        color: #000000 !important;
-
-        border: 1px solid #000000 !important;
-
-        padding: 2px !important;
-
-        font-size: 7px !important;
-
-        height: 20px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       CELLS
-    ----------------------------------------------------- */
-
-    .coach-table td,
-    .shop-card .coach-table td {
-        border: 1px solid #000000 !important;
-
-        padding: 1px !important;
-
-        height: 28px !important;
-
-        min-height: 28px !important;
-
-        font-size: 7px !important;
-
-        background: #ffffff !important;
-    }
-
-
-    /* -----------------------------------------------------
-       COACH CARD
-    ----------------------------------------------------- */
-
-    .coach-card,
-    .shop-card .coach-card {
-        min-height: 20px !important;
-
-        height: 100% !important;
-
-        display: flex !important;
-
-        justify-content: center !important;
-
-        align-items: center !important;
-    }
-
-    .coach-no,
-    .shop-card .coach-no {
-        font-size: 8px !important;
-
-        font-weight: 900 !important;
-    }
-
-    .coach-type,
-    .shop-card .coach-type {
-        font-size: 6px !important;
-    }
-
-    .coach-status,
-    .shop-card .coach-status {
-        font-size: 6px !important;
-    }
-
-
-    /* -----------------------------------------------------
-       STATUS COLOURS
-    ----------------------------------------------------- */
-
-    .status-po {
-        background: #fff3cd !important;
-    }
-
-    .status-s {
-        background: #d1e7dd !important;
-    }
-
-    .status-lm {
-        background: #cfe2ff !important;
-    }
-
-    .status-med {
-        background: #f8d7da !important;
-    }
-
-    .status-rl {
-        background: #e2d9f3 !important;
-    }
-
-    .status-r1 {
-        background: #d9f0ff !important;
-    }
-
-    .status-rs {
-        background: #fde2b8 !important;
-    }
-
-    .status-l {
-        background: #d7f9e9 !important;
-    }
-
-    .status-hvy {
-        background: #ffcdd2 !important;
-    }
-
-
-    /* -----------------------------------------------------
-       PRINT POSITION COLUMN
-    ----------------------------------------------------- */
-
-    .shop-card .coach-table th:first-child,
-    .shop-card .coach-table td:first-child {
-        width: 45px !important;
-
-        min-width: 45px !important;
-
-        max-width: 45px !important;
+    .coach-table td {
+        height: 48px;
     }
 }
-
-
-/* =========================================================
-   51. END
-========================================================= */
