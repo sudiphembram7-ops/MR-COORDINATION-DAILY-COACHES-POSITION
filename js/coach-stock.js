@@ -1,830 +1,598 @@
 
 /* =========================================================
    MR COACH STOCK DASHBOARD
-   FILE: coach-stock.js
-   VERSION: 2.2 FINAL
-   DATABASE: teamDuty/records
+   COACH-STOCK.JS
+   VERSION 1.0 FINAL
+   ---------------------------------------------------------
+   HTML:
+   Coach-stock.html
 
-   PUBLIC VIEWER:
-   ✔ Public Dashboard
-   ✔ Realtime Firebase Listener
-   ✔ Search / Filter
-   ✔ CSV Export
-   ✔ JSON Backup
-   ✔ Print
+   FIREBASE:
+   firebase-config.js
+   firebase-coach-stock.js
 
-   DESIGNATED ADMIN:
-   ✔ Email / Password Login
-   ✔ Add / Edit / Delete
-   ✔ CSV Import
-   ✔ JSON Restore
-   ✔ Reset Original Data
-
-   SECURITY:
-   ✔ Admin UID Verification
-   ✔ Stable Firebase Record ID
-   ✔ Public Read Listener
-   ✔ Admin-only Write (also enforced by RTDB Rules)
+   FEATURES:
+   ✔ ADMIN LOGIN
+   ✔ EDITOR LOGIN
+   ✔ ADD COACH
+   ✔ UPDATE COACH
+   ✔ DELETE COACH
+   ✔ AUTOMATIC DETENTION DAY
+   ✔ SEARCH COACH
+   ✔ SHOP FILTER
+   ✔ EXCEL CSV EXPORT
+   ✔ LIVE DASHBOARD
 ========================================================= */
 
-import { database, auth } from "./firebase-config.js";
-
 import {
-    ref,
-    onValue,
-    set,
-    remove,
-    push,
-    runTransaction
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-import {
-    onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
+import { auth } from "./firebase-config.js";
 
-/* =========================================================
-   CONFIGURATION
-========================================================= */
-
-const ADMIN_UID = "jHNrX5UaJla30nwGA48QHf87oaz2";
-
-const DB_PATH = "teamDuty/records";
-
-const HEADERS = [
-    "Shop",
-    "Work Section / Location",
-    "Date Placed",
-    "Coach No",
-    "Coach Code",
-    "Date In",
-    "PDF Detention Days",
-    "Detention Days (Calculated)",
-    "Status",
-    "Remarks / Verify"
-];
+import {
+    addCoach,
+    updateCoach,
+    deleteCoach,
+    listenCoachStock,
+    calculateDetentionDay
+} from "./firebase-coach-stock.js";
 
 
 /* =========================================================
-   ORIGINAL PDF DATA
-
-   Add original PDF rows here.
-   Each row must contain exactly 10 values.
-
-   Example:
-   ["N SHOP","N2","2026-10-01",
-    "ER123456","LHB","2026-10-02",
-    5,5,"Pending",""]
+   DOM ELEMENTS
 ========================================================= */
 
-const ORIGINAL_DATA = [
+const loginSection =
+    document.getElementById("loginSection");
 
-];
+const dashboardSection =
+    document.getElementById("dashboardSection");
+
+const loginEmail =
+    document.getElementById("loginEmail");
+
+const loginPassword =
+    document.getElementById("loginPassword");
+
+const loginBtn =
+    document.getElementById("loginBtn");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+const coachForm =
+    document.getElementById("coachForm");
+
+const recordId =
+    document.getElementById("recordId");
+
+const shop =
+    document.getElementById("shop");
+
+const coachNo =
+    document.getElementById("coachNo");
+
+const datePlaced =
+    document.getElementById("datePlaced");
+
+const dateIn =
+    document.getElementById("dateIn");
+
+const detentionDay =
+    document.getElementById("detentionDay");
+
+const status =
+    document.getElementById("status");
+
+const saveBtn =
+    document.getElementById("saveBtn");
+
+const resetBtn =
+    document.getElementById("resetBtn");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const shopFilter =
+    document.getElementById("shopFilter");
+
+const tableBody =
+    document.getElementById("coachTableBody");
+
+const message =
+    document.getElementById("message");
+
+const loginMessage =
+    document.getElementById("loginMessage");
 
 
 /* =========================================================
-   APPLICATION STATE
+   GLOBAL VARIABLES
 ========================================================= */
 
-let records = [];
-let recordIds = [];
-let recordOrders = [];
+let coachRecords = [];
 
-let isAdmin = false;
-let currentUser = null;
+let unsubscribeStock = null;
 
-let firebaseListenerStarted = false;
-let editingRecordId = null;
-
-const $ = id => document.getElementById(id);
-
-const FORM_IDS = [
-    "shop",
-    "location",
-    "datePlaced",
-    "coachNo",
-    "coachCode",
-    "dateIn",
-    "pdfDays",
-    "calcDays",
-    "status",
-    "remarks"
-];
+let loggedInUser = null;
 
 
 /* =========================================================
-   SAFE ELEMENT FUNCTIONS
+   SAFE HTML
 ========================================================= */
 
-function setText(id, value) {
+function escapeHTML(value) {
 
-    const element = $(id);
+    return String(value ?? "").replace(
+        /[&<>"']/g,
+        char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]
+    );
 
-    if (element) {
-        element.textContent = value;
-    }
 }
 
-function setDisabled(id, value) {
 
-    const element = $(id);
+/* =========================================================
+   MESSAGE
+========================================================= */
 
-    if (element) {
-        element.disabled = value;
-    }
+function showMessage(text, type = "success") {
+
+    message.textContent = text;
+
+    message.style.color =
+        type === "error" ? "#c52b35" : "#16834b";
+
 }
 
-function showNotice(message, error = false) {
 
-    const notice = $("notice");
+/* =========================================================
+   LOGIN
+========================================================= */
 
-    if (!notice) {
-        console.log(message);
+loginBtn.addEventListener("click", async () => {
+
+    const email = loginEmail.value.trim();
+
+    const password = loginPassword.value;
+
+    if (!email || !password) {
+
+        loginMessage.textContent =
+            "Please enter Email and Password.";
+
+        loginMessage.style.color = "red";
+
         return;
+
     }
 
-    notice.textContent = message;
+    loginBtn.disabled = true;
 
-    notice.style.background =
-        error ? "#fee2e2" : "#dbeafe";
+    loginBtn.textContent = "LOGGING IN...";
 
-    notice.style.color =
-        error ? "#991b1b" : "#123b68";
+    loginMessage.textContent = "";
 
-    notice.style.display = "block";
-}
+    try {
 
-
-/* =========================================================
-   GLOBAL JAVASCRIPT ERROR DIAGNOSTIC
-========================================================= */
-
-window.addEventListener("error", event => {
-
-    console.error(
-        "COACH STOCK JAVASCRIPT ERROR:",
-        event.message,
-        event.filename,
-        event.lineno
-    );
-
-});
-
-window.addEventListener("unhandledrejection", event => {
-
-    console.error(
-        "COACH STOCK PROMISE ERROR:",
-        event.reason
-    );
-
-});
-
-
-/* =========================================================
-   NORMALIZE ROW
-========================================================= */
-
-function normalizeRow(values) {
-
-    if (Array.isArray(values)) {
-
-        return HEADERS.map((_, index) =>
-            values[index] ?? ""
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
         );
 
+        loginMessage.textContent =
+            "Login successful.";
+
+        loginMessage.style.color = "green";
+
+    } catch (error) {
+
+        loginMessage.textContent =
+            "Login Failed: " + error.message;
+
+        loginMessage.style.color = "red";
+
+    } finally {
+
+        loginBtn.disabled = false;
+
+        loginBtn.textContent = "LOGIN";
+
     }
 
-    if (values && typeof values === "object") {
+});
 
-        return [
-            values.shop ?? "",
-            values.location ?? "",
-            values.datePlaced ?? "",
-            values.coachNo ?? "",
-            values.coachCode ?? "",
-            values.dateIn ?? "",
-            values.pdfDays ?? "",
-            values.calcDays ?? "",
-            values.status ?? "",
-            values.remarks ?? ""
-        ];
+
+/* =========================================================
+   ENTER KEY LOGIN
+========================================================= */
+
+loginPassword.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+        loginBtn.click();
+    }
+
+});
+
+
+/* =========================================================
+   AUTHENTICATION STATUS
+========================================================= */
+
+window.addEventListener("coachStockAuth", event => {
+
+    const authData = event.detail;
+
+    if (authData.loggedIn) {
+
+        loggedInUser = authData.user;
+
+        showDashboard();
+
+    } else {
+
+        loggedInUser = null;
+
+        showLogin();
 
     }
 
-    return Array(10).fill("");
+});
+
+
+/* =========================================================
+   SHOW DASHBOARD
+========================================================= */
+
+function showDashboard() {
+
+    loginSection.style.display = "none";
+
+    dashboardSection.style.display = "block";
+
+    document.getElementById("userInfo").textContent =
+        loggedInUser.email || loggedInUser.uid;
+
+    document.getElementById("databaseStatus").textContent =
+        "Firebase Connected";
+
+    document.getElementById("databaseStatus").style.color =
+        "green";
+
+    startStockListener();
 
 }
 
 
 /* =========================================================
-   AUTHENTICATION
+   SHOW LOGIN
 ========================================================= */
 
-// ADMIN LOGIN
+function showLogin() {
 
-if ($("adminLoginBtn")) {
+    loginSection.style.display = "block";
 
-    $("adminLoginBtn").addEventListener(
-        "click",
-        async () => {
+    dashboardSection.style.display = "none";
 
-            const email =
-                $("adminEmail")?.value.trim();
+    coachRecords = [];
 
-            const password =
-                $("adminPassword")?.value;
+    if (unsubscribeStock) {
 
-            if (!email || !password) {
+        unsubscribeStock();
 
-                alert(
-                    "Please enter Admin Email and Password."
-                );
+        unsubscribeStock = null;
 
-                return;
-            }
-
-            setDisabled("adminLoginBtn", true);
-
-            try {
-
-                await signInWithEmailAndPassword(
-                    auth,
-                    email,
-                    password
-                );
-
-                showNotice(
-                    "Login successful. Checking Admin permission..."
-                );
-
-            } catch (error) {
-
-                console.error("LOGIN ERROR:", error);
-
-                alert(
-                    "Login Failed: " + error.message
-                );
-
-            } finally {
-
-                setDisabled("adminLoginBtn", false);
-
-            }
-
-        }
-    );
-
-}
-
-
-// ADMIN LOGOUT
-
-if ($("adminLogoutBtn")) {
-
-    $("adminLogoutBtn").addEventListener(
-        "click",
-        async () => {
-
-            try {
-
-                await signOut(auth);
-
-                showNotice(
-                    "Admin logged out successfully."
-                );
-
-            } catch (error) {
-
-                alert(
-                    "Logout Error: " + error.message
-                );
-
-            }
-        }
-    );
+    }
 
 }
 
 
 /* =========================================================
-   PUBLIC FIREBASE LISTENER
-
-   Starts without login.
+   LOGOUT
 ========================================================= */
 
-function startPublicFirebaseListener() {
+logoutBtn.addEventListener("click", async () => {
 
-    if (firebaseListenerStarted) return;
-
-    firebaseListenerStarted = true;
-
-    listenFirebaseRecords();
-
-}
-
-
-/* =========================================================
-   FIREBASE CONNECTION DIAGNOSTIC — V2.3
-========================================================= */
-
-let firebaseConnected = false;
-
-function listenFirebaseRecords() {
-
-    console.log("Starting Firebase diagnostic...");
-
-    showNotice("Connecting to Firebase...");
-
-    if (!database) {
-        showNotice("ERROR: Firebase Database not initialized.", true);
+    if (!confirm("Are you sure you want to logout?")) {
         return;
     }
 
-    // CHECK REALTIME DATABASE CONNECTION
+    try {
 
-    const connectionRef = ref(database, ".info/connected");
+        await signOut(auth);
 
-    onValue(
-        connectionRef,
+    } catch (error) {
 
-        snapshot => {
+        alert("Logout Error: " + error.message);
 
-            firebaseConnected = snapshot.val() === true;
+    }
 
-            console.log(
-                "Firebase Server Connection:",
-                firebaseConnected
-            );
+});
 
-            if (firebaseConnected) {
-                showNotice("Firebase server connected. Loading coach records...");
-            } else {
-                showNotice("Connecting to Firebase server...");
-            }
+
+/* =========================================================
+   REALTIME DATABASE LISTENER
+========================================================= */
+
+function startStockListener() {
+
+    if (unsubscribeStock) {
+        unsubscribeStock();
+    }
+
+    unsubscribeStock = listenCoachStock(
+
+        records => {
+
+            coachRecords = records;
+
+            renderDashboard();
+
+            document.getElementById(
+                "databaseStatus"
+            ).textContent = "Firebase Connected";
+
+            document.getElementById(
+                "offlineStatus"
+            ).textContent = "";
 
         },
 
         error => {
 
-            console.error("CONNECTION ERROR:", error);
+            document.getElementById(
+                "databaseStatus"
+            ).textContent = "Database Error";
 
-            showNotice(
-                "CONNECTION ERROR: " + error.message,
-                true
-            );
+            document.getElementById(
+                "offlineStatus"
+            ).textContent = error.message;
 
         }
+
     );
 
-
-    // LOAD COACH RECORDS
-
-    try {
-
-        const recordsRef = ref(database, DB_PATH);
-
-        onValue(
-
-            recordsRef,
-
-            snapshot => {
-
-                console.log("Coach records received.");
-
-                const data = snapshot.val() || {};
-
-                const sorted = Object.entries(data)
-
-                    .map(([id, item]) => ({
-
-                        id,
-
-                        order: Number(item?.order || 0),
-
-                        row: normalizeRow(item?.values)
-
-                    }))
-
-                    .sort((a, b) => a.order - b.order);
-
-
-                records = sorted.map(item => item.row);
-
-                recordIds = sorted.map(item => item.id);
-
-                recordOrders = sorted.map(item => item.order);
-
-
-                updateFilters();
-
-                render();
-
-
-                showNotice(
-                    "FIREBASE CONNECTED — " +
-                    records.length +
-                    " COACH RECORDS LOADED"
-                );
-
-            },
-
-            error => {
-
-                console.error("RECORD LISTENER ERROR:", error);
-
-                showNotice(
-                    "DATABASE READ ERROR: " + error.message,
-                    true
-                );
-
-            }
-
-        );
-
-    } catch (error) {
-
-        console.error("FIREBASE STARTUP ERROR:", error);
-
-        showNotice(
-            "STARTUP ERROR: " + error.message,
-            true
-        );
-
-    }
-
 }
+
+
 /* =========================================================
-   AUTH STATE LISTENER
+   DETENTION DAY PREVIEW
 ========================================================= */
 
-onAuthStateChanged(
+function updateDetentionPreview() {
 
-    auth,
-
-    async user => {
-
-        currentUser = user;
-
-        isAdmin =
-            !!user &&
-            user.uid === ADMIN_UID;
-
-
-        applyPermission();
-
-
-        if ($("adminLoginBtn")) {
-
-            $("adminLoginBtn").style.display =
-                user ? "none" : "inline-block";
-
-        }
-
-        if ($("adminLogoutBtn")) {
-
-            $("adminLogoutBtn").style.display =
-                user ? "inline-block" : "none";
-
-        }
-
-        if ($("adminEmail")) {
-
-            $("adminEmail").style.display =
-                user ? "none" : "inline-block";
-
-        }
-
-        if ($("adminPassword")) {
-
-            $("adminPassword").style.display =
-                user ? "none" : "inline-block";
-
-        }
-
-
-        if (isAdmin) {
-
-            setText(
-                "adminLoginStatus",
-                "ADMIN MODE ACTIVE"
-            );
-
-            showNotice(
-                "Admin Login Successful."
-            );
-
-            await seedOriginalDataIfEmpty();
-
-        } else if (user) {
-
-            setText(
-                "adminLoginStatus",
-                "VIEWER MODE — ADMIN ACCESS DENIED"
-            );
-
-            showNotice(
-                "This account is not the designated Admin. Viewer Mode active.",
-                true
-            );
-
-        } else {
-
-    setText(
-        "adminLoginStatus",
-        "PUBLIC VIEWER MODE"
+    detentionDay.value = calculateDetentionDay(
+        datePlaced.value,
+        dateIn.value
     );
 
 }
 
-    },
+datePlaced.addEventListener(
+    "change",
+    updateDetentionPreview
+);
 
-    error => {
-
-        console.error(
-            "AUTH STATE ERROR:",
-            error
-        );
-
-        showNotice(
-            "Authentication Error: " + error.message,
-            true
-        );
-
-    }
-
+dateIn.addEventListener(
+    "change",
+    updateDetentionPreview
 );
 
 
 /* =========================================================
-   PERMISSION CONTROL
+   RESET FORM
 ========================================================= */
 
-function applyPermission() {
+function resetForm() {
 
-    const adminOnlyIds = [
-        "saveBtn",
-        "resetBtn",
-        "csvFile",
-        "jsonFile"
-    ];
+    coachForm.reset();
 
-    adminOnlyIds.forEach(id => {
+    recordId.value = "";
 
-        setDisabled(id, !isAdmin);
+    detentionDay.value = "0";
 
-    });
-
-
-    FORM_IDS.forEach(id => {
-
-        setDisabled(id, !isAdmin);
-
-    });
-
-
-    document.querySelectorAll(
-        ".edit-action, .delete-action"
-    ).forEach(button => {
-
-        button.disabled = !isAdmin;
-
-        button.style.display =
-            isAdmin ? "inline-block" : "none";
-
-    });
-
-
-    setDisabled("clearBtn", false);
-
-    renderIfReady();
+    saveBtn.textContent = "SAVE COACH";
 
 }
 
+resetBtn.addEventListener("click", resetForm);
 
-function renderIfReady() {
 
-    if ($("tableBody")) {
-        render();
+/* =========================================================
+   SAVE / UPDATE COACH
+========================================================= */
+
+coachForm.addEventListener("submit", async event => {
+
+    event.preventDefault();
+
+    if (!loggedInUser) {
+        showMessage("Please login first.", "error");
+        return;
     }
+
+    const data = {
+
+        shop: shop.value,
+
+        coachNo: coachNo.value.trim(),
+
+        datePlaced: datePlaced.value,
+
+        dateIn: dateIn.value,
+
+        status: status.value
+
+    };
+
+    if (!data.shop || !data.coachNo || !data.datePlaced) {
+
+        showMessage(
+            "Shop, Coach No and Date Placed are required.",
+            "error"
+        );
+
+        return;
+
+    }
+
+    if (data.dateIn && data.dateIn < data.datePlaced) {
+
+        showMessage(
+            "Date In cannot be earlier than Date Placed.",
+            "error"
+        );
+
+        return;
+
+    }
+
+    // Duplicate coach number check
+
+    const duplicate = coachRecords.find(item => {
+
+        return (
+            item.coachNo.toLowerCase() ===
+            data.coachNo.toLowerCase() &&
+            item.id !== recordId.value
+        );
+
+    });
+
+    if (duplicate) {
+
+        showMessage(
+            "This Coach Number already exists.",
+            "error"
+        );
+
+        return;
+
+    }
+
+    saveBtn.disabled = true;
+
+    saveBtn.textContent = "SAVING...";
+
+    try {
+
+        if (recordId.value) {
+
+            await updateCoach(recordId.value, data);
+
+            showMessage("Coach Updated Successfully.");
+
+        } else {
+
+            await addCoach(data);
+
+            showMessage("Coach Saved Successfully.");
+
+        }
+
+        resetForm();
+
+    } catch (error) {
+
+        showMessage(
+            "Error: " + error.message,
+            "error"
+        );
+
+    } finally {
+
+        saveBtn.disabled = false;
+
+        saveBtn.textContent = recordId.value
+            ? "UPDATE COACH"
+            : "SAVE COACH";
+
+    }
+
+});
+
+
+/* =========================================================
+   EDIT COACH
+========================================================= */
+
+function editCoach(id) {
+
+    const record = coachRecords.find(
+        item => item.id === id
+    );
+
+    if (!record) return;
+
+    recordId.value = record.id;
+
+    shop.value = record.shop || "";
+
+    coachNo.value = record.coachNo || "";
+
+    datePlaced.value = record.datePlaced || "";
+
+    dateIn.value = record.dateIn || "";
+
+    status.value = record.status || "";
+
+    updateDetentionPreview();
+
+    saveBtn.textContent = "UPDATE COACH";
+
+    document.getElementById(
+        "coachForm"
+    ).scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
 
 }
 
 
 /* =========================================================
-   FIRST-TIME ORIGINAL DATA SEED
+   DELETE COACH
 ========================================================= */
 
-async function seedOriginalDataIfEmpty() {
+async function removeCoach(id) {
 
-    if (
-        !isAdmin ||
-        ORIGINAL_DATA.length === 0
-    ) {
+    const record = coachRecords.find(
+        item => item.id === id
+    );
+
+    if (!record) return;
+
+    if (!confirm(
+        "Delete Coach " + record.coachNo + " ?"
+    )) {
         return;
     }
 
     try {
 
-        const recordsRef = ref(
-            database,
-            DB_PATH
-        );
+        await deleteCoach(id);
 
-        const result = await runTransaction(
+        showMessage("Coach Deleted Successfully.");
 
-            recordsRef,
-
-            current => {
-
-                if (
-                    current !== null &&
-                    Object.keys(current).length > 0
-                ) {
-                    return;
-                }
-
-                const initialData = {};
-
-                ORIGINAL_DATA.forEach(
-                    (row, index) => {
-
-                        const id =
-                            "original_" +
-                            String(index + 1).padStart(4, "0");
-
-                        initialData[id] = {
-
-                            values: normalizeRow(row),
-
-                            order: index + 1,
-
-                            updatedAt: Date.now(),
-
-                            updatedBy:
-                                currentUser?.uid || ""
-
-                        };
-
-                    }
-                );
-
-                return initialData;
-
-            }
-
-        );
-
-
-        if (result.committed) {
-
-            showNotice(
-                "Original records uploaded to Firebase."
-            );
-
+        if (recordId.value === id) {
+            resetForm();
         }
 
     } catch (error) {
 
-        console.error(
-            "INITIAL DATA ERROR:",
-            error
+        showMessage(
+            "Delete Error: " + error.message,
+            "error"
         );
-
-        showNotice(
-            "Initial Upload Error: " +
-            error.message,
-            true
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DASHBOARD COUNTERS
-========================================================= */
-
-function updateDashboard() {
-
-    setText(
-        "total",
-        records.length
-    );
-
-    setText(
-        "pending",
-        records.filter(
-            row => row[8] === "Pending"
-        ).length
-    );
-
-    setText(
-        "movement",
-        records.filter(
-            row => row[8] === "Traffic Out / Movement"
-        ).length
-    );
-
-    setText(
-        "final",
-        records.filter(
-            row => row[8] === "Final Condemn / Summary"
-        ).length
-    );
-
-}
-
-
-/* =========================================================
-   FILTERS
-========================================================= */
-
-function updateFilters() {
-
-    const shopFilter = $("shopFilter");
-
-    if (!shopFilter) return;
-
-    const oldShop = shopFilter.value;
-
-    const shops = [
-        ...new Set(
-            records
-                .map(row => row[0])
-                .filter(Boolean)
-        )
-    ].sort();
-
-
-    shopFilter.innerHTML =
-        '<option value="">All Shops</option>';
-
-
-    shops.forEach(shop => {
-
-        const option =
-            document.createElement("option");
-
-        option.value = shop;
-
-        option.textContent = shop;
-
-        shopFilter.appendChild(option);
-
-    });
-
-
-    shopFilter.value = oldShop;
-
-
-    const shopList = $("shopList");
-
-    if (shopList) {
-
-        shopList.innerHTML = "";
-
-        shops.forEach(shop => {
-
-            const option =
-                document.createElement("option");
-
-            option.value = shop;
-
-            shopList.appendChild(option);
-
-        });
-
-    }
-
-
-    const locations = [
-        ...new Set(
-            records
-                .map(row => row[1])
-                .filter(Boolean)
-        )
-    ].sort();
-
-
-    const locationList = $("locations");
-
-    if (locationList) {
-
-        locationList.innerHTML = "";
-
-        locations.forEach(location => {
-
-            const option =
-                document.createElement("option");
-
-            option.value = location;
-
-            locationList.appendChild(option);
-
-        });
 
     }
 
@@ -835,634 +603,333 @@ function updateFilters() {
    TABLE RENDER
 ========================================================= */
 
-function render() {
-
-    const body = $("tableBody");
-
-    if (!body) return;
-
+function renderTable() {
 
     const keyword =
-        $("search")?.value.trim().toLowerCase() || "";
+        searchInput.value.trim().toLowerCase();
 
-    const shop =
-        $("shopFilter")?.value || "";
+    const selectedShop = shopFilter.value;
 
-    const status =
-        $("statusFilter")?.value || "";
+    const filtered = coachRecords.filter(item => {
 
+        const matchesSearch = [
 
-    const filtered = records
+            item.shop,
 
-        .map((row, index) => ({
+            item.coachNo,
 
-            row,
+            item.status,
 
-            index,
+            item.datePlaced,
 
-            id: recordIds[index]
+            item.dateIn
 
-        }))
+        ].some(value =>
 
-        .filter(({ row }) => {
+            String(value || "")
+                .toLowerCase()
+                .includes(keyword)
 
-            const matchesSearch =
-                row.join(" ")
-                    .toLowerCase()
-                    .includes(keyword);
+        );
 
-            const matchesShop =
-                !shop || row[0] === shop;
+        const matchesShop =
+            !selectedShop ||
+            item.shop === selectedShop;
 
-            const matchesStatus =
-                !status || row[8] === status;
+        return matchesSearch && matchesShop;
 
-            return (
-                matchesSearch &&
-                matchesShop &&
-                matchesStatus
-            );
-
-        });
-
-
-    body.innerHTML = "";
-
-
-    setText(
-        "countLabel",
-        `Showing ${filtered.length} of ${records.length} records`
-    );
-
+    });
 
     if (filtered.length === 0) {
 
-        body.innerHTML = `
+        tableBody.innerHTML = `
             <tr>
-                <td colspan="12" class="empty">
-                    No Coach Record Found
+                <td colspan="8">
+                    No Coach Records Found
                 </td>
             </tr>
         `;
 
-    }
-
-
-    filtered.forEach(
-        ({ row, index, id }) => {
-
-            const tr =
-                document.createElement("tr");
-
-
-            const sl =
-                document.createElement("td");
-
-            sl.textContent = index + 1;
-
-            tr.appendChild(sl);
-
-
-            row.forEach((value, column) => {
-
-                const td =
-                    document.createElement("td");
-
-                if (column === 8) {
-
-                    const span =
-                        document.createElement("span");
-
-                    span.className = "pill";
-
-                    span.textContent = value || "";
-
-                    td.appendChild(span);
-
-                } else {
-
-                    td.textContent = value ?? "";
-
-                }
-
-                tr.appendChild(td);
-
-            });
-
-
-            const action =
-                document.createElement("td");
-
-            action.className = "no-print";
-
-
-            const edit =
-                document.createElement("button");
-
-            edit.className =
-                "rowbtn edit-action";
-
-            edit.textContent = "EDIT";
-
-            edit.disabled = !isAdmin;
-
-            edit.style.display =
-                isAdmin ? "inline-block" : "none";
-
-            edit.addEventListener(
-                "click",
-                () => editRecord(id)
-            );
-
-
-            const del =
-                document.createElement("button");
-
-            del.className =
-                "rowbtn danger delete-action";
-
-            del.textContent = "DELETE";
-
-            del.disabled = !isAdmin;
-
-            del.style.display =
-                isAdmin ? "inline-block" : "none";
-
-            del.addEventListener(
-                "click",
-                () => deleteRecord(id)
-            );
-
-
-            action.append(edit, del);
-
-            tr.appendChild(action);
-
-            body.appendChild(tr);
-
-        }
-    );
-
-
-    updateDashboard();
-
-}
-
-
-/* =========================================================
-   FORM DATA
-========================================================= */
-
-function getFormData() {
-
-    return [
-
-        $("shop")?.value.trim() || "",
-
-        $("location")?.value.trim() || "",
-
-        $("datePlaced")?.value || "",
-
-        $("coachNo")?.value.trim() || "",
-
-        $("coachCode")?.value.trim() || "",
-
-        $("dateIn")?.value || "",
-
-        $("pdfDays")?.value === ""
-            ? ""
-            : Number($("pdfDays").value),
-
-        $("calcDays")?.value === ""
-            ? ""
-            : Number($("calcDays").value),
-
-        $("status")?.value || "",
-
-        $("remarks")?.value.trim() || ""
-
-    ];
-
-}
-
-
-/* =========================================================
-   CLEAR FORM
-========================================================= */
-
-function clearForm() {
-
-    $("coachForm")?.reset();
-
-    editingRecordId = null;
-
-    if ($("editIndex")) {
-        $("editIndex").value = "-1";
-    }
-
-    setText(
-        "formTitle",
-        "ADD COACH STOCK RECORD"
-    );
-
-    setText(
-        "saveBtn",
-        "SAVE RECORD"
-    );
-
-    setDisabled(
-        "saveBtn",
-        !isAdmin
-    );
-
-}
-
-
-if ($("clearBtn")) {
-
-    $("clearBtn").addEventListener(
-        "click",
-        clearForm
-    );
-
-}
-
-
-/* =========================================================
-   SAVE / UPDATE RECORD
-========================================================= */
-
-if ($("coachForm")) {
-
-    $("coachForm").addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-            if (!isAdmin || !currentUser) {
-
-                alert(
-                    "Only designated Admin can save records."
-                );
-
-                return;
-            }
-
-
-            const row = getFormData();
-
-            const coachNo = row[3];
-
-            if (!coachNo) {
-
-                alert(
-                    "Coach Number is required."
-                );
-
-                return;
-            }
-
-
-            const duplicate = records.some(
-                (record, index) => {
-
-                    const sameCoach =
-                        String(record[3])
-                            .trim()
-                            .toLowerCase() ===
-                        coachNo.toLowerCase();
-
-                    const sameRecord =
-                        recordIds[index] ===
-                        editingRecordId;
-
-                    return (
-                        sameCoach &&
-                        !sameRecord
-                    );
-
-                }
-            );
-
-
-            if (duplicate) {
-
-                alert(
-                    "This Coach Number already exists."
-                );
-
-                return;
-            }
-
-
-            try {
-
-                setDisabled("saveBtn", true);
-
-                const now = Date.now();
-
-
-                if (editingRecordId) {
-
-                    const index =
-                        recordIds.indexOf(
-                            editingRecordId
-                        );
-
-                    if (index < 0) {
-
-                        throw new Error(
-                            "Record not found. Refresh and try again."
-                        );
-
-                    }
-
-
-                    const recordData = {
-
-                        values: row,
-
-                        order: recordOrders[index],
-
-                        updatedAt: now,
-
-                        updatedBy: currentUser.uid
-
-                    };
-
-
-                    await set(
-                        ref(
-                            database,
-                            `${DB_PATH}/${editingRecordId}`
-                        ),
-                        recordData
-                    );
-
-
-                    showNotice(
-                        "Coach record updated successfully."
-                    );
-
-
-                } else {
-
-                    const newRecord =
-                        push(
-                            ref(database, DB_PATH)
-                        );
-
-
-                    const recordData = {
-
-                        values: row,
-
-                        order: now,
-
-                        updatedAt: now,
-
-                        updatedBy: currentUser.uid
-
-                    };
-
-
-                    await set(
-                        newRecord,
-                        recordData
-                    );
-
-
-                    showNotice(
-                        "New Coach record saved successfully."
-                    );
-
-                }
-
-
-                clearForm();
-
-
-            } catch (error) {
-
-                console.error(
-                    "SAVE ERROR:",
-                    error
-                );
-
-                alert(
-                    "Firebase Save Error: " +
-                    error.message
-                );
-
-            } finally {
-
-                setDisabled(
-                    "saveBtn",
-                    !isAdmin
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   EDIT RECORD
-========================================================= */
-
-function editRecord(recordId) {
-
-    if (!isAdmin) return;
-
-    const index =
-        recordIds.indexOf(recordId);
-
-    if (index < 0) {
-
-        alert("Record not found.");
-
         return;
-    }
-
-
-    const row = records[index];
-
-
-    FORM_IDS.forEach(
-        (id, column) => {
-
-            if ($(id)) {
-
-                $(id).value =
-                    row[column] ?? "";
-
-            }
-
-        }
-    );
-
-
-    editingRecordId = recordId;
-
-
-    if ($("editIndex")) {
-
-        $("editIndex").value = index;
 
     }
 
+    tableBody.innerHTML = filtered.map((item, index) => {
 
-    setText(
-        "formTitle",
-        "EDIT COACH STOCK RECORD"
-    );
+        const days = calculateDetentionDay(
+            item.datePlaced,
+            item.dateIn || ""
+        );
 
-    setText(
-        "saveBtn",
-        "UPDATE RECORD"
-    );
+        return `
+
+            <tr>
+
+                <td>${index + 1}</td>
+
+                <td>${escapeHTML(item.shop)}</td>
+
+                <td><b>${escapeHTML(item.coachNo)}</b></td>
+
+                <td>${escapeHTML(item.datePlaced)}</td>
+
+                <td>${escapeHTML(item.dateIn || "-")}</td>
+
+                <td><b>${days}</b></td>
+
+                <td class="status">
+                    ${escapeHTML(item.status || "-")}
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn-warning"
+                        data-action="edit"
+                        data-id="${escapeHTML(item.id)}">
+                        EDIT
+                    </button>
+
+                    <button
+                        class="btn-danger"
+                        data-action="delete"
+                        data-id="${escapeHTML(item.id)}">
+                        DELETE
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }).join("");
+
+}
 
 
-    $("coachForm")?.scrollIntoView({
+/* =========================================================
+   TABLE BUTTON ACTIONS
+========================================================= */
 
-        behavior: "smooth",
+tableBody.addEventListener("click", event => {
 
-        block: "start"
+    const button = event.target.closest("button[data-action]");
+
+    if (!button) return;
+
+    const id = button.dataset.id;
+
+    if (button.dataset.action === "edit") {
+
+        editCoach(id);
+
+    }
+
+    if (button.dataset.action === "delete") {
+
+        removeCoach(id);
+
+    }
+
+});
+
+
+/* =========================================================
+   DASHBOARD SUMMARY
+========================================================= */
+
+function renderSummary() {
+
+    const total = coachRecords.length;
+
+    const active = coachRecords.filter(item => {
+
+        return (
+            !item.dateIn &&
+            item.status !== "RETURNED"
+        );
 
     });
 
+    const returned = coachRecords.filter(item => {
+
+        return (
+            item.status === "RETURNED" ||
+            !!item.dateIn
+        );
+
+    });
+
+    const average = active.length
+
+        ? Math.round(
+            active.reduce((sum, item) => {
+
+                return sum + calculateDetentionDay(
+                    item.datePlaced,
+                    ""
+                );
+
+            }, 0) / active.length
+        )
+
+        : 0;
+
+    document.getElementById(
+        "totalCoach"
+    ).textContent = total;
+
+    document.getElementById(
+        "inShop"
+    ).textContent = active.length;
+
+    document.getElementById(
+        "returnedCoach"
+    ).textContent = returned.length;
+
+    document.getElementById(
+        "averageDetention"
+    ).textContent = average;
+
 }
 
 
 /* =========================================================
-   DELETE RECORD
+   RENDER DASHBOARD
 ========================================================= */
 
-async function deleteRecord(recordId) {
+function renderDashboard() {
 
-    if (!isAdmin) return;
+    renderSummary();
 
-    const index =
-        recordIds.indexOf(recordId);
+    renderTable();
 
-    if (index < 0) {
-
-        alert("Record not found.");
-
-        return;
-    }
+}
 
 
-    const coachNo =
-        records[index][3];
+/* =========================================================
+   SEARCH
+========================================================= */
+
+searchInput.addEventListener(
+    "input",
+    renderTable
+);
+
+shopFilter.addEventListener(
+    "change",
+    renderTable
+);
 
 
-    if (!confirm(
-        `Delete Coach ${coachNo}?`
-    )) {
-        return;
-    }
+/* =========================================================
+   EXCEL CSV EXPORT
+========================================================= */
 
+document.getElementById(
+    "exportBtn"
+).addEventListener("click", () => {
 
-    try {
+    const keyword =
+        searchInput.value.trim().toLowerCase();
 
-        await remove(
-            ref(
-                database,
-                `${DB_PATH}/${recordId}`
-            )
+    const selectedShop = shopFilter.value;
+
+    const records = coachRecords.filter(item => {
+
+        const matchesSearch = [
+
+            item.shop,
+            item.coachNo,
+            item.status,
+            item.datePlaced,
+            item.dateIn
+
+        ].some(value =>
+
+            String(value || "")
+                .toLowerCase()
+                .includes(keyword)
+
         );
 
+        return matchesSearch &&
+            (!selectedShop || item.shop === selectedShop);
 
-        showNotice(
-            "Coach record deleted successfully."
-        );
+    });
 
+    const headers = [
 
-        if (editingRecordId === recordId) {
+        "SL",
+        "SHOP",
+        "COACH NO",
+        "DATE PLACED",
+        "DATE IN",
+        "DETENTION DAY",
+        "STATUS"
 
-            clearForm();
+    ];
 
+    const rows = records.map((item, index) => [
+
+        index + 1,
+
+        item.shop,
+
+        item.coachNo,
+
+        item.datePlaced,
+
+        item.dateIn || "",
+
+        calculateDetentionDay(
+            item.datePlaced,
+            item.dateIn || ""
+        ),
+
+        item.status || ""
+
+    ]);
+
+    function csvCell(value) {
+
+        let text = String(value ?? "");
+
+        // Prevent spreadsheet formula injection
+
+        if (/^[=+\-@\t\r]/.test(text)) {
+            text = "'" + text;
         }
 
-
-    } catch (error) {
-
-        console.error(
-            "DELETE ERROR:",
-            error
-        );
-
-        alert(
-            "Firebase Delete Error: " +
-            error.message
-        );
+        return '"' + text.replace(/"/g, '""') + '"';
 
     }
 
-}
+    const csv = "\uFEFF" + [
 
+        headers,
 
-/* =========================================================
-   SEARCH AND FILTER EVENTS
-========================================================= */
+        ...rows
 
-if ($("search")) {
+    ].map(row =>
 
-    $("search").addEventListener(
-        "input",
-        render
-    );
+        row.map(csvCell).join(",")
 
-}
-
-if ($("shopFilter")) {
-
-    $("shopFilter").addEventListener(
-        "change",
-        render
-    );
-
-}
-
-if ($("statusFilter")) {
-
-    $("statusFilter").addEventListener(
-        "change",
-        render
-    );
-
-}
-
-
-/* =========================================================
-   DOWNLOAD FILE
-========================================================= */
-
-function downloadFile(
-    content,
-    filename,
-    mimeType
-) {
+    ).join("\r\n");
 
     const blob = new Blob(
-        [content],
-        { type: mimeType }
+        [csv],
+        { type: "text/csv;charset=utf-8;" }
     );
 
-    const url =
-        URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
 
-    const link =
-        document.createElement("a");
+    const link = document.createElement("a");
 
     link.href = url;
 
-    link.download = filename;
+    link.download = "MR_COACH_STOCK.csv";
 
     document.body.appendChild(link);
 
@@ -1470,535 +937,15 @@ function downloadFile(
 
     link.remove();
 
-    setTimeout(
-        () => URL.revokeObjectURL(url),
-        1000
-    );
+    URL.revokeObjectURL(url);
 
-}
+});
 
 
 /* =========================================================
-   CSV EXPORT — EVERYONE
+   INITIALIZATION
 ========================================================= */
 
-function exportCSV() {
-
-    const csvRows = [
-        HEADERS,
-        ...records
-    ];
-
-
-    const csv = csvRows.map(
-        row =>
-
-            row.map(
-                value =>
-
-                    '"' +
-                    String(value ?? "")
-                        .replace(/"/g, '""') +
-                    '"'
-
-            ).join(",")
-
-    ).join("\r\n");
-
-
-    downloadFile(
-        "\uFEFF" + csv,
-        "MR_COACH_STOCK.csv",
-        "text/csv;charset=utf-8"
-    );
-
-}
-
-
-if ($("exportBtn")) {
-
-    $("exportBtn").addEventListener(
-        "click",
-        exportCSV
-    );
-
-}
-
-
-/* =========================================================
-   CSV PARSER
-========================================================= */
-
-function parseCSV(text) {
-
-    const rows = [];
-
-    let row = [];
-
-    let field = "";
-
-    let quoted = false;
-
-
-    for (
-        let i = 0;
-        i < text.length;
-        i++
-    ) {
-
-        const char = text[i];
-
-
-        if (char === '"') {
-
-            if (
-                quoted &&
-                text[i + 1] === '"'
-            ) {
-
-                field += '"';
-
-                i++;
-
-            } else {
-
-                quoted = !quoted;
-
-            }
-
-        } else if (
-            char === "," &&
-            !quoted
-        ) {
-
-            row.push(field);
-
-            field = "";
-
-        } else if (
-            (
-                char === "\n" ||
-                char === "\r"
-            ) &&
-            !quoted
-        ) {
-
-            if (
-                char === "\r" &&
-                text[i + 1] === "\n"
-            ) {
-                i++;
-            }
-
-
-            row.push(field);
-
-
-            if (
-                row.some(value => value !== "")
-            ) {
-                rows.push(row);
-            }
-
-
-            row = [];
-
-            field = "";
-
-        } else {
-
-            field += char;
-
-        }
-
-    }
-
-
-    row.push(field);
-
-
-    if (
-        row.some(value => value !== "")
-    ) {
-        rows.push(row);
-    }
-
-
-    return rows;
-
-}
-
-
-/* =========================================================
-   CSV IMPORT — ADMIN ONLY
-========================================================= */
-
-if ($("csvFile")) {
-
-    $("csvFile").addEventListener(
-        "change",
-        async event => {
-
-            if (!isAdmin) {
-
-                alert(
-                    "Admin permission required."
-                );
-
-                event.target.value = "";
-
-                return;
-            }
-
-
-            const file =
-                event.target.files[0];
-
-            if (!file) return;
-
-
-            try {
-
-                const text =
-                    await file.text();
-
-
-                const parsed = parseCSV(
-                    text.replace(/^\uFEFF/, "")
-                );
-
-
-                const imported = parsed
-
-                    .slice(1)
-
-                    .filter(row => row[3])
-
-                    .map(row => normalizeRow(row));
-
-
-                if (!imported.length) {
-
-                    throw new Error(
-                        "No valid coach records found."
-                    );
-
-                }
-
-
-                if (!confirm(
-                    `Replace all Firebase records with ${imported.length} imported records?`
-                )) {
-                    return;
-                }
-
-
-                await replaceAllRecords(imported);
-
-
-                showNotice(
-                    "CSV records imported successfully."
-                );
-
-
-            } catch (error) {
-
-                alert(
-                    "CSV Import Error: " +
-                    error.message
-                );
-
-            } finally {
-
-                event.target.value = "";
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   JSON BACKUP — EVERYONE
-========================================================= */
-
-function downloadBackup() {
-
-    const backup = {
-
-        backupDate:
-            new Date().toISOString(),
-
-        records: records
-
-    };
-
-
-    downloadFile(
-        JSON.stringify(
-            backup,
-            null,
-            2
-        ),
-        "MR_COACH_STOCK_BACKUP.json",
-        "application/json"
-    );
-
-}
-
-
-if ($("backupBtn")) {
-
-    $("backupBtn").addEventListener(
-        "click",
-        downloadBackup
-    );
-
-}
-
-
-/* =========================================================
-   JSON RESTORE — ADMIN ONLY
-========================================================= */
-
-if ($("jsonFile")) {
-
-    $("jsonFile").addEventListener(
-        "change",
-        async event => {
-
-            if (!isAdmin) {
-
-                alert(
-                    "Admin permission required."
-                );
-
-                event.target.value = "";
-
-                return;
-            }
-
-
-            const file =
-                event.target.files[0];
-
-            if (!file) return;
-
-
-            try {
-
-                const backup = JSON.parse(
-                    await file.text()
-                );
-
-
-                const rows =
-                    Array.isArray(backup)
-                        ? backup
-                        : backup.records;
-
-
-                if (
-                    !Array.isArray(rows) ||
-                    !rows.every(
-                        row =>
-                            Array.isArray(row) &&
-                            row.length === 10
-                    )
-                ) {
-
-                    throw new Error(
-                        "Invalid JSON backup format."
-                    );
-
-                }
-
-
-                if (!confirm(
-                    `Restore ${rows.length} records to Firebase?`
-                )) {
-                    return;
-                }
-
-
-                await replaceAllRecords(rows);
-
-
-                showNotice(
-                    "JSON backup restored successfully."
-                );
-
-
-            } catch (error) {
-
-                alert(
-                    "JSON Restore Error: " +
-                    error.message
-                );
-
-            } finally {
-
-                event.target.value = "";
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   REPLACE ALL RECORDS — ADMIN ONLY
-========================================================= */
-
-async function replaceAllRecords(rows) {
-
-    if (!isAdmin || !currentUser) {
-
-        throw new Error(
-            "Admin permission required."
-        );
-
-    }
-
-
-    const data = {};
-
-
-    rows.forEach(
-        (row, index) => {
-
-            const id =
-                "record_" +
-                String(index + 1).padStart(4, "0");
-
-
-            data[id] = {
-
-                values: normalizeRow(row),
-
-                order: index + 1,
-
-                updatedAt: Date.now(),
-
-                updatedBy: currentUser.uid
-
-            };
-
-        }
-    );
-
-
-    await set(
-        ref(database, DB_PATH),
-        data
-    );
-
-
-    clearForm();
-
-}
-
-
-/* =========================================================
-   RESET ORIGINAL DATA — ADMIN ONLY
-========================================================= */
-
-async function resetOriginal() {
-
-    if (!isAdmin) return;
-
-
-    if (!ORIGINAL_DATA.length) {
-
-        alert(
-            "Original PDF data is not added in coach-stock.js yet."
-        );
-
-        return;
-    }
-
-
-    if (!confirm(
-        "Reset Firebase records to original PDF data? Current records will be replaced."
-    )) {
-        return;
-    }
-
-
-    try {
-
-        await replaceAllRecords(
-            ORIGINAL_DATA
-        );
-
-
-        showNotice(
-            "Original PDF records restored."
-        );
-
-
-    } catch (error) {
-
-        alert(
-            "Reset Error: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-if ($("resetBtn")) {
-
-    $("resetBtn").addEventListener(
-        "click",
-        resetOriginal
-    );
-
-}
-
-
-/* =========================================================
-   PRINT
-========================================================= */
-
-if ($("printBtn")) {
-
-    $("printBtn").addEventListener(
-        "click",
-        () => window.print()
-    );
-
-}
-
-
-/* =========================================================
-   INITIAL PERMISSION STATE
-========================================================= */
-
-applyPermission();
-
-
-/* =========================================================
-   GLOBAL FUNCTIONS
-========================================================= */
-
-window.editRecord = editRecord;
-
-window.deleteRecord = deleteRecord;
-
-window.exportCSV = exportCSV;
-
-window.downloadBackup = downloadBackup;
-
-window.resetOriginal = resetOriginal;
-
-
-/* =========================================================
-   END OF COACH STOCK JS V2.2 FINAL
-========================================================= */
+console.log(
+    "MR COACH STOCK DASHBOARD VERSION 1.0 LOADED"
+);
