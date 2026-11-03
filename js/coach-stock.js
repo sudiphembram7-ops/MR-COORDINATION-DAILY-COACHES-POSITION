@@ -1,370 +1,181 @@
 
 /* =========================================================
-   MR CO-ORDINATION COACH STOCK DASHBOARD
+   MR CO-ORDINATION COACH STOCK
    COACH-STOCK.JS
-   VERSION 1.1 FINAL
-   ---------------------------------------------------------
-   FEATURES:
-   1. Firebase Admin Login
-   2. Add / Edit / Delete Coach
-   3. Separate MOVE COACH Button
-   4. Current Stock - One Record Per Coach
-   5. Click Coach Number - Full Details Popup
-   6. Complete Previous Shop Movement History
-   7. Automatic Detention Day
-   8. Search Coach Number / Shop / Type
-   9. Firebase Realtime Update
-========================================================= */
+   VERSION 2.0 FINAL
 
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+   MATCHED WITH:
+   Coach-stock.html
+   firebase-config.js V12
+   firebase-coach-stock.js V2.0
+========================================================= */
 
 import { auth } from "./firebase-config.js";
 
 import {
-  addCoach,
-  updateCoach,
-  deleteCoach,
-  listenCoachStock,
-  moveCoach,
-  calculateDetentionDay
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+import {
+    listenCoachStock,
+    addCoach,
+    updateCoach,
+    moveCoach,
+    deleteCoach,
+    calculateDetentionDay
 } from "./firebase-coach-stock.js";
 
 
 /* =========================================================
-   GLOBAL VARIABLES
+   ELEMENTS
 ========================================================= */
 
 const $ = id => document.getElementById(id);
 
-let allCoaches = [];
-let editingId = null;
-let movingId = null;
+const loginSection = $("loginSection");
+const appSection = $("appSection");
+
+let coachRecords = [];
 let unsubscribeStock = null;
+let selectedMoveId = null;
 
 
 /* =========================================================
-   COMMON FUNCTIONS
+   HELPERS
 ========================================================= */
-
-function showMessage(message, type = "success") {
-
-  const box = $("message");
-
-  box.textContent = message;
-  box.style.display = "block";
-
-  box.style.background =
-    type === "error" ? "#fee2e2" : "#dcfce7";
-
-  box.style.color =
-    type === "error" ? "#991b1b" : "#166534";
-
-  setTimeout(() => {
-    box.style.display = "none";
-  }, 4500);
-}
-
 
 function today() {
+    const d = new Date();
 
-  const d = new Date();
-
-  const offset = d.getTimezoneOffset();
-
-  return new Date(d.getTime() - offset * 60000)
-    .toISOString()
-    .slice(0, 10);
+    return [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, "0"),
+        String(d.getDate()).padStart(2, "0")
+    ].join("-");
 }
-
 
 function escapeHTML(value) {
-
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
 }
 
+function showMessage(message, isError = false) {
+    const el = $("message");
 
-function showLogin() {
+    if (!el) return;
 
-  $("loginSection").style.display = "block";
-  $("appSection").style.display = "none";
+    el.textContent = message;
+    el.style.color = isError ? "#bd3030" : "#16834a";
 }
 
+function showLoginMessage(message, isError = true) {
+    const el = $("loginMessage");
 
-function showApp(user) {
+    if (!el) return;
 
-  $("loginSection").style.display = "none";
-  $("appSection").style.display = "block";
-
-  $("userEmail").textContent =
-    user.email || "Logged in";
+    el.textContent = message;
+    el.style.color = isError ? "#bd3030" : "#16834a";
 }
 
+function openModal(id) {
+    const modal = $(id);
 
-/* =========================================================
-   FORM RESET
-========================================================= */
-
-function resetForm() {
-
-  editingId = null;
-
-  $("coachForm").reset();
-
-  $("shop").disabled = false;
-
-  $("formTitle").textContent =
-    "ADD COACH TO STOCK";
-
-  $("saveBtn").textContent =
-    "SAVE COACH";
-
-  $("datePlaced").value = today();
+    if (modal) {
+        modal.style.display = "flex";
+    }
 }
 
+window.closeModal = function(id) {
+    const modal = $(id);
 
-/* =========================================================
-   DASHBOARD SUMMARY
-========================================================= */
+    if (modal) {
+        modal.style.display = "none";
+    }
+};
 
-function renderStats() {
+function formatDate(value) {
+    if (!value) return "-";
 
-  const shops = new Set(
-    allCoaches.map(c => c.currentShop).filter(Boolean)
-  );
+    const parts = String(value).split("-");
 
-  const pending = allCoaches.filter(c =>
-    (c.currentVisit?.status || "") === "Pending"
-  ).length;
+    if (parts.length !== 3) return value;
 
-  const completed = allCoaches.filter(c =>
-    (c.currentVisit?.status || "") === "Completed"
-  ).length;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
 
-  $("totalCoaches").textContent = allCoaches.length;
+function getVisit(record) {
+    return record.currentVisit || {};
+}
 
-  $("totalShops").textContent = shops.size;
+function getFirstInDate(record) {
+    const visit = getVisit(record);
 
-  $("pendingCoaches").textContent = pending;
-
-  $("completedCoaches").textContent = completed;
+    return record.workshopFirstInDate ||
+        visit.dateIn ||
+        visit.datePlaced ||
+        "";
 }
 
 
 /* =========================================================
-   CURRENT STOCK TABLE
-   COACH NUMBER IS CLICKABLE
-========================================================= */
-
-function renderTable() {
-
-  const keyword =
-    $("searchInput").value.trim().toLowerCase();
-
-  const shopFilter =
-    $("shopFilter").value;
-
-  const filtered = allCoaches.filter(coach => {
-
-    const text = [
-      coach.coachNo,
-      coach.coachCode,
-      coach.currentShop
-    ].join(" ").toLowerCase();
-
-    const matchesText =
-      !keyword || text.includes(keyword);
-
-    const matchesShop =
-      !shopFilter || coach.currentShop === shopFilter;
-
-    return matchesText && matchesShop;
-  });
-
-  const tbody = $("stockTable");
-
-  if (!filtered.length) {
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="9">No Coach Found</td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  tbody.innerHTML = filtered.map((coach, index) => {
-
-    const visit = coach.currentVisit || {};
-
-    const detention = calculateDetentionDay(
-      visit.datePlaced,
-      visit.dateIn
-    );
-
-    return `
-      <tr>
-
-        <td>${index + 1}</td>
-
-        <td>
-          <strong>${escapeHTML(coach.currentShop)}</strong>
-        </td>
-
-        <td>
-          <button
-            class="primary"
-            style="padding:5px 9px"
-            data-action="details"
-            data-id="${coach.id}"
-            title="Click to view complete coach details">
-
-            ${escapeHTML(coach.coachNo)}
-
-          </button>
-        </td>
-
-        <td>${escapeHTML(coach.coachCode || "-")}</td>
-
-        <td>${escapeHTML(visit.datePlaced || "-")}</td>
-
-        <td>${escapeHTML(visit.dateIn || "-")}</td>
-
-        <td>
-          <strong>${detention}</strong>
-        </td>
-
-        <td>
-          <span class="badge">
-            ${escapeHTML(visit.status || "Pending")}
-          </span>
-        </td>
-
-        <td>
-          <div class="actions">
-
-            <button
-              class="primary"
-              data-action="edit"
-              data-id="${coach.id}">
-              EDIT
-            </button>
-
-            <button
-              class="warning"
-              data-action="move"
-              data-id="${coach.id}">
-              MOVE COACH
-            </button>
-
-            <button
-              class="secondary"
-              data-action="history"
-              data-id="${coach.id}">
-              HISTORY
-            </button>
-
-            <button
-              class="danger"
-              data-action="delete"
-              data-id="${coach.id}">
-              DELETE
-            </button>
-
-          </div>
-        </td>
-
-      </tr>
-    `;
-
-  }).join("");
-}
-
-
-/* =========================================================
-   FIREBASE REALTIME LISTENER
-========================================================= */
-
-function startListening() {
-
-  if (unsubscribeStock) {
-    unsubscribeStock();
-  }
-
-  unsubscribeStock = listenCoachStock(records => {
-
-    allCoaches = records.sort((a, b) =>
-      String(a.coachNo).localeCompare(String(b.coachNo))
-    );
-
-    renderStats();
-    renderTable();
-
-  }, error => {
-
-    showMessage(
-      "Firebase read error: " + error.message,
-      "error"
-    );
-
-  });
-}
-
-
-/* =========================================================
-   LOGIN
+   AUTH LOGIN
 ========================================================= */
 
 $("loginBtn").addEventListener("click", async () => {
 
-  const email = $("loginEmail").value.trim();
+    const email = $("loginEmail").value.trim();
+    const password = $("loginPassword").value;
 
-  const password = $("loginPassword").value;
+    if (!email || !password) {
+        showLoginMessage("Please enter email and password.");
+        return;
+    }
 
-  if (!email || !password) {
+    $("loginBtn").disabled = true;
+    $("loginBtn").textContent = "LOGGING IN...";
 
-    $("loginMessage").textContent =
-      "Enter email and password.";
+    try {
 
-    return;
-  }
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
 
-  $("loginBtn").disabled = true;
+        showLoginMessage("Login successful.", false);
 
-  $("loginMessage").textContent =
-    "Logging in...";
+    } catch (error) {
 
-  try {
+        console.error("Login error:", error);
 
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+        showLoginMessage(
+            error.message || "Login failed. Check your credentials."
+        );
 
-    $("loginMessage").textContent = "";
+    } finally {
 
-  } catch (error) {
+        $("loginBtn").disabled = false;
+        $("loginBtn").textContent = "LOGIN";
+    }
+});
 
-    $("loginMessage").textContent =
-      error.message;
 
-  } finally {
+/* =========================================================
+   ENTER KEY LOGIN
+========================================================= */
 
-    $("loginBtn").disabled = false;
+$("loginPassword").addEventListener("keydown", event => {
 
-  }
-
+    if (event.key === "Enter") {
+        $("loginBtn").click();
+    }
 });
 
 
@@ -374,23 +185,15 @@ $("loginBtn").addEventListener("click", async () => {
 
 $("logoutBtn").addEventListener("click", async () => {
 
-  try {
+    try {
 
-    if (unsubscribeStock) {
+        await signOut(auth);
 
-      unsubscribeStock();
+    } catch (error) {
 
-      unsubscribeStock = null;
+        console.error(error);
+        showMessage(error.message, true);
     }
-
-    await signOut(auth);
-
-  } catch (error) {
-
-    showMessage(error.message, "error");
-
-  }
-
 });
 
 
@@ -400,298 +203,240 @@ $("logoutBtn").addEventListener("click", async () => {
 
 onAuthStateChanged(auth, user => {
 
-  if (user) {
-
-    showApp(user);
-
-    startListening();
-
-  } else {
-
     if (unsubscribeStock) {
-
-      unsubscribeStock();
-
-      unsubscribeStock = null;
+        unsubscribeStock();
+        unsubscribeStock = null;
     }
 
-    allCoaches = [];
+    if (user) {
 
-    showLogin();
+        loginSection.style.display = "none";
+        appSection.style.display = "block";
 
-  }
+        $("userEmail").textContent = user.email || "Logged in";
 
-});
+        showMessage("Connected to Coach Stock Database.");
 
-
-/* =========================================================
-   ADD / UPDATE COACH
-========================================================= */
-
-$("coachForm").addEventListener("submit", async event => {
-
-  event.preventDefault();
-
-  const data = {
-
-    coachNo: $("coachNo").value.trim(),
-
-    coachCode: $("coachCode").value.trim(),
-
-    shop: $("shop").value,
-
-    datePlaced: $("datePlaced").value,
-
-    dateIn: $("dateIn").value,
-
-    status: $("status").value,
-
-    remarks: $("remarks").value.trim()
-
-  };
-
-  if (!data.coachNo || !data.shop || !data.datePlaced) {
-
-    showMessage(
-      "Coach Number, Shop and Date Placed are required.",
-      "error"
-    );
-
-    return;
-  }
-
-  if (data.dateIn && data.dateIn < data.datePlaced) {
-
-    showMessage(
-      "Date In cannot be earlier than Date Placed.",
-      "error"
-    );
-
-    return;
-  }
-
-  $("saveBtn").disabled = true;
-
-  try {
-
-    if (editingId) {
-
-      await updateCoach(editingId, data);
-
-      showMessage("Coach details updated successfully.");
+        startStockListener();
 
     } else {
 
-      await addCoach(data);
+        loginSection.style.display = "block";
+        appSection.style.display = "none";
 
-      showMessage("Coach added successfully.");
+        $("userEmail").textContent = "";
+
+        coachRecords = [];
+        renderTable([]);
+        updateDashboard([]);
 
     }
-
-    resetForm();
-
-  } catch (error) {
-
-    showMessage(error.message, "error");
-
-  } finally {
-
-    $("saveBtn").disabled = false;
-
-  }
-
 });
 
 
-$("resetBtn").addEventListener("click", resetForm);
+/* =========================================================
+   REALTIME DATABASE LISTENER
+========================================================= */
+
+function startStockListener() {
+
+    unsubscribeStock = listenCoachStock(
+        records => {
+
+            coachRecords = records;
+
+            renderTable(records);
+            updateDashboard(records);
+
+        },
+        error => {
+
+            showMessage(
+                "Database error: " + error.message,
+                true
+            );
+
+        }
+    );
+}
 
 
 /* =========================================================
-   SEARCH AND SHOP FILTER
+   DASHBOARD COUNTERS
 ========================================================= */
 
-$("searchInput").addEventListener(
-  "input",
-  renderTable
-);
+function updateDashboard(records) {
 
-$("shopFilter").addEventListener(
-  "change",
-  renderTable
-);
+    $("totalCoaches").textContent = records.length;
+
+    const shops = new Set(
+        records.map(record =>
+            record.currentShop || record.currentVisit?.shop
+        ).filter(Boolean)
+    );
+
+    $("totalShops").textContent = 15;
+
+    const completed = records.filter(record =>
+        getVisit(record).status === "Completed"
+    ).length;
+
+    $("completedCoaches").textContent = completed;
+
+    $("pendingCoaches").textContent =
+        records.length - completed;
+}
 
 
 /* =========================================================
-   COACH NUMBER CLICK
-   SHOW COMPLETE DETAILS + HISTORY
+   TABLE FILTER
 ========================================================= */
 
-function showCoachDetails(coach) {
+$("searchInput").addEventListener("input", applyFilters);
 
-  const visit = coach.currentVisit || {};
+$("shopFilter").addEventListener("change", applyFilters);
 
-  const history = Array.isArray(coach.history)
-    ? coach.history
-    : [];
+function applyFilters() {
 
-  const detention = calculateDetentionDay(
-    visit.datePlaced,
-    visit.dateIn
-  );
+    const keyword = $("searchInput").value
+        .trim()
+        .toLowerCase();
 
-  let html = `
+    const selectedShop = $("shopFilter").value;
 
-    <div class="panel">
+    const filtered = coachRecords.filter(record => {
 
-      <h3>COACH BASIC DETAILS</h3>
+        const visit = getVisit(record);
 
-      <p><b>Coach Number:</b>
-        ${escapeHTML(coach.coachNo)}
-      </p>
+        const searchText = [
 
-      <p><b>Coach Type:</b>
-        ${escapeHTML(coach.coachCode || "-")}
-      </p>
+            record.coachNo,
+            record.coachCode,
+            record.currentShop,
+            visit.shop,
+            visit.status,
+            visit.remarks
 
-      <p><b>Current Shop:</b>
-        ${escapeHTML(coach.currentShop || "-")}
-      </p>
+        ].join(" ").toLowerCase();
 
-      <p><b>Date Placed:</b>
-        ${escapeHTML(visit.datePlaced || "-")}
-      </p>
+        const matchesSearch = searchText.includes(keyword);
 
-      <p><b>Date In:</b>
-        ${escapeHTML(visit.dateIn || "-")}
-      </p>
+        const matchesShop = !selectedShop ||
+            (record.currentShop || visit.shop) === selectedShop;
 
-      <p><b>Detention Day:</b>
-        ${detention} Days
-      </p>
-
-      <p><b>Status:</b>
-        ${escapeHTML(visit.status || "-")}
-      </p>
-
-      <p><b>Remarks:</b>
-        ${escapeHTML(visit.remarks || "-")}
-      </p>
-
-    </div>
-
-    <h3>PREVIOUS SHOP MOVEMENT HISTORY</h3>
-
-  `;
-
-  if (!history.length) {
-
-    html += `
-      <div class="panel">
-        No Previous Movement History Available.
-      </div>
-    `;
-
-  } else {
-
-    html += `
-
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-
-            <tr>
-              <th>SL</th>
-              <th>SHOP</th>
-              <th>DATE PLACED</th>
-              <th>DATE IN</th>
-              <th>DATE OUT</th>
-              <th>DESTINATION SHOP</th>
-              <th>STATUS</th>
-              <th>DETENTION DAY</th>
-              <th>REMARKS</th>
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-    `;
-
-    history.slice().reverse().forEach((item, index) => {
-
-      html += `
-
-        <tr>
-
-          <td>${index + 1}</td>
-
-          <td>${escapeHTML(item.shop || "-")}</td>
-
-          <td>${escapeHTML(item.datePlaced || "-")}</td>
-
-          <td>${escapeHTML(item.dateIn || "-")}</td>
-
-          <td>${escapeHTML(item.dateOut || "-")}</td>
-
-          <td>${escapeHTML(item.movedToShop || "-")}</td>
-
-          <td>${escapeHTML(item.status || "-")}</td>
-
-          <td>
-            ${calculateDetentionDay(
-              item.datePlaced,
-              item.dateOut
-            )}
-          </td>
-
-          <td>${escapeHTML(item.remarks || "-")}</td>
-
-        </tr>
-
-      `;
-
+        return matchesSearch && matchesShop;
     });
 
-    html += `
+    renderTable(filtered);
+}
 
-          </tbody>
 
-        </table>
+/* =========================================================
+   RENDER STOCK TABLE
+========================================================= */
 
-      </div>
+function renderTable(records) {
 
-    `;
+    const tbody = $("stockTable");
 
-  }
+    if (!tbody) return;
 
-  html += `
+    if (!records || records.length === 0) {
 
-    <div class="panel">
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="11">No Coach Records Found</td>
+            </tr>
+        `;
 
-      <h3>CURRENT SHOP DETAILS</h3>
+        return;
+    }
 
-      <p><b>Current Shop:</b>
-        ${escapeHTML(coach.currentShop || "-")}
-      </p>
+    tbody.innerHTML = records.map((record, index) => {
 
-      <p><b>Current Date Placed:</b>
-        ${escapeHTML(visit.datePlaced || "-")}
-      </p>
+        const visit = getVisit(record);
 
-      <p><b>Current Detention:</b>
-        ${detention} Days
-      </p>
+        const firstIn = getFirstInDate(record);
 
-    </div>
+        const detention = calculateDetentionDay(
+            visit.datePlaced || "",
+            visit.dateOut || ""
+        );
 
-  `;
+        const status = visit.status || "Pending";
 
-  $("historyContent").innerHTML = html;
+        const statusClass = status === "Completed"
+            ? "status completed"
+            : "status";
 
-  $("historyModal").style.display = "block";
+        return `
+        <tr>
 
+            <td>${index + 1}</td>
+
+            <td>${escapeHTML(record.currentShop || visit.shop || "-")}</td>
+
+            <td>
+                <button
+                    type="button"
+                    class="coach-link"
+                    data-action="details"
+                    data-id="${escapeHTML(record.id)}">
+                    ${escapeHTML(record.coachNo)}
+                </button>
+            </td>
+
+            <td>${escapeHTML(record.coachCode || "-")}</td>
+
+            <td>${formatDate(firstIn)}</td>
+
+            <td>${formatDate(visit.datePlaced)}</td>
+
+            <td>${formatDate(visit.dateIn)}</td>
+
+            <td>${formatDate(visit.dateOut)}</td>
+
+            <td><strong>${detention}</strong></td>
+
+            <td>
+                <span class="${statusClass}">
+                    ${escapeHTML(status)}
+                </span>
+            </td>
+
+            <td>
+                <div class="actions">
+
+                    <button
+                        type="button"
+                        class="btn-orange"
+                        data-action="move"
+                        data-id="${escapeHTML(record.id)}">
+                        MOVE
+                    </button>
+
+                    <button
+                        type="button"
+                        data-action="edit"
+                        data-id="${escapeHTML(record.id)}">
+                        EDIT
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn-red"
+                        data-action="delete"
+                        data-id="${escapeHTML(record.id)}">
+                        DELETE
+                    </button>
+
+                </div>
+            </td>
+
+        </tr>
+        `;
+
+    }).join("");
 }
 
 
@@ -701,87 +446,208 @@ function showCoachDetails(coach) {
 
 $("stockTable").addEventListener("click", async event => {
 
-  const button = event.target.closest(
-    "button[data-action]"
-  );
+    const button = event.target.closest("button[data-action]");
 
-  if (!button) return;
+    if (!button) return;
 
-  const id = button.dataset.id;
+    const id = button.dataset.id;
+    const action = button.dataset.action;
 
-  const action = button.dataset.action;
+    const record = coachRecords.find(item => item.id === id);
 
-  const coach = allCoaches.find(c => c.id === id);
+    if (!record) {
+        showMessage("Coach record not found.", true);
+        return;
+    }
 
-  if (!coach) return;
+    if (action === "details") {
+        showCoachDetails(record);
+    }
+
+    if (action === "edit") {
+        editCoachForm(record);
+    }
+
+    if (action === "move") {
+        openMoveForm(record);
+    }
+
+    if (action === "delete") {
+        await deleteCoachRecord(record);
+    }
+});
 
 
-  /* COACH NUMBER CLICK */
+/* =========================================================
+   ADD / UPDATE FORM
+========================================================= */
 
-  if (action === "details") {
+$("coachForm").addEventListener("submit", async event => {
 
-    showCoachDetails(coach);
+    event.preventDefault();
 
-    return;
+    const id = $("editId").value;
 
-  }
+    const data = {
+
+        coachNo: $("coachNo").value.trim(),
+
+        coachCode: $("coachCode").value,
+
+        shop: $("shop").value,
+
+        workshopFirstInDate: $("workshopFirstInDate").value,
+
+        datePlaced: $("datePlaced").value,
+
+        dateIn: $("dateIn").value,
+
+        status: $("status").value,
+
+        remarks: $("remarks").value.trim()
+    };
+
+    if (!data.coachNo ||
+        !data.coachCode ||
+        !data.shop ||
+        !data.workshopFirstInDate ||
+        !data.datePlaced) {
+
+        showMessage("Please fill all required fields.", true);
+        return;
+    }
+
+    $("saveBtn").disabled = true;
+    $("saveBtn").textContent = "SAVING...";
+
+    try {
+
+        if (id) {
+
+            await updateCoach(id, data);
+
+            showMessage("Coach updated successfully.");
+
+        } else {
+
+            await addCoach(data);
+
+            showMessage("New Coach saved successfully.");
+        }
+
+        resetForm();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(error.message || "Save failed.", true);
+
+    } finally {
+
+        $("saveBtn").disabled = false;
+
+        $("saveBtn").textContent = "SAVE COACH";
+    }
+});
 
 
-  /* EDIT */
+/* =========================================================
+   EDIT COACH FORM
+========================================================= */
 
-  if (action === "edit") {
+function editCoachForm(record) {
 
-    const visit = coach.currentVisit || {};
+    const visit = getVisit(record);
 
-    editingId = id;
+    $("editId").value = record.id;
 
-    $("formTitle").textContent =
-      "EDIT CURRENT COACH DETAILS";
+    $("coachNo").value = record.coachNo || "";
 
-    $("saveBtn").textContent =
-      "UPDATE COACH";
+    $("coachCode").value = record.coachCode || "";
 
-    $("coachNo").value =
-      coach.coachNo || "";
+    $("shop").value = record.currentShop || visit.shop || "";
 
-    $("coachCode").value =
-      coach.coachCode || "";
+    $("workshopFirstInDate").value =
+        getFirstInDate(record);
 
-    $("shop").value =
-      coach.currentShop || "";
+    $("datePlaced").value = visit.datePlaced || "";
 
-    $("shop").disabled = true;
+    $("dateIn").value = visit.dateIn || "";
 
-    $("datePlaced").value =
-      visit.datePlaced || "";
+    $("status").value = visit.status || "Pending";
 
-    $("dateIn").value =
-      visit.dateIn || "";
+    $("remarks").value = visit.remarks || "";
 
-    $("status").value =
-      visit.status || "Pending";
+    $("formTitle").textContent = "UPDATE COACH";
 
-    $("remarks").value =
-      visit.remarks || "";
+    $("saveBtn").textContent = "UPDATE COACH";
 
     window.scrollTo({
-      top: 0,
-      behavior: "smooth"
+        top: 0,
+        behavior: "smooth"
     });
-
-    return;
-
-  }
+}
 
 
-  /* MOVE COACH */
+/* =========================================================
+   RESET FORM
+========================================================= */
 
-  if (action === "move") {
+function resetForm() {
 
-    movingId = id;
+    $("coachForm").reset();
+
+    $("editId").value = "";
+
+    $("formTitle").textContent = "ADD NEW COACH";
+
+    $("saveBtn").textContent = "SAVE COACH";
+
+}
+
+$("resetBtn").addEventListener("click", resetForm);
+
+
+/* =========================================================
+   DELETE COACH
+========================================================= */
+
+async function deleteCoachRecord(record) {
+
+    const confirmed = confirm(
+        `Delete Coach ${record.coachNo}?\n\nThis will delete the complete record and its history.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+
+        await deleteCoach(record.id);
+
+        showMessage("Coach deleted successfully.");
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(error.message || "Delete failed.", true);
+    }
+}
+
+
+/* =========================================================
+   OPEN MOVE MODAL
+========================================================= */
+
+function openMoveForm(record) {
+
+    selectedMoveId = record.id;
+
+    const visit = getVisit(record);
 
     $("moveCoachLabel").textContent =
-      `Coach No: ${coach.coachNo} | Current Shop: ${coach.currentShop}`;
+        `Coach: ${record.coachNo} | Current Shop: ${record.currentShop || visit.shop}`;
 
     $("moveShop").value = "";
 
@@ -793,173 +659,267 @@ $("stockTable").addEventListener("click", async event => {
 
     $("moveRemarks").value = "";
 
-    $("moveModal").style.display = "block";
-
-    return;
-
-  }
-
-
-  /* HISTORY BUTTON */
-
-  if (action === "history") {
-
-    showCoachDetails(coach);
-
-    return;
-
-  }
-
-
-  /* DELETE */
-
-  if (action === "delete") {
-
-    const confirmDelete = confirm(
-      `Delete Coach ${coach.coachNo} and its complete movement history?`
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-
-      await deleteCoach(id);
-
-      showMessage("Coach record deleted.");
-
-      if (editingId === id) {
-        resetForm();
-      }
-
-    } catch (error) {
-
-      showMessage(error.message, "error");
-
-    }
-
-  }
-
-});
+    openModal("moveModal");
+}
 
 
 /* =========================================================
-   CONFIRM MOVE COACH
+   CONFIRM COACH MOVEMENT
 ========================================================= */
 
 $("confirmMoveBtn").addEventListener("click", async () => {
 
-  if (!movingId) return;
+    if (!selectedMoveId) {
+        showMessage("No Coach selected for movement.", true);
+        return;
+    }
 
-  const destination = $("moveShop").value;
+    const data = {
 
-  const movementDate = $("moveDate").value;
+        shop: $("moveShop").value,
 
-  const dateIn = $("moveDateIn").value;
+        date: $("moveDate").value,
 
-  const status = $("moveStatus").value;
+        dateIn: $("moveDateIn").value,
 
-  const remarks = $("moveRemarks").value.trim();
+        status: $("moveStatus").value,
 
-  const coach = allCoaches.find(
-    c => c.id === movingId
-  );
+        remarks: $("moveRemarks").value.trim()
+    };
 
-  if (!coach) return;
+    if (!data.shop) {
 
-  if (!destination || !movementDate) {
+        alert("Please select the new shop.");
+        return;
+    }
 
-    showMessage(
-      "Select destination Shop and movement date.",
-      "error"
+    const record = coachRecords.find(
+        item => item.id === selectedMoveId
     );
 
-    return;
+    if (record &&
+        data.shop === (record.currentShop || getVisit(record).shop)) {
 
-  }
+        alert("Coach is already in this shop.");
+        return;
+    }
 
-  if (destination === coach.currentShop) {
-
-    showMessage(
-      "Destination Shop is same as current Shop.",
-      "error"
+    const confirmed = confirm(
+        `Confirm Coach Movement?\n\nCoach: ${record?.coachNo || ""}\nNew Shop: ${data.shop}\nMovement Date: ${data.date}`
     );
 
-    return;
+    if (!confirmed) return;
 
-  }
+    $("confirmMoveBtn").disabled = true;
+    $("confirmMoveBtn").textContent = "MOVING...";
 
-  const currentPlaced =
-    coach.currentVisit?.datePlaced || "";
+    try {
 
-  if (movementDate < currentPlaced) {
+        await moveCoach(selectedMoveId, data);
 
-    showMessage(
-      "Movement date cannot be earlier than current Date Placed.",
-      "error"
+        showMessage(
+            "Coach moved successfully. Previous shop visit saved in history."
+        );
+
+        closeModal("moveModal");
+
+        selectedMoveId = null;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(error.message || "Coach movement failed.");
+
+    } finally {
+
+        $("confirmMoveBtn").disabled = false;
+        $("confirmMoveBtn").textContent = "CONFIRM MOVE";
+    }
+});
+
+
+/* =========================================================
+   COACH DETAILS + HISTORY POPUP
+========================================================= */
+
+function showCoachDetails(record) {
+
+    const visit = getVisit(record);
+
+    const history = Array.isArray(record.history)
+        ? record.history
+        : [];
+
+    const firstIn = getFirstInDate(record);
+
+    const detention = calculateDetentionDay(
+        visit.datePlaced || "",
+        visit.dateOut || ""
     );
 
-    return;
+    let historyHTML = "";
 
-  }
+    if (history.length === 0) {
 
-  if (dateIn && dateIn < movementDate) {
+        historyHTML = `
+            <p>No Previous Shop History Available.</p>
+        `;
 
-    showMessage(
-      "Date In cannot be earlier than movement date.",
-      "error"
-    );
+    } else {
 
-    return;
+        historyHTML = history.slice().reverse().map((item, index) => {
 
-  }
+            const days = calculateDetentionDay(
+                item.datePlaced || "",
+                item.dateOut || ""
+            );
 
-  $("confirmMoveBtn").disabled = true;
+            return `
+                <div class="history-item">
 
-  try {
+                    <strong>Previous Visit ${history.length - index}</strong>
 
-    await moveCoach(
-      movingId,
-      destination,
-      movementDate,
-      dateIn,
-      status,
-      remarks
-    );
+                    <div class="detail-grid" style="margin-top:10px">
 
-    closeModal("moveModal");
+                        <div class="detail-item">
+                            <small>SHOP</small>
+                            ${escapeHTML(item.shop || "-")}
+                        </div>
 
-    movingId = null;
+                        <div class="detail-item">
+                            <small>DATE PLACED</small>
+                            ${formatDate(item.datePlaced)}
+                        </div>
 
-    showMessage(
-      "Coach moved successfully. Previous Shop saved in History."
-    );
+                        <div class="detail-item">
+                            <small>DATE IN</small>
+                            ${formatDate(item.dateIn)}
+                        </div>
 
-  } catch (error) {
+                        <div class="detail-item">
+                            <small>DATE OUT</small>
+                            ${formatDate(item.dateOut)}
+                        </div>
 
-    showMessage(error.message, "error");
+                        <div class="detail-item">
+                            <small>DETENTION DAY</small>
+                            ${days}
+                        </div>
 
-  } finally {
+                        <div class="detail-item">
+                            <small>STATUS</small>
+                            ${escapeHTML(item.status || "-")}
+                        </div>
 
-    $("confirmMoveBtn").disabled = false;
+                        <div class="detail-item">
+                            <small>MOVED TO</small>
+                            ${escapeHTML(item.movedToShop || "-")}
+                        </div>
 
-  }
+                        <div class="detail-item">
+                            <small>REMARKS</small>
+                            ${escapeHTML(item.remarks || "-")}
+                        </div>
+
+                    </div>
+                </div>
+            `;
+
+        }).join("");
+    }
+
+    $("historyContent").innerHTML = `
+
+        <h3 style="margin-bottom:12px">
+            COACH: ${escapeHTML(record.coachNo)}
+        </h3>
+
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <small>COACH TYPE</small>
+                ${escapeHTML(record.coachCode || "-")}
+            </div>
+
+            <div class="detail-item">
+                <small>CURRENT SHOP</small>
+                ${escapeHTML(record.currentShop || visit.shop || "-")}
+            </div>
+
+            <div class="detail-item">
+                <small>WORKSHOP 1ST IN DATE</small>
+                ${formatDate(firstIn)}
+            </div>
+
+            <div class="detail-item">
+                <small>DATE PLACED</small>
+                ${formatDate(visit.datePlaced)}
+            </div>
+
+            <div class="detail-item">
+                <small>DATE IN</small>
+                ${formatDate(visit.dateIn)}
+            </div>
+
+            <div class="detail-item">
+                <small>DATE OUT</small>
+                ${formatDate(visit.dateOut)}
+            </div>
+
+            <div class="detail-item">
+                <small>DETENTION DAY</small>
+                ${detention}
+            </div>
+
+            <div class="detail-item">
+                <small>STATUS</small>
+                ${escapeHTML(visit.status || "-")}
+            </div>
+
+            <div class="detail-item">
+                <small>REMARKS</small>
+                ${escapeHTML(visit.remarks || "-")}
+            </div>
+
+        </div>
+
+        <hr style="margin:18px 0">
+
+        <h3>PREVIOUS SHOP HISTORY</h3>
+
+        ${historyHTML}
+    `;
+
+    openModal("historyModal");
+}
+
+
+/* =========================================================
+   MODAL OUTSIDE CLICK
+========================================================= */
+
+["moveModal", "historyModal"].forEach(id => {
+
+    $(id).addEventListener("click", event => {
+
+        if (event.target.id === id) {
+            closeModal(id);
+        }
+    });
 
 });
 
 
 /* =========================================================
-   MODAL CLOSE
-========================================================= */
-
-window.closeModal = function(id) {
-
-  $(id).style.display = "none";
-
-};
-
-
-/* =========================================================
-   INITIALIZE
+   INITIAL DEFAULT DATE
 ========================================================= */
 
 $("datePlaced").value = today();
+
+$("moveDate").value = today();
+
+
+/* =========================================================
+   END OF COACH-STOCK.JS V2.0 FINAL
+========================================================= */
