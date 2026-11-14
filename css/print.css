@@ -2,11 +2,12 @@
 /* =========================================================
    MR CO-ORDINATION DAILY COACHES POSITION
    LILUAH WORKSHOP
-   PRINT CSS VERSION 14.2 FINAL
+   PRINT CSS VERSION 14.3
+   MATCHED WITH YOUR PRINT.HTML
    A4 LANDSCAPE
    ========================================================= */
 
-/* ---------- PAGE SETUP ---------- */
+/* ================= PAGE SETUP ================= */
 
 @page {
     size: A4 landscape;
@@ -29,135 +30,198 @@ body {
     background: #fff;
 }
 
-/* ---------- SCREEN ONLY ---------- */
+/* ================= SCREEN VIEW ================= */
 
-@media screen {
-    body {
-        background: #e5e5e5;
-        padding: 15px;
-    }
-
-    #printPage {
-        width: 287mm;
-        min-height: 200mm;
-        margin: auto;
-        padding: 5mm;
-        background: #fff;
-        box-shadow: 0 0 8px rgba(0,0,0,0.25);
-    }
+body {
+    padding: 10px;
 }
 
-/* ---------- PRINT PAGE ---------- */
-
-#printPage {
+.print-container {
     width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
     background: #fff;
-    color: #000;
 }
 
-/* ---------- HEADER ---------- */
+/* ================= HEADER ================= */
 
-#printHeader {
+.print-header {
     width: 100%;
     text-align: center;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
-#printHeader h1 {
-    font-size: 17px;
+.print-header h1 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.1;
     font-weight: 800;
-    margin: 0 0 3px 0;
-    text-transform: uppercase;
 }
 
-#printHeader h2 {
+.print-header h2 {
+    margin: 3px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.print-date {
+    margin-top: 3px;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+/* ================= BUTTONS ================= */
+
+.print-controls {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.print-btn,
+.refresh-btn {
+    border: 0;
+    color: #fff;
+    padding: 7px 18px;
+    border-radius: 5px;
     font-size: 12px;
-    font-weight: 700;
-    margin: 0 0 4px 0;
-    text-transform: uppercase;
+    cursor: pointer;
 }
 
-#printDate {
-    font-size: 10px;
-    font-weight: 700;
-    text-align: right;
-    margin-bottom: 5px;
+.print-btn {
+    background: #0d6efd;
 }
 
-/* ---------- PRINT GRID ---------- */
+.refresh-btn {
+    background: #198754;
+    margin-left: 5px;
+}
 
-#printGrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 5px;
+/* ================= LOADING / ERROR ================= */
+
+#loading {
+    text-align: center;
+    padding: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#error {
+    text-align: center;
+    color: red;
+    padding: 8px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* ================= PRINT AREA ================= */
+
+#printArea {
     width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* ================= TWO COLUMN LAYOUT ================= */
+
+.print-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 5px;
     align-items: start;
 }
 
-/* ---------- SHOP BLOCK ---------- */
+/* ================= SHOP GROUP ================= */
 
-.printBlock {
-    border: 1px solid #000;
+.group {
     width: 100%;
     min-width: 0;
+    margin: 0;
     break-inside: avoid;
     page-break-inside: avoid;
 }
 
-.printBlock h3 {
-    background: #d9d9d9;
-    color: #000;
-    border-bottom: 1px solid #000;
+.group-title {
+    background: #000;
+    color: #fff;
+    text-align: center;
     font-size: 11px;
     font-weight: 800;
-    text-align: center;
-    text-transform: uppercase;
-    margin: 0;
-    padding: 4px 2px;
+    padding: 4px;
+    line-height: 1.1;
+    border: 1px solid #000;
 }
 
-/* ---------- COACH TABLE ---------- */
+/* ================= FULL WIDTH GROUP ================= */
 
-.coachTable {
+.full-width {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+/* ================= TABLE ================= */
+
+table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
     margin: 0;
 }
 
-.coachTable th,
-.coachTable td {
-    border: 1px solid #777;
+th,
+td {
+    border: 1px solid #000;
     text-align: center;
     vertical-align: middle;
     padding: 2px 1px;
+    line-height: 1.1;
     overflow-wrap: anywhere;
 }
 
-.coachTable th {
-    background: #eeeeee;
+th {
+    background: #e9e9e9;
     font-size: 8px;
     font-weight: 800;
-    padding: 3px 1px;
+    height: 20px;
 }
 
-.coachTable td {
+td {
     font-size: 8px;
-    height: 24px;
+    font-weight: 600;
+    min-height: 25px;
 }
 
-/* ---------- COACH NUMBER ---------- */
+/* ================= COLUMN WIDTH ================= */
+
+.position-col {
+    width: 18%;
+}
+
+.shop-col {
+    width: 18%;
+}
+
+.line-col {
+    width: 18%;
+}
+
+.coach-col {
+    width: 44%;
+}
+
+/* ================= COACH NUMBER ================= */
 
 .print-coach-number {
-    font-size: 14px;
-    font-weight: 900;
+    display: block;
+    font-size: 14px !important;
+    font-weight: 900 !important;
     line-height: 1.1;
     color: #000;
     text-align: center;
     white-space: nowrap;
 }
 
-/* ---------- COACH TYPE + STATUS ---------- */
+/* ================= COACH TYPE + STATUS ================= */
 
 .print-coach-meta {
     display: flex;
@@ -170,26 +234,26 @@ body {
 }
 
 .print-coach-type {
-    font-size: 8px;
-    font-weight: 700;
+    font-size: 8px !important;
+    font-weight: 700 !important;
     color: #000;
 }
 
 .print-coach-status {
-    font-size: 8px;
-    font-weight: 700;
+    font-size: 8px !important;
+    font-weight: 700 !important;
     color: #000;
 }
 
-/* ---------- EMPTY POSITION ---------- */
+/* ================= EMPTY POSITION ================= */
 
 .empty-position {
-    color: #777;
     font-size: 8px;
+    color: #777;
     font-weight: 400;
 }
 
-/* ---------- STATUS COLORS ---------- */
+/* ================= STATUS COLORS ================= */
 
 .status-available {
     background: #d9ead3 !important;
@@ -207,77 +271,48 @@ body {
     background: #cfe2f3 !important;
 }
 
-/* ---------- PULLED OUT COACHES ---------- */
+/* ================= MOBILE SCREEN ================= */
 
-#pulledOutSection {
-    width: 100%;
-    margin-top: 6px;
-    border: 1px solid #000;
-    break-inside: avoid;
-    page-break-inside: avoid;
+@media screen and (max-width: 768px) {
+
+    body {
+        padding: 5px;
+    }
+
+    .print-container {
+        max-width: 100%;
+    }
+
+    #printArea {
+        width: 100%;
+    }
+
+    .print-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 3px;
+    }
+
+    .print-header h1 {
+        font-size: 18px;
+    }
+
+    .group-title {
+        font-size: 9px;
+    }
+
+    th {
+        font-size: 6px;
+    }
+
+    td {
+        font-size: 6.5px;
+    }
 }
 
-#pulledOutSection h3 {
-    background: #d9d9d9;
-    font-size: 10px;
-    font-weight: 800;
-    text-align: center;
-    text-transform: uppercase;
-    margin: 0;
-    padding: 3px;
-    border-bottom: 1px solid #000;
-}
-
-#pulledOutTable {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-#pulledOutTable th,
-#pulledOutTable td {
-    border: 1px solid #777;
-    text-align: center;
-    padding: 2px;
-    font-size: 8px;
-}
-
-/* ---------- LEGEND ---------- */
-
-#printLegend {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 6px;
-    font-size: 8px;
-    font-weight: 700;
-}
-
-.legendItem {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.legendColor {
-    width: 10px;
-    height: 10px;
-    display: inline-block;
-    border: 1px solid #000;
-}
-
-/* ---------- BUTTONS ---------- */
-
-.refresh-btn,
-.print-btn,
-button {
-    cursor: pointer;
-}
-
-/* ---------- PRINT MEDIA ---------- */
+/* ================= A4 LANDSCAPE PRINT ================= */
 
 @media print {
+
     html,
     body {
         width: 100%;
@@ -286,41 +321,151 @@ button {
         background: #fff !important;
     }
 
-    #printPage {
-        width: 100%;
-        min-height: 0;
-        margin: 0;
-        padding: 0;
-        box-shadow: none;
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
-    .no-print,
-    .refresh-btn,
-    .print-btn,
-    button {
+    .print-container {
+        width: 287mm !important;
+        max-width: 287mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+    }
+
+    .print-header {
+        margin-bottom: 4px;
+    }
+
+    .print-header h1 {
+        font-size: 17px;
+        line-height: 1.1;
+    }
+
+    .print-header h2 {
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .print-date {
+        font-size: 8px;
+        margin-top: 2px;
+    }
+
+    /* Hide buttons and messages */
+
+    .print-controls,
+    #loading,
+    #error {
         display: none !important;
     }
 
-    #printGrid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 4px;
+    /* Print area */
+
+    #printArea {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
     }
 
-    .printBlock {
+    /* Two column shop layout */
+
+    .print-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 3mm;
+        margin-bottom: 3mm;
+        align-items: start;
+    }
+
+    /* Full width SCR and CR */
+
+    .full-width {
+        width: 100% !important;
+        margin-bottom: 3mm;
+    }
+
+    /* Shop title */
+
+    .group-title {
+        font-size: 9px;
+        padding: 1.5mm 1mm;
+        line-height: 1.1;
+        background: #000 !important;
+        color: #fff !important;
+        border: 1px solid #000;
+    }
+
+    /* Table */
+
+    table {
+        width: 100% !important;
+        table-layout: fixed;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    th,
+    td {
+        border: 0.3mm solid #000 !important;
+        padding: 0.7mm 0.5mm;
+        line-height: 1.1;
+        overflow-wrap: anywhere;
+    }
+
+    th {
+        font-size: 7px;
+        height: auto;
+        font-weight: 800;
+        background: #e9e9e9 !important;
+        color: #000 !important;
+    }
+
+    td {
+        font-size: 8px;
+        min-height: 0;
+        font-weight: 600;
+        height: auto;
+    }
+
+    /* Exact requested font sizes */
+
+    .print-coach-number {
+        font-size: 14px !important;
+        font-weight: 900 !important;
+        line-height: 1.1;
+        white-space: nowrap;
+    }
+
+    .print-coach-meta {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 2px;
+        margin-top: 2px;
+    }
+
+    .print-coach-type,
+    .print-coach-status {
+        font-size: 8px !important;
+        font-weight: 700 !important;
+        line-height: 1.1;
+    }
+
+    .empty-position {
+        font-size: 8px;
+    }
+
+    /* Prevent shop splitting */
+
+    .group,
+    .print-row {
         break-inside: avoid;
         page-break-inside: avoid;
     }
 
-    .coachTable {
-        break-inside: auto;
-    }
-
-    .coachTable tr {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-
-    #pulledOutSection {
+    tr {
         break-inside: avoid;
         page-break-inside: avoid;
     }
