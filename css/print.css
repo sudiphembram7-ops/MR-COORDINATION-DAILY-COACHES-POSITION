@@ -1,618 +1,332 @@
-/* =========================================================
-   MR CO-ORDINATION
-   A4 PRINT CSS
-   COACH NUMBER ONLY
-========================================================= */
-
 
 /* =========================================================
-   A4
-========================================================= */
+   MR CO-ORDINATION DAILY COACHES POSITION
+   LILUAH WORKSHOP
+   PRINT CSS VERSION 14.2 FINAL
+   A4 LANDSCAPE
+   ========================================================= */
 
-@page{
+/* ---------- PAGE SETUP ---------- */
 
-    size:A4 landscape;
-
-    margin:5mm;
-
+@page {
+    size: A4 landscape;
+    margin: 5mm;
 }
 
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-*{
-
-    box-sizing:border-box;
-
+* {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
 }
-
 
 html,
-body{
-
-    margin:0;
-
-    padding:0;
-
-    width:100%;
-
-    background:#fff;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
+    background: #fff;
 }
 
+/* ---------- SCREEN ONLY ---------- */
 
-/* =========================================================
-   SCREEN BUTTONS
-========================================================= */
+@media screen {
+    body {
+        background: #e5e5e5;
+        padding: 15px;
+    }
 
-.screenControls{
-
-    position:fixed;
-
-    top:15px;
-
-    right:15px;
-
-    z-index:9999;
-
-    display:flex;
-
-    gap:10px;
-
+    #printPage {
+        width: 287mm;
+        min-height: 200mm;
+        margin: auto;
+        padding: 5mm;
+        background: #fff;
+        box-shadow: 0 0 8px rgba(0,0,0,0.25);
+    }
 }
 
+/* ---------- PRINT PAGE ---------- */
 
-.screenControls button{
-
-    border:0;
-
-    border-radius:8px;
-
-    padding:13px 24px;
-
-    color:#fff;
-
-    font-size:16px;
-
-    font-weight:700;
-
+#printPage {
+    width: 100%;
+    background: #fff;
+    color: #000;
 }
 
+/* ---------- HEADER ---------- */
 
-.printBtn{
-
-    background:#198754;
-
+#printHeader {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 5px;
 }
 
-
-.closeBtn{
-
-    background:#dc3545;
-
+#printHeader h1 {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0 0 3px 0;
+    text-transform: uppercase;
 }
 
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-#loading{
-
-    position:fixed;
-
-    inset:0;
-
-    z-index:9998;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    background:#fff;
-
-    font-size:22px;
-
-    font-weight:700;
-
+#printHeader h2 {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
 }
 
-
-#loading.error{
-
-    color:#dc3545;
-
+#printDate {
+    font-size: 10px;
+    font-weight: 700;
+    text-align: right;
+    margin-bottom: 5px;
 }
 
+/* ---------- PRINT GRID ---------- */
 
-/* =========================================================
-   PRINT PAGE
-========================================================= */
-
-#printPage{
-
-    width:100%;
-
-    max-width:287mm;
-
-    margin:0 auto;
-
-    background:#fff;
-
+#printGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+    width: 100%;
+    align-items: start;
 }
 
+/* ---------- SHOP BLOCK ---------- */
 
-/* =========================================================
-   HEADER
-========================================================= */
-
-.printHeader{
-
-    width:100%;
-
-    text-align:center;
-
-    margin-bottom:2mm;
-
+.printBlock {
+    border: 1px solid #000;
+    width: 100%;
+    min-width: 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
 }
 
-
-.mainTitle{
-
-    font-size:13px;
-
-    font-weight:700;
-
-    line-height:1.1;
-
+.printBlock h3 {
+    background: #d9d9d9;
+    color: #000;
+    border-bottom: 1px solid #000;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 4px 2px;
 }
 
+/* ---------- COACH TABLE ---------- */
 
-.workshopTitle{
-
-    margin-top:1px;
-
-    font-size:10px;
-
-    font-weight:700;
-
+.coachTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
 }
-
-
-.printDate{
-
-    margin-top:1px;
-
-    font-size:6px;
-
-}
-
-
-/* =========================================================
-   4 BLOCK GRID
-========================================================= */
-
-#printGrid{
-
-    display:grid;
-
-    grid-template-columns:
-        1fr
-        1fr;
-
-    grid-template-rows:
-        1fr
-        1fr;
-
-    gap:2.5mm;
-
-    width:100%;
-
-}
-
-
-/* =========================================================
-   PRINT BLOCK
-========================================================= */
-
-.printBlock{
-
-    min-width:0;
-
-    border:0.35mm solid #222;
-
-    padding:1.2mm;
-
-    overflow:hidden;
-
-}
-
-
-/* =========================================================
-   BLOCK TITLE
-========================================================= */
-
-.blockTitle{
-
-    width:100%;
-
-    text-align:center;
-
-    font-size:8px;
-
-    font-weight:700;
-
-    padding:1mm 0;
-
-    background:#ffc107;
-
-    border-bottom:0.3mm solid #222;
-
-}
-
-
-/* =========================================================
-   SHOP CONTAINER
-========================================================= */
-
-.shopContainer{
-
-    width:100%;
-
-}
-
-
-/* =========================================================
-   SINGLE SHOP
-========================================================= */
-
-.singleShop{
-
-    width:100%;
-
-    margin-bottom:1.2mm;
-
-}
-
-
-.singleShop:last-child{
-
-    margin-bottom:0;
-
-}
-
-
-/* =========================================================
-   SHOP NAME
-========================================================= */
-
-.shopName{
-
-    width:100%;
-
-    text-align:left;
-
-    font-size:6.5px;
-
-    font-weight:700;
-
-    padding:0.6mm 1mm;
-
-    background:#eee;
-
-    border-bottom:0.2mm solid #555;
-
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-.coachTable{
-
-    width:100%;
-
-    border-collapse:collapse;
-
-    table-layout:fixed;
-
-}
-
-
-/* =========================================================
-   CELLS
-========================================================= */
 
 .coachTable th,
-.coachTable td{
-
-    border:0.2mm solid #777;
-
-    padding:0;
-
-    height:5.8mm;
-
-    text-align:center;
-
-    vertical-align:middle;
-
-    overflow:hidden;
-
+.coachTable td {
+    border: 1px solid #777;
+    text-align: center;
+    vertical-align: middle;
+    padding: 2px 1px;
+    overflow-wrap: anywhere;
 }
 
-
-/* =========================================================
-   HEADER CELLS
-========================================================= */
-
-.coachTable th{
-
-    background:#20282c;
-
-    color:#fff;
-
-    font-size:5px;
-
-    font-weight:700;
-
-    height:4.5mm;
-
+.coachTable th {
+    background: #eeeeee;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 3px 1px;
 }
 
-
-/* =========================================================
-   POSITION
-========================================================= */
-
-.coachTable th:first-child,
-.coachTable td.position{
-
-    width:9mm;
-
+.coachTable td {
+    font-size: 8px;
+    height: 24px;
 }
 
+/* ---------- COACH NUMBER ---------- */
 
-.coachTable td.position{
-
-    background:#20282c;
-
-    color:#fff;
-
-    font-size:5.5px;
-
-    font-weight:700;
-
+.print-coach-number {
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: #000;
+    text-align: center;
+    white-space: nowrap;
 }
 
+/* ---------- COACH TYPE + STATUS ---------- */
 
-/* =========================================================
-   COACH NUMBER ONLY
-========================================================= */
-
-.coachNumber{
-
-    display:block;
-
-    width:100%;
-
-    text-align:center;
-
-    font-size:7px;
-
-    font-weight:700;
-
-    line-height:1;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-
+.print-coach-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: 2px;
+    line-height: 1.1;
 }
 
-
-/* =========================================================
-   EMPTY
-========================================================= */
-
-.coachTable td:empty{
-
-    background:#fff;
-
+.print-coach-type {
+    font-size: 8px;
+    font-weight: 700;
+    color: #000;
 }
 
-
-/* =========================================================
-   NO DATA
-========================================================= */
-
-.noData{
-
-    text-align:center;
-
-    font-size:6px;
-
-    padding:2mm;
-
-    color:#777;
-
+.print-coach-status {
+    font-size: 8px;
+    font-weight: 700;
+    color: #000;
 }
 
+/* ---------- EMPTY POSITION ---------- */
 
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.printFooter{
-
-    width:100%;
-
-    text-align:center;
-
-    margin-top:1.5mm;
-
-    font-size:5.5px;
-
-    font-weight:600;
-
+.empty-position {
+    color: #777;
+    font-size: 8px;
+    font-weight: 400;
 }
 
+/* ---------- STATUS COLORS ---------- */
 
-/* =========================================================
-   MOBILE SCREEN
-========================================================= */
-
-@media screen and (max-width:900px){
-
-    body{
-
-        overflow-x:auto;
-
-    }
-
-
-    #printPage{
-
-        width:100%;
-
-        min-width:0;
-
-        padding:85px 5px 20px;
-
-    }
-
-
-    #printGrid{
-
-        grid-template-columns:
-            1fr;
-
-        grid-template-rows:
-            auto;
-
-    }
-
-
-    .screenControls{
-
-        top:15px;
-
-        right:15px;
-
-    }
-
-
-    .screenControls button{
-
-        padding:13px 20px;
-
-        font-size:16px;
-
-    }
-
+.status-available {
+    background: #d9ead3 !important;
 }
 
+.status-working {
+    background: #fff2cc !important;
+}
 
-/* =========================================================
-   PRINT MODE
-========================================================= */
+.status-hold {
+    background: #f4cccc !important;
+}
 
-@media print{
+.status-completed {
+    background: #cfe2f3 !important;
+}
 
+/* ---------- PULLED OUT COACHES ---------- */
+
+#pulledOutSection {
+    width: 100%;
+    margin-top: 6px;
+    border: 1px solid #000;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+#pulledOutSection h3 {
+    background: #d9d9d9;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 3px;
+    border-bottom: 1px solid #000;
+}
+
+#pulledOutTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#pulledOutTable th,
+#pulledOutTable td {
+    border: 1px solid #777;
+    text-align: center;
+    padding: 2px;
+    font-size: 8px;
+}
+
+/* ---------- LEGEND ---------- */
+
+#printLegend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 8px;
+    font-weight: 700;
+}
+
+.legendItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.legendColor {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border: 1px solid #000;
+}
+
+/* ---------- BUTTONS ---------- */
+
+.refresh-btn,
+.print-btn,
+button {
+    cursor: pointer;
+}
+
+/* ---------- PRINT MEDIA ---------- */
+
+@media print {
     html,
-    body{
-
-        width:100%;
-
-        height:100%;
-
-        background:#fff;
-
+    body {
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
     }
 
-
-    .screenControls,
-    #loading{
-
-        display:none !important;
-
+    #printPage {
+        width: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
     }
 
-
-    #printPage{
-
-        width:100%;
-
-        max-width:none;
-
-        margin:0;
-
-        padding:0;
-
+    .no-print,
+    .refresh-btn,
+    .print-btn,
+    button {
+        display: none !important;
     }
 
-
-    #printGrid{
-
-        display:grid;
-
-        grid-template-columns:
-            1fr
-            1fr;
-
-        grid-template-rows:
-            1fr
-            1fr;
-
-        gap:2.5mm;
-
-        width:100%;
-
+    #printGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
     }
 
-
-    .printBlock{
-
-        break-inside:avoid;
-
-        page-break-inside:avoid;
-
+    .printBlock {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
-
-    .singleShop{
-
-        break-inside:avoid;
-
-        page-break-inside:avoid;
-
+    .coachTable {
+        break-inside: auto;
     }
 
-
-    .printHeader{
-
-        break-after:avoid;
-
-        page-break-after:avoid;
-
+    .coachTable tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
-
-    .printFooter{
-
-        break-before:avoid;
-
-        page-break-before:avoid;
-
+    #pulledOutSection {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 }
