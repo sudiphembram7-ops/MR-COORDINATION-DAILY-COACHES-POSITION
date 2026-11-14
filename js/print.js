@@ -2,25 +2,10 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    PRINT.JS
-   VERSION 14.2 FINAL
-   ---------------------------------------------------------
-   FEATURES:
-   ✓ Firebase Realtime Database
-   ✓ coachBoard path
-   ✓ Coach Number: 14px
-   ✓ Coach Type: 8px
-   ✓ Coach Status: 8px
-   ✓ N + M rendering
-   ✓ Lifting Bay + J rendering
-   ✓ MR SCR rendering
-   ✓ CR rendering
-   ✓ Multiple Firebase data structures supported
+   VERSION 14.3 FINAL
 ========================================================= */
 
-
-/* =========================================================
-   FIREBASE IMPORT
-========================================================= */
+/* FIREBASE IMPORT */
 
 import {
     ref,
@@ -31,20 +16,15 @@ import {
     database
 } from "./firebase-config.js";
 
+console.log("PRINT.JS VERSION 14.3 LOADED");
 
-console.log("PRINT.JS VERSION 14.2 LOADED");
 
-
-/* =========================================================
-   FIREBASE PATH
-========================================================= */
+/* FIREBASE PATH */
 
 const BOARD_PATH = "coachBoard";
 
 
-/* =========================================================
-   SHOP CONFIGURATION
-========================================================= */
+/* SHOP CONFIGURATION */
 
 const CONFIG = {
 
@@ -100,9 +80,7 @@ const CONFIG = {
 };
 
 
-/* =========================================================
-   NORMALIZE
-========================================================= */
+/* NORMALIZE */
 
 function normalize(value) {
 
@@ -126,9 +104,7 @@ function compact(value) {
 }
 
 
-/* =========================================================
-   GET FIELD VALUE
-========================================================= */
+/* GET FIELD VALUE */
 
 function getField(object, keys) {
 
@@ -144,9 +120,7 @@ function getField(object, keys) {
             object[key] !== undefined &&
             String(object[key]).trim() !== ""
         ) {
-
             return String(object[key]).trim();
-
         }
 
     }
@@ -156,9 +130,7 @@ function getField(object, keys) {
 }
 
 
-/* =========================================================
-   GET COACH NUMBER
-========================================================= */
+/* GET COACH NUMBER */
 
 function getCoachNumber(value) {
 
@@ -166,13 +138,8 @@ function getCoachNumber(value) {
         return "";
     }
 
-    if (
-        typeof value === "string" ||
-        typeof value === "number"
-    ) {
-
+    if (typeof value === "string" || typeof value === "number") {
         return String(value).trim();
-
     }
 
     if (typeof value !== "object") {
@@ -217,9 +184,7 @@ function getCoachNumber(value) {
 }
 
 
-/* =========================================================
-   GET COACH TYPE
-========================================================= */
+/* GET COACH TYPE */
 
 function getCoachType(value) {
 
@@ -237,9 +202,7 @@ function getCoachType(value) {
 }
 
 
-/* =========================================================
-   GET COACH STATUS
-========================================================= */
+/* GET COACH STATUS */
 
 function getCoachStatus(value) {
 
@@ -257,9 +220,7 @@ function getCoachStatus(value) {
 }
 
 
-/* =========================================================
-   GET COMPLETE COACH DATA
-========================================================= */
+/* GET COMPLETE COACH DATA */
 
 function getCoachData(value) {
 
@@ -274,7 +235,7 @@ function getCoachData(value) {
     }
 
     return {
-        number: number,
+        number,
         type: getCoachType(value),
         status: getCoachStatus(value)
     };
@@ -282,9 +243,7 @@ function getCoachData(value) {
 }
 
 
-/* =========================================================
-   MATCH SHOP ALIAS
-========================================================= */
+/* MATCH SHOP ALIAS */
 
 function matchesAlias(value, aliases) {
 
@@ -295,9 +254,7 @@ function matchesAlias(value, aliases) {
 }
 
 
-/* =========================================================
-   FIND SHOP NODE
-========================================================= */
+/* FIND SHOP NODE */
 
 function getShopNode(board, config) {
 
@@ -318,9 +275,7 @@ function getShopNode(board, config) {
 }
 
 
-/* =========================================================
-   FIND KEY
-========================================================= */
+/* FIND KEY */
 
 function findKey(object, target) {
 
@@ -343,9 +298,7 @@ function findKey(object, target) {
 }
 
 
-/* =========================================================
-   DIRECT SEARCH
-========================================================= */
+/* DIRECT SEARCH */
 
 function directSearch(board, config, line, position) {
 
@@ -378,9 +331,7 @@ function directSearch(board, config, line, position) {
 }
 
 
-/* =========================================================
-   RECURSIVE SEARCH
-========================================================= */
+/* RECURSIVE SEARCH */
 
 function recursiveSearch(board, config, line, position) {
 
@@ -392,13 +343,13 @@ function recursiveSearch(board, config, line, position) {
 
     function walk(node, path) {
 
-        if (result || !node || typeof node !== "object") {
+        if (
+            result ||
+            !node ||
+            typeof node !== "object"
+        ) {
             return;
         }
-
-        /*
-           EXPLICIT FIELDS
-        */
 
         const nodeShop = compact(
             node.shop ??
@@ -420,6 +371,8 @@ function recursiveSearch(board, config, line, position) {
             node.cell
         );
 
+        /* EXPLICIT FIELD MATCH */
+
         if (
             targetShops.includes(nodeShop) &&
             nodeLine === targetLine &&
@@ -435,10 +388,7 @@ function recursiveSearch(board, config, line, position) {
 
         }
 
-        /*
-           PATH BASED MATCHING
-           SHOP / LINE / POSITION
-        */
+        /* PATH BASED MATCH */
 
         if (path.length >= 3) {
 
@@ -461,9 +411,7 @@ function recursiveSearch(board, config, line, position) {
 
         }
 
-        /*
-           WALK CHILDREN
-        */
+        /* WALK CHILDREN */
 
         for (const key of Object.keys(node)) {
 
@@ -484,9 +432,7 @@ function recursiveSearch(board, config, line, position) {
 }
 
 
-/* =========================================================
-   FIND COMPLETE COACH DATA
-========================================================= */
+/* FIND COMPLETE COACH DATA */
 
 function findCoachData(board, shop, line, position) {
 
@@ -495,10 +441,6 @@ function findCoachData(board, shop, line, position) {
     if (!config) {
         return null;
     }
-
-    /*
-       STEP 1: DIRECT STRUCTURE
-    */
 
     let coach = directSearch(
         board,
@@ -510,10 +452,6 @@ function findCoachData(board, shop, line, position) {
     if (coach) {
         return coach;
     }
-
-    /*
-       STEP 2: RECURSIVE STRUCTURE
-    */
 
     coach = recursiveSearch(
         board,
@@ -527,9 +465,7 @@ function findCoachData(board, shop, line, position) {
 }
 
 
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
+/* ESCAPE HTML */
 
 function escapeHTML(value) {
 
@@ -547,9 +483,7 @@ function escapeHTML(value) {
 }
 
 
-/* =========================================================
-   RENDER SHOP
-========================================================= */
+/* RENDER SHOP */
 
 function renderShop(board, shop) {
 
@@ -573,9 +507,7 @@ function renderShop(board, shop) {
 
         const tr = document.createElement("tr");
 
-        /*
-           POSITION CELL
-        */
+        /* POSITION CELL */
 
         const positionCell = document.createElement("th");
 
@@ -583,9 +515,7 @@ function renderShop(board, shop) {
 
         tr.appendChild(positionCell);
 
-        /*
-           COACH CELLS
-        */
+        /* COACH CELLS */
 
         for (const line of config.lines) {
 
@@ -601,7 +531,6 @@ function renderShop(board, shop) {
             if (coach) {
 
                 td.innerHTML = `
-
                     <div class="print-coach-number">
                         ${escapeHTML(coach.number)}
                     </div>
@@ -610,36 +539,23 @@ function renderShop(board, shop) {
 
                         ${
                             coach.type
-                                ? `
-                                    <span class="print-coach-type">
-                                        ${escapeHTML(coach.type)}
-                                    </span>
-                                  `
+                                ? `<span class="print-coach-type">${escapeHTML(coach.type)}</span>`
                                 : ""
                         }
 
                         ${
                             coach.status
-                                ? `
-                                    <span class="print-coach-status">
-                                        ${escapeHTML(coach.status)}
-                                    </span>
-                                  `
+                                ? `<span class="print-coach-status">${escapeHTML(coach.status)}</span>`
                                 : ""
                         }
 
                     </div>
-
                 `;
 
                 console.log(
                     `Coach: ${shop} / ${line} / ${position}`,
                     coach
                 );
-
-            } else {
-
-                td.textContent = "";
 
             }
 
@@ -654,9 +570,7 @@ function renderShop(board, shop) {
 }
 
 
-/* =========================================================
-   RENDER ALL SHOPS
-========================================================= */
+/* RENDER ALL SHOPS */
 
 function renderAllShops(board) {
 
@@ -674,9 +588,7 @@ function renderAllShops(board) {
 }
 
 
-/* =========================================================
-   PRINT DATE
-========================================================= */
+/* PRINT DATE */
 
 function setPrintDate() {
 
@@ -697,9 +609,7 @@ function setPrintDate() {
 }
 
 
-/* =========================================================
-   LOAD BOARD
-========================================================= */
+/* LOAD BOARD */
 
 async function loadBoard() {
 
@@ -711,14 +621,13 @@ async function loadBoard() {
         console.log("Loading Firebase:", BOARD_PATH);
 
         if (loading) {
-
             loading.style.display = "flex";
             loading.textContent = "Loading coach board...";
-
         }
 
         if (error) {
             error.textContent = "";
+            error.style.display = "none";
         }
 
         if (!database) {
@@ -762,11 +671,10 @@ async function loadBoard() {
         }
 
         if (error) {
-
+            error.style.display = "block";
             error.textContent =
                 "Unable to load coach board: " +
-                errorObject.message;
-
+                (errorObject?.message || "Unknown error");
         }
 
     }
@@ -774,9 +682,7 @@ async function loadBoard() {
 }
 
 
-/* =========================================================
-   REFRESH BUTTON
-========================================================= */
+/* REFRESH BUTTON */
 
 function initializeButtons() {
 
@@ -793,9 +699,7 @@ function initializeButtons() {
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+/* START */
 
 document.addEventListener("DOMContentLoaded", () => {
 
