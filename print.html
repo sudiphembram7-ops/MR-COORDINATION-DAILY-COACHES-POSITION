@@ -353,6 +353,37 @@ td {
         height: auto;
     }
 }
+/* All shop tables: fixed and equal columns */
+table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+}
+
+/* Coach cells and headings */
+th,
+td {
+  width: 35px !important;
+  min-width: 35px !important;
+  max-width: 35px !important;
+
+  height: 15px !important;
+  min-height: 15px !important;
+
+  padding: 1px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Keep coach details compact */
+td {
+  line-height: 11px !important;
+}
 </style>
 </head>
 
