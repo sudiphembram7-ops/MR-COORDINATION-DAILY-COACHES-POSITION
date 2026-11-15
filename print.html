@@ -384,6 +384,56 @@ td {
 td {
   line-height: 11px !important;
 }
+
+/* FIXED TABLE COLUMNS */
+table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+/* CELL SIZE */
+th,
+td {
+    box-sizing: border-box;
+    text-align: center;
+    vertical-align: middle;
+    padding: 1px !important;
+    overflow: hidden;
+}
+
+/* COACH NUMBER */
+.print-coach-number {
+    display: block;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 12px;
+    white-space: nowrap;
+}
+
+/* TYPE AND STATUS SAME LINE */
+.print-coach-meta {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    line-height: 10px;
+    font-size: 7px;
+}
+
+.print-coach-type,
+.print-coach-status {
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 7px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+
 </style>
 </head>
 
