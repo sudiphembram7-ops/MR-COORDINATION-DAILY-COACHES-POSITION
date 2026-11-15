@@ -590,6 +590,35 @@ th {
 }
 
 
+/* BLACK TABLE GRID LINES */
+#printArea table {
+    border-collapse: collapse !important;
+    border: 1px solid #000 !important;
+}
+
+#printArea th,
+#printArea td {
+    border: 1px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+}
+
+/* SHOP TITLE WITHOUT BLACK BACKGROUND */
+.group-title {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+}
+
+/* PRINT BORDER */
+@media print {
+    #printArea table,
+    #printArea th,
+    #printArea td {
+        border: 1px solid #000 !important;
+    }
+}
+
 
 </style>
 
