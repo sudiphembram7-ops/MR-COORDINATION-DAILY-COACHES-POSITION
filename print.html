@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MR CO-ORDINATION - PRINT</title>
 
-
 <style>
 * {
     box-sizing: border-box;
@@ -77,75 +76,88 @@ body {
 
 #printArea {
     width: 100%;
+    max-width: none;
     margin: 0 auto;
 }
 
-/* TWO SHOP GROUPS SIDE BY SIDE */
+/* TWO COLUMN ROWS */
 .print-row {
     display: grid;
-    grid-template-columns: max-content max-content;
-    justify-content: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 6px;
     align-items: start;
-    gap: 10px;
-    margin-bottom: 8px;
 }
 
 /* SHOP GROUP */
 .group {
-    width: max-content;
+    width: 100%;
+    min-width: 0;
     margin: 0;
     break-inside: avoid;
     page-break-inside: avoid;
 }
 
+/* SHOP TITLE - WHITE */
 .group-title {
-    background: #000;
-    color: #fff;
+    width: 100%;
+    background: #fff;
+    color: #000;
     text-align: center;
     font-size: 10px;
     font-weight: 700;
-    padding: 3px 4px;
-    line-height: 1;
-    border: 1px solid #000;
-    width: 100%;
+    padding: 4px;
+    line-height: 1.2;
+    border: none;
 }
 
 /* ALL TABLES */
-table {
-    width: max-content !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
+#printArea table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
     margin: 0;
 }
 
-/* EVERY COLUMN SAME WIDTH */
-th, td {
-    width: 85px !important;
-    min-width: 85px !important;
-    max-width: 85px !important;
+/* EQUAL COLUMNS + BLACK BORDER */
+#printArea th,
+#printArea td {
+    width: auto;
+    min-width: 0;
+    max-width: none;
     box-sizing: border-box;
     text-align: center;
     vertical-align: middle;
     border: 1px solid #000;
     padding: 2px;
+    background: #fff;
+    color: #000;
     overflow: hidden;
 }
 
-/* TABLE HEADING */
-th {
-    height: 18px;
-    background: #e8e8e8;
+/* LINE HEADING */
+#printArea th {
+    height: 20px;
     font-size: 8px;
     font-weight: 700;
+}
+
+/* COACH CELL */
+#printArea td {
+    height: 9mm;
+    min-height: 9mm;
+    padding: 1mm;
 }
 
 /* COACH NUMBER */
 .print-coach-number {
     display: block;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.15;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
     white-space: nowrap;
+    margin-bottom: 1mm;
 }
 
 /* TYPE AND STATUS SIDE BY SIDE */
@@ -154,7 +166,7 @@ th {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     flex-wrap: nowrap;
     white-space: nowrap;
     line-height: 1.1;
@@ -164,7 +176,7 @@ th {
 .print-coach-status {
     display: inline-block;
     font-size: 8px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.1;
     white-space: nowrap;
     margin: 0;
@@ -174,14 +186,10 @@ th {
 /* FULL WIDTH SHOPS */
 .full-width {
     width: 100%;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
-.full-width table {
-    width: max-content !important;
-}
-
-/* LOADING AND ERROR */
+/* LOADING */
 #loading {
     text-align: center;
     padding: 12px;
@@ -189,6 +197,7 @@ th {
     font-weight: bold;
 }
 
+/* ERROR */
 #error {
     text-align: center;
     color: red;
@@ -212,21 +221,41 @@ th {
     }
 
     .print-row {
-        gap: 5px;
+        gap: 4px;
+    }
+
+    .group-title {
+        font-size: 8px;
+    }
+
+    #printArea th {
+        font-size: 6px;
+    }
+
+    .print-coach-number {
+        font-size: 11px;
+    }
+
+    .print-coach-type,
+    .print-coach-status {
+        font-size: 7px;
     }
 }
 
-/* A4 LANDSCAPE PRINT */
+/* A4 LANDSCAPE */
 @page {
     size: A4 landscape;
-    margin: 8mm;
+    margin: 5mm;
 }
 
+/* PRINT DESIGN */
 @media print {
+
     html, body {
-        margin: 0;
-        padding: 0;
-        background: #fff;
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
     }
 
     body {
@@ -235,33 +264,29 @@ th {
     }
 
     .print-container {
-        width: 100%;
-        max-width: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    #printArea {
-        width: 100%;
-        max-width: none;
-        margin: 0;
-        overflow: visible;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .print-header {
-        margin-bottom: 4px;
+        margin-bottom: 3mm;
     }
 
     .print-header h1 {
         font-size: 13px;
+        line-height: 1.1;
     }
 
     .print-header h2 {
         font-size: 9px;
+        margin-top: 2px;
     }
 
     .print-date {
         font-size: 6px;
+        margin-top: 1px;
     }
 
     .print-controls,
@@ -270,519 +295,53 @@ th {
         display: none !important;
     }
 
-    .print-row {
-        grid-template-columns: max-content max-content;
-        gap: 8px;
-        margin-bottom: 3mm;
-    }
-
-    .group-title {
-        font-size: 7px;
-        padding: 1.5mm 1mm;
-    }
-
-    th, td {
-        width: 70px !important;
-        min-width: 70px !important;
-        max-width: 70px !important;
-        border: 0.3mm solid #000;
-        padding: 0.7mm 0.5mm;
-    }
-
-    th {
-        height: 6mm;
-        font-size: 5.5px;
-    }
-
-    td {
-        height: auto;
-        font-size: 6px;
-    }
-
-    .print-coach-number {
-        font-size: 14px;
-    }
-
-    .print-coach-type,
-    .print-coach-status {
-        font-size: 8px;
-    }
-
-    .full-width {
-        margin-bottom: 3mm;
-    }
-}
-
-/* ===== FULL PAGE WIDTH FIX ===== */
-
-.print-container {
-    width: 100% !important;
-    max-width: none !important;
-}
-
-#printArea {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 auto !important;
-}
-
-/* N + J AND LIFTING + M */
-.print-row {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    width: 100% !important;
-    gap: 5mm !important;
-    margin-bottom: 4mm !important;
-}
-
-.group {
-    width: 100% !important;
-    min-width: 0 !important;
-}
-
-/* ALL TABLES FULL WIDTH */
-.group table,
-.full-width table {
-    width: 100% !important;
-    max-width: 100% !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-}
-
-/* EQUAL COLUMNS INSIDE EACH TABLE */
-.group table th,
-.group table td {
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    text-align: center !important;
-    vertical-align: middle !important;
-    overflow: hidden !important;
-    overflow-wrap: anywhere !important;
-}
-
-/* REMOVE OLD POSITION COLUMN STYLING */
-#printArea table th:first-child,
-#printArea table td:first-child {
-    width: auto !important;
-    min-width: 0 !important;
-}
-
-/* TYPE AND STATUS SIDE BY SIDE */
-.print-coach-meta {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    gap: 3px !important;
-}
-
-/* FULL WIDTH SCR AND CR */
-.full-width {
-    width: 100% !important;
-    margin-bottom: 4mm !important;
-}
-
-/* PRINT PAGE */
-@media print {
-    .print-container,
     #printArea {
         width: 100% !important;
-        max-width: none !important;
-    }
-
-    .print-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        width: 100% !important;
-        gap: 5mm !important;
-    }
-
-    .group table,
-    .full-width table {
-        width: 100% !important;
-        table-layout: fixed !important;
-    }
-
-    .group table th,
-    .group table td {
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: none !important;
-    }
-}
-
-/* REMOVE BLACK SHOP HEADING */
-.group-title {
-    background: #fff !important;
-    color: #000 !important;
-    border: none !important;
-    font-weight: 700 !important;
-}
-
-/* REMOVE ALL TABLE LINES */
-#printArea table,
-#printArea th,
-#printArea td {
-    border: none !important;
-    outline: none !important;
-}
-
-/* WHITE TABLE BACKGROUND */
-#printArea table,
-#printArea th,
-#printArea td {
-    background: #fff !important;
-    color: #000 !important;
-}
-
-/* REMOVE HEADING CELL COLOUR */
-#printArea th {
-    background: #fff !important;
-    font-weight: 700 !important;
-}
-
-/* KEEP COACH DETAILS CLEAR */
-.print-coach-number {
-    color: #000 !important;
-}
-
-.print-coach-type,
-.print-coach-status {
-    color: #000 !important;
-}
-
-/* PRINT WITHOUT BLACK BACKGROUND */
-@media print {
-    .group-title,
-    #printArea th,
-    #printArea td {
-        background: #fff !important;
-        color: #000 !important;
-        border: none !important;
-    }
-}
-
-/* ===== FIT EVERYTHING ON ONE A4 PAGE ===== */
-
-@page {
-    size: A4 landscape;
-    margin: 5mm;
-}
-
-@media print {
-
-    html, body {
-        width: 287mm !important;
-        height: 200mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-    }
-
-    .print-container {
-        width: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    #printArea {
-        width: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
-    }
-
-    /* HEADER */
-    .print-header {
-        margin-bottom: 2mm !important;
-    }
-
-    .print-header h1 {
-        font-size: 11px !important;
-    }
-
-    .print-header h2 {
-        font-size: 8px !important;
-    }
-
-    .print-date {
-        font-size: 6px !important;
-    }
-
-    /* TWO SHOP ROWS */
-    .print-row {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 3mm !important;
-        margin-bottom: 2mm !important;
-    }
-
-    .group {
-        width: 100% !important;
-        margin: 0 !important;
-        break-inside: avoid !important;
-    }
-
-    /* SHOP TITLES */
-    .group-title {
-        background: white !important;
-        color: black !important;
-        border: none !important;
-        font-size: 7px !important;
-        padding: 1mm !important;
-    }
-
-    /* TABLES */
-    .group table,
-    .full-width table {
-        width: 100% !important;
-        table-layout: fixed !important;
-        border-collapse: collapse !important;
-    }
-
-    th, td {
-        width: auto !important;
-        min-width: 0 !important;
         max-width: none !important;
         height: auto !important;
-        padding: 0.5mm !important;
-        border: none !important;
-        background: white !important;
-        color: black !important;
-        line-height: 1 !important;
-    }
-
-    th {
-        font-size: 5px !important;
-    }
-
-    .print-coach-number {
-        font-size: 9px !important;
-        line-height: 1.1 !important;
-    }
-
-    .print-coach-meta {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: center !important;
-        gap: 2px !important;
-        white-space: nowrap !important;
-    }
-
-    .print-coach-type,
-    .print-coach-status {
-        font-size: 6px !important;
-        line-height: 1 !important;
-    }
-
-    .full-width {
-        width: 100% !important;
-        margin-bottom: 2mm !important;
-        break-inside: avoid !important;
-    }
-
-    .print-controls,
-    #loading,
-    #error {
-        display: none !important;
-    }
-}
-
-
-/* BLACK TABLE GRID LINES */
-#printArea table {
-    border-collapse: collapse !important;
-    border: 1px solid #000 !important;
-}
-
-#printArea th,
-#printArea td {
-    border: 1px solid #000 !important;
-    background: #fff !important;
-    color: #000 !important;
-}
-
-/* SHOP TITLE WITHOUT BLACK BACKGROUND */
-.group-title {
-    background: #fff !important;
-    color: #000 !important;
-    border: none !important;
-}
-
-/* PRINT BORDER */
-@media print {
-    #printArea table,
-    #printArea th,
-    #printArea td {
-        border: 1px solid #000 !important;
-    }
-}
-
-
-/* ===== A4 FULL PAGE WITHOUT BIG ROWS ===== */
-@media print {
-
-    @page {
-        size: A4 landscape;
-        margin: 5mm;
-    }
-
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .print-container,
-    #printArea {
-        width: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
-    }
-
-    /* Use full printable page height */
-    #printArea {
-        min-height: 185mm !important;
+        min-height: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
-    }
-
-    .print-header {
-        margin-bottom: 2mm !important;
-    }
-
-    .print-row {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
         gap: 3mm !important;
-        margin: 0 !important;
-    }
-
-    .group {
-        width: 100% !important;
-        margin: 0 !important;
-    }
-
-    .full-width {
-        width: 100% !important;
-        margin: 0 !important;
-    }
-
-    /* Equal columns, compact rows */
-    table {
-        width: 100% !important;
-        table-layout: fixed !important;
-        border-collapse: collapse !important;
-    }
-
-    th, td {
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: none !important;
-        height: 5mm !important;
-        padding: 0.4mm !important;
-        line-height: 1 !important;
-        border: 0.3mm solid #000 !important;
-        background: #fff !important;
-        color: #000 !important;
-    }
-
-    th {
-        font-size: 5.5px !important;
-    }
-
-    .group-title {
-        background: #fff !important;
-        color: #000 !important;
-        border: none !important;
-        padding: 1mm !important;
-        font-size: 7px !important;
-    }
-
-    .print-coach-number {
-        font-size: 9px !important;
-        line-height: 1.1 !important;
-    }
-
-    .print-coach-meta {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: center !important;
-        gap: 2px !important;
-    }
-
-    .print-coach-type,
-    .print-coach-status {
-        font-size: 6px !important;
-    }
-
-    .print-controls,
-    #loading,
-    #error {
-        display: none !important;
-    }
-}
-
-/* ===== FINAL A4 SHOP SPACING ===== */
-
-@media print {
-
-    @page {
-        size: A4 landscape;
-        margin: 5mm;
-    }
-
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .print-container,
-    #printArea {
-        width: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
-    }
-
-    /* REMOVE EXCESSIVE EMPTY GAPS */
-    #printArea {
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: flex-start !important;
-        align-items: stretch !important;
-        gap: 5mm !important;
-        min-height: 0 !important;
+        overflow: visible !important;
     }
 
     /* N + J, LIFTING + M */
     .print-row {
         display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 3mm !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         width: 100% !important;
+        gap: 4mm !important;
         margin: 0 !important;
         align-items: start !important;
     }
 
     .group {
         width: 100% !important;
+        min-width: 0 !important;
         margin: 0 !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
     }
 
-    /* SCR AND CR */
+    /* SCR + CR FULL WIDTH */
     .full-width {
         width: 100% !important;
         margin: 0 !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
     }
 
-    /* EQUAL COLUMNS */
+    /* TABLES */
     #printArea table {
         width: 100% !important;
         table-layout: fixed !important;
         border-collapse: collapse !important;
+        margin: 0 !important;
     }
 
+    /* EQUAL COLUMN WIDTH */
     #printArea th,
     #printArea td {
         width: auto !important;
@@ -791,57 +350,65 @@ th {
         border: 1px solid #000 !important;
         background: #fff !important;
         color: #000 !important;
-        padding: 0.5mm !important;
-    }
-
-    /* KEEP ROWS COMPACT */
-    #printArea td {
-        height: 5mm !important;
-        line-height: 1 !important;
-    }
-
-    #printArea th {
-        height: 5mm !important;
-        font-size: 5.5px !important;
-    }
-
-    .group-title {
-        background: #fff !important;
-        color: #000 !important;
-        border: none !important;
-        font-size: 7px !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        overflow: hidden !important;
         padding: 1mm !important;
     }
 
-    .print-coach-number {
-        font-size: 9px !important;
-        line-height: 1.1 !important;
+    /* LINE HEADER */
+    #printArea th {
+        height: 6mm !important;
+        font-size: 6px !important;
+        font-weight: 700 !important;
     }
 
+    /* COACH CELL HEIGHT */
+    #printArea td {
+        height: 9mm !important;
+        min-height: 9mm !important;
+        padding: 1mm !important;
+    }
+
+    /* COACH NUMBER */
+    .print-coach-number {
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        line-height: 1.2 !important;
+        margin-bottom: 1mm !important;
+    }
+
+    /* TYPE + STATUS */
     .print-coach-meta {
         display: flex !important;
         flex-direction: row !important;
         justify-content: center !important;
         align-items: center !important;
-        gap: 2px !important;
+        gap: 3px !important;
         flex-wrap: nowrap !important;
+        white-space: nowrap !important;
     }
 
     .print-coach-type,
     .print-coach-status {
-        font-size: 6px !important;
+        display: inline-block !important;
+        font-size: 7px !important;
+        font-weight: 700 !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
     }
 
-    .print-controls,
-    #loading,
-    #error {
-        display: none !important;
+    /* WHITE SHOP TITLE */
+    .group-title {
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important;
+        font-size: 8px !important;
+        font-weight: 700 !important;
+        padding: 1.5mm !important;
     }
 }
-
-
 </style>
-
 </head>
 
 <body>
@@ -888,7 +455,6 @@ th {
                 <table>
                     <thead>
                         <tr>
-                           
                             <th>J1</th>
                             <th>J2</th>
                             <th>J3</th>
@@ -911,7 +477,6 @@ th {
                 <table>
                     <thead>
                         <tr>
-                           
                             <th>L9</th>
                             <th>L10</th>
                         </tr>
@@ -925,7 +490,6 @@ th {
                 <table>
                     <thead>
                         <tr>
-                            
                             <th>M2</th>
                             <th>M3</th>
                             <th>M4</th>
@@ -969,7 +533,6 @@ th {
             <table>
                 <thead>
                     <tr>
-                       
                         <th>F1</th>
                         <th>F2</th>
                         <th>F3</th>
@@ -990,7 +553,7 @@ th {
     </div>
 </div>
 
-<script type="module" src="js/print.js?v=143"></script>
+<script type="module" src="js/print.js?v=153"></script>
 
 </body>
 </html>
