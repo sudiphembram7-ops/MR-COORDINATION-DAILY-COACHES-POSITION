@@ -724,6 +724,122 @@ th {
     }
 }
 
+/* ===== FINAL A4 SHOP SPACING ===== */
+
+@media print {
+
+    @page {
+        size: A4 landscape;
+        margin: 5mm;
+    }
+
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .print-container,
+    #printArea {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    /* REMOVE EXCESSIVE EMPTY GAPS */
+    #printArea {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: stretch !important;
+        gap: 5mm !important;
+        min-height: 0 !important;
+    }
+
+    /* N + J, LIFTING + M */
+    .print-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 3mm !important;
+        width: 100% !important;
+        margin: 0 !important;
+        align-items: start !important;
+    }
+
+    .group {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* SCR AND CR */
+    .full-width {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* EQUAL COLUMNS */
+    #printArea table {
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+    }
+
+    #printArea th,
+    #printArea td {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        border: 1px solid #000 !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0.5mm !important;
+    }
+
+    /* KEEP ROWS COMPACT */
+    #printArea td {
+        height: 5mm !important;
+        line-height: 1 !important;
+    }
+
+    #printArea th {
+        height: 5mm !important;
+        font-size: 5.5px !important;
+    }
+
+    .group-title {
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important;
+        font-size: 7px !important;
+        padding: 1mm !important;
+    }
+
+    .print-coach-number {
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+    }
+
+    .print-coach-meta {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 2px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .print-coach-type,
+    .print-coach-status {
+        font-size: 6px !important;
+    }
+
+    .print-controls,
+    #loading,
+    #error {
+        display: none !important;
+    }
+}
+
+
 </style>
 
 </head>
