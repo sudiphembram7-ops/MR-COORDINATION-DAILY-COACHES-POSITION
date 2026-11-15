@@ -412,6 +412,58 @@ th {
     }
 }
 
+/* REMOVE BLACK SHOP HEADING */
+.group-title {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+    font-weight: 700 !important;
+}
+
+/* REMOVE ALL TABLE LINES */
+#printArea table,
+#printArea th,
+#printArea td {
+    border: none !important;
+    outline: none !important;
+}
+
+/* WHITE TABLE BACKGROUND */
+#printArea table,
+#printArea th,
+#printArea td {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+/* REMOVE HEADING CELL COLOUR */
+#printArea th {
+    background: #fff !important;
+    font-weight: 700 !important;
+}
+
+/* KEEP COACH DETAILS CLEAR */
+.print-coach-number {
+    color: #000 !important;
+}
+
+.print-coach-type,
+.print-coach-status {
+    color: #000 !important;
+}
+
+/* PRINT WITHOUT BLACK BACKGROUND */
+@media print {
+    .group-title,
+    #printArea th,
+    #printArea td {
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important;
+    }
+}
+
+
 </style>
 
 </head>
