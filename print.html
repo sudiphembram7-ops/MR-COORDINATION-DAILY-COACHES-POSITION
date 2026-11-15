@@ -463,6 +463,133 @@ th {
     }
 }
 
+/* ===== FIT EVERYTHING ON ONE A4 PAGE ===== */
+
+@page {
+    size: A4 landscape;
+    margin: 5mm;
+}
+
+@media print {
+
+    html, body {
+        width: 287mm !important;
+        height: 200mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .print-container {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #printArea {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    /* HEADER */
+    .print-header {
+        margin-bottom: 2mm !important;
+    }
+
+    .print-header h1 {
+        font-size: 11px !important;
+    }
+
+    .print-header h2 {
+        font-size: 8px !important;
+    }
+
+    .print-date {
+        font-size: 6px !important;
+    }
+
+    /* TWO SHOP ROWS */
+    .print-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 3mm !important;
+        margin-bottom: 2mm !important;
+    }
+
+    .group {
+        width: 100% !important;
+        margin: 0 !important;
+        break-inside: avoid !important;
+    }
+
+    /* SHOP TITLES */
+    .group-title {
+        background: white !important;
+        color: black !important;
+        border: none !important;
+        font-size: 7px !important;
+        padding: 1mm !important;
+    }
+
+    /* TABLES */
+    .group table,
+    .full-width table {
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+    }
+
+    th, td {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: auto !important;
+        padding: 0.5mm !important;
+        border: none !important;
+        background: white !important;
+        color: black !important;
+        line-height: 1 !important;
+    }
+
+    th {
+        font-size: 5px !important;
+    }
+
+    .print-coach-number {
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+    }
+
+    .print-coach-meta {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        gap: 2px !important;
+        white-space: nowrap !important;
+    }
+
+    .print-coach-type,
+    .print-coach-status {
+        font-size: 6px !important;
+        line-height: 1 !important;
+    }
+
+    .full-width {
+        width: 100% !important;
+        margin-bottom: 2mm !important;
+        break-inside: avoid !important;
+    }
+
+    .print-controls,
+    #loading,
+    #error {
+        display: none !important;
+    }
+}
+
+
 
 </style>
 
