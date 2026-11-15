@@ -620,6 +620,110 @@ th {
 }
 
 
+/* ===== A4 FULL PAGE WITHOUT BIG ROWS ===== */
+@media print {
+
+    @page {
+        size: A4 landscape;
+        margin: 5mm;
+    }
+
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .print-container,
+    #printArea {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    /* Use full printable page height */
+    #printArea {
+        min-height: 185mm !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+
+    .print-header {
+        margin-bottom: 2mm !important;
+    }
+
+    .print-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 3mm !important;
+        margin: 0 !important;
+    }
+
+    .group {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .full-width {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* Equal columns, compact rows */
+    table {
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+    }
+
+    th, td {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 5mm !important;
+        padding: 0.4mm !important;
+        line-height: 1 !important;
+        border: 0.3mm solid #000 !important;
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    th {
+        font-size: 5.5px !important;
+    }
+
+    .group-title {
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important;
+        padding: 1mm !important;
+        font-size: 7px !important;
+    }
+
+    .print-coach-number {
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+    }
+
+    .print-coach-meta {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        gap: 2px !important;
+    }
+
+    .print-coach-type,
+    .print-coach-status {
+        font-size: 6px !important;
+    }
+
+    .print-controls,
+    #loading,
+    #error {
+        display: none !important;
+    }
+}
+
 </style>
 
 </head>
