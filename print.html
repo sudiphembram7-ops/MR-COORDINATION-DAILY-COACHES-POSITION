@@ -312,6 +312,106 @@ th {
         margin-bottom: 3mm;
     }
 }
+
+/* ===== FULL PAGE WIDTH FIX ===== */
+
+.print-container {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+#printArea {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+}
+
+/* N + J AND LIFTING + M */
+.print-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    gap: 5mm !important;
+    margin-bottom: 4mm !important;
+}
+
+.group {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+/* ALL TABLES FULL WIDTH */
+.group table,
+.full-width table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+}
+
+/* EQUAL COLUMNS INSIDE EACH TABLE */
+.group table th,
+.group table td {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* REMOVE OLD POSITION COLUMN STYLING */
+#printArea table th:first-child,
+#printArea table td:first-child {
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+/* TYPE AND STATUS SIDE BY SIDE */
+.print-coach-meta {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 3px !important;
+}
+
+/* FULL WIDTH SCR AND CR */
+.full-width {
+    width: 100% !important;
+    margin-bottom: 4mm !important;
+}
+
+/* PRINT PAGE */
+@media print {
+    .print-container,
+    #printArea {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    .print-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        gap: 5mm !important;
+    }
+
+    .group table,
+    .full-width table {
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    .group table th,
+    .group table td {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+}
+
 </style>
 
 </head>
