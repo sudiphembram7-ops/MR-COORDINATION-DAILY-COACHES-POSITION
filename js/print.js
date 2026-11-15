@@ -304,6 +304,7 @@ function escapeHTML(value) {
         .replace(/'/g, "&#039;");
 }
 
+
 /* RENDER SHOP - NO POSITION COLUMN */
 function renderShop(board, shop) {
     const config = CONFIG[shop];
@@ -338,17 +339,12 @@ function renderShop(board, shop) {
                     </div>
 
                     <div class="print-coach-meta">
-                        ${
-                            coach.type
-                                ? `<span class="print-coach-type">${escapeHTML(coach.type)}</span>`
-                                : ""
-                        }
-
-                        ${
-                            coach.status
-                                ? `<span class="print-coach-status">${escapeHTML(coach.status)}</span>`
-                                : ""
-                        }
+                        <span class="print-coach-type">
+                            ${escapeHTML(coach.type || "")}
+                        </span>
+                        <span class="print-coach-status">
+                            ${escapeHTML(coach.status || "")}
+                        </span>
                     </div>
                 `;
 
@@ -364,6 +360,7 @@ function renderShop(board, shop) {
         tbody.appendChild(tr);
     }
 }
+
 
 /* RENDER ALL SHOPS */
 function renderAllShops(board) {
