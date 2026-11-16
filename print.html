@@ -56,7 +56,8 @@ body {
     margin-bottom: 10px;
 }
 
-.print-btn, .refresh-btn {
+.print-btn,
+.refresh-btn {
     border: 0;
     color: #fff;
     padding: 7px 18px;
@@ -76,11 +77,10 @@ body {
 
 #printArea {
     width: 100%;
-    max-width: none;
     margin: 0 auto;
 }
 
-/* TWO COLUMN LAYOUT */
+/* TWO COLUMN ROWS */
 .print-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -89,7 +89,7 @@ body {
     align-items: start;
 }
 
-/* SHOP GROUP */
+/* SHOP */
 .group {
     width: 100%;
     min-width: 0;
@@ -98,7 +98,6 @@ body {
     page-break-inside: avoid;
 }
 
-/* WHITE SHOP TITLE */
 .group-title {
     width: 100%;
     background: #fff;
@@ -111,7 +110,7 @@ body {
     border: none;
 }
 
-/* ALL TABLES */
+/* TABLE */
 #printArea table {
     width: 100%;
     table-layout: fixed;
@@ -119,12 +118,10 @@ body {
     margin: 0;
 }
 
-/* TABLE GRID */
 #printArea th,
 #printArea td {
     width: auto;
     min-width: 0;
-    max-width: none;
     box-sizing: border-box;
     text-align: center;
     vertical-align: middle;
@@ -135,7 +132,7 @@ body {
     overflow: hidden;
 }
 
-/* LINE HEADING */
+/* LINE HEADER */
 #printArea th {
     height: 20px;
     font-size: 8px;
@@ -145,14 +142,13 @@ body {
 /* COACH CELL */
 #printArea td {
     height: 10mm;
-    min-height: 10mm;
     padding: 1mm;
 }
 
 /* COACH NUMBER */
 .print-coach-number {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 800;
     line-height: 1.2;
     text-align: center;
@@ -160,13 +156,13 @@ body {
     margin-bottom: 1mm;
 }
 
-/* TYPE AND STATUS SIDE BY SIDE */
+/* TYPE + STATUS SIDE BY SIDE */
 .print-coach-meta {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     flex-wrap: nowrap;
     white-space: nowrap;
     line-height: 1.1;
@@ -183,13 +179,12 @@ body {
     padding: 0;
 }
 
-/* FULL WIDTH SHOPS */
+/* FULL WIDTH */
 .full-width {
     width: 100%;
     margin-bottom: 6px;
 }
 
-/* LOADING */
 #loading {
     text-align: center;
     padding: 12px;
@@ -197,7 +192,6 @@ body {
     font-weight: bold;
 }
 
-/* ERROR */
 #error {
     text-align: center;
     color: red;
@@ -206,7 +200,7 @@ body {
     font-weight: bold;
 }
 
-/* MOBILE */
+/* MOBILE SCREEN */
 @media screen and (max-width: 768px) {
     .print-container {
         max-width: 100%;
@@ -248,10 +242,10 @@ body {
     margin: 5mm;
 }
 
-/* PRINT */
+/* PRINT SETTINGS */
 @media print {
-
-    html, body {
+    html,
+    body {
         width: 100%;
         margin: 0 !important;
         padding: 0 !important;
@@ -295,29 +289,30 @@ body {
         display: none !important;
     }
 
+    /* FIT ALL SHOPS IN ONE PAGE */
     #printArea {
         width: 100% !important;
-        max-width: none !important;
-        height: auto !important;
-        min-height: 0 !important;
+        height: 190mm !important;
+        max-height: 190mm !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
-        gap: 2mm !important;
+        gap: 1mm !important;
         overflow: visible !important;
     }
 
-    /* N + J / LIFTING + M */
+    /* N + J AND LIFTING + M */
     .print-row {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         width: 100% !important;
-        gap: 4mm !important;
+        gap: 3mm !important;
         margin: 0 !important;
         align-items: start !important;
     }
 
-    .group {
+    .group,
+    .full-width {
         width: 100% !important;
         min-width: 0 !important;
         margin: 0 !important;
@@ -325,15 +320,7 @@ body {
         page-break-inside: avoid !important;
     }
 
-    /* SCR + CR FULL WIDTH */
-    .full-width {
-        width: 100% !important;
-        margin: 0 !important;
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
-
-    /* TABLES */
+    /* ALL TABLES */
     #printArea table {
         width: 100% !important;
         table-layout: fixed !important;
@@ -341,7 +328,7 @@ body {
         margin: 0 !important;
     }
 
-    /* EQUAL COLUMNS + BLACK GRID */
+    /* EQUAL COLUMNS WITH BLACK BORDERS */
     #printArea th,
     #printArea td {
         width: auto !important;
@@ -357,32 +344,31 @@ body {
     }
 
     #printArea th {
-        height: 6mm !important;
+        height: 5mm !important;
         font-size: 6px !important;
         font-weight: 700 !important;
     }
 
-    /* LARGER COACH CELLS */
     #printArea td {
-        height: 10mm !important;
-        min-height: 10mm !important;
+        height: 9mm !important;
+        min-height: 9mm !important;
         padding: 1mm !important;
     }
 
     .print-coach-number {
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: 800 !important;
         line-height: 1.2 !important;
         margin-bottom: 1mm !important;
     }
 
-    /* TYPE + STATUS */
+    /* TYPE AND STATUS SAME LINE */
     .print-coach-meta {
         display: flex !important;
         flex-direction: row !important;
         justify-content: center !important;
         align-items: center !important;
-        gap: 3px !important;
+        gap: 2px !important;
         flex-wrap: nowrap !important;
         white-space: nowrap !important;
     }
@@ -396,14 +382,14 @@ body {
         white-space: nowrap !important;
     }
 
-    /* WHITE SHOP TITLE */
+    /* NO BLACK SHOP HEADING */
     .group-title {
         background: #fff !important;
         color: #000 !important;
         border: none !important;
         font-size: 8px !important;
         font-weight: 700 !important;
-        padding: 1.5mm !important;
+        padding: 1mm !important;
     }
 }
 </style>
@@ -429,7 +415,7 @@ body {
 
     <div id="printArea">
 
-        <!-- FIRST ROW: N SHOP + J SHOP -->
+        <!-- N SHOP + J SHOP -->
         <div class="print-row">
 
             <section class="group">
@@ -467,7 +453,7 @@ body {
 
         </div>
 
-        <!-- SECOND ROW: LIFTING BAY + M SHOP -->
+        <!-- LIFTING BAY + M SHOP -->
         <div class="print-row">
 
             <section class="group">
@@ -501,7 +487,7 @@ body {
 
         </div>
 
-        <!-- FULL WIDTH: MR SCR SHOP -->
+        <!-- MR SCR SHOP -->
         <section class="group full-width">
             <div class="group-title">MR SCR SHOP</div>
             <table>
@@ -525,7 +511,7 @@ body {
             </table>
         </section>
 
-        <!-- FULL WIDTH: CR SHOP -->
+        <!-- CR SHOP -->
         <section class="group full-width">
             <div class="group-title">CR SHOP</div>
             <table>
