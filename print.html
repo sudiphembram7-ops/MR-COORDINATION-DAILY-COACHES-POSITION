@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MR CO-ORDINATION - PRINT</title>
+<title>MR CO-ORDINATION DAILY COACHES</title>
 
 <style>
 * {
@@ -20,13 +20,13 @@ html, body {
 }
 
 body {
-    padding: 8px;
+    padding: 10px;
 }
 
 .print-container {
     width: 100%;
     max-width: 1100px;
-    margin: 0 auto;
+    margin: auto;
 }
 
 .print-header {
@@ -36,19 +36,19 @@ body {
 
 .print-header h1 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.1;
 }
 
 .print-header h2 {
-    margin: 2px 0;
-    font-size: 12px;
+    margin: 3px 0 0;
+    font-size: 13px;
 }
 
 .print-date {
+    margin-top: 3px;
     font-size: 9px;
-    margin-top: 2px;
 }
 
 .print-controls {
@@ -56,7 +56,8 @@ body {
     margin-bottom: 10px;
 }
 
-.print-btn, .refresh-btn {
+.print-btn,
+.refresh-btn {
     border: 0;
     color: white;
     padding: 7px 18px;
@@ -76,80 +77,80 @@ body {
 
 #printArea {
     width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
+    margin: auto;
 }
 
-/* TWO SHOP SIDE BY SIDE */
+/* TWO COLUMN SHOP ROW */
 .print-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 5px;
     margin-bottom: 6px;
-    width: 100%;
+    align-items: start;
 }
 
-/* SHOP SECTION */
+/* SHOP DESIGN */
 .group {
     width: 100%;
     min-width: 0;
-    margin: 0 0 6px;
+    margin: 0;
     break-inside: avoid;
     page-break-inside: avoid;
 }
 
-/* SHOP TITLE - WHITE BACKGROUND */
 .group-title {
+    width: 100%;
     background: white;
     color: black;
     text-align: center;
     font-size: 10px;
     font-weight: bold;
     padding: 4px;
-    border: 1px solid black;
+    border: none;
 }
 
-/* ALL TABLES */
-table {
+/* TABLE */
+#printArea table {
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
     margin: 0;
 }
 
-/* BLACK CELL BORDER */
-th, td {
-    border: 1px solid black;
+#printArea th,
+#printArea td {
     width: auto;
-    padding: 3px 1px;
+    min-width: 0;
+    border: 1px solid black;
+    background: white;
+    color: black;
     text-align: center;
     vertical-align: middle;
+    padding: 2px;
     overflow: hidden;
 }
 
-/* LINE HEADER - WHITE */
-th {
-    background: white;
-    color: black;
-    font-size: 9px;
+/* LINE NAME */
+#printArea th {
+    height: 20px;
+    font-size: 8px;
     font-weight: bold;
-    height: 22px;
 }
 
-/* COACH CELL HEIGHT */
-td {
-    height: 32px;
-    background: white;
-    color: black;
+/* COACH CELL */
+#printArea td {
+    height: 10mm;
+    padding: 1mm;
 }
 
 /* COACH NUMBER */
 .print-coach-number {
     display: block;
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     line-height: 1.15;
     white-space: nowrap;
+    margin-bottom: 1px;
 }
 
 /* TYPE AND STATUS SIDE BY SIDE */
@@ -162,18 +163,23 @@ td {
     flex-wrap: nowrap;
     white-space: nowrap;
     line-height: 1.1;
-    margin-top: 2px;
 }
 
 .print-coach-type,
 .print-coach-status {
     display: inline-block;
     font-size: 8px;
-    font-weight: 600;
+    font-weight: bold;
     white-space: nowrap;
+    line-height: 1.1;
 }
 
-/* LOADING AND ERROR */
+/* FULL WIDTH SHOPS */
+.full-width {
+    width: 100%;
+    margin-bottom: 6px;
+}
+
 #loading {
     text-align: center;
     padding: 12px;
@@ -190,83 +196,83 @@ td {
 }
 
 /* MOBILE VIEW */
-@media screen and (max-width: 600px) {
-    body {
-        padding: 4px;
+@media screen and (max-width: 768px) {
+    .print-header h1 {
+        font-size: 16px;
     }
 
     .print-row {
-        gap: 3px;
+        gap: 4px;
     }
 
-    th {
-        font-size: 7px;
+    .group-title {
+        font-size: 8px;
     }
 
-    td {
-        height: 27px;
-        padding: 2px 0;
+    #printArea th {
+        font-size: 6px;
+    }
+
+    #printArea td {
+        height: 9mm;
     }
 
     .print-coach-number {
-        font-size: 9px;
+        font-size: 10px;
     }
 
     .print-coach-type,
     .print-coach-status {
         font-size: 6px;
     }
-
-    .print-coach-meta {
-        gap: 1px;
-    }
 }
 
-/* A4 LANDSCAPE - ONE PAGE */
+/* A4 LANDSCAPE */
 @page {
     size: A4 landscape;
-    margin: 5mm;
+    margin: 4mm;
 }
 
+/* PRINT */
 @media print {
-    html, body {
+
+    html,
+    body {
         width: 100%;
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
-        overflow: visible !important;
+    }
+
+    body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
 
     .print-container {
         width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 auto !important;
+        max-width: none !important;
+        margin: 0 !important;
         padding: 0 !important;
     }
 
-    #printArea {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 auto !important;
-        zoom: 0.85;
-    }
-
     .print-header {
-        margin-bottom: 3mm;
+        margin-bottom: 1mm !important;
     }
 
     .print-header h1 {
-        font-size: 13px;
+        font-size: 11px !important;
+        line-height: 1.1 !important;
     }
 
     .print-header h2 {
-        font-size: 9px;
+        font-size: 8px !important;
+        margin-top: 1px !important;
     }
 
     .print-date {
-        font-size: 6px;
+        font-size: 6px !important;
+        margin-top: 1px !important;
     }
 
     .print-controls,
@@ -275,86 +281,110 @@ td {
         display: none !important;
     }
 
-    .print-row {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-        gap: 2mm !important;
-        margin-bottom: 2mm !important;
+    /* FIT ALL SHOPS ON ONE PAGE */
+    #printArea {
         width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        gap: 1.5mm !important;
+        overflow: visible !important;
     }
 
-    .group {
+    /* N + J, LIFTING + M */
+    .print-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        gap: 2mm !important;
+        margin: 0 !important;
+        align-items: start !important;
+    }
+
+    .group,
+    .full-width {
         width: 100% !important;
         min-width: 0 !important;
-        margin-bottom: 2mm !important;
+        margin: 0 !important;
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
 
+    /* SHOP HEADING WHITE */
     .group-title {
         background: white !important;
         color: black !important;
-        border: 0.3mm solid black !important;
-        font-size: 7px;
-        padding: 1mm;
+        border: none !important;
+        font-size: 7px !important;
+        padding: 0.5mm !important;
     }
 
-    table {
+    /* EQUAL WIDTH COLUMNS */
+    #printArea table {
         width: 100% !important;
         table-layout: fixed !important;
         border-collapse: collapse !important;
         margin: 0 !important;
     }
 
-    th, td {
+    #printArea th,
+    #printArea td {
         width: auto !important;
         min-width: 0 !important;
         max-width: none !important;
-        border: 0.25mm solid black !important;
+        border: 1px solid black !important;
+        background: white !important;
+        color: black !important;
         text-align: center !important;
         vertical-align: middle !important;
-        padding: 0.8mm 0.3mm !important;
+        padding: 0.5mm !important;
         overflow: hidden !important;
     }
 
-    th {
-        height: 5mm !important;
-        font-size: 6px !important;
-        background: white !important;
-        color: black !important;
+    /* LINE HEADER */
+    #printArea th {
+        height: 4mm !important;
+        font-size: 5.5px !important;
+        font-weight: bold !important;
     }
 
-    td {
-        height: 7mm !important;
-        background: white !important;
-        color: black !important;
+    /* CELL HEIGHT */
+    #printArea td {
+        height: 8mm !important;
+        min-height: 8mm !important;
+        padding: 0.5mm !important;
     }
 
+    /* COACH NUMBER */
     .print-coach-number {
-        font-size: 9px !important;
+        font-size: 10px !important;
+        font-weight: 800 !important;
         line-height: 1.1 !important;
+        margin-bottom: 0.5mm !important;
     }
 
+    /* TYPE + STATUS SAME LINE */
     .print-coach-meta {
         display: flex !important;
         flex-direction: row !important;
         justify-content: center !important;
         align-items: center !important;
-        gap: 2px !important;
+        gap: 1px !important;
         flex-wrap: nowrap !important;
         white-space: nowrap !important;
-        margin-top: 1px !important;
     }
 
     .print-coach-type,
     .print-coach-status {
+        display: inline-block !important;
         font-size: 6px !important;
-        line-height: 1.1 !important;
-    }
-
-    .full-width {
-        width: 100% !important;
-        margin-bottom: 2mm !important;
+        font-weight: bold !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 }
 </style>
@@ -502,7 +532,7 @@ td {
     </div>
 </div>
 
-<script type="module" src="js/print.js?v=150"></script>
+<script type="module" src="js/print.js?v=154"></script>
 
 </body>
 </html>
