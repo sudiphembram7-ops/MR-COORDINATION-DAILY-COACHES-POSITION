@@ -4,200 +4,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MR COACH STOCK DASHBOARD</title>
+<meta name="theme-color" content="#102b50">
+<title>MR Co-ordination Daily Coach Stock</title>
 
 <style>
+:root{--navy:#102b50;--blue:#1d5b91;--gold:#e3b34f;--ink:#17263c;--muted:#64748b;--line:#e2e8f0;--bg:#f2f5fa;--green:#16834a;--red:#bd3030;--orange:#c47b16}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
-header{background:#102b50;color:white;padding:18px;text-align:center}
-header h1{font-size:23px}
-header p{margin-top:6px;color:#dce8f5}
-.container{max-width:1500px;margin:auto;padding:16px}
-.panel{background:white;padding:18px;border-radius:10px;margin-bottom:16px;box-shadow:0 2px 9px #00000012}
-h2{font-size:18px;margin-bottom:14px;color:#17365d}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-.stat{padding:16px;border-radius:9px;background:#eaf1fb;border-left:5px solid #245b96}
-.stat strong{display:block;font-size:25px;margin-top:7px}
-label{display:block;font-weight:bold;font-size:13px;margin-bottom:6px}
-input,select,textarea{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;background:white}
-textarea{min-height:70px;resize:vertical}
-.field{margin-bottom:12px}
-button{border:0;border-radius:6px;padding:10px 14px;font-weight:bold;cursor:pointer;background:#174d83;color:white}
-button:hover{opacity:.9}
-button:disabled{opacity:.6;cursor:not-allowed}
-.btn-green{background:#16834a}
-.btn-red{background:#bd3030}
-.btn-orange{background:#c47b16}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+header{background:linear-gradient(120deg,#0b203d,#174d7d 70%,#24699c);color:#fff;padding:24px 18px;box-shadow:0 5px 18px #102b5026}
+.header-inner{max-width:1500px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:48px;height:48px;border:1px solid #ffffff55;border-radius:14px;display:grid;place-items:center;color:var(--gold);font-weight:900;font-size:21px}
+header h1{font-size:clamp(18px,2.5vw,26px)}
+header p{margin-top:5px;color:#d7e5f4;font-size:13px;letter-spacing:1px}
+.header-tag{border:1px solid #ffffff55;border-radius:30px;padding:8px 13px;font-size:11px;letter-spacing:1px}
+.container{max-width:1500px;margin:24px auto;padding:0 18px 35px}
+.panel{background:#fff;padding:20px;border:1px solid #e8edf4;border-radius:15px;margin-bottom:17px;box-shadow:0 5px 18px #102b500a}
+.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+h2{font-size:17px;color:var(--navy)}
+.eyebrow{font-size:10px;color:var(--blue);font-weight:800;letter-spacing:1.4px;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.stat{padding:18px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#fff,#f7faff);min-height:105px}
+.stat-label{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:1px}
+.stat strong{display:block;font-size:29px;color:var(--navy);margin-top:8px}
+label{display:block;font-weight:800;font-size:11px;color:#40516a;margin-bottom:6px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;background:#fff;color:var(--ink)}
+textarea{min-height:76px;resize:vertical}
+.field{margin-bottom:13px}
+button{border:0;border-radius:8px;padding:10px 14px;font-weight:800;font-size:11px;cursor:pointer;background:var(--blue);color:#fff}
+button:hover{filter:brightness(1.07)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.btn-green{background:var(--green)}
+.btn-red{background:var(--red)}
+.btn-orange{background:var(--orange)}
 .btn-gray{background:#64748b}
-.actions{display:flex;gap:7px;flex-wrap:wrap}
-.toolbar{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:12px}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:1100px;font-size:13px}
-th,td{border:1px solid #dce3ec;padding:10px;text-align:center}
-th{background:#17365d;color:white;white-space:nowrap}
-tbody tr:nth-child(even){background:#f5f8fc}
-.coach-link{color:#075db5;text-decoration:underline;font-weight:bold;cursor:pointer;background:none;padding:0}
-.status{padding:5px 9px;border-radius:20px;background:#fff0d4;color:#8b5700;font-weight:bold}
+.btn-light{background:#eaf1f8;color:var(--navy)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.accessbar{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.access-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.access-dot{width:9px;height:9px;border-radius:50%;background:#22a06b}
+.role-pill{background:#e8f5ed;color:#17653b;border-radius:30px;padding:5px 10px;font-size:10px;font-weight:900}
+#loginPanel{display:none;max-width:480px;margin:18px 0}
+.message{margin-top:9px;font-size:12px;min-height:17px}
+.note{font-size:11px;color:var(--muted);margin-top:6px}
+.toolbar{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:14px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;min-width:1120px;font-size:12px}
+th,td{padding:12px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:#173b63;color:#fff;font-size:10px;letter-spacing:.7px}
+tbody tr:nth-child(even){background:#f8fafd}
+.coach-link{color:#075db5;text-decoration:underline;background:none;padding:0;font-size:12px}
+.status{display:inline-block;padding:5px 9px;border-radius:30px;background:#fff0d4;color:#8b5700;font-weight:800;font-size:10px}
 .status.completed{background:#d9f6e5;color:#12683b}
-#appSection{display:none}
-#loginSection{max-width:420px;margin:45px auto}
-.message{margin-top:10px;font-size:13px}
-.modal{display:none;position:fixed;inset:0;background:#0009;z-index:1000;align-items:center;justify-content:center;padding:12px}
-.modal-box{background:white;width:100%;max-width:700px;max-height:90vh;overflow:auto;border-radius:10px;padding:20px}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-.modal-head h2{margin:0}
-.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.detail-item{background:#f1f5f9;padding:10px;border-radius:6px;overflow-wrap:anywhere}
-.detail-item small{display:block;color:#64748b;margin-bottom:5px}
-.history-item{border-left:4px solid #245b96;padding:10px;margin:10px 0;background:#f5f8fc}
-.note{font-size:12px;color:#64748b;margin-top:6px}
-@media(max-width:600px){
- header h1{font-size:18px}
- .container{padding:9px}
- .panel{padding:12px}
- .toolbar{grid-template-columns:1fr}
- .detail-grid{grid-template-columns:1fr}
-}
+.viewer-note{background:#edf5fc;border:1px solid #d8e8f7;color:#234d72;padding:11px 13px;border-radius:10px;font-size:12px;margin-bottom:15px}
+#editorPanel{display:none}
+.modal{display:none;position:fixed;inset:0;background:#071629b8;z-index:1000;align-items:center;justify-content:center;padding:14px}
+.modal-box{background:#fff;width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:16px;padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
+.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.detail-item{background:#f2f6fb;padding:12px;border-radius:9px;overflow-wrap:anywhere}
+.detail-item small{display:block;color:var(--muted);font-size:9px;font-weight:800;margin-bottom:5px}
+.history-item{border-left:4px solid var(--blue);padding:12px 14px;margin:11px 0;background:#f5f8fc;border-radius:0 9px 9px 0;font-size:12px}
+.history-item p{margin-top:4px;color:#45566d}
+.empty{padding:26px!important;color:var(--muted);text-align:center}
+footer{text-align:center;color:#8491a3;font-size:10px;padding:8px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.header-tag{display:none}}
+@media(max-width:560px){header{padding:17px 13px}.container{padding:0 10px 25px;margin:14px auto}.panel{padding:14px}.grid{gap:9px}.stat{padding:13px;min-height:90px}.stat strong{font-size:25px}.toolbar{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.accessbar{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 
 <body>
-
 <header>
+<div class="header-inner">
+<div class="brand">
+<div class="brand-mark">MR</div>
+<div>
 <h1>MR CO-ORDINATION DAILY COACH STOCK</h1>
 <p>LILUAH WORKSHOP | MR CO-ORDINATION SECTION</p>
+</div>
+</div>
+<div class="header-tag">LIVE STOCK REGISTER</div>
+</div>
 </header>
 
-<div class="container">
+<main class="container">
 
-<!-- LOGIN -->
-<section id="loginSection" class="panel">
-<h2>ADMIN / EDITOR LOGIN</h2>
+<section class="panel">
+<div class="accessbar">
+<div class="access-left">
+<span class="access-dot"></span>
+<strong id="userEmail">PUBLIC VIEWER</strong>
+<span id="roleBadge" class="role-pill">VIEW ONLY</span>
+</div>
+<div class="actions">
+<button id="showLoginBtn" class="btn-light" type="button">ADMIN LOGIN</button>
+<button id="logoutBtn" class="btn-red" type="button" style="display:none">LOGOUT</button>
+</div>
+</div>
+<p id="message" class="message"></p>
 
+<section id="loginPanel">
+<div class="panel-heading">
+<div><div class="eyebrow">Secure access</div><h2>ADMIN LOGIN</h2></div>
+<button id="closeLoginBtn" class="btn-gray" type="button">CLOSE</button>
+</div>
 <div class="field">
 <label>EMAIL</label>
-<input type="email" id="loginEmail" placeholder="Enter email" autocomplete="username">
+<input type="email" id="loginEmail" placeholder="Enter admin email" autocomplete="username">
 </div>
-
 <div class="field">
 <label>PASSWORD</label>
 <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
 </div>
-
 <button id="loginBtn" type="button">LOGIN</button>
 <p id="loginMessage" class="message"></p>
 </section>
+</section>
 
+<section class="grid panel">
+<div class="stat"><span class="stat-label">TOTAL COACHES</span><strong id="totalCoaches">0</strong></div>
+<div class="stat"><span class="stat-label">TOTAL SHOPS</span><strong id="totalShops">0</strong></div>
+<div class="stat"><span class="stat-label">PENDING</span><strong id="pendingCoaches">0</strong></div>
+<div class="stat"><span class="stat-label">COMPLETED</span><strong id="completedCoaches">0</strong></div>
+</section>
 
-<!-- MAIN APP -->
-<section id="appSection">
-
-<div class="panel">
-<div class="actions" style="justify-content:space-between;align-items:center">
-<div>Logged in: <strong id="userEmail"></strong></div>
-<button id="logoutBtn" class="btn-red" type="button">LOGOUT</button>
+<section id="editorPanel" class="panel">
+<div class="panel-heading">
+<div><div class="eyebrow">Stock management</div><h2 id="formTitle">ADD NEW COACH</h2></div>
+<span class="role-pill">ADMIN ACCESS</span>
 </div>
-<p id="message" class="message"></p>
-</div>
-
-
-<!-- DASHBOARD -->
-<div class="grid panel">
-<div class="stat">TOTAL COACHES<strong id="totalCoaches">0</strong></div>
-<div class="stat">TOTAL SHOPS<strong id="totalShops">18</strong></div>
-<div class="stat">PENDING<strong id="pendingCoaches">0</strong></div>
-<div class="stat">COMPLETED<strong id="completedCoaches">0</strong></div>
-</div>
-
-
-<!-- ADD / UPDATE COACH -->
-<div class="panel">
-<h2 id="formTitle">ADD NEW COACH</h2>
 
 <form id="coachForm">
 <input type="hidden" id="editId">
-
 <div class="grid">
-
 <div class="field">
 <label>COACH NUMBER *</label>
 <input id="coachNo" required placeholder="Enter Coach Number">
 </div>
-
 <div class="field">
 <label>COACH TYPE *</label>
 <select id="coachCode" required>
 <option value="">Select Coach Type</option>
-<option value="LWACCN">LWACCN</option>
-<option value="LWACCN2">LWACCN2</option>
-<option value="LWACCNA">LWACCNA</option>
-<option value="LWACCNE">LWACCNE</option>
-<option value="LWACCW">LWACCW</option>
-<option value="LWACCW2">LWACCW2</option>
-<option value="LWFCWAC">LWFCWAC</option>
-<option value="LS5">LS5</option>
-<option value="LWCBAC">LWCBAC</option>
-<option value="LWSCN">LWSCN</option>
-<option value="LWSCN1">LWSCN1</option>
-<option value="LWSCNA">LWSCNA</option>
-<option value="LWSCNAA">LWSCNAA</option>
-<option value="LWSCZ">LWSCZ</option>
-<option value="LWSCZAC">LWSCZAC</option>
-<option value="LWFAC2">LWFAC2</option>
-<option value="LWFCZAC">LWFCZAC</option>
-<option value="LWSCZAC">LWSCZAC</option>
-<option value="LWLRRM">LWLRRM</option>
-<option value="LWLRRM2">LWLRRM2</option>
-<option value="LWLRRMA">LWLRRMA</option>
-<option value="LWS">LWS</option>
-<option value="LVPH">LVPH</option>
-<option value="LSLRDAA">LSLRDAA</option>
-<option value="WGS">WGS</option>
-<option value="WGS/C">WGS/C</option>
-<option value="WGSCN">WGSCN</option>
-<option value="WGSCN/C">WGSCN/C</option>
-<option value="WGSCZ">WGSCZ</option>
-<option value="WGSCZAC">WGSCZAC</option>
-<option value="WGSCZ/C">WGSCZ/C</option>
-<option value="WGACCN">WGACCN</option>
-<option value="WGACCN/C">WGACCN/C</option>
-<option value="WGACCW">WGACCW</option>
-<option value="WGACCW/C">WGACCW/C</option>
-<option value="GS">GS</option>
-<option value="GSLRD">GSLRD</option>
-<option value="GSLRD">GSLRD/C</option>
-<option value="GSRD">GSRD</option>
-<option value="GSRD">GSRD/C</option>
-<option value="RCC">RCC</option>
-<option value="NMG">NMG</option>
-<option value="NMGH">NMGH</option>
-<option value="NMGHS">NMGHS</option>
-<option value="NMGHSR">NMGHSR</option>
-<option value="WGCB">WGCB</option>
-<option value="MWGACCN">MWGACCN</option>
-<option value="MWGSCN">MWGSCN</option>
-<option value="WGSCZ">WGSCZ</option>
-<option value="WGSCZAC">WGSCZAC</option>
-<option value="RS">RS</option>
-<option value="SGS">SGS</option>
-<option value="SGS/C">SGS/C</option>
-<option value="RA/AC">RA/AC</option>
-<option value="RA">RA</option>
-<option value="WGFAC">WGFAC</option>
-<option value="ART">ART</option>
-<option value="RE">RE</option>
-<option value="RT">RT</option>
-<option value="VPH">VPH</option>
-<option value="VPU">VPU</option>
-<option value="VPUH">VPUH</option>
-<option value="VPUHX">VPUHX</option>
-<option value="TSDTC">TSDTC</option>
-<option value="TSMC">TSMC</option>
-<option value="TSMC2">TSMC2</option>
-<option value="TSTC">TSTC</option>
-<option value="TSTCEC">TSTCEC</option>
-<option value="RE">RE</option>
-<option value="CE/AC2">CE/AC2</option>
+<option>LWACCN</option><option>LWACCN2</option><option>LWACCNA</option><option>LWACCNE</option><option>LWACCW</option><option>LWACCW2</option><option>LWFCWAC</option><option>LS5</option><option>LWCBAC</option><option>LWSCN</option><option>LWSCN1</option><option>LWSCNA</option><option>LWSCNAA</option><option>LWSCZ</option><option>LWSCZAC</option><option>LWFAC2</option><option>LWFCZAC</option><option>LWLRRM</option><option>LWLRRM2</option><option>LWLRRMA</option><option>LWS</option><option>LVPH</option><option>LSLRDAA</option><option>WGS</option><option>WGS/C</option><option>WGSCN</option><option>WGSCN/C</option><option>WGSCZ</option><option>WGSCZAC</option><option>WGSCZ/C</option><option>WGACCN</option><option>WGACCN/C</option><option>WGACCW</option><option>WGACCW/C</option><option>GS</option><option>GSLRD</option><option>GSLRD/C</option><option>GSRD</option><option>GSRD/C</option><option>RCC</option><option>NMG</option><option>NMGH</option><option>NMGHS</option><option>NMGHSR</option><option>WGCB</option><option>MWGACCN</option><option>MWGSCN</option><option>RS</option><option>SGS</option><option>SGS/C</option><option>RA/AC</option><option>RA</option><option>WGFAC</option><option>ART</option><option>RE</option><option>RT</option><option>VPH</option><option>VPU</option><option>VPUH</option><option>VPUHX</option><option>TSDTC</option><option>TSMC</option><option>TSMC2</option><option>TSTC</option><option>TSTCEC</option><option>CE/AC2</option>
 </select>
 </div>
 
@@ -230,32 +178,20 @@ tbody tr:nth-child(even){background:#f5f8fc}
 <option>NPO:L-SHOP CORROSION</option>
 <option>SURPLUS COACHES</option>
 <option>AW/FINAL CONDEMN COACHES</option>
-
 </select>
 </div>
 
 <div class="field">
 <label>WORKSHOP IN DATE *</label>
 <input type="date" id="workshopFirstInDate" required>
-<p class="note">First entry only. This date will automatically become the first Shop Date Placed.</p>
+<p class="note">First entry date; also becomes the first shop Date Placed.</p>
 </div>
 
 <div class="field">
 <label>STATUS</label>
 <select id="status">
-    <option value=""></option>
-<option value="600">600</option>
-<option value="700">700</option>
-<option value="800">800</option>
-<option value="800">800</option>
-<option value="900">900</option>
-<option value="1100">1100</option>
-<option value="PO">PO</option>
-<option value="L">L</option>
-<option value="LM">LM</option>
-<option value="MED">MED</option>
-<option value="HEAVY">HEAVY</option>
-<option value="ML/LM">ML/LM</option>
+<option value=""></option>
+<option>600</option><option>700</option><option>800</option><option>900</option><option>1100</option><option>PO</option><option>L</option><option>LM</option><option>MED</option><option>HEAVY</option><option>ML/LM</option><option>COMPLETED</option>
 </select>
 </div>
 
@@ -263,30 +199,26 @@ tbody tr:nth-child(even){background:#f5f8fc}
 <label>REMARKS</label>
 <textarea id="remarks" placeholder="Enter remarks"></textarea>
 </div>
-
 </div>
 
-<p class="note">
-Date Placed and Date Out will be generated automatically.
-No manual Date In entry is required.
-</p>
-
-<div class="actions" style="margin-top:12px">
+<p class="note">Date Out is recorded automatically when a coach is moved to another shop.</p>
+<div class="actions" style="margin-top:14px">
 <button type="submit" id="saveBtn" class="btn-green">SAVE COACH</button>
 <button type="button" id="resetBtn" class="btn-gray">RESET</button>
 </div>
-
 </form>
+</section>
+
+<section class="panel">
+<div class="panel-heading">
+<div><div class="eyebrow">Live database</div><h2>COACH STOCK REGISTER</h2></div>
+<span class="role-pill">LIVE VIEW</span>
 </div>
 
-
-<!-- STOCK REGISTER -->
-<div class="panel">
-<h2>COACH STOCK REGISTER</h2>
+<div class="viewer-note" id="viewerNote">View-only access. Sign in with the authorised Admin account to manage coach records.</div>
 
 <div class="toolbar">
-<input id="searchInput" placeholder="Search Coach / Shop / Type / Status">
-
+<input id="searchInput" placeholder="Search Coach / Shop / Type / Status / Remarks">
 <select id="shopFilter">
 <option value="">ALL SHOPS</option>
 <option>CORROSION:CONV:RCC/NMG</option>
@@ -323,48 +255,34 @@ No manual Date In entry is required.
 <table>
 <thead>
 <tr>
-<th>SL</th>
-<th>CURRENT SHOP</th>
-<th>COACH NO</th>
-<th>COACH TYPE</th>
-<th>WORKSHOP IN DATE</th>
-<th>DATE PLACED</th>
-<th>DATE OUT</th>
-<th>DETENTION DAY</th>
-<th>STATUS</th>
-<th>ACTION</th>
+<th>SL</th><th>CURRENT SHOP</th><th>COACH NO</th><th>COACH TYPE</th>
+<th>WORKSHOP IN DATE</th><th>DATE PLACED</th><th>DATE OUT</th>
+<th>DETENTION DAYS</th><th>STATUS</th><th>ACTION</th>
 </tr>
 </thead>
-
 <tbody id="stockTable">
-<tr><td colspan="10">Loading...</td></tr>
+<tr><td colspan="10" class="empty">Loading live coach stock…</td></tr>
 </tbody>
 </table>
 </div>
-</div>
-
 </section>
-</div>
+<footer>MR CO-ORDINATION • LILUAH WORKSHOP</footer>
+</main>
 
-
-<!-- MOVE COACH MODAL -->
 <div id="moveModal" class="modal">
 <div class="modal-box">
-
 <div class="modal-head">
 <h2>MOVE COACH</h2>
-<button type="button" class="btn-red" onclick="closeModal('moveModal')">X</button>
+<button type="button" class="btn-red" onclick="closeModal('moveModal')">CLOSE</button>
 </div>
-
-<p id="moveCoachLabel" style="margin-bottom:15px;font-weight:bold"></p>
-
+<p id="moveCoachLabel" style="font-weight:800;margin-bottom:16px"></p>
 <div class="field">
 <label>NEW SHOP *</label>
-<select id="moveShop" required>
+<select id="moveShop">
 <option value="">Select New Shop</option>
 <option>CORROSION:CONV:RCC/NMG</option>
 <option>POH:NOMINATION:CONV:RCC/NMG</option>
-<option>WIP:MLR:LHB LINE</option>
+<option>WIP:MLR:LHB</option>
 <option>CORROSION:POH:L-SHOP</option>
 <option>LIFTING BAY:POH:LHB</option>
 <option>LIFTING BAY:POH:NONLHB</option>
@@ -388,67 +306,43 @@ No manual Date In entry is required.
 <option>NPO:L-SHOP CORROSION</option>
 <option>SURPLUS COACHES</option>
 <option>AW/FINAL CONDEMN COACHES</option>
+</select>
 </div>
-
 <div class="field">
 <label>MOVEMENT DATE</label>
 <input type="date" id="moveDate" readonly>
-<p class="note">Automatically set to today's date when Move is opened.</p>
 </div>
-
 <div class="field">
 <label>STATUS</label>
 <select id="moveStatus">
- <option value=""></option>
-<option value="600">600</option>
-<option value="700">700</option>
-<option value="800">800</option>
-<option value="800">800</option>
-<option value="900">900</option>
-<option value="1100">1100</option>
-<option value="PO">PO</option>
-<option value="L">L</option>
-<option value="LM">LM</option>
-<option value="MED">MED</option>
-<option value="HEAVY">HEAVY</option>
-<option value="ML/LM">ML/LM</option>
+<option value=""></option>
+<option>600</option><option>700</option><option>800</option><option>900</option><option>1100</option><option>PO</option><option>L</option><option>LM</option><option>MED</option><option>HEAVY</option><option>ML/LM</option><option>COMPLETED</option>
 </select>
 </div>
-
 <div class="field">
 <label>REMARKS</label>
 <textarea id="moveRemarks"></textarea>
 </div>
-
 <button type="button" id="confirmMoveBtn" class="btn-green">CONFIRM MOVE</button>
-
 </div>
 </div>
 
-
-<!-- COACH DETAILS AND HISTORY -->
 <div id="historyModal" class="modal">
 <div class="modal-box">
-
 <div class="modal-head">
 <h2>COACH DETAILS & HISTORY</h2>
-<button type="button" class="btn-red" onclick="closeModal('historyModal')">X</button>
+<button type="button" class="btn-red" onclick="closeModal('historyModal')">CLOSE</button>
 </div>
-
 <div id="historyContent"></div>
-
 </div>
 </div>
-
 
 <script>
-window.closeModal = function(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.style.display = "none";
+window.closeModal=function(id){
+const modal=document.getElementById(id);
+if(modal)modal.style.display="none";
 };
 </script>
-
 <script type="module" src="js/coach-stock.js"></script>
-
 </body>
 </html>
