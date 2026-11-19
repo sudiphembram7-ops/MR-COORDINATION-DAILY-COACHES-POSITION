@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MR CO-ORDINATION DAILY COACHES</title>
+<title>MR CO-ORDINATION - PRINT</title>
 
 <style>
 * {
@@ -80,7 +80,7 @@ body {
     margin: auto;
 }
 
-/* TWO COLUMN SHOP ROW */
+/* TWO COLUMN ROWS */
 .print-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -89,7 +89,7 @@ body {
     align-items: start;
 }
 
-/* SHOP DESIGN */
+/* SHOP */
 .group {
     width: 100%;
     min-width: 0;
@@ -130,10 +130,10 @@ body {
     overflow: hidden;
 }
 
-/* LINE NAME */
+/* LINE HEADER */
 #printArea th {
     height: 20px;
-    font-size: 10px;
+    font-size: 8px;
     font-weight: bold;
 }
 
@@ -146,9 +146,9 @@ body {
 /* COACH NUMBER */
 .print-coach-number {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.2;
     white-space: nowrap;
     margin-bottom: 1px;
 }
@@ -168,13 +168,13 @@ body {
 .print-coach-type,
 .print-coach-status {
     display: inline-block;
-    font-size: 6px;
+    font-size: 8px;
     font-weight: bold;
     white-space: nowrap;
     line-height: 1.1;
 }
 
-/* FULL WIDTH SHOPS */
+/* FULL WIDTH */
 .full-width {
     width: 100%;
     margin-bottom: 6px;
@@ -195,10 +195,10 @@ body {
     font-weight: bold;
 }
 
-/* MOBILE VIEW */
+/* MOBILE */
 @media screen and (max-width: 768px) {
     .print-header h1 {
-        font-size: 12px;
+        font-size: 16px;
     }
 
     .print-row {
@@ -210,20 +210,20 @@ body {
     }
 
     #printArea th {
-        font-size: 13px;
+        font-size: 6px;
     }
 
     #printArea td {
-        height: 9mm;
+        height: 10mm;
     }
 
     .print-coach-number {
-        font-size: 14px;
+        font-size: 10px;
     }
 
     .print-coach-type,
     .print-coach-status {
-        font-size: 8px;
+        font-size: 6px;
     }
 }
 
@@ -233,7 +233,7 @@ body {
     margin: 4mm;
 }
 
-/* PRINT */
+/* PRINT SETTINGS */
 @media print {
 
     html,
@@ -281,7 +281,7 @@ body {
         display: none !important;
     }
 
-    /* FIT ALL SHOPS ON ONE PAGE */
+    /* ALL SHOPS IN ONE PAGE */
     #printArea {
         width: 100% !important;
         height: auto !important;
@@ -293,7 +293,7 @@ body {
         overflow: visible !important;
     }
 
-    /* N + J, LIFTING + M */
+    /* N + J AND LIFTING + M */
     .print-row {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -312,7 +312,7 @@ body {
         page-break-inside: avoid !important;
     }
 
-    /* SHOP HEADING WHITE */
+    /* WHITE SHOP HEADING */
     .group-title {
         background: white !important;
         color: black !important;
@@ -321,7 +321,7 @@ body {
         padding: 0.5mm !important;
     }
 
-    /* EQUAL WIDTH COLUMNS */
+    /* EQUAL COLUMN WIDTH */
     #printArea table {
         width: 100% !important;
         table-layout: fixed !important;
@@ -339,39 +339,39 @@ body {
         color: black !important;
         text-align: center !important;
         vertical-align: middle !important;
-        padding: 0.5mm !important;
+        padding: 0.7mm !important;
         overflow: hidden !important;
     }
 
     /* LINE HEADER */
     #printArea th {
-        height: 4mm !important;
-        font-size: 12px !important;
+        height: 5mm !important;
+        font-size: 5.5px !important;
         font-weight: bold !important;
     }
 
-    /* CELL HEIGHT */
+    /* INCREASED CELL HEIGHT */
     #printArea td {
-        height: 8mm !important;
-        min-height: 8mm !important;
-        padding: 0.5mm !important;
+        height: 10mm !important;
+        min-height: 10mm !important;
+        padding: 1mm !important;
     }
 
-    /* COACH NUMBER */
+    /* BIG COACH NUMBER */
     .print-coach-number {
-        font-size: 14px !important;
+        font-size: 12px !important;
         font-weight: 800 !important;
-        line-height: 1.1 !important;
-        margin-bottom: 0.5mm !important;
+        line-height: 1.2 !important;
+        margin-bottom: 0.7mm !important;
     }
 
-    /* TYPE + STATUS SAME LINE */
+    /* TYPE AND STATUS SAME LINE */
     .print-coach-meta {
         display: flex !important;
         flex-direction: row !important;
         justify-content: center !important;
         align-items: center !important;
-        gap: 1px !important;
+        gap: 1.5px !important;
         flex-wrap: nowrap !important;
         white-space: nowrap !important;
     }
@@ -379,9 +379,9 @@ body {
     .print-coach-type,
     .print-coach-status {
         display: inline-block !important;
-        font-size: 8px !important;
+        font-size: 7px !important;
         font-weight: bold !important;
-        line-height: 1 !important;
+        line-height: 1.1 !important;
         white-space: nowrap !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -532,7 +532,7 @@ body {
     </div>
 </div>
 
-<script type="module" src="js/print.js?v=154"></script>
+<script type="module" src="js/print.js?v=155"></script>
 
 </body>
 </html>
