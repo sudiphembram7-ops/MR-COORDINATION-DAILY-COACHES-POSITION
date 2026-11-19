@@ -435,8 +435,7 @@ function createPanel() {
         <div id="stockBoardResults"></div>
 
         <p style="margin-top:12px;color:#64748b">
-            Coach Number-এ click করলে Details দেখুন।
-            Board-এ বসাতে বা Move করতে Select করুন।
+            
         </p>
     `;
 
