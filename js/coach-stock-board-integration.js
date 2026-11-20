@@ -2,7 +2,7 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    COACH STOCK + BOARD INTEGRATION
-   VERSION 3.0 - COACH DETAILS POPUP
+   VERSION 4.0 - COACH DETAILS + STOCK SHOP CHANGE
 ========================================================= */
 
 import { database } from "./firebase-config.js";
@@ -95,6 +95,18 @@ function getStockStatuses() {
     )].sort();
 }
 
+function getHistoryList(history) {
+    if (Array.isArray(history)) {
+        return [...history];
+    }
+
+    if (history && typeof history === "object") {
+        return Object.values(history);
+    }
+
+    return [];
+}
+
 
 /* =========================================================
    STYLES
@@ -111,6 +123,7 @@ function installStyles() {
     style.id = "stockBoardIntegrationCSS";
 
     style.textContent = `
+
     #stockBoardPanel {
         background:#fff;
         border:1px solid #cbd5e1;
@@ -202,6 +215,25 @@ function installStyles() {
         color:white;
     }
 
+    #changeStockShopBtn {
+        display:none;
+        padding:13px 18px;
+        border:0;
+        border-radius:9px;
+        background:#7c3aed;
+        color:white;
+        font-weight:bold;
+        cursor:pointer;
+        margin:8px 0 14px;
+        width:100%;
+        font-size:15px;
+    }
+
+    #changeStockShopBtn:disabled {
+        opacity:.6;
+        cursor:not-allowed;
+    }
+
     /* DETAILS MODAL */
 
     #coachDetailsModal {
@@ -287,6 +319,8 @@ function installStyles() {
         line-height:1.7;
     }
 
+    /* MOVE MODAL */
+
     #coachMoveModal {
         position:fixed;
         inset:0;
@@ -366,6 +400,86 @@ function installStyles() {
         background:#16834b;
         color:white;
     }
+
+    /* STOCK SHOP CHANGE MODAL */
+
+    #stockShopChangeModal {
+        position:fixed;
+        inset:0;
+        z-index:1000002;
+        background:rgba(15,23,42,.75);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:12px;
+        box-sizing:border-box;
+    }
+
+    #stockShopChangeBox {
+        width:100%;
+        max-width:550px;
+        max-height:90vh;
+        overflow:auto;
+        background:white;
+        color:#26364b;
+        padding:22px;
+        border-radius:16px;
+        box-sizing:border-box;
+    }
+
+    #stockShopChangeBox h2 {
+        margin-top:0;
+    }
+
+    #stockShopChangeBox label {
+        display:block;
+        margin:15px 0 6px;
+        font-weight:bold;
+    }
+
+    #stockShopChangeBox select,
+    #stockShopChangeBox input,
+    #stockShopChangeBox textarea {
+        width:100%;
+        padding:13px;
+        box-sizing:border-box;
+        border:1px solid #cbd5e1;
+        border-radius:8px;
+        font-size:16px;
+        background:white;
+        color:#26364b;
+    }
+
+    #stockShopChangeBox textarea {
+        min-height:85px;
+        resize:vertical;
+    }
+
+    #stockShopChangeButtons {
+        display:flex;
+        gap:10px;
+        margin-top:20px;
+    }
+
+    #stockShopChangeButtons button {
+        flex:1;
+        padding:13px;
+        border:0;
+        border-radius:8px;
+        font-weight:bold;
+        cursor:pointer;
+    }
+
+    #cancelStockShopChange {
+        background:#64748b;
+        color:white;
+    }
+
+    #confirmStockShopChange {
+        background:#7c3aed;
+        color:white;
+    }
+
     `;
 
     document.head.appendChild(style);
@@ -432,11 +546,14 @@ function createPanel() {
             No Coach Selected
         </div>
 
-        <div id="stockBoardResults"></div>
+        <button
+            id="changeStockShopBtn"
+            type="button"
+        >
+            CHANGE STOCK SHOP
+        </button>
 
-        <p style="margin-top:12px;color:#64748b">
-            
-        </p>
+        <div id="stockBoardResults"></div>
     `;
 
     const shopContainer = findNShopContainer();
@@ -461,26 +578,42 @@ function createPanel() {
 
     document
         .getElementById("stockBoardSearch")
-        .addEventListener("input", showResults);
+        .addEventListener("input", () => {
+
+            selectedCoach = null;
+
+            const selection =
+                document.getElementById("stockBoardSelection");
+
+            if (selection) {
+                selection.textContent = "No Coach Selected";
+            }
+
+            const button =
+                document.getElementById("changeStockShopBtn");
+
+            if (button) {
+                button.style.display = "none";
+            }
+
+            showResults();
+        });
+
+    document
+        .getElementById("changeStockShopBtn")
+        .addEventListener("click", () => {
+
+            if (selectedCoach) {
+                openStockOnlyShopModal(selectedCoach);
+            }
+
+        });
 }
 
 
 /* =========================================================
    COACH DETAILS POPUP
 ========================================================= */
-
-function getHistoryList(history) {
-
-    if (Array.isArray(history)) {
-        return history;
-    }
-
-    if (history && typeof history === "object") {
-        return Object.values(history);
-    }
-
-    return [];
-}
 
 function detailRow(label, value) {
 
@@ -646,6 +779,272 @@ function openCoachDetails(item) {
 
 
 /* =========================================================
+   STOCK ONLY SHOP CHANGE
+   IMPORTANT:
+   This function updates ONLY coachStock/records/<id>
+   It does NOT update coachBoard or Board Position.
+========================================================= */
+
+function openStockOnlyShopModal(item) {
+
+    const stockEntry = findStockRecord(item.coachNo);
+
+    if (!stockEntry) {
+        alert(
+            "This Coach has no matching Coach Stock record. " +
+            "Stock Shop cannot be changed."
+        );
+        return;
+    }
+
+    const [stockId, record] = stockEntry;
+
+    const currentVisit = record.currentVisit || {};
+
+    const currentShop =
+        clean(record.currentShop || currentVisit.shop);
+
+    const shops = getStockShops();
+
+    const statuses = getStockStatuses();
+
+    const defaultStatuses = [
+        "IN SHOP",
+        "UNDER REPAIR",
+        "WAITING",
+        "COMPLETED",
+        "OUT"
+    ];
+
+    const allStatuses = [
+        ...new Set([
+            ...statuses,
+            ...defaultStatuses
+        ])
+    ];
+
+    const shopOptions = shops.map(shop => `
+        <option
+            value="${escapeHTML(shop)}"
+            ${upper(shop) === upper(currentShop) ? "selected" : ""}
+        >
+            ${escapeHTML(shop)}
+        </option>
+    `).join("");
+
+    const statusOptions = allStatuses.map(status => `
+        <option
+            value="${escapeHTML(status)}"
+            ${
+                upper(status) === upper(currentVisit.status)
+                    ? "selected"
+                    : ""
+            }
+        >
+            ${escapeHTML(status)}
+        </option>
+    `).join("");
+
+    const modal = document.createElement("div");
+
+    modal.id = "stockShopChangeModal";
+
+    modal.innerHTML = `
+        <div id="stockShopChangeBox">
+
+            <h2>CHANGE STOCK SHOP</h2>
+
+            <p>
+                Coach Number:
+                <strong>${escapeHTML(item.coachNo)}</strong>
+            </p>
+
+            <p>
+                Current Shop:
+                <strong>${escapeHTML(currentShop || "Not Available")}</strong>
+            </p>
+
+            <p style="color:#b45309;font-size:13px">
+                This operation changes Coach Stock only.
+                Board Position will remain unchanged.
+            </p>
+
+            <label>NEW SHOP</label>
+
+            <select id="stockShopNewShop">
+                <option value="">Select New Shop</option>
+                ${shopOptions}
+            </select>
+
+            <label>SHOP CHANGE DATE</label>
+
+            <input
+                id="stockShopChangeDate"
+                type="date"
+                value="${todayISO()}"
+            >
+
+            <label>STATUS</label>
+
+            <select id="stockShopChangeStatus">
+                <option value="">Select Status</option>
+                ${statusOptions}
+            </select>
+
+            <label>REMARKS</label>
+
+            <textarea
+                id="stockShopChangeRemarks"
+                placeholder="Enter remarks"
+            >${escapeHTML(currentVisit.remarks || record.remarks || "")}</textarea>
+
+            <div id="stockShopChangeButtons">
+
+                <button
+                    id="cancelStockShopChange"
+                    type="button"
+                >
+                    CANCEL
+                </button>
+
+                <button
+                    id="confirmStockShopChange"
+                    type="button"
+                >
+                    CONFIRM CHANGE
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#cancelStockShopChange").onclick = () => {
+        modal.remove();
+    };
+
+    modal.addEventListener("click", event => {
+        if (event.target === modal) {
+            modal.remove();
+        }
+    });
+
+    modal.querySelector("#confirmStockShopChange").onclick =
+        async () => {
+
+            const newShop =
+                clean(modal.querySelector("#stockShopNewShop").value);
+
+            const movementDate =
+                clean(modal.querySelector("#stockShopChangeDate").value);
+
+            const status =
+                clean(modal.querySelector("#stockShopChangeStatus").value);
+
+            const remarks =
+                clean(modal.querySelector("#stockShopChangeRemarks").value);
+
+            if (!newShop || !movementDate || !status) {
+                alert("Please select New Shop, Date and Status.");
+                return;
+            }
+
+            if (upper(newShop) === upper(currentShop)) {
+                alert("Please select a different Shop.");
+                return;
+            }
+
+            const button =
+                modal.querySelector("#confirmStockShopChange");
+
+            button.disabled = true;
+            button.textContent = "PLEASE WAIT...";
+
+            try {
+
+                /*
+                   SAVE OLD VISIT IN HISTORY
+                */
+
+                const oldHistory = getHistoryList(record.history);
+
+                const oldVisit = {
+                    ...currentVisit,
+
+                    shop: currentVisit.shop || currentShop,
+
+                    dateOut: movementDate,
+
+                    movementType: "STOCK SHOP CHANGED",
+
+                    recordedAt: new Date().toISOString()
+                };
+
+                oldHistory.push(oldVisit);
+
+
+                /*
+                   CREATE NEW CURRENT VISIT
+                */
+
+                const newVisit = {
+                    shop: newShop,
+                    datePlaced: movementDate,
+                    dateIn: movementDate,
+                    dateOut: "",
+                    status: status,
+                    remarks: remarks
+                };
+
+
+                /*
+                   IMPORTANT:
+                   ONLY STOCK DATABASE PATH IS UPDATED.
+                   NO coachBoard UPDATE HERE.
+                */
+
+                await update(
+                    ref(database, `${STOCK_PATH}/${stockId}`),
+                    {
+                        currentShop: newShop,
+                        currentVisit: newVisit,
+                        history: oldHistory,
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: "Board - Stock Shop Change"
+                    }
+                );
+
+                alert(
+                    `Coach ${item.coachNo} Stock Shop changed successfully.\n` +
+                    `New Shop: ${newShop}\n\n` +
+                    `Board Position has NOT been changed.`
+                );
+
+                modal.remove();
+
+                await refreshBoard();
+
+                showResults();
+
+            } catch (error) {
+
+                console.error("Stock Shop Change Error:", error);
+
+                alert(
+                    "Stock Shop Change failed: " +
+                    (error.message || "Unknown error")
+                );
+
+                button.disabled = false;
+                button.textContent = "CONFIRM CHANGE";
+            }
+        };
+}
+
+
+/* =========================================================
    COMBINED SEARCH
 ========================================================= */
 
@@ -767,6 +1166,17 @@ function showResults() {
                 .textContent =
                 `Selected: ${item.coachNo} (${item.source}) — ` +
                 "Now click the destination Position.";
+
+            const stockShopButton =
+                document.getElementById("changeStockShopBtn");
+
+            if (stockShopButton) {
+
+                stockShopButton.style.display =
+                    findStockRecord(item.coachNo)
+                        ? "block"
+                        : "none";
+            }
         };
 
         info.querySelector(".stock-result-coachno").onclick = () => {
@@ -809,6 +1219,7 @@ function getTargetPosition(element) {
 
 /* =========================================================
    STOCK MOVEMENT UPDATE
+   Used by BOARD MOVE / SWAP only.
 ========================================================= */
 
 async function updateStockMovement(
@@ -822,9 +1233,7 @@ async function updateStockMovement(
 
     const oldVisit = record.currentVisit || {};
 
-    const oldHistory = Array.isArray(record.history)
-        ? [...record.history]
-        : Object.values(record.history || {});
+    const oldHistory = getHistoryList(record.history);
 
     oldHistory.push({
         ...oldVisit,
@@ -881,7 +1290,11 @@ function openMoveModal(item, target) {
         `<option value="${escapeHTML(shop)}">${escapeHTML(shop)}</option>`
     ).join("");
 
-    const statusOptions = statuses.map(status =>
+    const statusList = statuses.length
+        ? statuses
+        : ["IN SHOP", "UNDER REPAIR", "WAITING", "COMPLETED", "OUT"];
+
+    const statusOptions = statusList.map(status =>
         `<option value="${escapeHTML(status)}">${escapeHTML(status)}</option>`
     ).join("");
 
@@ -942,7 +1355,6 @@ function openMoveModal(item, target) {
             <select id="moveStatus">
                 <option value="">Select Status</option>
                 ${statusOptions}
-                ${statuses.length ? "" : '<option value="IN SHOP">IN SHOP</option>'}
             </select>
 
             <label>REMARKS</label>
@@ -995,10 +1407,7 @@ function openMoveModal(item, target) {
                 return;
             }
 
-            if (
-                upper(newShop) === upper(record.currentShop) &&
-                !remarks
-            ) {
+            if (upper(newShop) === upper(record.currentShop)) {
                 alert("Please select a different Shop.");
                 return;
             }
@@ -1085,6 +1494,13 @@ function openMoveModal(item, target) {
                     selection.textContent = "No Coach Selected";
                 }
 
+                const stockShopButton =
+                    document.getElementById("changeStockShopBtn");
+
+                if (stockShopButton) {
+                    stockShopButton.style.display = "none";
+                }
+
                 await refreshBoard();
                 showResults();
 
@@ -1162,6 +1578,13 @@ async function enterOrMoveCoach(target) {
 
         document.getElementById("stockBoardSelection")
             .textContent = "No Coach Selected";
+
+        const stockShopButton =
+            document.getElementById("changeStockShopBtn");
+
+        if (stockShopButton) {
+            stockShopButton.style.display = "none";
+        }
 
         await refreshBoard();
         showResults();
@@ -1313,7 +1736,7 @@ async function startIntegration() {
     startBoardListener();
 
     console.log(
-        "MR CO-ORDINATION BOARD + COACH STOCK INTEGRATION READY - V3"
+        "MR CO-ORDINATION BOARD + COACH STOCK INTEGRATION READY - V4"
     );
 }
 
