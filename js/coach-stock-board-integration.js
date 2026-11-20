@@ -1597,4 +1597,18 @@ async function startIntegration() {
     );
 }
 
+console.log("COACH STOCK INTEGRATION FILE LOADED");
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM READY");
+    console.log(
+        "Panel exists:",
+        !!document.getElementById("stockBoardPanel")
+    );
+    console.log(
+        "Search input exists:",
+        !!document.getElementById("stockBoardSearch")
+    );
+});
+
 startIntegration();
