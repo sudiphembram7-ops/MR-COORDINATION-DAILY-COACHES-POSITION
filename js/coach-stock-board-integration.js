@@ -131,9 +131,8 @@ function getCoachType(item) {
 }
 
 function isLHB(item) {
-    return getCoachType(item).includes("LHB");
+    return getCoachType(item).startsWith("L");
 }
-
 function isICF(item) {
     return getCoachType(item).includes("ICF");
 }
