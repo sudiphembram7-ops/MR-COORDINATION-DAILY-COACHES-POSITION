@@ -2,7 +2,8 @@
 /* =========================================================
    MR CO-ORDINATION BOARD
    COACH STOCK + BOARD INTEGRATION
-   VERSION 4.0 - COACH DETAILS + STOCK SHOP CHANGE
+   VERSION 5.0
+   COMBINED SEARCH + COACH NUMBER AUTO FORMAT
 ========================================================= */
 
 import { database } from "./firebase-config.js";
@@ -70,14 +71,103 @@ function displayValue(value) {
     return clean(value) || "Not Available";
 }
 
+function getHistoryList(history) {
+    if (Array.isArray(history)) return [...history];
+
+    if (history && typeof history === "object") {
+        return Object.values(history);
+    }
+
+    return [];
+}
+
+
+/* =========================================================
+   COACH IDENTITY
+   ER194373 = 194373/C
+   SR194373 = SR194373/C
+   SE194373 = SE194373/C
+   SER194373 = SER194373/C
+========================================================= */
+
+function coachKey(value) {
+    let number = upper(value).replace(/\s+/g, "");
+
+    // Remove LHB suffix
+    number = number.replace(/\/C$/, "");
+
+    // ER prefix is ignored for matching
+    number = number.replace(/^ER(?=\d)/, "");
+
+    return number;
+}
+
 function findStockRecord(coachNo) {
-    const target = upper(coachNo);
+    const target = coachKey(coachNo);
+
+    if (!target) return null;
 
     return Object.entries(stockRecords).find(
         ([id, record]) =>
-            upper(record?.coachNo) === target
+            coachKey(record?.coachNo) === target
     ) || null;
 }
+
+
+/* =========================================================
+   COACH TYPE AND BOARD NUMBER FORMAT
+========================================================= */
+
+function getCoachType(item) {
+    const record = item?.record || {};
+
+    return upper(
+        record.coachType ||
+        item?.coachType ||
+        record.coachCode ||
+        item?.coachCode ||
+        ""
+    );
+}
+
+function isLHB(item) {
+    return getCoachType(item).includes("LHB");
+}
+
+function isICF(item) {
+    return getCoachType(item).includes("ICF");
+}
+
+function formatBoardCoachNo(item) {
+
+    const original = upper(item?.coachNo)
+        .replace(/\s+/g, "");
+
+    if (!original) return "";
+
+    // ICF number remains unchanged
+    if (isICF(item)) {
+        return original;
+    }
+
+    // Only LHB gets /C
+    if (!isLHB(item)) {
+        return original;
+    }
+
+    let number = original.replace(/\/C$/, "");
+
+    // Remove ER only
+    number = number.replace(/^ER(?=\d)/, "");
+
+    // Keep SR, SE, SER and other prefixes
+    return `${number}/C`;
+}
+
+
+/* =========================================================
+   STOCK OPTIONS
+========================================================= */
 
 function getStockShops() {
     return [...new Set(
@@ -95,18 +185,6 @@ function getStockStatuses() {
     )].sort();
 }
 
-function getHistoryList(history) {
-    if (Array.isArray(history)) {
-        return [...history];
-    }
-
-    if (history && typeof history === "object") {
-        return Object.values(history);
-    }
-
-    return [];
-}
-
 
 /* =========================================================
    STYLES
@@ -119,7 +197,6 @@ function installStyles() {
     }
 
     const style = document.createElement("style");
-
     style.id = "stockBoardIntegrationCSS";
 
     style.textContent = `
@@ -136,8 +213,8 @@ function installStyles() {
     }
 
     #stockBoardPanel h2 {
-        font-size:clamp(20px,4vw,32px);
-        margin:0 0 18px;
+        font-size:clamp(20px,4vw,30px);
+        margin:0 0 16px;
     }
 
     #stockBoardSearch {
@@ -155,13 +232,13 @@ function installStyles() {
     }
 
     #stockBoardResults {
-        max-height:400px;
+        max-height:450px;
         overflow-y:auto;
     }
 
     .stock-board-result {
         padding:12px;
-        margin:7px 0;
+        margin:8px 0;
         border:1px solid #d5dce5;
         border-radius:9px;
         background:#f8fafc;
@@ -175,13 +252,12 @@ function installStyles() {
 
     .stock-result-info {
         font-size:14px;
-        line-height:1.7;
+        line-height:1.8;
         margin-bottom:9px;
     }
 
     .stock-result-coachno {
         display:inline-block;
-        padding:0;
         border:0;
         background:transparent;
         color:#075fc7;
@@ -189,6 +265,7 @@ function installStyles() {
         font-weight:bold;
         text-decoration:underline;
         cursor:pointer;
+        padding:0;
     }
 
     .stock-result-actions {
@@ -198,7 +275,7 @@ function installStyles() {
     }
 
     .stock-result-actions button {
-        padding:9px 14px;
+        padding:10px 14px;
         border:0;
         border-radius:7px;
         cursor:pointer;
@@ -229,17 +306,12 @@ function installStyles() {
         font-size:15px;
     }
 
-    #changeStockShopBtn:disabled {
-        opacity:.6;
-        cursor:not-allowed;
-    }
-
-    /* DETAILS MODAL */
-
-    #coachDetailsModal {
+    #coachDetailsModal,
+    #coachMoveModal,
+    #stockShopChangeModal {
         position:fixed;
         inset:0;
-        z-index:1000001;
+        z-index:1000005;
         background:rgba(15,23,42,.75);
         display:flex;
         align-items:center;
@@ -248,21 +320,18 @@ function installStyles() {
         box-sizing:border-box;
     }
 
-    #coachDetailsBox {
+    #coachDetailsBox,
+    #coachMoveBox,
+    #stockShopChangeBox {
         background:white;
+        color:#26364b;
         width:100%;
-        max-width:700px;
+        max-width:680px;
         max-height:92vh;
         overflow-y:auto;
-        border-radius:17px;
+        border-radius:16px;
         padding:20px;
         box-sizing:border-box;
-        color:#26364b;
-    }
-
-    #coachDetailsBox h2 {
-        margin:0;
-        font-size:24px;
     }
 
     .coach-details-heading {
@@ -273,7 +342,8 @@ function installStyles() {
         margin-bottom:18px;
     }
 
-    #closeCoachDetails {
+    #closeCoachDetails,
+    #closeCoachMove {
         border:0;
         border-radius:8px;
         padding:11px 17px;
@@ -319,50 +389,22 @@ function installStyles() {
         line-height:1.7;
     }
 
-    /* MOVE MODAL */
-
-    #coachMoveModal {
-        position:fixed;
-        inset:0;
-        z-index:999999;
-        background:rgba(15,23,42,.72);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:15px;
-        box-sizing:border-box;
-    }
-
-    #coachMoveBox {
-        background:white;
-        width:100%;
-        max-width:660px;
-        max-height:92vh;
-        overflow-y:auto;
-        border-radius:24px;
-        padding:25px;
-        box-sizing:border-box;
-        color:#26364b;
-    }
-
-    #coachMoveBox h2 {
-        font-size:26px;
-        margin:10px 0 25px;
-    }
-
-    #coachMoveBox label {
+    #coachMoveBox label,
+    #stockShopChangeBox label {
         display:block;
         font-weight:bold;
-        margin-top:18px;
-        margin-bottom:7px;
+        margin:15px 0 7px;
     }
 
     #coachMoveBox select,
     #coachMoveBox input,
-    #coachMoveBox textarea {
+    #coachMoveBox textarea,
+    #stockShopChangeBox select,
+    #stockShopChangeBox input,
+    #stockShopChangeBox textarea {
         width:100%;
         box-sizing:border-box;
-        padding:14px;
+        padding:13px;
         border:1px solid #cbd5e1;
         border-radius:9px;
         font-size:16px;
@@ -370,104 +412,32 @@ function installStyles() {
         color:#26364b;
     }
 
-    #coachMoveBox textarea {
-        min-height:100px;
-        resize:vertical;
-    }
-
-    #coachMoveButtons {
-        display:flex;
-        gap:10px;
-        margin-top:22px;
-    }
-
-    #coachMoveButtons button {
-        flex:1;
-        padding:15px 10px;
-        border:0;
-        border-radius:10px;
-        font-weight:bold;
-        font-size:15px;
-        cursor:pointer;
-    }
-
-    #closeCoachMove {
-        background:#c62828;
-        color:white;
-    }
-
-    #confirmCoachMove {
-        background:#16834b;
-        color:white;
-    }
-
-    /* STOCK SHOP CHANGE MODAL */
-
-    #stockShopChangeModal {
-        position:fixed;
-        inset:0;
-        z-index:1000002;
-        background:rgba(15,23,42,.75);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:12px;
-        box-sizing:border-box;
-    }
-
-    #stockShopChangeBox {
-        width:100%;
-        max-width:550px;
-        max-height:90vh;
-        overflow:auto;
-        background:white;
-        color:#26364b;
-        padding:22px;
-        border-radius:16px;
-        box-sizing:border-box;
-    }
-
-    #stockShopChangeBox h2 {
-        margin-top:0;
-    }
-
-    #stockShopChangeBox label {
-        display:block;
-        margin:15px 0 6px;
-        font-weight:bold;
-    }
-
-    #stockShopChangeBox select,
-    #stockShopChangeBox input,
-    #stockShopChangeBox textarea {
-        width:100%;
-        padding:13px;
-        box-sizing:border-box;
-        border:1px solid #cbd5e1;
-        border-radius:8px;
-        font-size:16px;
-        background:white;
-        color:#26364b;
-    }
-
+    #coachMoveBox textarea,
     #stockShopChangeBox textarea {
         min-height:85px;
         resize:vertical;
     }
 
+    #coachMoveButtons,
     #stockShopChangeButtons {
         display:flex;
         gap:10px;
         margin-top:20px;
     }
 
+    #coachMoveButtons button,
     #stockShopChangeButtons button {
         flex:1;
-        padding:13px;
+        padding:14px 10px;
         border:0;
-        border-radius:8px;
+        border-radius:9px;
         font-weight:bold;
         cursor:pointer;
+    }
+
+    #confirmCoachMove {
+        background:#16834b;
+        color:white;
     }
 
     #cancelStockShopChange {
@@ -506,11 +476,7 @@ function findNShopContainer() {
     let parent = heading.parentElement;
 
     while (parent && parent !== document.body) {
-
-        if (parent.querySelector("table")) {
-            return parent;
-        }
-
+        if (parent.querySelector("table")) return parent;
         parent = parent.parentElement;
     }
 
@@ -524,12 +490,9 @@ function findNShopContainer() {
 
 function createPanel() {
 
-    if (document.getElementById("stockBoardPanel")) {
-        return;
-    }
+    if (document.getElementById("stockBoardPanel")) return;
 
     const panel = document.createElement("section");
-
     panel.id = "stockBoardPanel";
 
     panel.innerHTML = `
@@ -542,14 +505,9 @@ function createPanel() {
             autocomplete="off"
         >
 
-        <div id="stockBoardSelection">
-            No Coach Selected
-        </div>
+        <div id="stockBoardSelection">No Coach Selected</div>
 
-        <button
-            id="changeStockShopBtn"
-            type="button"
-        >
+        <button id="changeStockShopBtn" type="button">
             CHANGE STOCK SHOP
         </button>
 
@@ -559,14 +517,8 @@ function createPanel() {
     const shopContainer = findNShopContainer();
 
     if (shopContainer?.parentElement) {
-
-        shopContainer.parentElement.insertBefore(
-            panel,
-            shopContainer
-        );
-
+        shopContainer.parentElement.insertBefore(panel, shopContainer);
     } else {
-
         const firstTable = document.querySelector("table");
 
         if (firstTable?.parentElement) {
@@ -576,47 +528,239 @@ function createPanel() {
         }
     }
 
-    document
-        .getElementById("stockBoardSearch")
+    document.getElementById("stockBoardSearch")
         .addEventListener("input", () => {
 
             selectedCoach = null;
 
-            const selection =
-                document.getElementById("stockBoardSelection");
+            document.getElementById("stockBoardSelection")
+                .textContent = "No Coach Selected";
 
-            if (selection) {
-                selection.textContent = "No Coach Selected";
-            }
-
-            const button =
-                document.getElementById("changeStockShopBtn");
-
-            if (button) {
-                button.style.display = "none";
-            }
+            document.getElementById("changeStockShopBtn")
+                .style.display = "none";
 
             showResults();
         });
 
-    document
-        .getElementById("changeStockShopBtn")
+    document.getElementById("changeStockShopBtn")
         .addEventListener("click", () => {
-
             if (selectedCoach) {
                 openStockOnlyShopModal(selectedCoach);
             }
-
         });
 }
 
 
 /* =========================================================
-   COACH DETAILS POPUP
+   COMBINED LIST
+   SAME COACH = ONE CARD
+========================================================= */
+
+function getCombinedList() {
+
+    const combined = new Map();
+
+    // First add Stock records
+    Object.entries(stockRecords).forEach(([id, record]) => {
+
+        const key = coachKey(record?.coachNo);
+        if (!key) return;
+
+        combined.set(key, {
+            source: "STOCK",
+            displaySource: "STOCK",
+            id,
+            coachNo: record?.coachNo || "",
+            stockCoachNo: record?.coachNo || "",
+            coachCode: record?.coachCode || "",
+            coachType: record?.coachType || record?.coachCode || "",
+            status: record?.currentVisit?.status || "",
+            shop: record?.currentShop || "",
+            record
+        });
+    });
+
+    // Merge Board records into matching Stock records
+    boardRecords.forEach(coach => {
+
+        const key = coachKey(coach.coachNo);
+        if (!key) return;
+
+        const existing = combined.get(key);
+
+        if (existing) {
+
+            existing.source = "BOARD";
+            existing.displaySource = "BOARD + STOCK";
+
+            existing.boardCoachNo = coach.coachNo;
+            existing.coachNo = coach.coachNo;
+
+            existing.line = coach.line;
+            existing.position = coach.position;
+
+            existing.coachCode =
+                coach.coachCode || existing.coachCode;
+
+            existing.coachType =
+                coach.coachType || existing.coachType;
+
+            existing.boardRecord = coach;
+
+        } else {
+
+            combined.set(key, {
+                ...coach,
+                source: "BOARD",
+                displaySource: "BOARD",
+                boardCoachNo: coach.coachNo,
+                coachNo: coach.coachNo
+            });
+        }
+    });
+
+    return [...combined.values()];
+}
+
+
+/* =========================================================
+   SEARCH RESULTS
+========================================================= */
+
+function showResults() {
+
+    const input = document.getElementById("stockBoardSearch");
+    const results = document.getElementById("stockBoardResults");
+
+    if (!input || !results) return;
+
+    const query = normal(input.value);
+
+    results.innerHTML = "";
+
+    if (!query) return;
+
+    const matches = getCombinedList().filter(item => {
+
+        const searchable = [
+            item.coachNo,
+            item.stockCoachNo,
+            item.boardCoachNo,
+            item.coachCode,
+            item.coachType,
+            item.status,
+            item.shop,
+            item.line,
+            item.position,
+            item.displaySource
+        ].map(normal).join(" ");
+
+        return searchable.includes(query);
+    });
+
+    if (!matches.length) {
+        results.textContent = "No Coach Found.";
+        return;
+    }
+
+    matches.slice(0, 100).forEach(item => {
+
+        const card = document.createElement("div");
+        card.className = "stock-board-result";
+
+        const info = document.createElement("div");
+        info.className = "stock-result-info";
+
+        info.innerHTML = `
+            <strong>${escapeHTML(item.displaySource || item.source)}</strong>
+            <br>
+
+            Coach Number:
+            <button type="button" class="stock-result-coachno">
+                ${escapeHTML(item.coachNo)}
+            </button>
+
+            ${
+                item.stockCoachNo &&
+                item.stockCoachNo !== item.coachNo
+                    ? `<br>Stock Number: ${escapeHTML(item.stockCoachNo)}`
+                    : ""
+            }
+
+            <br>
+            Code: ${escapeHTML(item.coachCode || item.coachType || "-")}
+
+            <br>
+            Board Position:
+            ${
+                item.source === "BOARD"
+                    ? `${escapeHTML(item.line || "-")} / ${escapeHTML(item.position || "-")}`
+                    : "Not on Board"
+            }
+
+            <br>
+            Stock Shop:
+            ${escapeHTML(
+                item.shop ||
+                findStockRecord(item.coachNo)?.[1]?.currentShop ||
+                "-"
+            )}
+        `;
+
+        const actions = document.createElement("div");
+        actions.className = "stock-result-actions";
+
+        const detailsButton = document.createElement("button");
+        detailsButton.type = "button";
+        detailsButton.className = "stock-details-button";
+        detailsButton.textContent = "VIEW DETAILS";
+        detailsButton.onclick = () => openCoachDetails(item);
+
+        const selectButton = document.createElement("button");
+        selectButton.type = "button";
+        selectButton.className = "stock-select-button";
+        selectButton.textContent = "SELECT COACH";
+
+        selectButton.onclick = () => {
+
+            selectedCoach = item;
+
+            document.querySelectorAll(".stock-board-result")
+                .forEach(element =>
+                    element.classList.remove("selected")
+                );
+
+            card.classList.add("selected");
+
+            document.getElementById("stockBoardSelection")
+                .textContent =
+                `Selected: ${item.coachNo} (${item.displaySource}) — ` +
+                "Now click the destination Position.";
+
+            document.getElementById("changeStockShopBtn")
+                .style.display =
+                findStockRecord(item.coachNo) ? "block" : "none";
+        };
+
+        info.querySelector(".stock-result-coachno").onclick =
+            () => openCoachDetails(item);
+
+        actions.appendChild(detailsButton);
+        actions.appendChild(selectButton);
+
+        card.appendChild(info);
+        card.appendChild(actions);
+
+        results.appendChild(card);
+    });
+}
+
+
+/* =========================================================
+   DETAILS POPUP
 ========================================================= */
 
 function detailRow(label, value) {
-
     return `
         <div class="coach-detail-row">
             <span>${escapeHTML(label)}</span>
@@ -628,19 +772,15 @@ function detailRow(label, value) {
 function openCoachDetails(item) {
 
     const stockEntry = findStockRecord(item.coachNo);
-
     const stock = stockEntry ? stockEntry[1] : null;
 
     const visit = stock?.currentVisit || {};
 
-    const boardShop = item.source === "BOARD"
-        ? (item.shop || item.line || "")
-        : "";
-
     const currentShop =
         stock?.currentShop ||
         visit.shop ||
-        boardShop;
+        item.shop ||
+        "";
 
     const shopInDate =
         visit.dateIn ||
@@ -667,37 +807,23 @@ function openCoachDetails(item) {
     const history = getHistoryList(stock?.history);
 
     const historyHTML = history.length
-        ? history.slice().reverse().map((entry, index) => {
-
-            const oldShop =
-                entry?.shop ||
-                entry?.currentShop ||
-                "";
-
-            const oldIn =
-                entry?.dateIn ||
-                entry?.datePlaced ||
-                "";
-
-            const oldOut =
-                entry?.dateOut ||
-                "";
-
-            return `
-                <div class="coach-history-item">
-                    <strong>Previous Visit ${history.length - index}</strong><br>
-                    Shop: ${escapeHTML(displayValue(oldShop))}<br>
-                    Shop In: ${escapeHTML(displayValue(oldIn))}<br>
-                    Shop Out: ${escapeHTML(displayValue(oldOut))}<br>
-                    Status: ${escapeHTML(displayValue(entry?.status))}<br>
-                    Remarks: ${escapeHTML(displayValue(entry?.remarks))}
-                </div>
-            `;
-        }).join("")
-        : `<p>No Previous Shop History Available.</p>`;
+        ? history.slice().reverse().map((entry, index) => `
+            <div class="coach-history-item">
+                <strong>Previous Visit ${history.length - index}</strong><br>
+                Shop: ${escapeHTML(displayValue(
+                    entry?.shop || entry?.currentShop
+                ))}<br>
+                Shop In: ${escapeHTML(displayValue(
+                    entry?.dateIn || entry?.datePlaced
+                ))}<br>
+                Shop Out: ${escapeHTML(displayValue(entry?.dateOut))}<br>
+                Status: ${escapeHTML(displayValue(entry?.status))}<br>
+                Remarks: ${escapeHTML(displayValue(entry?.remarks))}
+            </div>
+        `).join("")
+        : "<p>No Previous Shop History Available.</p>";
 
     const modal = document.createElement("div");
-
     modal.id = "coachDetailsModal";
 
     modal.innerHTML = `
@@ -705,25 +831,21 @@ function openCoachDetails(item) {
 
             <div class="coach-details-heading">
                 <h2>COACH DETAILS</h2>
-
-                <button
-                    id="closeCoachDetails"
-                    type="button"
-                >
-                    CLOSE
-                </button>
+                <button id="closeCoachDetails" type="button">CLOSE</button>
             </div>
 
             <div class="coach-detail-card">
 
                 ${detailRow("Coach Number", item.coachNo)}
 
+                ${detailRow("Stock Coach Number", item.stockCoachNo)}
+
                 ${detailRow(
                     "Coach Code",
                     item.coachCode || item.coachType
                 )}
 
-                ${detailRow("Source", item.source)}
+                ${detailRow("Source", item.displaySource || item.source)}
 
                 ${detailRow(
                     "Board Position",
@@ -733,22 +855,15 @@ function openCoachDetails(item) {
                 )}
 
                 ${detailRow("Current Shop", currentShop)}
-
                 ${detailRow("Shop In Date", shopInDate)}
-
                 ${detailRow("Shop Out Date", shopOutDate)}
-
                 ${detailRow("Status", status)}
-
                 ${detailRow("Remarks", remarks)}
 
             </div>
 
             <h3>PREVIOUS SHOP HISTORY</h3>
-
-            <div>
-                ${historyHTML}
-            </div>
+            ${historyHTML}
 
             ${
                 stock
@@ -757,7 +872,6 @@ function openCoachDetails(item) {
                        </p>`
                     : `<p style="color:#b45309;font-weight:bold">
                         No matching Coach Stock record found.
-                        Stock dates are not available.
                        </p>`
             }
 
@@ -766,23 +880,18 @@ function openCoachDetails(item) {
 
     document.body.appendChild(modal);
 
-    modal.querySelector("#closeCoachDetails").onclick = () => {
-        modal.remove();
-    };
+    modal.querySelector("#closeCoachDetails").onclick =
+        () => modal.remove();
 
     modal.addEventListener("click", event => {
-        if (event.target === modal) {
-            modal.remove();
-        }
+        if (event.target === modal) modal.remove();
     });
 }
 
 
 /* =========================================================
    STOCK ONLY SHOP CHANGE
-   IMPORTANT:
-   This function updates ONLY coachStock/records/<id>
-   It does NOT update coachBoard or Board Position.
+   Updates ONLY coachStock/records/<id>
 ========================================================= */
 
 function openStockOnlyShopModal(item) {
@@ -790,10 +899,7 @@ function openStockOnlyShopModal(item) {
     const stockEntry = findStockRecord(item.coachNo);
 
     if (!stockEntry) {
-        alert(
-            "This Coach has no matching Coach Stock record. " +
-            "Stock Shop cannot be changed."
-        );
+        alert("No matching Coach Stock record found.");
         return;
     }
 
@@ -806,47 +912,32 @@ function openStockOnlyShopModal(item) {
 
     const shops = getStockShops();
 
-    const statuses = getStockStatuses();
-
-    const defaultStatuses = [
-        "IN SHOP",
-        "UNDER REPAIR",
-        "WAITING",
-        "COMPLETED",
-        "OUT"
-    ];
-
-    const allStatuses = [
+    const statuses = [
         ...new Set([
-            ...statuses,
-            ...defaultStatuses
+            ...getStockStatuses(),
+            "IN SHOP",
+            "UNDER REPAIR",
+            "WAITING",
+            "COMPLETED",
+            "OUT"
         ])
     ];
 
     const shopOptions = shops.map(shop => `
-        <option
-            value="${escapeHTML(shop)}"
-            ${upper(shop) === upper(currentShop) ? "selected" : ""}
-        >
+        <option value="${escapeHTML(shop)}"
+            ${upper(shop) === upper(currentShop) ? "selected" : ""}>
             ${escapeHTML(shop)}
         </option>
     `).join("");
 
-    const statusOptions = allStatuses.map(status => `
-        <option
-            value="${escapeHTML(status)}"
-            ${
-                upper(status) === upper(currentVisit.status)
-                    ? "selected"
-                    : ""
-            }
-        >
+    const statusOptions = statuses.map(status => `
+        <option value="${escapeHTML(status)}"
+            ${upper(status) === upper(currentVisit.status) ? "selected" : ""}>
             ${escapeHTML(status)}
         </option>
     `).join("");
 
     const modal = document.createElement("div");
-
     modal.id = "stockShopChangeModal";
 
     modal.innerHTML = `
@@ -870,50 +961,30 @@ function openStockOnlyShopModal(item) {
             </p>
 
             <label>NEW SHOP</label>
-
             <select id="stockShopNewShop">
                 <option value="">Select New Shop</option>
                 ${shopOptions}
             </select>
 
             <label>SHOP CHANGE DATE</label>
-
-            <input
-                id="stockShopChangeDate"
-                type="date"
-                value="${todayISO()}"
-            >
+            <input id="stockShopChangeDate" type="date" value="${todayISO()}">
 
             <label>STATUS</label>
-
             <select id="stockShopChangeStatus">
                 <option value="">Select Status</option>
                 ${statusOptions}
             </select>
 
             <label>REMARKS</label>
-
-            <textarea
-                id="stockShopChangeRemarks"
-                placeholder="Enter remarks"
-            >${escapeHTML(currentVisit.remarks || record.remarks || "")}</textarea>
+            <textarea id="stockShopChangeRemarks">${escapeHTML(
+                currentVisit.remarks || record.remarks || ""
+            )}</textarea>
 
             <div id="stockShopChangeButtons">
-
-                <button
-                    id="cancelStockShopChange"
-                    type="button"
-                >
-                    CANCEL
-                </button>
-
-                <button
-                    id="confirmStockShopChange"
-                    type="button"
-                >
+                <button id="cancelStockShopChange" type="button">CANCEL</button>
+                <button id="confirmStockShopChange" type="button">
                     CONFIRM CHANGE
                 </button>
-
             </div>
 
         </div>
@@ -921,30 +992,31 @@ function openStockOnlyShopModal(item) {
 
     document.body.appendChild(modal);
 
-    modal.querySelector("#cancelStockShopChange").onclick = () => {
-        modal.remove();
-    };
+    modal.querySelector("#cancelStockShopChange").onclick =
+        () => modal.remove();
 
     modal.addEventListener("click", event => {
-        if (event.target === modal) {
-            modal.remove();
-        }
+        if (event.target === modal) modal.remove();
     });
 
     modal.querySelector("#confirmStockShopChange").onclick =
         async () => {
 
-            const newShop =
-                clean(modal.querySelector("#stockShopNewShop").value);
+            const newShop = clean(
+                modal.querySelector("#stockShopNewShop").value
+            );
 
-            const movementDate =
-                clean(modal.querySelector("#stockShopChangeDate").value);
+            const movementDate = clean(
+                modal.querySelector("#stockShopChangeDate").value
+            );
 
-            const status =
-                clean(modal.querySelector("#stockShopChangeStatus").value);
+            const status = clean(
+                modal.querySelector("#stockShopChangeStatus").value
+            );
 
-            const remarks =
-                clean(modal.querySelector("#stockShopChangeRemarks").value);
+            const remarks = clean(
+                modal.querySelector("#stockShopChangeRemarks").value
+            );
 
             if (!newShop || !movementDate || !status) {
                 alert("Please select New Shop, Date and Status.");
@@ -964,47 +1036,26 @@ function openStockOnlyShopModal(item) {
 
             try {
 
-                /*
-                   SAVE OLD VISIT IN HISTORY
-                */
-
                 const oldHistory = getHistoryList(record.history);
 
-                const oldVisit = {
+                oldHistory.push({
                     ...currentVisit,
-
                     shop: currentVisit.shop || currentShop,
-
                     dateOut: movementDate,
-
                     movementType: "STOCK SHOP CHANGED",
-
                     recordedAt: new Date().toISOString()
-                };
-
-                oldHistory.push(oldVisit);
-
-
-                /*
-                   CREATE NEW CURRENT VISIT
-                */
+                });
 
                 const newVisit = {
                     shop: newShop,
                     datePlaced: movementDate,
                     dateIn: movementDate,
                     dateOut: "",
-                    status: status,
-                    remarks: remarks
+                    status,
+                    remarks
                 };
 
-
-                /*
-                   IMPORTANT:
-                   ONLY STOCK DATABASE PATH IS UPDATED.
-                   NO coachBoard UPDATE HERE.
-                */
-
+                // STOCK PATH ONLY. DO NOT UPDATE BOARD.
                 await update(
                     ref(database, `${STOCK_PATH}/${stockId}`),
                     {
@@ -1019,13 +1070,12 @@ function openStockOnlyShopModal(item) {
                 alert(
                     `Coach ${item.coachNo} Stock Shop changed successfully.\n` +
                     `New Shop: ${newShop}\n\n` +
-                    `Board Position has NOT been changed.`
+                    "Board Position has NOT been changed."
                 );
 
                 modal.remove();
 
                 await refreshBoard();
-
                 showResults();
 
             } catch (error) {
@@ -1041,156 +1091,6 @@ function openStockOnlyShopModal(item) {
                 button.textContent = "CONFIRM CHANGE";
             }
         };
-}
-
-
-/* =========================================================
-   COMBINED SEARCH
-========================================================= */
-
-function getCombinedList() {
-
-    const stockList = Object.entries(stockRecords).map(
-        ([id, record]) => ({
-            source: "STOCK",
-            id,
-            coachNo: record?.coachNo || "",
-            coachCode: record?.coachCode || "",
-            coachType:
-                record?.coachType ||
-                record?.coachCode ||
-                "Not specified",
-            status: record?.currentVisit?.status || "",
-            shop: record?.currentShop || "",
-            record
-        })
-    );
-
-    const boardList = boardRecords.map(coach => ({
-        ...coach,
-        source: "BOARD"
-    }));
-
-    return [...boardList, ...stockList];
-}
-
-function showResults() {
-
-    const input = document.getElementById("stockBoardSearch");
-    const results = document.getElementById("stockBoardResults");
-
-    if (!input || !results) return;
-
-    const query = normal(input.value);
-
-    results.innerHTML = "";
-
-    if (!query) return;
-
-    const matches = getCombinedList().filter(item => {
-
-        const searchable = [
-            item.coachNo,
-            item.coachCode,
-            item.coachType,
-            item.status,
-            item.shop,
-            item.line,
-            item.position
-        ].map(normal).join(" ");
-
-        return searchable.includes(query);
-    });
-
-    if (!matches.length) {
-        results.textContent = "No Coach Found.";
-        return;
-    }
-
-    matches.slice(0, 100).forEach(item => {
-
-        const card = document.createElement("div");
-
-        card.className = "stock-board-result";
-
-        const info = document.createElement("div");
-        info.className = "stock-result-info";
-
-        info.innerHTML = `
-            <strong>${escapeHTML(item.source)}</strong>
-            |
-            <button
-                type="button"
-                class="stock-result-coachno"
-            >${escapeHTML(item.coachNo)}</button>
-            <br>
-            Code:
-            ${escapeHTML(item.coachCode || item.coachType || "-")}
-            <br>
-            ${
-                item.source === "BOARD"
-                    ? `Board Position: ${escapeHTML(item.line || "-")} / ${escapeHTML(item.position || "-")}`
-                    : `Stock Shop: ${escapeHTML(item.shop || "-")}`
-            }
-        `;
-
-        const actions = document.createElement("div");
-        actions.className = "stock-result-actions";
-
-        const detailsButton = document.createElement("button");
-        detailsButton.type = "button";
-        detailsButton.className = "stock-details-button";
-        detailsButton.textContent = "VIEW DETAILS";
-
-        detailsButton.onclick = () => {
-            openCoachDetails(item);
-        };
-
-        const selectButton = document.createElement("button");
-        selectButton.type = "button";
-        selectButton.className = "stock-select-button";
-        selectButton.textContent = "SELECT COACH";
-
-        selectButton.onclick = () => {
-
-            selectedCoach = item;
-
-            document.querySelectorAll(".stock-board-result")
-                .forEach(element =>
-                    element.classList.remove("selected")
-                );
-
-            card.classList.add("selected");
-
-            document.getElementById("stockBoardSelection")
-                .textContent =
-                `Selected: ${item.coachNo} (${item.source}) — ` +
-                "Now click the destination Position.";
-
-            const stockShopButton =
-                document.getElementById("changeStockShopBtn");
-
-            if (stockShopButton) {
-
-                stockShopButton.style.display =
-                    findStockRecord(item.coachNo)
-                        ? "block"
-                        : "none";
-            }
-        };
-
-        info.querySelector(".stock-result-coachno").onclick = () => {
-            openCoachDetails(item);
-        };
-
-        actions.appendChild(detailsButton);
-        actions.appendChild(selectButton);
-
-        card.appendChild(info);
-        card.appendChild(actions);
-
-        results.appendChild(card);
-    });
 }
 
 
@@ -1219,7 +1119,6 @@ function getTargetPosition(element) {
 
 /* =========================================================
    STOCK MOVEMENT UPDATE
-   Used by BOARD MOVE / SWAP only.
 ========================================================= */
 
 async function updateStockMovement(
@@ -1232,7 +1131,6 @@ async function updateStockMovement(
 ) {
 
     const oldVisit = record.currentVisit || {};
-
     const oldHistory = getHistoryList(record.history);
 
     oldHistory.push({
@@ -1266,7 +1164,7 @@ async function updateStockMovement(
 
 
 /* =========================================================
-   MOVE COACH MODAL
+   MOVE / SWAP MODAL
 ========================================================= */
 
 function openMoveModal(item, target) {
@@ -1284,51 +1182,35 @@ function openMoveModal(item, target) {
     const [stockId, record] = sourceEntry;
 
     const shops = getStockShops();
-    const statuses = getStockStatuses();
 
-    const shopOptions = shops.map(shop =>
-        `<option value="${escapeHTML(shop)}">${escapeHTML(shop)}</option>`
-    ).join("");
-
-    const statusList = statuses.length
-        ? statuses
+    const statuses = getStockStatuses().length
+        ? getStockStatuses()
         : ["IN SHOP", "UNDER REPAIR", "WAITING", "COMPLETED", "OUT"];
 
-    const statusOptions = statusList.map(status =>
-        `<option value="${escapeHTML(status)}">${escapeHTML(status)}</option>`
-    ).join("");
+    const shopOptions = shops.map(shop => `
+        <option value="${escapeHTML(shop)}">
+            ${escapeHTML(shop)}
+        </option>
+    `).join("");
+
+    const statusOptions = statuses.map(status => `
+        <option value="${escapeHTML(status)}">
+            ${escapeHTML(status)}
+        </option>
+    `).join("");
 
     const modal = document.createElement("div");
-
     modal.id = "coachMoveModal";
 
     modal.innerHTML = `
         <div id="coachMoveBox">
 
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                gap:10px;
-            ">
+            <div style="display:flex;justify-content:space-between;align-items:center">
                 <h2>MOVE COACH</h2>
-
-                <button id="closeCoachMove" type="button"
-                    style="
-                        background:#c62828;
-                        color:white;
-                        padding:13px 20px;
-                        border:0;
-                        border-radius:10px;
-                        font-weight:bold;
-                    ">
-                    CLOSE
-                </button>
+                <button id="closeCoachMove" type="button">CLOSE</button>
             </div>
 
-            <h3>
-                Coach: ${escapeHTML(item.coachNo)}
-            </h3>
+            <h3>Coach: ${escapeHTML(item.coachNo)}</h3>
 
             <p>
                 Current Shop:
@@ -1336,40 +1218,27 @@ function openMoveModal(item, target) {
             </p>
 
             <label>NEW SHOP</label>
-
             <select id="moveNewShop">
                 <option value="">Select New Shop</option>
                 ${shopOptions}
             </select>
 
             <label>MOVEMENT DATE</label>
-
-            <input
-                id="moveDate"
-                type="date"
-                value="${todayISO()}"
-            >
+            <input id="moveDate" type="date" value="${todayISO()}">
 
             <label>STATUS</label>
-
             <select id="moveStatus">
                 <option value="">Select Status</option>
                 ${statusOptions}
             </select>
 
             <label>REMARKS</label>
-
-            <textarea
-                id="moveRemarks"
-                placeholder="Enter remarks"
-            ></textarea>
+            <textarea id="moveRemarks" placeholder="Enter remarks"></textarea>
 
             <div id="coachMoveButtons">
-
                 <button id="confirmCoachMove" type="button">
                     CONFIRM MOVEMENT
                 </button>
-
             </div>
 
         </div>
@@ -1377,30 +1246,31 @@ function openMoveModal(item, target) {
 
     document.body.appendChild(modal);
 
-    modal.querySelector("#closeCoachMove").onclick = () => {
-        modal.remove();
-    };
+    modal.querySelector("#closeCoachMove").onclick =
+        () => modal.remove();
 
     modal.addEventListener("click", event => {
-        if (event.target === modal) {
-            modal.remove();
-        }
+        if (event.target === modal) modal.remove();
     });
 
     modal.querySelector("#confirmCoachMove").onclick =
         async () => {
 
-            const newShop =
-                modal.querySelector("#moveNewShop").value;
+            const newShop = clean(
+                modal.querySelector("#moveNewShop").value
+            );
 
-            const movementDate =
-                modal.querySelector("#moveDate").value;
+            const movementDate = clean(
+                modal.querySelector("#moveDate").value
+            );
 
-            const status =
-                modal.querySelector("#moveStatus").value;
+            const status = clean(
+                modal.querySelector("#moveStatus").value
+            );
 
-            const remarks =
-                modal.querySelector("#moveRemarks").value.trim();
+            const remarks = clean(
+                modal.querySelector("#moveRemarks").value
+            );
 
             if (!newShop || !movementDate || !status) {
                 alert("Please select New Shop, Date and Status.");
@@ -1456,16 +1326,14 @@ function openMoveModal(item, target) {
                     remarks
                 );
 
-                if (result.action === "SWAP" && swappedStockEntry) {
+                if (result?.action === "SWAP" && swappedStockEntry) {
 
                     const [otherId, otherRecord] =
                         swappedStockEntry;
 
-                    const otherShop =
-                        record.currentShop || "";
+                    const otherShop = record.currentShop || "";
 
                     if (otherShop) {
-
                         await updateStockMovement(
                             otherId,
                             otherRecord,
@@ -1478,7 +1346,7 @@ function openMoveModal(item, target) {
                 }
 
                 alert(
-                    result.action === "SWAP"
+                    result?.action === "SWAP"
                         ? "Coach positions swapped. Board and Stock updated."
                         : "Coach moved. Board and Stock updated."
                 );
@@ -1487,19 +1355,11 @@ function openMoveModal(item, target) {
 
                 selectedCoach = null;
 
-                const selection =
-                    document.getElementById("stockBoardSelection");
+                document.getElementById("stockBoardSelection")
+                    .textContent = "No Coach Selected";
 
-                if (selection) {
-                    selection.textContent = "No Coach Selected";
-                }
-
-                const stockShopButton =
-                    document.getElementById("changeStockShopBtn");
-
-                if (stockShopButton) {
-                    stockShopButton.style.display = "none";
-                }
+                document.getElementById("changeStockShopBtn")
+                    .style.display = "none";
 
                 await refreshBoard();
                 showResults();
@@ -1521,7 +1381,7 @@ function openMoveModal(item, target) {
 
 
 /* =========================================================
-   ENTRY / MOVE
+   ENTRY / MOVE COACH
 ========================================================= */
 
 async function enterOrMoveCoach(target) {
@@ -1530,12 +1390,13 @@ async function enterOrMoveCoach(target) {
 
     const item = selectedCoach;
 
+    // STOCK-ONLY COACH: ENTER INTO BOARD
     if (item.source === "STOCK") {
 
         const record = item.record || {};
 
         const existingBoardCoach = boardRecords.find(coach =>
-            upper(coach.coachNo) === upper(item.coachNo)
+            coachKey(coach.coachNo) === coachKey(item.coachNo)
         );
 
         if (existingBoardCoach) {
@@ -1547,11 +1408,14 @@ async function enterOrMoveCoach(target) {
             return;
         }
 
+        // AUTOMATIC COACH NUMBER FORMAT
+        const boardCoachNo = formatBoardCoachNo(item);
+
         await firebaseSaveCoach({
             line: target.line,
             position: target.position,
-            coachNo: item.coachNo,
-            coachCode: item.coachCode,
+            coachNo: boardCoachNo,
+            coachCode: item.coachCode || record.coachCode || "",
             coachType:
                 record.coachType ||
                 record.coachCode ||
@@ -1568,23 +1432,22 @@ async function enterOrMoveCoach(target) {
                 `coachBoard/${target.line}/${target.position}`
             ),
             {
-                coachCode: item.coachCode || ""
+                coachCode: item.coachCode || record.coachCode || ""
             }
         );
 
-        alert(`Coach ${item.coachNo} entered successfully.`);
+        alert(
+            `Coach entered successfully.\n` +
+            `Board Coach Number: ${boardCoachNo}`
+        );
 
         selectedCoach = null;
 
         document.getElementById("stockBoardSelection")
             .textContent = "No Coach Selected";
 
-        const stockShopButton =
-            document.getElementById("changeStockShopBtn");
-
-        if (stockShopButton) {
-            stockShopButton.style.display = "none";
-        }
+        document.getElementById("changeStockShopBtn")
+            .style.display = "none";
 
         await refreshBoard();
         showResults();
@@ -1592,9 +1455,10 @@ async function enterOrMoveCoach(target) {
         return;
     }
 
+    // BOARD COACH: MOVE OR SWAP
     if (
-        item.line === target.line &&
-        item.position === target.position
+        clean(item.line) === target.line &&
+        clean(item.position) === target.position
     ) {
         alert("This is already the Coach's position.");
         return;
@@ -1623,9 +1487,7 @@ function installPositionClick() {
         event.stopImmediatePropagation();
 
         try {
-
             await enterOrMoveCoach(target);
-
         } catch (error) {
 
             console.error("Coach Entry Error:", error);
@@ -1647,11 +1509,8 @@ function installPositionClick() {
 async function refreshBoard() {
 
     try {
-
-        boardRecords = await getAllCoaches();
-
+        boardRecords = await getAllCoaches() || [];
     } catch (error) {
-
         console.error("Board refresh error:", error);
     }
 }
@@ -1673,7 +1532,6 @@ function startStockListener() {
                 : {};
 
             showResults();
-
         },
 
         error => {
@@ -1701,9 +1559,7 @@ function startBoardListener() {
         async () => {
 
             await refreshBoard();
-
             showResults();
-
         },
 
         error => {
@@ -1724,19 +1580,16 @@ async function startIntegration() {
     integrationStarted = true;
 
     installStyles();
-
     createPanel();
-
     installPositionClick();
 
     await refreshBoard();
 
     startStockListener();
-
     startBoardListener();
 
     console.log(
-        "MR CO-ORDINATION BOARD + COACH STOCK INTEGRATION READY - V4"
+        "MR CO-ORDINATION BOARD + COACH STOCK INTEGRATION READY - V5.0"
     );
 }
 
