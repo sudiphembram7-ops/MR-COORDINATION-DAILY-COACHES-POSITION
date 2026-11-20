@@ -1380,6 +1380,7 @@ function openMoveModal(item, target) {
 }
 
 
+
 /* =========================================================
    ENTRY / MOVE COACH
 ========================================================= */
@@ -1390,9 +1391,8 @@ async function enterOrMoveCoach(target) {
 
     const item = selectedCoach;
 
-    
     // STOCK-ONLY COACH: OPEN EXISTING BOARD MODAL
-    // NO DIRECT FIREBASE BOARD WRITE
+    // NO FIREBASE WRITE BEFORE USER CLICKS SAVE
 
     if (item.source === "STOCK") {
 
@@ -1411,7 +1411,6 @@ async function enterOrMoveCoach(target) {
             return;
         }
 
-        // Preserve existing LHB / ICF number formatting
         const boardCoachNo = formatBoardCoachNo(item);
 
         const coachType =
@@ -1427,93 +1426,40 @@ async function enterOrMoveCoach(target) {
             "";
 
         if (typeof window.openStockCoachEntryModal !== "function") {
-            alert(
-                "Board Entry Modal not available. Check board.js."
-            );
+            alert("Board Entry Modal not available. Check board.js.");
             return;
         }
 
-        // Open modal only. No Firebase write here.
+        // Open existing modal only. Save happens through Board modal.
         window.openStockCoachEntryModal({
-
             line: target.line,
-
             position: target.position,
-
             coachNo: boardCoachNo,
-
             coachType: coachType,
-
             status: status
-
         });
 
-        // Clear Stock selection after opening modal
         selectedCoach = null;
 
         const selection =
             document.getElementById("stockBoardSelection");
 
-        if (selection)
+        if (selection) {
             selection.textContent = "No Coach Selected";
+        }
 
         const changeButton =
             document.getElementById("changeStockShopBtn");
 
-        if (changeButton)
+        if (changeButton) {
             changeButton.style.display = "none";
-
-        return;
-    }
-
-        // AUTOMATIC COACH NUMBER FORMAT
-        const boardCoachNo = formatBoardCoachNo(item);
-
-        await firebaseSaveCoach({
-            line: target.line,
-            position: target.position,
-            coachNo: boardCoachNo,
-            coachCode: item.coachCode || record.coachCode || "",
-            coachType:
-                record.coachType ||
-                record.coachCode ||
-                "Not specified",
-            status:
-                record.currentVisit?.status ||
-                record.status ||
-                "IN SHOP"
-        });
-
-        await update(
-            ref(
-                database,
-                `coachBoard/${target.line}/${target.position}`
-            ),
-            {
-                coachCode: item.coachCode || record.coachCode || ""
-            }
-        );
-
-        alert(
-            `Coach entered successfully.\n` +
-            `Board Coach Number: ${boardCoachNo}`
-        );
-
-        selectedCoach = null;
-
-        document.getElementById("stockBoardSelection")
-            .textContent = "No Coach Selected";
-
-        document.getElementById("changeStockShopBtn")
-            .style.display = "none";
-
-        await refreshBoard();
-        showResults();
+        }
 
         return;
     }
 
     // BOARD COACH: MOVE OR SWAP
+
     if (
         clean(item.line) === target.line &&
         clean(item.position) === target.position
