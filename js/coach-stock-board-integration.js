@@ -1390,6 +1390,7 @@ async function enterOrMoveCoach(target) {
     if (!selectedCoach) return;
 
     const item = selectedCoach;
+    alert("SOURCE = " + item.source + " | COACH = " + item.coachNo);
 
     // STOCK-ONLY COACH: OPEN EXISTING BOARD MODAL
     // NO FIREBASE WRITE BEFORE USER CLICKS SAVE
