@@ -1390,7 +1390,10 @@ async function enterOrMoveCoach(target) {
 
     const item = selectedCoach;
 
-    // STOCK-ONLY COACH: ENTER INTO BOARD
+    
+    // STOCK-ONLY COACH: OPEN EXISTING BOARD MODAL
+    // NO DIRECT FIREBASE BOARD WRITE
+
     if (item.source === "STOCK") {
 
         const record = item.record || {};
@@ -1407,6 +1410,61 @@ async function enterOrMoveCoach(target) {
             );
             return;
         }
+
+        // Preserve existing LHB / ICF number formatting
+        const boardCoachNo = formatBoardCoachNo(item);
+
+        const coachType =
+            record.coachType ||
+            record.coachCode ||
+            item.coachType ||
+            item.coachCode ||
+            "";
+
+        const status =
+            record.currentVisit?.status ||
+            record.status ||
+            "";
+
+        if (typeof window.openStockCoachEntryModal !== "function") {
+            alert(
+                "Board Entry Modal not available. Check board.js."
+            );
+            return;
+        }
+
+        // Open modal only. No Firebase write here.
+        window.openStockCoachEntryModal({
+
+            line: target.line,
+
+            position: target.position,
+
+            coachNo: boardCoachNo,
+
+            coachType: coachType,
+
+            status: status
+
+        });
+
+        // Clear Stock selection after opening modal
+        selectedCoach = null;
+
+        const selection =
+            document.getElementById("stockBoardSelection");
+
+        if (selection)
+            selection.textContent = "No Coach Selected";
+
+        const changeButton =
+            document.getElementById("changeStockShopBtn");
+
+        if (changeButton)
+            changeButton.style.display = "none";
+
+        return;
+    }
 
         // AUTOMATIC COACH NUMBER FORMAT
         const boardCoachNo = formatBoardCoachNo(item);
