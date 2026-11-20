@@ -625,6 +625,69 @@ function openNewCoachModal(
 
 
 /* =========================================================
+   STOCK COACH → EXISTING BOARD ENTRY MODAL
+   NO FIREBASE WRITE BEFORE SAVE
+========================================================= */
+
+window.openStockCoachEntryModal = function (data) {
+
+    if (!data) return;
+
+    if (!requireAdmin()) return;
+
+    const line = clean(data.line);
+    const position = clean(data.position);
+    const coachNo = clean(data.coachNo);
+    const coachType = clean(data.coachType);
+
+    if (!line || !position || !coachNo || !coachType) {
+        showMessage(
+            "Coach Number, Coach Type, Line and Position are required.",
+            "warning"
+        );
+        return;
+    }
+
+    // Open the existing NEW COACH modal
+    openNewCoachModal(line, position);
+
+    const el = getModalElements();
+
+    if (el.shop)
+        el.shop.value = getShopFromLine(line);
+
+    if (el.line)
+        el.line.value = line;
+
+    if (el.position)
+        el.position.value = position;
+
+    if (el.coachNo)
+        el.coachNo.value = coachNo;
+
+    if (el.coachType)
+        el.coachType.value = coachType;
+
+    if (el.status)
+        el.status.value = data.status || "";
+
+    // Must remain a NEW coach entry
+    editingMode = false;
+    searchViewMode = false;
+    returnMode = false;
+
+    selectedLine = line;
+    selectedPosition = position;
+
+    selectedPulledOutKey = "";
+    selectedPulledOutCoach = null;
+
+    updateEditButtons();
+
+};
+
+
+/* =========================================================
    OPEN EXISTING COACH MODAL
 ========================================================= */
 
