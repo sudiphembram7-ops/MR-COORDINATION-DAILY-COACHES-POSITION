@@ -138,31 +138,18 @@ function isICF(item) {
 }
 
 function formatBoardCoachNo(item) {
+    let coachNo = String(item?.coachNo || "").trim();
 
-    const original = upper(item?.coachNo)
-        .replace(/\s+/g, "");
+    // Remove ER prefix
+    coachNo = coachNo.replace(/^ER/i, "");
 
-    if (!original) return "";
-
-    // ICF number remains unchanged
-    if (isICF(item)) {
-        return original;
+    // Add /C only for LHB coaches
+    if (isLHB(item)) {
+        coachNo = coachNo.replace(/\/C$/i, "") + "/C";
     }
 
-    // Only LHB gets /C
-    if (!isLHB(item)) {
-        return original;
-    }
-
-    let number = original.replace(/\/C$/, "");
-
-    // Remove ER only
-    number = number.replace(/^ER(?=\d)/, "");
-
-    // Keep SR, SE, SER and other prefixes
-    return `${number}/C`;
+    return coachNo;
 }
-
 
 /* =========================================================
    STOCK OPTIONS
