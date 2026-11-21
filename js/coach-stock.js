@@ -379,7 +379,7 @@ function openMoveModal(id){
 
  $("moveShop").value="";
  $("moveDate").value=todayDate();
- $("moveStatus").value=getStatus(v.status);
+ $("moveStatus").value="";
  $("moveRemarks").value=v.remarks||"";
 
  $("moveModal").style.display="flex";
@@ -433,7 +433,9 @@ $("confirmMoveBtn").addEventListener("click",async()=>{
     datePlaced:movementDate,
     dateIn:"",
     dateOut:"",
-    status:getStatus($("moveStatus").value),
+    status:$("moveStatus").value
+ ? getStatus($("moveStatus").value)
+ : getStatus(old.status),
     remarks:$("moveRemarks").value.trim()
    },
    history,
