@@ -1005,10 +1005,10 @@ function openStockOnlyShopModal(item) {
                 modal.querySelector("#stockShopChangeRemarks").value
             );
 
-            if (!newShop || !movementDate || !status) {
-                alert("Please select New Shop, Date and Status.");
-                return;
-            }
+            if (!newShop || !movementDate) {
+    alert("Please select New Shop and Date.");
+    return;
+}
 
             if (upper(newShop) === upper(currentShop)) {
                 alert("Please select a different Shop.");
