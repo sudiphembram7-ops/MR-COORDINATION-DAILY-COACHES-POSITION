@@ -444,7 +444,167 @@ function installStyles() {
 
     document.head.appendChild(style);
 }
+function installSearchCardStyles() {
+    if (document.getElementById("modernSearchCardCSS")) return;
 
+    const style = document.createElement("style");
+    style.id = "modernSearchCardCSS";
+
+    style.textContent = `
+    #stockBoardResults {
+        max-height:none;
+        overflow:visible;
+        padding:12px 2px;
+        background:#f8fbff;
+    }
+
+    .stock-results-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:22px;
+        background:linear-gradient(110deg,#1682ff,#0645d9);
+        color:white;
+        border-radius:15px 15px 0 0;
+        font-size:22px;
+        font-weight:900;
+    }
+
+    .stock-results-count {
+        background:white;
+        color:#0870ed;
+        padding:11px 16px;
+        border-radius:30px;
+        font-size:14px;
+    }
+
+    .stock-modern-card {
+        background:white;
+        border:2px solid #c8dcff;
+        border-radius:25px;
+        padding:22px;
+        margin:12px 0;
+        box-shadow:0 5px 15px rgba(20,80,150,.08);
+    }
+
+    .stock-modern-top {
+        display:flex;
+        align-items:center;
+        gap:12px;
+        margin-bottom:22px;
+    }
+
+    .stock-train-icon {
+        width:72px;
+        height:72px;
+        border-radius:50%;
+        background:#e7f0ff;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        font-size:37px;
+        flex-shrink:0;
+    }
+
+    .stock-modern-number {
+        flex:1;
+        min-width:0;
+    }
+
+    .stock-modern-number small {
+        display:block;
+        color:#666;
+        font-size:14px;
+    }
+
+    .stock-modern-number strong {
+        display:block;
+        color:#0870ed;
+        font-size:clamp(22px,5vw,34px);
+        overflow-wrap:anywhere;
+    }
+
+    .stock-found-badge {
+        background:#0875ff;
+        color:white;
+        padding:11px 13px;
+        border-radius:30px;
+        font-weight:bold;
+        font-size:12px;
+    }
+
+    .stock-modern-info {
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        background:#edf4ff;
+        border-radius:16px;
+        padding:17px 7px;
+        gap:3px;
+    }
+
+    .stock-modern-info > div {
+        min-width:0;
+        padding:5px 7px;
+        border-right:2px solid #d9e2ef;
+    }
+
+    .stock-modern-info > div:last-child {
+        border-right:0;
+    }
+
+    .stock-modern-info small {
+        display:block;
+        color:#606975;
+        font-size:12px;
+    }
+
+    .stock-modern-info strong {
+        display:block;
+        margin-top:7px;
+        color:#242b33;
+        font-size:14px;
+        overflow-wrap:anywhere;
+    }
+
+    .stock-modern-info .stock-position {
+        color:#0870ed;
+    }
+
+    .stock-modern-status {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:8px;
+        background:#dcf8e9;
+        color:#168653;
+        padding:15px 18px;
+        margin-top:15px;
+        border-radius:15px;
+        font-weight:900;
+        font-size:18px;
+    }
+
+    .stock-modern-status strong {
+        background:#198956;
+        color:white;
+        padding:11px 18px;
+        border-radius:10px;
+        font-size:15px;
+    }
+
+    @media(max-width:420px) {
+        .stock-modern-card {padding:15px}
+        .stock-train-icon {width:58px;height:58px;font-size:30px}
+        .stock-modern-info {padding:12px 4px}
+        .stock-modern-info > div {padding:4px}
+        .stock-modern-info small {font-size:10px}
+        .stock-modern-info strong {font-size:12px}
+        .stock-found-badge {padding:9px;font-size:11px}
+    }
+    `;
+
+    document.head.appendChild(style);
+}
 
 /* =========================================================
    FIND N SHOP SECTION
@@ -618,20 +778,17 @@ function getCombinedList() {
 ========================================================= */
 
 function showResults() {
-
     const input = document.getElementById("stockBoardSearch");
     const results = document.getElementById("stockBoardResults");
 
     if (!input || !results) return;
 
     const query = normal(input.value);
-
     results.innerHTML = "";
 
     if (!query) return;
 
     const matches = getCombinedList().filter(item => {
-
         const searchable = [
             item.coachNo,
             item.stockCoachNo,
@@ -648,98 +805,121 @@ function showResults() {
         return searchable.includes(query);
     });
 
+    const header = document.createElement("div");
+    header.className = "stock-results-header";
+    header.innerHTML = `
+        <span>SEARCH RESULTS</span>
+        <span class="stock-results-count">
+            ${matches.length} FOUND
+        </span>
+    `;
+    results.appendChild(header);
+
     if (!matches.length) {
-        results.textContent = "No Coach Found.";
+        const empty = document.createElement("p");
+        empty.textContent = "No Coach Found.";
+        results.appendChild(empty);
         return;
     }
 
     matches.slice(0, 100).forEach(item => {
+        const stockEntry = findStockRecord(item.coachNo);
+        const stock = stockEntry ? stockEntry[1] : null;
+
+        const board = item.boardRecord ||
+            (item.source === "BOARD" ? item : null);
+
+        const shop =
+            stock?.currentShop ||
+            stock?.currentVisit?.shop ||
+            item.shop ||
+            "-";
+
+        const position = board
+            ? `${board.line || "-"} / ${board.position || "-"}`
+            : "NOT ON BOARD";
+
+        const coachType =
+            stock?.coachType ||
+            stock?.coachCode ||
+            item.coachType ||
+            item.coachCode ||
+            "-";
+
+        const status =
+            stock?.currentVisit?.status ||
+            stock?.status ||
+            item.status ||
+            "NOT AVAILABLE";
 
         const card = document.createElement("div");
-        card.className = "stock-board-result";
+        card.className = "stock-modern-card";
 
-        const info = document.createElement("div");
-        info.className = "stock-result-info";
+        card.innerHTML = `
+            <div class="stock-modern-top">
+                <div class="stock-train-icon">🚆</div>
 
-        info.innerHTML = `
-            <strong>${escapeHTML(item.displaySource || item.source)}</strong>
-            <br>
+                <div class="stock-modern-number">
+                    <small>COACH NUMBER</small>
+                    <strong>${escapeHTML(item.coachNo)}</strong>
+                </div>
 
-            Coach Number:
-            <button type="button" class="stock-result-coachno">
-                ${escapeHTML(item.coachNo)}
-            </button>
+                <span class="stock-found-badge">FOUND</span>
+            </div>
 
-            ${
-                item.stockCoachNo &&
-                item.stockCoachNo !== item.coachNo
-                    ? `<br>Stock Number: ${escapeHTML(item.stockCoachNo)}`
-                    : ""
-            }
+            <div class="stock-modern-info">
+                <div>
+                    <small>SHOP</small>
+                    <strong>${escapeHTML(shop)}</strong>
+                </div>
 
-            <br>
-            Code: ${escapeHTML(item.coachCode || item.coachType || "-")}
+                <div>
+                    <small>LINE/POSITION</small>
+                    <strong class="stock-position">
+                        ${escapeHTML(position)}
+                    </strong>
+                </div>
 
-            <br>
-            Board Position:
-            ${
-                item.source === "BOARD"
-                    ? `${escapeHTML(item.line || "-")} / ${escapeHTML(item.position || "-")}`
-                    : "Not on Board"
-            }
+                <div>
+                    <small>COACH TYPE</small>
+                    <strong>${escapeHTML(coachType)}</strong>
+                </div>
+            </div>
 
-            <br>
-            Stock Shop:
-            ${escapeHTML(
-                item.shop ||
-                findStockRecord(item.coachNo)?.[1]?.currentShop ||
-                "-"
-            )}
+            <div class="stock-modern-status">
+                <span>STATUS</span>
+                <strong>${escapeHTML(status)}</strong>
+            </div>
+
+            <div class="stock-result-actions" style="margin-top:15px">
+                <button type="button" class="stock-details-button">
+                    VIEW DETAILS
+                </button>
+
+                <button type="button" class="stock-select-button">
+                    SELECT COACH
+                </button>
+            </div>
         `;
 
-        const actions = document.createElement("div");
-        actions.className = "stock-result-actions";
+        card.querySelector(".stock-details-button").onclick =
+            () => openCoachDetails(item);
 
-        const detailsButton = document.createElement("button");
-        detailsButton.type = "button";
-        detailsButton.className = "stock-details-button";
-        detailsButton.textContent = "VIEW DETAILS";
-        detailsButton.onclick = () => openCoachDetails(item);
-
-        const selectButton = document.createElement("button");
-        selectButton.type = "button";
-        selectButton.className = "stock-select-button";
-        selectButton.textContent = "SELECT COACH";
-
-        selectButton.onclick = () => {
-
+        card.querySelector(".stock-select-button").onclick = () => {
             selectedCoach = item;
 
-            document.querySelectorAll(".stock-board-result")
-                .forEach(element =>
-                    element.classList.remove("selected")
-                );
-
-            card.classList.add("selected");
-
             document.getElementById("stockBoardSelection")
-                .textContent =
-                `Selected: ${item.coachNo} (${item.displaySource}) — ` +
-                "Now click the destination Position.";
+                .textContent = `Selected: ${item.coachNo}`;
+
+            document.querySelectorAll(".stock-modern-card")
+                .forEach(el => el.style.borderColor = "#c8dcff");
+
+            card.style.borderColor = "#16834b";
 
             document.getElementById("changeStockShopBtn")
                 .style.display =
                 findStockRecord(item.coachNo) ? "block" : "none";
         };
-
-        info.querySelector(".stock-result-coachno").onclick =
-            () => openCoachDetails(item);
-
-        actions.appendChild(detailsButton);
-        actions.appendChild(selectButton);
-
-        card.appendChild(info);
-        card.appendChild(actions);
 
         results.appendChild(card);
     });
@@ -1575,9 +1755,9 @@ async function startIntegration() {
     integrationStarted = true;
 
     installStyles();
-    createPanel();
-    installPositionClick();
-
+installSearchCardStyles();
+createPanel();
+installPositionClick();
     await refreshBoard();
 
     startStockListener();
