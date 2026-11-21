@@ -6,7 +6,11 @@
    COMBINED SEARCH + COACH NUMBER AUTO FORMAT
 ========================================================= */
 
-import { database } from "./firebase-config.js";
+import { auth, database } from "./firebase-config.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 import {
     ref,
@@ -94,14 +98,13 @@ function coachKey(value) {
     let number = upper(value).replace(/\s+/g, "");
 
     // Remove LHB suffix
-    number = number.replace(/\/C$/, "");
+    number = number.replace(/\/C$/i, "");
 
-    // ER prefix is ignored for matching
-    number = number.replace(/^ER(?=\d)/, "");
+    // Remove Railway prefix
+    number = number.replace(/^(EC|ER|SW|NR|NE|WR|SR|SE)(?=\d)/i, "");
 
     return number;
 }
-
 function findStockRecord(coachNo) {
     const target = coachKey(coachNo);
 
