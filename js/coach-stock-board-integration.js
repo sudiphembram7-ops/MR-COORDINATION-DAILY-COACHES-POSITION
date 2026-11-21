@@ -140,8 +140,8 @@ function isICF(item) {
 function formatBoardCoachNo(item) {
     let coachNo = String(item?.coachNo || "").trim();
 
-    // Remove ER prefix
-    coachNo = coachNo.replace(/^ER/i, "");
+    // Remove railway prefix, preserve the remaining number
+    coachNo = coachNo.replace(/^(SW|NR|ER|NE|WR|SR|EC|SE)/i, "");
 
     // Add /C only for LHB coaches
     if (isLHB(item)) {
@@ -150,6 +150,7 @@ function formatBoardCoachNo(item) {
 
     return coachNo;
 }
+
 
 /* =========================================================
    STOCK OPTIONS
