@@ -639,6 +639,7 @@ window.openStockCoachEntryModal = function (data) {
     const position = clean(data.position);
     const coachNo = clean(data.coachNo);
     const coachType = clean(data.coachType);
+    const status = clean(data.status);
 
     if (!line || !position || !coachNo || !coachType) {
         showMessage(
@@ -648,30 +649,50 @@ window.openStockCoachEntryModal = function (data) {
         return;
     }
 
-    // Open the existing NEW COACH modal
+    // Open existing Board Entry Modal
     openNewCoachModal(line, position);
 
     const el = getModalElements();
 
-    if (el.shop)
-        el.shop.value = getShopFromLine(line);
-
-    if (el.line)
-        el.line.value = line;
-
-    if (el.position)
-        el.position.value = position;
-
-    if (el.coachNo)
+    // Set Coach Number
+    if (el.coachNo) {
         el.coachNo.value = coachNo;
+    }
 
-    if (el.coachType)
+    // Add unknown Stock Coach Code to dropdown if needed
+    if (el.coachType) {
+
+        if (
+            el.coachType.tagName === "SELECT" &&
+            !Array.from(el.coachType.options)
+                .some(option => option.value === coachType)
+        ) {
+            el.coachType.add(
+                new Option(coachType, coachType)
+            );
+        }
+
         el.coachType.value = coachType;
+    }
 
-    if (el.status)
-        el.status.value = data.status || "";
+    // Add unknown Stock Status to dropdown if needed
+    if (el.status) {
 
-    // Must remain a NEW coach entry
+        if (
+            el.status.tagName === "SELECT" &&
+            status &&
+            !Array.from(el.status.options)
+                .some(option => option.value === status)
+        ) {
+            el.status.add(
+                new Option(status, status)
+            );
+        }
+
+        el.status.value = status;
+    }
+
+    // Keep this as a NEW COACH entry
     editingMode = false;
     searchViewMode = false;
     returnMode = false;
@@ -683,10 +704,7 @@ window.openStockCoachEntryModal = function (data) {
     selectedPulledOutCoach = null;
 
     updateEditButtons();
-
 };
-
-
 /* =========================================================
    OPEN EXISTING COACH MODAL
 ========================================================= */
