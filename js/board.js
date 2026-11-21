@@ -629,10 +629,10 @@ function openNewCoachModal(
    NO FIREBASE WRITE BEFORE SAVE
 ========================================================= */
 
+
 window.openStockCoachEntryModal = function (data) {
 
     if (!data) return;
-
     if (!requireAdmin()) return;
 
     const line = clean(data.line);
@@ -641,9 +641,9 @@ window.openStockCoachEntryModal = function (data) {
     const coachType = clean(data.coachType);
     const status = clean(data.status);
 
-    if (!line || !position || !coachNo || !coachType) {
+    if (!line || !position || !coachNo) {
         showMessage(
-            "Coach Number, Coach Type, Line and Position are required.",
+            "Coach Number, Line and Position are required.",
             "warning"
         );
         return;
@@ -654,18 +654,18 @@ window.openStockCoachEntryModal = function (data) {
 
     const el = getModalElements();
 
-    // Set Coach Number
     if (el.coachNo) {
         el.coachNo.value = coachNo;
     }
 
-    // Add unknown Stock Coach Code to dropdown if needed
-    if (el.coachType) {
+    // Keep original Stock Coach Code
+    if (el.coachType && coachType) {
 
         if (
             el.coachType.tagName === "SELECT" &&
-            !Array.from(el.coachType.options)
-                .some(option => option.value === coachType)
+            !Array.from(el.coachType.options).some(
+                option => option.value === coachType
+            )
         ) {
             el.coachType.add(
                 new Option(coachType, coachType)
@@ -675,14 +675,14 @@ window.openStockCoachEntryModal = function (data) {
         el.coachType.value = coachType;
     }
 
-    // Add unknown Stock Status to dropdown if needed
-    if (el.status) {
+    // Set Stock Status, adding option if necessary
+    if (el.status && status) {
 
         if (
             el.status.tagName === "SELECT" &&
-            status &&
-            !Array.from(el.status.options)
-                .some(option => option.value === status)
+            !Array.from(el.status.options).some(
+                option => option.value === status
+            )
         ) {
             el.status.add(
                 new Option(status, status)
@@ -692,7 +692,7 @@ window.openStockCoachEntryModal = function (data) {
         el.status.value = status;
     }
 
-    // Keep this as a NEW COACH entry
+    // Preserve NEW COACH mode
     editingMode = false;
     searchViewMode = false;
     returnMode = false;
@@ -705,6 +705,7 @@ window.openStockCoachEntryModal = function (data) {
 
     updateEditButtons();
 };
+
 /* =========================================================
    OPEN EXISTING COACH MODAL
 ========================================================= */
