@@ -1,8 +1,9 @@
 
 import { auth, database } from "./firebase-config.js";
 
-import { onAuthStateChanged } from
-    "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
     ref,
@@ -18,31 +19,36 @@ import {
 // ======================================
 
 const DEMAND_PATH = "coachDemands/requests";
+const STOCK_PATH = "coachStock/records";
 
 const ADMIN_UID = "jHNrX5UaJla30nwGA48QHf87oaz2";
 
 let currentUser = null;
-let demandListenerStarted = false;
+let coachStockRecords = [];
 let demandUnsubscribe = null;
+let stockUnsubscribe = null;
 
 
 // ======================================
-// SHOP AND LINE DATA
+// SHOP / LINE / POSITION DATA
 // ======================================
 
 const SHOP_LINES = {
     "N SHOP": ["N2", "N3", "N5", "N7", "N8"],
     "M SHOP": ["M2", "M3", "M4", "M5", "M6"],
     "LIFTING BAY": ["L9", "L10"],
+
     "MR SCR SHOP": [
         "SCR9", "SCR10", "SCR11", "SCR12",
         "SCR13", "SCR14", "SCR15", "SCR16",
         "SCR18", "SCR19", "SCR21", "SCR22"
     ],
+
     "CR SHOP": [
         "F1", "F2", "F3", "F4", "F5", "F6",
         "F7", "F8", "F9", "F10", "F11"
     ],
+
     "J SHOP": ["J1", "J2", "J3", "J4", "J5", "J6"]
 };
 
@@ -57,7 +63,7 @@ const SHOP_POSITIONS = {
 
 
 // ======================================
-// HTML HELPERS
+// HELPER FUNCTIONS
 // ======================================
 
 function escapeHTML(value) {
@@ -70,6 +76,22 @@ function escapeHTML(value) {
     })[char]);
 }
 
+
+function getField(record, fields) {
+    if (!record || typeof record !== "object") return "";
+
+    for (const field of fields) {
+        const value = record[field];
+
+        if (value !== undefined && value !== null && value !== "") {
+            return value;
+        }
+    }
+
+    return "";
+}
+
+
 function shopOptions(selected = "") {
     return Object.keys(SHOP_LINES).map(shop => `
         <option value="${escapeHTML(shop)}"
@@ -80,8 +102,25 @@ function shopOptions(selected = "") {
 }
 
 
+function addSelectOption(select, value) {
+    if (!value) return;
+
+    const text = String(value).trim();
+
+    const exists = [...select.options].some(option =>
+        option.value.toLowerCase() === text.toLowerCase()
+    );
+
+    if (!exists) {
+        select.add(new Option(text, text));
+    }
+
+    select.value = text;
+}
+
+
 // ======================================
-// CREATE PANEL
+// CREATE COACH DEMAND PANEL
 // ======================================
 
 function createDemandPanel() {
@@ -96,12 +135,12 @@ function createDemandPanel() {
     panel.innerHTML = `
         <style>
             #coachDemandPanel {
-                margin: 20px auto;
                 max-width: 1100px;
+                margin: 20px auto;
             }
 
             #coachDemandPanel .demand-card {
-                background: white;
+                background: #fff;
                 border: 1px solid #ddd;
                 border-radius: 10px;
                 padding: 20px;
@@ -120,22 +159,23 @@ function createDemandPanel() {
             }
 
             #coachDemandPanel .status-pending {
-                color: #856404;
                 background: #fff3cd;
+                color: #856404;
             }
 
             #coachDemandPanel .status-approved {
-                color: #155724;
                 background: #d4edda;
+                color: #155724;
             }
 
             #coachDemandPanel .status-rejected {
-                color: #721c24;
                 background: #f8d7da;
+                color: #721c24;
             }
         </style>
 
         <div class="demand-card">
+
             <h4 class="mb-3">Coach Demand Form</h4>
 
             <form id="coachDemandForm">
@@ -144,27 +184,46 @@ function createDemandPanel() {
 
                     <div class="col-md-6">
                         <label class="form-label">Source Shop</label>
-                        <select class="form-select" id="demandSourceShop" required>
+
+                        <select class="form-select"
+                            id="demandSourceShop" required>
+
                             <option value="">Select Source Shop</option>
+
                             ${shopOptions()}
+
                             <option value="Yard POH">Yard POH</option>
                         </select>
                     </div>
 
+
                     <div class="col-md-6">
                         <label class="form-label">Coach Number</label>
+
                         <input
                             type="text"
                             class="form-control"
                             id="demandCoachNo"
-                            placeholder="Enter Coach Number"
+                            list="coachStockNumberList"
+                            placeholder="Search Coach Number"
+                            autocomplete="off"
                             required
                         >
+
+                        <datalist id="coachStockNumberList"></datalist>
+
+                        <small class="text-muted">
+                            Select Coach Number from Coach Stock
+                        </small>
                     </div>
+
 
                     <div class="col-md-6">
                         <label class="form-label">Coach Type</label>
-                        <select class="form-select" id="demandCoachType" required>
+
+                        <select class="form-select"
+                            id="demandCoachType" required>
+
                             <option value="">Select Coach Type</option>
                             <option value="LHB">LHB</option>
                             <option value="ICF">ICF</option>
@@ -175,44 +234,60 @@ function createDemandPanel() {
                         </select>
                     </div>
 
+
                     <div class="col-md-6">
                         <label class="form-label">Destination Shop</label>
-                        <select class="form-select" id="demandDestinationShop" required>
+
+                        <select class="form-select"
+                            id="demandDestinationShop" required>
+
                             <option value="">Select Destination Shop</option>
+
                             ${shopOptions()}
                         </select>
                     </div>
 
+
                     <div class="col-md-4">
                         <label class="form-label">Destination Line</label>
-                        <select class="form-select" id="demandDestinationLine" required>
+
+                        <select class="form-select"
+                            id="demandDestinationLine" required>
+
                             <option value="">Select Line</option>
                         </select>
                     </div>
 
+
                     <div class="col-md-4">
                         <label class="form-label">Destination Position</label>
-                        <select class="form-select" id="demandDestinationPosition" required>
+
+                        <select class="form-select"
+                            id="demandDestinationPosition" required>
+
                             <option value="">Select Position</option>
                         </select>
                     </div>
 
+
                     <div class="col-md-4">
-                        <label class="form-label">Remarks (Optional)</label>
+                        <label class="form-label">Remarks</label>
+
                         <input
                             type="text"
                             class="form-control"
                             id="demandRemarks"
-                            placeholder="Enter Remarks"
+                            placeholder="Optional Remarks"
                         >
                     </div>
 
                 </div>
 
-                <button
-                    type="submit"
+
+                <button type="submit"
                     class="btn btn-primary mt-4"
                     id="submitDemandBtn">
+
                     Submit Coach Demand
                 </button>
 
@@ -221,17 +296,22 @@ function createDemandPanel() {
             </form>
         </div>
 
+
         <div class="demand-card">
+
             <h4 class="mb-3">Coach Demand Records</h4>
 
             <div class="table-responsive">
+
                 <table class="table table-bordered table-striped demand-table">
+
                     <thead class="table-dark">
+
                         <tr>
                             <th>Coach No.</th>
-                            <th>Type</th>
+                            <th>Coach Type</th>
                             <th>Source Shop</th>
-                            <th>Destination</th>
+                            <th>Destination Shop</th>
                             <th>Line</th>
                             <th>Position</th>
                             <th>Remarks</th>
@@ -241,17 +321,23 @@ function createDemandPanel() {
                                 Action
                             </th>
                         </tr>
+
                     </thead>
 
                     <tbody id="coachDemandRecords">
+
                         <tr>
                             <td colspan="10" class="text-center">
                                 Loading demands...
                             </td>
                         </tr>
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
     `;
 
@@ -266,39 +352,234 @@ function createDemandPanel() {
 
 
 // ======================================
-// DESTINATION SHOP / LINE / POSITION
+// COACH STOCK DATA FIELD MAPPING
+// ======================================
+
+function normalizeCoachStock(data) {
+
+    const result = [];
+
+    if (!data || typeof data !== "object") return result;
+
+    Object.entries(data).forEach(([key, value]) => {
+
+        if (!value || typeof value !== "object") return;
+
+        // Coach Number
+        const coachNo = getField(value, [
+            "coachNo",
+            "coachNumber",
+            "coach_no",
+            "coach_number",
+            "coach",
+            "number",
+            "vehicleNo",
+            "vehicleNumber"
+        ]) || key;
+
+        // Coach Type
+        const coachType = getField(value, [
+            "coachType",
+            "type",
+            "coach_type",
+            "category"
+        ]);
+
+        // Source Shop
+        const sourceShop = getField(value, [
+            "sourceShop",
+            "shop",
+            "shopName",
+            "currentShop",
+            "current_shop",
+            "location",
+            "depot"
+        ]);
+
+        result.push({
+            coachNo: String(coachNo).trim(),
+            coachType: String(coachType || "").trim(),
+            sourceShop: String(sourceShop || "").trim(),
+            originalData: value
+        });
+
+    });
+
+    return result.filter(item => item.coachNo);
+}
+
+
+// ======================================
+// LOAD COACH STOCK FROM FIREBASE
+// ======================================
+
+function loadCoachStockForDemand() {
+
+    if (stockUnsubscribe) {
+        stockUnsubscribe();
+        stockUnsubscribe = null;
+    }
+
+    const stockRef = ref(database, STOCK_PATH);
+
+    stockUnsubscribe = onValue(
+        stockRef,
+
+        snapshot => {
+
+            const stockData = snapshot.val() || {};
+
+            coachStockRecords = normalizeCoachStock(stockData);
+
+            updateCoachNumberSuggestions();
+
+            console.log(
+                "Coach Stock Loaded for Demand:",
+                coachStockRecords
+            );
+
+        },
+
+        error => {
+
+            console.error(
+                "Coach Stock Loading Error:",
+                error
+            );
+
+            const message =
+                document.getElementById("demandMessage");
+
+            if (message) {
+                message.innerHTML = `
+                    <div class="alert alert-warning">
+                        Coach Stock could not be loaded:
+                        ${escapeHTML(error.message)}
+                    </div>
+                `;
+            }
+        }
+    );
+}
+
+
+// ======================================
+// COACH NUMBER SUGGESTIONS
+// ======================================
+
+function updateCoachNumberSuggestions() {
+
+    const datalist = document.getElementById(
+        "coachStockNumberList"
+    );
+
+    if (!datalist) return;
+
+    const uniqueNumbers = [
+        ...new Set(
+            coachStockRecords.map(item => item.coachNo)
+        )
+    ];
+
+    datalist.innerHTML = uniqueNumbers.map(number => `
+        <option value="${escapeHTML(number)}"></option>
+    `).join("");
+}
+
+
+// ======================================
+// FIND SELECTED COACH
+// ======================================
+
+function findCoachInStock(coachNumber) {
+
+    const searchNumber = String(coachNumber)
+        .trim()
+        .toLowerCase();
+
+    return coachStockRecords.find(item =>
+        item.coachNo.toLowerCase() === searchNumber
+    );
+}
+
+
+// ======================================
+// AUTO FILL SOURCE SHOP AND COACH TYPE
+// ======================================
+
+function autoFillDemandCoachDetails() {
+
+    const coachNumber =
+        document.getElementById("demandCoachNo").value.trim();
+
+    const coach = findCoachInStock(coachNumber);
+
+    if (!coach) return;
+
+    const typeField =
+        document.getElementById("demandCoachType");
+
+    const shopField =
+        document.getElementById("demandSourceShop");
+
+    if (coach.coachType) {
+        addSelectOption(typeField, coach.coachType);
+    }
+
+    if (coach.sourceShop) {
+        addSelectOption(shopField, coach.sourceShop);
+    }
+}
+
+
+// ======================================
+// FORM EVENT SETUP
 // ======================================
 
 function setupDemandForm() {
 
-    const shopSelect = document.getElementById("demandDestinationShop");
-    const lineSelect = document.getElementById("demandDestinationLine");
-    const positionSelect = document.getElementById("demandDestinationPosition");
+    const destinationShop =
+        document.getElementById("demandDestinationShop");
 
-    shopSelect.addEventListener("change", () => {
+    const destinationLine =
+        document.getElementById("demandDestinationLine");
 
-        const shop = shopSelect.value;
+    const destinationPosition =
+        document.getElementById("demandDestinationPosition");
+
+    const coachNumber =
+        document.getElementById("demandCoachNo");
+
+
+    destinationShop.addEventListener("change", () => {
+
+        const shop = destinationShop.value;
         const lines = SHOP_LINES[shop] || [];
 
-        lineSelect.innerHTML = `
+        destinationLine.innerHTML = `
             <option value="">Select Line</option>
+
             ${lines.map(line => `
-                <option value="${escapeHTML(line)}">${escapeHTML(line)}</option>
+                <option value="${escapeHTML(line)}">
+                    ${escapeHTML(line)}
+                </option>
             `).join("")}
         `;
 
-        positionSelect.innerHTML = `
+        destinationPosition.innerHTML = `
             <option value="">Select Position</option>
         `;
     });
 
-    lineSelect.addEventListener("change", () => {
 
-        const shop = shopSelect.value;
+    destinationLine.addEventListener("change", () => {
+
+        const shop = destinationShop.value;
         const positions = SHOP_POSITIONS[shop] || [];
 
-        positionSelect.innerHTML = `
+        destinationPosition.innerHTML = `
             <option value="">Select Position</option>
+
             ${positions.map(position => `
                 <option value="${escapeHTML(position)}">
                     ${escapeHTML(position)}
@@ -307,13 +588,25 @@ function setupDemandForm() {
         `;
     });
 
+
+    coachNumber.addEventListener(
+        "input",
+        autoFillDemandCoachDetails
+    );
+
+    coachNumber.addEventListener(
+        "change",
+        autoFillDemandCoachDetails
+    );
+
+
     document.getElementById("coachDemandForm")
         .addEventListener("submit", submitCoachDemand);
 }
 
 
 // ======================================
-// SUBMIT DEMAND TO FIREBASE
+// SUBMIT COACH DEMAND
 // ======================================
 
 async function submitCoachDemand(event) {
@@ -346,35 +639,52 @@ async function submitCoachDemand(event) {
     const remarks =
         document.getElementById("demandRemarks").value.trim();
 
-    const message = document.getElementById("demandMessage");
-    const button = document.getElementById("submitDemandBtn");
+    const message =
+        document.getElementById("demandMessage");
 
-    if (!sourceShop || !coachNo || !coachType ||
-        !destinationShop || !destinationLine ||
-        !destinationPosition) {
+    const button =
+        document.getElementById("submitDemandBtn");
+
+
+    if (
+        !sourceShop ||
+        !coachNo ||
+        !coachType ||
+        !destinationShop ||
+        !destinationLine ||
+        !destinationPosition
+    ) {
 
         message.innerHTML = `
             <div class="alert alert-warning">
                 Please fill all required fields.
             </div>
         `;
+
         return;
     }
+
 
     button.disabled = true;
     button.textContent = "Submitting...";
 
+
     try {
 
-        const demandRef = push(ref(database, DEMAND_PATH));
+        const demandRef = push(
+            ref(database, DEMAND_PATH)
+        );
 
         const demandData = {
+
             sourceShop,
             coachNo,
             coachType,
+
             destinationShop,
             destinationLine,
             destinationPosition,
+
             remarks,
 
             status: "PENDING",
@@ -386,13 +696,16 @@ async function submitCoachDemand(event) {
             updatedAt: Date.now()
         };
 
+
         await set(demandRef, demandData);
+
 
         message.innerHTML = `
             <div class="alert alert-success">
                 Coach Demand submitted successfully!
             </div>
         `;
+
 
         document.getElementById("coachDemandForm").reset();
 
@@ -402,13 +715,15 @@ async function submitCoachDemand(event) {
         document.getElementById("demandDestinationPosition").innerHTML =
             `<option value="">Select Position</option>`;
 
+
     } catch (error) {
 
-        console.error("Coach Demand Error:", error);
+        console.error("Coach Demand Submit Error:", error);
 
         message.innerHTML = `
             <div class="alert alert-danger">
-                Failed to submit demand: ${escapeHTML(error.message)}
+                Failed to submit:
+                ${escapeHTML(error.message)}
             </div>
         `;
 
@@ -421,14 +736,15 @@ async function submitCoachDemand(event) {
 
 
 // ======================================
-// LISTEN TO FIREBASE DEMANDS
+// START DEMAND LISTENER
 // ======================================
 
 function startDemandListener() {
 
-    if (demandListenerStarted) return;
-
-    demandListenerStarted = true;
+    if (demandUnsubscribe) {
+        demandUnsubscribe();
+        demandUnsubscribe = null;
+    }
 
     const demandsRef = ref(database, DEMAND_PATH);
 
@@ -439,32 +755,50 @@ function startDemandListener() {
 
             const allDemands = snapshot.val() || {};
 
-            const isAdmin = currentUser.uid === ADMIN_UID;
+            const isAdmin =
+                currentUser.uid === ADMIN_UID;
 
             const records = Object.entries(allDemands)
-                .map(([id, data]) => ({ id, ...data }))
-                .filter(item => {
-                    return isAdmin ||
-                        item.requestedBy === currentUser.uid;
-                })
+
+                .map(([id, data]) => ({
+                    id,
+                    ...data
+                }))
+
+                .filter(item =>
+                    isAdmin ||
+                    item.requestedBy === currentUser.uid
+                )
+
                 .sort((a, b) =>
-                    (b.requestedAt || 0) - (a.requestedAt || 0)
+                    (b.requestedAt || 0) -
+                    (a.requestedAt || 0)
                 );
 
+
             renderDemandRecords(records, isAdmin);
+
         },
 
         error => {
 
-            console.error("Demand Listener Error:", error);
+            console.error(
+                "Demand Listener Error:",
+                error
+            );
 
-            document.getElementById("coachDemandRecords").innerHTML = `
-                <tr>
-                    <td colspan="10" class="text-danger text-center">
-                        Unable to load demands: ${escapeHTML(error.message)}
-                    </td>
-                </tr>
-            `;
+            const tbody =
+                document.getElementById("coachDemandRecords");
+
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-danger text-center">
+                            ${escapeHTML(error.message)}
+                        </td>
+                    </tr>
+                `;
+            }
         }
     );
 }
@@ -476,16 +810,24 @@ function startDemandListener() {
 
 function renderDemandRecords(records, isAdmin) {
 
-    const tbody = document.getElementById("coachDemandRecords");
-    const actionHeading = document.getElementById("demandActionHeading");
+    const tbody =
+        document.getElementById("coachDemandRecords");
 
-    actionHeading.style.display = isAdmin ? "" : "none";
+    const actionHeading =
+        document.getElementById("demandActionHeading");
+
+    if (!tbody || !actionHeading) return;
+
+    actionHeading.style.display =
+        isAdmin ? "" : "none";
+
 
     if (!records.length) {
 
         tbody.innerHTML = `
             <tr>
-                <td colspan="${isAdmin ? 10 : 9}" class="text-center">
+                <td colspan="${isAdmin ? 10 : 9}"
+                    class="text-center">
                     No Coach Demand Found.
                 </td>
             </tr>
@@ -493,6 +835,7 @@ function renderDemandRecords(records, isAdmin) {
 
         return;
     }
+
 
     tbody.innerHTML = records.map(item => {
 
@@ -504,16 +847,26 @@ function renderDemandRecords(records, isAdmin) {
             "status-pending";
 
         const requestedBy =
-            item.requestedByEmail || item.requestedBy || "-";
+            item.requestedByEmail ||
+            item.requestedBy ||
+            "-";
+
 
         return `
             <tr>
+
                 <td>${escapeHTML(item.coachNo)}</td>
+
                 <td>${escapeHTML(item.coachType)}</td>
+
                 <td>${escapeHTML(item.sourceShop)}</td>
+
                 <td>${escapeHTML(item.destinationShop)}</td>
+
                 <td>${escapeHTML(item.destinationLine)}</td>
+
                 <td>${escapeHTML(item.destinationPosition)}</td>
+
                 <td>${escapeHTML(item.remarks || "-")}</td>
 
                 <td>
@@ -527,10 +880,12 @@ function renderDemandRecords(records, isAdmin) {
                 ${isAdmin ? `
                     <td>
                         ${status === "PENDING" ? `
+
                             <button
                                 class="btn btn-success btn-sm mb-1"
                                 data-demand-action="approve"
                                 data-demand-id="${escapeHTML(item.id)}">
+
                                 Approve
                             </button>
 
@@ -538,27 +893,39 @@ function renderDemandRecords(records, isAdmin) {
                                 class="btn btn-danger btn-sm mb-1"
                                 data-demand-action="reject"
                                 data-demand-id="${escapeHTML(item.id)}">
+
                                 Reject
                             </button>
+
                         ` : `
-                            <span class="text-muted">Completed</span>
+                            <span class="text-muted">
+                                Completed
+                            </span>
                         `}
                     </td>
                 ` : ""}
+
             </tr>
         `;
+
     }).join("");
 
+
     if (isAdmin) {
+
         tbody.querySelectorAll("[data-demand-action]")
             .forEach(button => {
 
                 button.addEventListener("click", () => {
 
-                    const action = button.dataset.demandAction;
-                    const id = button.dataset.demandId;
+                    const action =
+                        button.dataset.demandAction;
+
+                    const id =
+                        button.dataset.demandId;
 
                     updateDemandStatus(id, action);
+
                 });
             });
     }
@@ -571,19 +938,29 @@ function renderDemandRecords(records, isAdmin) {
 
 async function updateDemandStatus(demandId, action) {
 
-    if (!currentUser || currentUser.uid !== ADMIN_UID) {
+    if (
+        !currentUser ||
+        currentUser.uid !== ADMIN_UID
+    ) {
+
         alert("Only Admin can approve or reject demands.");
+
         return;
     }
 
+
     const newStatus =
-        action === "approve" ? "APPROVED" : "REJECTED";
+        action === "approve"
+            ? "APPROVED"
+            : "REJECTED";
 
-    const confirmAction = confirm(
+
+    if (!confirm(
         `Are you sure you want to ${newStatus} this Coach Demand?`
-    );
+    )) {
+        return;
+    }
 
-    if (!confirmAction) return;
 
     try {
 
@@ -591,6 +968,7 @@ async function updateDemandStatus(demandId, action) {
             database,
             `${DEMAND_PATH}/${demandId}`
         );
+
 
         await update(demandRef, {
 
@@ -605,11 +983,18 @@ async function updateDemandStatus(demandId, action) {
             updatedAt: Date.now()
         });
 
-        alert(`Coach Demand ${newStatus} successfully.`);
+
+        alert(
+            `Coach Demand ${newStatus} successfully.`
+        );
+
 
     } catch (error) {
 
-        console.error("Demand Status Update Error:", error);
+        console.error(
+            "Demand Status Update Error:",
+            error
+        );
 
         alert(
             "Failed to update demand: " + error.message
@@ -626,6 +1011,7 @@ onAuthStateChanged(auth, user => {
 
     currentUser = user;
 
+
     if (!user) {
 
         if (demandUnsubscribe) {
@@ -633,19 +1019,24 @@ onAuthStateChanged(auth, user => {
             demandUnsubscribe = null;
         }
 
-        demandListenerStarted = false;
+        if (stockUnsubscribe) {
+            stockUnsubscribe();
+            stockUnsubscribe = null;
+        }
 
-        const existingPanel =
+        const panel =
             document.getElementById("coachDemandPanel");
 
-        if (existingPanel) {
-            existingPanel.remove();
-        }
+        if (panel) panel.remove();
 
         return;
     }
 
+
     createDemandPanel();
 
+    loadCoachStockForDemand();
+
     startDemandListener();
+
 });
