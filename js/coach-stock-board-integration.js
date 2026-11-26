@@ -740,9 +740,8 @@ function getCombinedList() {
 
         if (existing) {
 
-            existing.source = "BOARD";
-            existing.displaySource = "BOARD + STOCK";
-
+            existing.boardSource = true;
+existing.displaySource = "BOARD + STOCK";
             existing.boardCoachNo = coach.coachNo;
             existing.coachNo = coach.coachNo;
 
@@ -1627,6 +1626,7 @@ async function enterOrMoveCoach(target) {
    POSITION CLICK
 ========================================================= */
 
+
 function installPositionClick() {
 
     if (window.stockBoardPositionClickInstalled) return;
@@ -1635,33 +1635,46 @@ function installPositionClick() {
 
     document.addEventListener("click", async event => {
 
-        if (!selectedCoach) return;
-
         const target = getTargetPosition(event.target);
 
         if (!target) return;
 
-        console.log("STOCK COACH SELECTED:", selectedCoach);
-        console.log("TARGET CELL:", target.line, target.position);
+        // Empty cell only: block manual entry
+        const cell = target.cell;
+
+        const occupiedCoach = boardRecords.find(coach =>
+            clean(coach.line) === target.line &&
+            clean(coach.position) === target.position
+        );
+
+        if (!selectedCoach) {
+            if (!occupiedCoach) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                console.log("MANUAL BOARD ENTRY BLOCKED");
+            }
+            return;
+        }
 
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
 
+        console.log("SELECTED COACH:", selectedCoach);
+        console.log("TARGET:", target.line, target.position);
+
         try {
             await enterOrMoveCoach(target);
         } catch (error) {
-
-            console.error("STOCK BOARD ENTRY ERROR:", error);
-
-            alert(
-                "Coach Entry Failed: " +
-                (error.message || "Unknown error")
-            );
+            console.error("STOCK BOARD ERROR:", error);
+            alert(error.message || "Coach Entry Failed");
         }
 
     }, true);
 }
+
 /* =========================================================
    REFRESH BOARD
 ========================================================= */
