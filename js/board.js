@@ -630,6 +630,7 @@ function openNewCoachModal(
 ========================================================= */
 
 
+
 window.openStockCoachEntryModal = function (data) {
 
     if (!data) return;
@@ -652,47 +653,7 @@ window.openStockCoachEntryModal = function (data) {
     // Open existing Board Entry Modal
     openNewCoachModal(line, position);
 
-    const el = getModalElements();
-
-    if (el.coachNo) {
-        el.coachNo.value = coachNo;
-    }
-
-    // Keep original Stock Coach Code
-    if (el.coachType && coachType) {
-
-        if (
-            el.coachType.tagName === "SELECT" &&
-            !Array.from(el.coachType.options).some(
-                option => option.value === coachType
-            )
-        ) {
-            el.coachType.add(
-                new Option(coachType, coachType)
-            );
-        }
-
-        el.coachType.value = coachType;
-    }
-
-    // Set Stock Status, adding option if necessary
-    if (el.status && status) {
-
-        if (
-            el.status.tagName === "SELECT" &&
-            !Array.from(el.status.options).some(
-                option => option.value === status
-            )
-        ) {
-            el.status.add(
-                new Option(status, status)
-            );
-        }
-
-        el.status.value = status;
-    }
-
-    // Preserve NEW COACH mode
+    // Set modal state
     editingMode = false;
     searchViewMode = false;
     returnMode = false;
@@ -703,92 +664,73 @@ window.openStockCoachEntryModal = function (data) {
     selectedPulledOutKey = "";
     selectedPulledOutCoach = null;
 
-    updateEditButtons();
-};
-window.chooseBoardStockClassification = function (line, coachNo) {
-    const required = getBoardStockClassification(line, "");
+    // Wait until modal fields are ready
+    requestAnimationFrame(() => {
 
-    // Automatic অথবা unmapped line
-    if (required !== "") {
-        return Promise.resolve("");
-    }
+        const el = getModalElements();
 
-    const key = upper(line);
+        if (!el.coachNo) {
+            console.error("Coach Number input not found");
+            showMessage("Coach Number input field not found.", "warning");
+            return;
+        }
 
-    const options = SCR_STOCK_LINES.includes(key)
-        ? [
-            "CORROSION:POH:SCR NAC",
-            "CORROSION:POH:SCR AC"
-        ]
-        : [
-            "PAINT:POH:LHB",
-            "PAINT:POH:NON LHB"
-        ];
+        el.coachNo.value = coachNo;
+        el.coachNo.dispatchEvent(
+            new Event("input", { bubbles: true })
+        );
+        el.coachNo.dispatchEvent(
+            new Event("change", { bubbles: true })
+        );
 
-    return new Promise(resolve => {
-        const modal = document.createElement("div");
-
-        modal.style.cssText = `
-            position:fixed;inset:0;z-index:1000010;
-            background:rgba(0,0,0,.75);
-            display:flex;align-items:center;
-            justify-content:center;padding:15px;
-        `;
-
-        modal.innerHTML = `
-            <div style="
-                background:white;color:#26364b;
-                padding:22px;border-radius:14px;
-                width:100%;max-width:450px;
-            ">
-                <h3>COACH STOCK CLASSIFICATION</h3>
-                <p>Coach: <strong>${escapeHTML(coachNo)}</strong></p>
-                <p>Target Line: <strong>${escapeHTML(line)}</strong></p>
-
-                <select id="boardStockMoveChoice"
-                    style="width:100%;padding:13px;border:1px solid #ccc;border-radius:8px">
-                    <option value="">Select Classification</option>
-                    ${options.map(option => `
-                        <option value="${escapeHTML(option)}">
-                            ${escapeHTML(option)}
-                        </option>
-                    `).join("")}
-                </select>
-
-                <div style="display:flex;gap:10px;margin-top:18px">
-                    <button id="boardStockCancel"
-                        style="flex:1;padding:12px;background:#64748b;color:white;border:0;border-radius:8px">
-                        CANCEL
-                    </button>
-                    <button id="boardStockConfirm"
-                        style="flex:1;padding:12px;background:#16834b;color:white;border:0;border-radius:8px">
-                        CONFIRM
-                    </button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        modal.querySelector("#boardStockCancel").onclick = () => {
-            modal.remove();
-            resolve(null);
-        };
-
-        modal.querySelector("#boardStockConfirm").onclick = () => {
-            const value =
-                modal.querySelector("#boardStockMoveChoice").value;
-
-            if (!value) {
-                alert("Please select a classification.");
-                return;
+        if (el.coachType && coachType) {
+            if (
+                el.coachType.tagName === "SELECT" &&
+                !Array.from(el.coachType.options).some(
+                    option => option.value === coachType
+                )
+            ) {
+                el.coachType.add(
+                    new Option(coachType, coachType)
+                );
             }
 
-            modal.remove();
-            resolve(value);
-        };
+            el.coachType.value = coachType;
+            el.coachType.dispatchEvent(
+                new Event("change", { bubbles: true })
+            );
+        }
+
+        if (el.status && status) {
+            if (
+                el.status.tagName === "SELECT" &&
+                !Array.from(el.status.options).some(
+                    option => option.value === status
+                )
+            ) {
+                el.status.add(
+                    new Option(status, status)
+                );
+            }
+
+            el.status.value = status;
+            el.status.dispatchEvent(
+                new Event("change", { bubbles: true })
+            );
+        }
+
+        updateEditButtons();
+
+        console.log("STOCK DATA PREFILLED:", {
+            line,
+            position,
+            coachNo,
+            coachType,
+            status
+        });
     });
 };
+
 /* =========================================================
    OPEN EXISTING COACH MODAL
 ========================================================= */
