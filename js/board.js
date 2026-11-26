@@ -705,7 +705,90 @@ window.openStockCoachEntryModal = function (data) {
 
     updateEditButtons();
 };
+window.chooseBoardStockClassification = function (line, coachNo) {
+    const required = getBoardStockClassification(line, "");
 
+    // Automatic অথবা unmapped line
+    if (required !== "") {
+        return Promise.resolve("");
+    }
+
+    const key = upper(line);
+
+    const options = SCR_STOCK_LINES.includes(key)
+        ? [
+            "CORROSION:POH:SCR NAC",
+            "CORROSION:POH:SCR AC"
+        ]
+        : [
+            "PAINT:POH:LHB",
+            "PAINT:POH:NON LHB"
+        ];
+
+    return new Promise(resolve => {
+        const modal = document.createElement("div");
+
+        modal.style.cssText = `
+            position:fixed;inset:0;z-index:1000010;
+            background:rgba(0,0,0,.75);
+            display:flex;align-items:center;
+            justify-content:center;padding:15px;
+        `;
+
+        modal.innerHTML = `
+            <div style="
+                background:white;color:#26364b;
+                padding:22px;border-radius:14px;
+                width:100%;max-width:450px;
+            ">
+                <h3>COACH STOCK CLASSIFICATION</h3>
+                <p>Coach: <strong>${escapeHTML(coachNo)}</strong></p>
+                <p>Target Line: <strong>${escapeHTML(line)}</strong></p>
+
+                <select id="boardStockMoveChoice"
+                    style="width:100%;padding:13px;border:1px solid #ccc;border-radius:8px">
+                    <option value="">Select Classification</option>
+                    ${options.map(option => `
+                        <option value="${escapeHTML(option)}">
+                            ${escapeHTML(option)}
+                        </option>
+                    `).join("")}
+                </select>
+
+                <div style="display:flex;gap:10px;margin-top:18px">
+                    <button id="boardStockCancel"
+                        style="flex:1;padding:12px;background:#64748b;color:white;border:0;border-radius:8px">
+                        CANCEL
+                    </button>
+                    <button id="boardStockConfirm"
+                        style="flex:1;padding:12px;background:#16834b;color:white;border:0;border-radius:8px">
+                        CONFIRM
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        modal.querySelector("#boardStockCancel").onclick = () => {
+            modal.remove();
+            resolve(null);
+        };
+
+        modal.querySelector("#boardStockConfirm").onclick = () => {
+            const value =
+                modal.querySelector("#boardStockMoveChoice").value;
+
+            if (!value) {
+                alert("Please select a classification.");
+                return;
+            }
+
+            modal.remove();
+            resolve(value);
+        };
+    });
+};
 /* =========================================================
    OPEN EXISTING COACH MODAL
 ========================================================= */
@@ -1754,7 +1837,24 @@ async function saveCoach(event) {
         return;
 
     }
+const stockChoice =
+    document.getElementById("stockShopChoice")?.value || "";
 
+const stockClassification =
+    window.getBoardStockClassification?.(
+        line,
+        stockChoice
+    );
+
+if (stockClassification === "") {
+    showMessage(
+        `Please select Coach Stock classification for ${line}.`,
+        "warning"
+    );
+
+    document.getElementById("stockShopChoice")?.focus();
+    return;
+}
 
     const coach = {
 
@@ -1793,7 +1893,30 @@ async function saveCoach(event) {
         await callFirebaseSaveCoach(
             coach
         );
+let stockSyncWarning = "";
 
+try {
+    const syncResult =
+        await window.syncCoachStockFromBoard({
+            coachNo,
+            line,
+            classification: stockChoice,
+            status
+        });
+
+    if (syncResult?.skipped &&
+        syncResult.reason === "STOCK RECORD NOT FOUND") {
+        stockSyncWarning =
+            " Board saved; matching Coach Stock record was not found.";
+    }
+
+} catch (stockError) {
+    console.error("Stock Classification Sync Error:", stockError);
+
+    stockSyncWarning =
+        " Board saved, but Coach Stock update failed: " +
+        stockError.message;
+}
 
         await writeLocalHistory(
             "ADD_COACH",
@@ -1965,7 +2088,24 @@ async function updateCoach(event) {
     const el =
         getModalElements();
 
+const stockChoice =
+    document.getElementById("stockShopChoice")?.value || "";
 
+const stockClassification =
+    window.getBoardStockClassification?.(
+        clean(el.line?.value),
+        stockChoice
+    );
+
+if (stockClassification === "") {
+    showMessage(
+        "Please select Coach Stock classification.",
+        "warning"
+    );
+
+    document.getElementById("stockShopChoice")?.focus();
+    return;
+}
     const coach = {
 
         shop:
@@ -2034,7 +2174,30 @@ async function updateCoach(event) {
             coach
         );
 
+let stockSyncWarning = "";
 
+try {
+    const syncResult =
+        await window.syncCoachStockFromBoard({
+            coachNo: coach.coachNo,
+            line: coach.line,
+            classification: stockChoice,
+            status: coach.status
+        });
+
+    if (syncResult?.skipped &&
+        syncResult.reason === "STOCK RECORD NOT FOUND") {
+        stockSyncWarning =
+            " Board updated; Coach Stock record not found.";
+    }
+
+} catch (stockError) {
+    console.error("Stock Sync Error:", stockError);
+
+    stockSyncWarning =
+        " Board updated, but Stock sync failed: " +
+        stockError.message;
+}
         await writeLocalHistory(
             "UPDATE_COACH",
             coach
@@ -4098,59 +4261,114 @@ function initializeDragDrop() {
    DRAG MOVE
 ========================================================= */
 
-async function moveCoachFromDrag(
-    source,
-    target
-) {
+async function moveCoachFromDrag(source, target) {
 
-    if (!requireAdmin())
-        return;
-
+    if (!requireAdmin()) return;
 
     if (returnMode) {
-
         showMessage(
             "Please exit RETURN MODE before moving a coach.",
             "warning"
         );
-
         return;
-
     }
 
+    const sourceCoach =
+        boardData?.[source.line]?.[source.position];
+
+    if (!sourceCoach) {
+        showMessage("Source Coach not found.", "danger");
+        return;
+    }
+
+    const targetCoach =
+        boardData?.[target.line]?.[target.position] || null;
 
     try {
+        // Source coach destination classification
+        const sourceChoice =
+            await window.chooseBoardStockClassification(
+                target.line,
+                sourceCoach.coachNo
+            );
 
-        await updateCoachPosition(
+        if (sourceChoice === null) return;
+
+        // If occupied, target coach moves to source line
+        let targetChoice = "";
+
+        if (targetCoach) {
+            targetChoice =
+                await window.chooseBoardStockClassification(
+                    source.line,
+                    targetCoach.coachNo
+                );
+
+            if (targetChoice === null) return;
+        }
+
+        // First complete Board movement
+        const result = await updateCoachPosition(
             source.line,
             source.position,
             target.line,
             target.position
         );
 
+        // Then sync Stock separately
+        const syncErrors = [];
+
+        try {
+            await window.syncCoachStockFromBoard({
+                coachNo: sourceCoach.coachNo,
+                line: target.line,
+                classification: sourceChoice,
+                status: sourceCoach.status,
+                movementType: result?.action === "SWAP"
+                    ? "BOARD SWAP"
+                    : "BOARD DRAG MOVE"
+            });
+        } catch (error) {
+            syncErrors.push(error.message);
+        }
+
+        if (targetCoach && result?.action === "SWAP") {
+            try {
+                await window.syncCoachStockFromBoard({
+                    coachNo: targetCoach.coachNo,
+                    line: source.line,
+                    classification: targetChoice,
+                    status: targetCoach.status,
+                    movementType: "BOARD SWAP"
+                });
+            } catch (error) {
+                syncErrors.push(error.message);
+            }
+        }
+
+        if (syncErrors.length) {
+            showMessage(
+                "Board movement successful, but Stock sync needs attention: " +
+                syncErrors.join("; "),
+                "warning"
+            );
+        } else {
+            showMessage(
+                result?.action === "SWAP"
+                    ? "Coach positions swapped. Stock classification synchronized."
+                    : "Coach moved. Stock classification synchronized.",
+                "success"
+            );
+        }
+
+    } catch (error) {
+        console.error("MOVE ERROR:", error);
 
         showMessage(
-            "Coach moved successfully.",
-            "success"
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "MOVE ERROR:",
-            error
-        );
-
-
-        showMessage(
-            error?.message ||
-            "Move failed.",
+            error?.message || "Move failed.",
             "danger"
         );
-
     }
-
 }
 
 
