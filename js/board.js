@@ -634,6 +634,7 @@ function openNewCoachModal(
 
 
 
+
 window.openStockCoachEntryModal = function (data) {
 
     if (!data || !requireAdmin()) return;
@@ -645,10 +646,7 @@ window.openStockCoachEntryModal = function (data) {
     const status = clean(data.status);
 
     if (!line || !position || !coachNo) {
-        showMessage(
-            "Coach Number, Line and Position are required.",
-            "warning"
-        );
+        showMessage("Coach Number, Line and Position are required.", "warning");
         return;
     }
 
@@ -665,23 +663,14 @@ window.openStockCoachEntryModal = function (data) {
     selectedPulledOutCoach = null;
 
     const el = getModalElements();
-    
-
-
 
     if (el.shop) el.shop.value = getShopFromLine(line);
     if (el.line) el.line.value = line;
     if (el.position) el.position.value = position;
 
-    // ==================================
-    // COACH STOCK CLASSIFICATION DROPDOWN
-    // ==================================
-
-    const stockChoiceWrap =
-        document.getElementById("stockShopChoiceWrap");
-
-    const stockChoice =
-        document.getElementById("stockShopChoice");
+    // STOCK CLASSIFICATION DROPDOWN
+    const stockWrap = document.getElementById("stockShopChoiceWrap");
+    const stockSelect = document.getElementById("stockShopChoice");
 
     const upperLine = line.toUpperCase();
 
@@ -691,62 +680,44 @@ window.openStockCoachEntryModal = function (data) {
         "SCR11", "SCR12", "F11", "J6"
     ];
 
-    const nLines = [
-        "N2", "N3", "N5", "N7", "N8"
-    ];
+    const nLines = ["N2", "N3", "N5", "N7", "N8"];
 
-    if (stockChoiceWrap && stockChoice) {
+    if (stockWrap && stockSelect) {
 
-        stockChoiceWrap.style.display = "none";
+        stockWrap.style.setProperty("display", "none", "important");
 
-        stockChoice.innerHTML =
+        stockSelect.innerHTML =
             '<option value="">Select Stock Shop</option>';
 
-        stockChoice.value = "";
+        stockSelect.value = "";
 
         if (scrLines.includes(upperLine)) {
-
-            stockChoice.innerHTML = `
+            stockSelect.innerHTML = `
                 <option value="">Select Stock Shop</option>
-                <option value="CORROSION:POH:SCR NAC">
-                    CORROSION:POH:SCR NAC
-                </option>
-                <option value="CORROSION:POH:SCR AC">
-                    CORROSION:POH:SCR AC
-                </option>
+                <option value="CORROSION:POH:SCR NAC">CORROSION:POH:SCR NAC</option>
+                <option value="CORROSION:POH:SCR AC">CORROSION:POH:SCR AC</option>
             `;
-
-            stockChoiceWrap.style.display = "block";
+            stockWrap.style.setProperty("display", "block", "important");
         }
 
         else if (nLines.includes(upperLine)) {
-
-            stockChoice.innerHTML = `
+            stockSelect.innerHTML = `
                 <option value="">Select Stock Shop</option>
-                <option value="PAINT:POH:LHB">
-                    PAINT:POH:LHB
-                </option>
-                <option value="PAINT:POH:NON LHB">
-                    PAINT:POH:NON LHB
-                </option>
+                <option value="PAINT:POH:LHB">PAINT:POH:LHB</option>
+                <option value="PAINT:POH:NON LHB">PAINT:POH:NON LHB</option>
             `;
-
-            stockChoiceWrap.style.display = "block";
+            stockWrap.style.setProperty("display", "block", "important");
         }
     }
 
-    console.log("STOCK CLASSIFICATION DROPDOWN:", {
+    console.log("STOCK DROPDOWN CHECK:", {
         line: upperLine,
-        visible: stockChoiceWrap?.style.display,
-        options: stockChoice?.options.length
+        visible: stockWrap ? getComputedStyle(stockWrap).display : "NOT FOUND",
+        options: stockSelect?.options.length
     });
 
-    // ==================================
     // FILL STOCK COACH DETAILS
-    // ==================================
-
-    const modalElement =
-        document.getElementById("coachModal");
+    const modalElement = document.getElementById("coachModal");
 
     let filled = false;
 
@@ -759,14 +730,8 @@ window.openStockCoachEntryModal = function (data) {
 
         if (fields.coachNo) {
             fields.coachNo.value = coachNo;
-
-            fields.coachNo.dispatchEvent(
-                new Event("input", { bubbles: true })
-            );
-
-            fields.coachNo.dispatchEvent(
-                new Event("change", { bubbles: true })
-            );
+            fields.coachNo.dispatchEvent(new Event("input", { bubbles: true }));
+            fields.coachNo.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
         if (fields.coachType && coachType) {
@@ -777,16 +742,11 @@ window.openStockCoachEntryModal = function (data) {
                     option => option.value === coachType
                 )
             ) {
-                fields.coachType.add(
-                    new Option(coachType, coachType)
-                );
+                fields.coachType.add(new Option(coachType, coachType));
             }
 
             fields.coachType.value = coachType;
-
-            fields.coachType.dispatchEvent(
-                new Event("change", { bubbles: true })
-            );
+            fields.coachType.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
         if (fields.status && status) {
@@ -797,24 +757,15 @@ window.openStockCoachEntryModal = function (data) {
                     option => option.value === status
                 )
             ) {
-                fields.status.add(
-                    new Option(status, status)
-                );
+                fields.status.add(new Option(status, status));
             }
 
             fields.status.value = status;
-
-            fields.status.dispatchEvent(
-                new Event("change", { bubbles: true })
-            );
+            fields.status.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
         console.log("STOCK DATA FILLED:", {
-            coachNo,
-            coachType,
-            status,
-            line,
-            position
+            coachNo, coachType, status, line, position
         });
     };
 
@@ -827,13 +778,13 @@ window.openStockCoachEntryModal = function (data) {
     }
 
     updateEditButtons();
-
     showModal();
 
     setTimeout(() => {
         if (!filled) fillStockData();
     }, 300);
 };
+
 
 /* =========================================================
    OPEN EXISTING COACH MODAL
