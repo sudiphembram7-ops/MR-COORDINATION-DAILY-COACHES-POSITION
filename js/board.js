@@ -632,6 +632,7 @@ function openNewCoachModal(
 
 
 
+
 window.openStockCoachEntryModal = function (data) {
 
     if (!data || !requireAdmin()) return;
@@ -643,11 +644,13 @@ window.openStockCoachEntryModal = function (data) {
     const status = clean(data.status);
 
     if (!line || !position || !coachNo) {
-        showMessage("Coach Number, Line and Position are required.", "warning");
+        showMessage(
+            "Coach Number, Line and Position are required.",
+            "warning"
+        );
         return;
     }
 
-    // Reset and prepare modal
     resetModal();
 
     selectedLine = line;
@@ -666,43 +669,63 @@ window.openStockCoachEntryModal = function (data) {
     if (el.line) el.line.value = line;
     if (el.position) el.position.value = position;
 
-    // Open modal
-    showModal();
-
     const modalElement = document.getElementById("coachModal");
 
+    let filled = false;
+
     const fillStockData = () => {
+
+        if (filled) return;
+        filled = true;
 
         const fields = getModalElements();
 
         if (fields.coachNo) {
             fields.coachNo.value = coachNo;
+            fields.coachNo.dispatchEvent(
+                new Event("input", { bubbles: true })
+            );
+            fields.coachNo.dispatchEvent(
+                new Event("change", { bubbles: true })
+            );
         }
 
         if (fields.coachType && coachType) {
+
             if (
                 fields.coachType.tagName === "SELECT" &&
                 !Array.from(fields.coachType.options).some(
                     option => option.value === coachType
                 )
             ) {
-                fields.coachType.add(new Option(coachType, coachType));
+                fields.coachType.add(
+                    new Option(coachType, coachType)
+                );
             }
 
             fields.coachType.value = coachType;
+            fields.coachType.dispatchEvent(
+                new Event("change", { bubbles: true })
+            );
         }
 
         if (fields.status && status) {
+
             if (
                 fields.status.tagName === "SELECT" &&
                 !Array.from(fields.status.options).some(
                     option => option.value === status
                 )
             ) {
-                fields.status.add(new Option(status, status));
+                fields.status.add(
+                    new Option(status, status)
+                );
             }
 
             fields.status.value = status;
+            fields.status.dispatchEvent(
+                new Event("change", { bubbles: true })
+            );
         }
 
         console.log("STOCK DATA FILLED:", {
@@ -714,6 +737,7 @@ window.openStockCoachEntryModal = function (data) {
         });
     };
 
+    // Register event BEFORE opening modal
     if (modalElement) {
         modalElement.addEventListener(
             "shown.bs.modal",
@@ -722,12 +746,14 @@ window.openStockCoachEntryModal = function (data) {
         );
     }
 
-    // Fallback if Bootstrap is unavailable
-    if (!window.bootstrap) {
-        setTimeout(fillStockData, 200);
-    }
-
     updateEditButtons();
+
+    showModal();
+
+    // Fallback and final field verification
+    setTimeout(() => {
+        if (!filled) fillStockData();
+    }, 300);
 };
 
 /* =========================================================
@@ -1865,10 +1891,17 @@ try {
         );
 
 
-        showMessage(
-            `Coach ${coachNo} saved successfully.`,
-            "success"
-        );
+        if (stockSyncWarning) {
+    showMessage(
+        `Coach ${coachNo} saved successfully.${stockSyncWarning}`,
+        "warning"
+    );
+} else {
+    showMessage(
+        `Coach ${coachNo} saved successfully and Coach Stock synced.`,
+        "success"
+    );
+}
 
 
         console.log(
