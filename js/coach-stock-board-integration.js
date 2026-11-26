@@ -1560,10 +1560,6 @@ async function enterOrMoveCoach(target) {
     if (!selectedCoach) return;
 
     const item = selectedCoach;
-    
-
-    // STOCK-ONLY COACH: OPEN EXISTING BOARD MODAL
-    // NO FIREBASE WRITE BEFORE USER CLICKS SAVE
 
     if (item.source === "STOCK") {
 
@@ -1575,14 +1571,18 @@ async function enterOrMoveCoach(target) {
 
         if (existingBoardCoach) {
             alert(
-                "This Coach is already on the Board at " +
+                "This Coach is already on Board at " +
                 existingBoardCoach.line + " / " +
                 existingBoardCoach.position
             );
             return;
         }
 
-        const boardCoachNo = formatBoardCoachNo(item);
+        if (typeof window.openStockCoachEntryModal !== "function") {
+            console.error("openStockCoachEntryModal is missing.");
+            alert("Board Entry Modal function not found. Check board.js.");
+            return;
+        }
 
         const coachType =
             record.coachType ||
@@ -1596,40 +1596,20 @@ async function enterOrMoveCoach(target) {
             record.status ||
             "";
 
-        if (typeof window.openStockCoachEntryModal !== "function") {
-            alert("Board Entry Modal not available. Check board.js.");
-            return;
-        }
-
-        // Open existing modal only. Save happens through Board modal.
-        window.openStockCoachEntryModal({
+        const entryData = {
             line: target.line,
             position: target.position,
-            coachNo: boardCoachNo,
-            coachType: coachType,
-            status: status
-        });
+            coachNo: formatBoardCoachNo(item),
+            coachType,
+            status
+        };
 
-        selectedCoach = null;
+        console.log("OPENING STOCK COACH ENTRY:", entryData);
 
-        const selection =
-            document.getElementById("stockBoardSelection");
-
-        if (selection) {
-            selection.textContent = "No Coach Selected";
-        }
-
-        const changeButton =
-            document.getElementById("changeStockShopBtn");
-
-        if (changeButton) {
-            changeButton.style.display = "none";
-        }
+        window.openStockCoachEntryModal(entryData);
 
         return;
     }
-
-    // BOARD COACH: MOVE OR SWAP
 
     if (
         clean(item.line) === target.line &&
@@ -1649,6 +1629,10 @@ async function enterOrMoveCoach(target) {
 
 function installPositionClick() {
 
+    if (window.stockBoardPositionClickInstalled) return;
+
+    window.stockBoardPositionClickInstalled = true;
+
     document.addEventListener("click", async event => {
 
         if (!selectedCoach) return;
@@ -1656,6 +1640,9 @@ function installPositionClick() {
         const target = getTargetPosition(event.target);
 
         if (!target) return;
+
+        console.log("STOCK COACH SELECTED:", selectedCoach);
+        console.log("TARGET CELL:", target.line, target.position);
 
         event.preventDefault();
         event.stopPropagation();
@@ -1665,18 +1652,16 @@ function installPositionClick() {
             await enterOrMoveCoach(target);
         } catch (error) {
 
-            console.error("Coach Entry Error:", error);
+            console.error("STOCK BOARD ENTRY ERROR:", error);
 
             alert(
-                error.message ||
-                "Coach Entry failed."
+                "Coach Entry Failed: " +
+                (error.message || "Unknown error")
             );
         }
 
     }, true);
 }
-
-
 /* =========================================================
    REFRESH BOARD
 ========================================================= */
