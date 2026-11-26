@@ -1742,7 +1742,185 @@ function startBoardListener() {
         }
     );
 }
+/* =========================================================
+   BOARD LINE → COACH STOCK CLASSIFICATION
+========================================================= */
 
+const BOARD_STOCK_LINE_MAP = {
+    "L9": "LIFTING BAY:POH:NON LHB",
+    "L10": "LIFTING BAY:POH:NON LHB",
+
+    "F9": "CORROSION:POH:M SHOP",
+    "F10": "CORROSION:POH:M SHOP",
+
+    "J5": "CORROSION:POH:M SHOP",
+
+    "M2": "CORROSION:POH:M SHOP",
+    "M3": "CORROSION:POH:M SHOP",
+    "M4": "CORROSION:POH:M SHOP",
+    "M5": "CORROSION:POH:M SHOP",
+
+    "F1": "CORROSION:POH:CR SHOP",
+    "F2": "CORROSION:POH:CR SHOP",
+    "F3": "CORROSION:POH:CR SHOP",
+    "F4": "CORROSION:POH:CR SHOP",
+    "F5": "CORROSION:POH:CR SHOP",
+    "F6": "CORROSION:POH:CR SHOP",
+    "F7": "CORROSION:POH:CR SHOP",
+    "F8": "CORROSION:POH:CR SHOP",
+
+    "J1": "CORROSION:POH:L-SHOP",
+    "J2": "CORROSION:POH:L-SHOP"
+};
+
+const SCR_STOCK_LINES = [
+    "SCR21", "SCR22", "SCR15", "SCR16",
+    "SCR18", "SCR19", "SCR13", "SCR14",
+    "SCR11", "SCR12", "F11", "J6"
+];
+
+const N_STOCK_LINES = [
+    "N2", "N3", "N5", "N7", "N8"
+];
+
+function getBoardStockClassification(line, choice = "") {
+    const key = upper(line);
+    const selected = upper(choice);
+
+    if (BOARD_STOCK_LINE_MAP[key]) {
+        return BOARD_STOCK_LINE_MAP[key];
+    }
+
+    if (SCR_STOCK_LINES.includes(key)) {
+        if (
+            selected === "CORROSION:POH:SCR NAC" ||
+            selected === "CORROSION:POH:SCR AC"
+        ) return selected;
+
+        return "";
+    }
+
+    if (N_STOCK_LINES.includes(key)) {
+        if (
+            selected === "PAINT:POH:LHB" ||
+            selected === "PAINT:POH:NON LHB"
+        ) return selected;
+
+        return "";
+    }
+
+    return null;
+}
+
+window.getBoardStockClassification =
+    getBoardStockClassification;
+
+
+/* =========================================================
+   STOCK SYNC AFTER SUCCESSFUL BOARD OPERATION
+========================================================= */
+
+window.syncCoachStockFromBoard = async function ({
+    coachNo,
+    line,
+    classification = "",
+    movementDate = todayISO(),
+    status = "",
+    remarks = "",
+    movementType = "BOARD CLASSIFICATION"
+}) {
+    const newShop = getBoardStockClassification(
+        line,
+        classification
+    );
+
+    // Unmapped line: preserve existing Stock Shop
+    if (newShop === null) {
+        return {
+            success: true,
+            skipped: true,
+            reason: "UNMAPPED LINE"
+        };
+    }
+
+    if (!newShop) {
+        throw new Error(
+            `Please select Stock classification for ${line}.`
+        );
+    }
+
+    const entry = findStockRecord(coachNo);
+
+    // Stock record missing: Board operation must continue
+    if (!entry) {
+        return {
+            success: false,
+            skipped: true,
+            reason: "STOCK RECORD NOT FOUND"
+        };
+    }
+
+    const [stockId, record] = entry;
+
+    const oldVisit = record.currentVisit || {};
+
+    let oldShop = clean(
+        record.currentShop || oldVisit.shop
+    );
+
+    // Normalize old spelling
+    if (
+        upper(oldShop) ===
+        "LIFTING BAY:POH:NONLHB"
+    ) {
+        oldShop = "LIFTING BAY:POH:NON LHB";
+    }
+
+    if (upper(oldShop) === upper(newShop)) {
+        return {
+            success: true,
+            skipped: true,
+            reason: "SAME SHOP"
+        };
+    }
+
+    const history = getHistoryList(record.history);
+
+    history.push({
+        ...oldVisit,
+        shop: oldShop,
+        dateOut: movementDate,
+        movementType,
+        recordedAt: new Date().toISOString()
+    });
+
+    const newVisit = {
+        ...oldVisit,
+        shop: newShop,
+        datePlaced: movementDate,
+        dateIn: movementDate,
+        dateOut: "",
+        status: status || oldVisit.status || "",
+        remarks: remarks || oldVisit.remarks || ""
+    };
+
+    await update(
+        ref(database, `${STOCK_PATH}/${stockId}`),
+        {
+            currentShop: newShop,
+            currentVisit: newVisit,
+            history,
+            updatedAt: new Date().toISOString(),
+            updatedBy: "Board Classification Sync"
+        }
+    );
+
+    return {
+        success: true,
+        skipped: false,
+        shop: newShop
+    };
+};
 
 /* =========================================================
    START
