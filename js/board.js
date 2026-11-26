@@ -631,10 +631,10 @@ function openNewCoachModal(
 
 
 
+
 window.openStockCoachEntryModal = function (data) {
 
-    if (!data) return;
-    if (!requireAdmin()) return;
+    if (!data || !requireAdmin()) return;
 
     const line = clean(data.line);
     const position = clean(data.position);
@@ -643,92 +643,91 @@ window.openStockCoachEntryModal = function (data) {
     const status = clean(data.status);
 
     if (!line || !position || !coachNo) {
-        showMessage(
-            "Coach Number, Line and Position are required.",
-            "warning"
-        );
+        showMessage("Coach Number, Line and Position are required.", "warning");
         return;
     }
 
-    // Open existing Board Entry Modal
-    openNewCoachModal(line, position);
-
-    // Set modal state
-    editingMode = false;
-    searchViewMode = false;
-    returnMode = false;
+    // Reset and prepare modal
+    resetModal();
 
     selectedLine = line;
     selectedPosition = position;
 
+    editingMode = false;
+    searchViewMode = false;
+    returnMode = false;
+
     selectedPulledOutKey = "";
     selectedPulledOutCoach = null;
 
-    // Wait until modal fields are ready
-    requestAnimationFrame(() => {
+    const el = getModalElements();
 
-        const el = getModalElements();
+    if (el.shop) el.shop.value = getShopFromLine(line);
+    if (el.line) el.line.value = line;
+    if (el.position) el.position.value = position;
 
-        if (!el.coachNo) {
-            console.error("Coach Number input not found");
-            showMessage("Coach Number input field not found.", "warning");
-            return;
+    // Open modal
+    showModal();
+
+    const modalElement = document.getElementById("coachModal");
+
+    const fillStockData = () => {
+
+        const fields = getModalElements();
+
+        if (fields.coachNo) {
+            fields.coachNo.value = coachNo;
         }
 
-        el.coachNo.value = coachNo;
-        el.coachNo.dispatchEvent(
-            new Event("input", { bubbles: true })
-        );
-        el.coachNo.dispatchEvent(
-            new Event("change", { bubbles: true })
-        );
-
-        if (el.coachType && coachType) {
+        if (fields.coachType && coachType) {
             if (
-                el.coachType.tagName === "SELECT" &&
-                !Array.from(el.coachType.options).some(
+                fields.coachType.tagName === "SELECT" &&
+                !Array.from(fields.coachType.options).some(
                     option => option.value === coachType
                 )
             ) {
-                el.coachType.add(
-                    new Option(coachType, coachType)
-                );
+                fields.coachType.add(new Option(coachType, coachType));
             }
 
-            el.coachType.value = coachType;
-            el.coachType.dispatchEvent(
-                new Event("change", { bubbles: true })
-            );
+            fields.coachType.value = coachType;
         }
 
-        if (el.status && status) {
+        if (fields.status && status) {
             if (
-                el.status.tagName === "SELECT" &&
-                !Array.from(el.status.options).some(
+                fields.status.tagName === "SELECT" &&
+                !Array.from(fields.status.options).some(
                     option => option.value === status
                 )
             ) {
-                el.status.add(
-                    new Option(status, status)
-                );
+                fields.status.add(new Option(status, status));
             }
 
-            el.status.value = status;
-            el.status.dispatchEvent(
-                new Event("change", { bubbles: true })
-            );
+            fields.status.value = status;
         }
 
-        updateEditButtons();
-
-        console.log("STOCK DATA PREFILLED:", {
-            line,
-            position,
+        console.log("STOCK DATA FILLED:", {
             coachNo,
             coachType,
-            status
+            status,
+            line,
+            position
         });
-    });
+    };
+
+    if (modalElement) {
+        modalElement.addEventListener(
+            "shown.bs.modal",
+            fillStockData,
+            { once: true }
+        );
+    }
+
+    // Fallback if Bootstrap is unavailable
+    if (!window.bootstrap) {
+        setTimeout(fillStockData, 200);
+    }
+
+    updateEditButtons();
 };
 
 /* =========================================================
