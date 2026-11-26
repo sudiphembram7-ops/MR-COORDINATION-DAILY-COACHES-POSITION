@@ -1627,24 +1627,33 @@ async function enterOrMoveCoach(target) {
 ========================================================= */
 
 
-function installPositionClick() {
 
+function installPositionClick() {
     if (window.stockBoardPositionClickInstalled) return;
 
     window.stockBoardPositionClickInstalled = true;
 
     document.addEventListener("click", async event => {
+        const clickedCell = event.target.closest("td[id]");
 
-        const target = getTargetPosition(event.target);
+        if (!clickedCell) return;
 
-        if (!target) return;
+        const id = clickedCell.id;
+        const separator = id.lastIndexOf("_");
 
-        // Empty cell only: block manual entry
-        const cell = target.cell;
+        if (separator < 1) return;
+
+        const target = {
+            cell: clickedCell,
+            line: id.slice(0, separator),
+            position: id.slice(separator + 1)
+        };
+
+        console.log("BOARD CELL CLICKED:", target);
 
         const occupiedCoach = boardRecords.find(coach =>
-            clean(coach.line) === target.line &&
-            clean(coach.position) === target.position
+            clean(coach.line).toUpperCase() === target.line.toUpperCase() &&
+            clean(coach.position).toUpperCase() === target.position.toUpperCase()
         );
 
         if (!selectedCoach) {
@@ -1652,7 +1661,6 @@ function installPositionClick() {
                 event.preventDefault();
                 event.stopPropagation();
                 event.stopImmediatePropagation();
-
                 console.log("MANUAL BOARD ENTRY BLOCKED");
             }
             return;
@@ -1662,8 +1670,12 @@ function installPositionClick() {
         event.stopPropagation();
         event.stopImmediatePropagation();
 
-        console.log("SELECTED COACH:", selectedCoach);
+        console.log("SELECTED STOCK COACH:", selectedCoach);
         console.log("TARGET:", target.line, target.position);
+        console.log(
+            "MODAL FUNCTION:",
+            typeof window.openStockCoachEntryModal
+        );
 
         try {
             await enterOrMoveCoach(target);
@@ -1671,9 +1683,11 @@ function installPositionClick() {
             console.error("STOCK BOARD ERROR:", error);
             alert(error.message || "Coach Entry Failed");
         }
-
     }, true);
+
+    console.log("STOCK BOARD CLICK LISTENER INSTALLED");
 }
+
 
 /* =========================================================
    REFRESH BOARD
