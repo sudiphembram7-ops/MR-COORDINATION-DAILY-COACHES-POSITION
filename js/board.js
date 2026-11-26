@@ -633,6 +633,7 @@ function openNewCoachModal(
 
 
 
+
 window.openStockCoachEntryModal = function (data) {
 
     if (!data || !requireAdmin()) return;
@@ -669,7 +670,80 @@ window.openStockCoachEntryModal = function (data) {
     if (el.line) el.line.value = line;
     if (el.position) el.position.value = position;
 
-    const modalElement = document.getElementById("coachModal");
+    // ==================================
+    // COACH STOCK CLASSIFICATION DROPDOWN
+    // ==================================
+
+    const stockChoiceWrap =
+        document.getElementById("stockShopChoiceWrap");
+
+    const stockChoice =
+        document.getElementById("stockShopChoice");
+
+    const upperLine = line.toUpperCase();
+
+    const scrLines = [
+        "SCR21", "SCR22", "SCR15", "SCR16",
+        "SCR18", "SCR19", "SCR13", "SCR14",
+        "SCR11", "SCR12", "F11", "J6"
+    ];
+
+    const nLines = [
+        "N2", "N3", "N5", "N7", "N8"
+    ];
+
+    if (stockChoiceWrap && stockChoice) {
+
+        stockChoiceWrap.style.display = "none";
+
+        stockChoice.innerHTML =
+            '<option value="">Select Stock Shop</option>';
+
+        stockChoice.value = "";
+
+        if (scrLines.includes(upperLine)) {
+
+            stockChoice.innerHTML = `
+                <option value="">Select Stock Shop</option>
+                <option value="CORROSION:POH:SCR NAC">
+                    CORROSION:POH:SCR NAC
+                </option>
+                <option value="CORROSION:POH:SCR AC">
+                    CORROSION:POH:SCR AC
+                </option>
+            `;
+
+            stockChoiceWrap.style.display = "block";
+        }
+
+        else if (nLines.includes(upperLine)) {
+
+            stockChoice.innerHTML = `
+                <option value="">Select Stock Shop</option>
+                <option value="PAINT:POH:LHB">
+                    PAINT:POH:LHB
+                </option>
+                <option value="PAINT:POH:NON LHB">
+                    PAINT:POH:NON LHB
+                </option>
+            `;
+
+            stockChoiceWrap.style.display = "block";
+        }
+    }
+
+    console.log("STOCK CLASSIFICATION DROPDOWN:", {
+        line: upperLine,
+        visible: stockChoiceWrap?.style.display,
+        options: stockChoice?.options.length
+    });
+
+    // ==================================
+    // FILL STOCK COACH DETAILS
+    // ==================================
+
+    const modalElement =
+        document.getElementById("coachModal");
 
     let filled = false;
 
@@ -682,9 +756,11 @@ window.openStockCoachEntryModal = function (data) {
 
         if (fields.coachNo) {
             fields.coachNo.value = coachNo;
+
             fields.coachNo.dispatchEvent(
                 new Event("input", { bubbles: true })
             );
+
             fields.coachNo.dispatchEvent(
                 new Event("change", { bubbles: true })
             );
@@ -704,6 +780,7 @@ window.openStockCoachEntryModal = function (data) {
             }
 
             fields.coachType.value = coachType;
+
             fields.coachType.dispatchEvent(
                 new Event("change", { bubbles: true })
             );
@@ -723,6 +800,7 @@ window.openStockCoachEntryModal = function (data) {
             }
 
             fields.status.value = status;
+
             fields.status.dispatchEvent(
                 new Event("change", { bubbles: true })
             );
@@ -737,7 +815,6 @@ window.openStockCoachEntryModal = function (data) {
         });
     };
 
-    // Register event BEFORE opening modal
     if (modalElement) {
         modalElement.addEventListener(
             "shown.bs.modal",
@@ -750,7 +827,6 @@ window.openStockCoachEntryModal = function (data) {
 
     showModal();
 
-    // Fallback and final field verification
     setTimeout(() => {
         if (!filled) fillStockData();
     }, 300);
