@@ -665,6 +665,49 @@ window.openStockCoachEntryModal = function (data) {
     selectedPulledOutCoach = null;
 
     const el = getModalElements();
+    
+const stockWrap = document.getElementById("stockShopChoiceWrap");
+const stockSelect = document.getElementById("stockShopChoice");
+
+const lineCode = String(line).trim().toUpperCase();
+
+const scrLines = [
+    "SCR21", "SCR22", "SCR15", "SCR16",
+    "SCR18", "SCR19", "SCR13", "SCR14",
+    "SCR11", "SCR12", "F11", "J6"
+];
+
+const paintLines = ["N2", "N3", "N5", "N7", "N8"];
+
+if (stockWrap && stockSelect) {
+    stockWrap.style.setProperty("display", "none", "important");
+    stockSelect.value = "";
+
+    if (scrLines.includes(lineCode)) {
+        stockSelect.innerHTML = `
+            <option value="">Select Stock Shop</option>
+            <option value="CORROSION:POH:SCR NAC">CORROSION:POH:SCR NAC</option>
+            <option value="CORROSION:POH:SCR AC">CORROSION:POH:SCR AC</option>
+        `;
+        stockWrap.style.setProperty("display", "block", "important");
+    } else if (paintLines.includes(lineCode)) {
+        stockSelect.innerHTML = `
+            <option value="">Select Stock Shop</option>
+            <option value="PAINT:POH:LHB">PAINT:POH:LHB</option>
+            <option value="PAINT:POH:NON LHB">PAINT:POH:NON LHB</option>
+        `;
+        stockWrap.style.setProperty("display", "block", "important");
+    }
+
+    console.log("CLASSIFICATION CHECK", {
+        lineCode,
+        display: getComputedStyle(stockWrap).display,
+        options: stockSelect.options.length
+    });
+} else {
+    console.error("STOCK DROPDOWN ELEMENT NOT FOUND");
+}
+
 
     if (el.shop) el.shop.value = getShopFromLine(line);
     if (el.line) el.line.value = line;
