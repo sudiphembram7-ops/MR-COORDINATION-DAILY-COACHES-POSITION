@@ -84,7 +84,21 @@ function getHistoryList(history) {
 
     return [];
 }
+/* =========================================================
+   FIND STOCK RECORD BY COACH NUMBER
+========================================================= */
 
+function findStockRecord(coachNo) {
+
+    const key = coachKey(coachNo);
+
+    if (!key) return null;
+
+    return Object.entries(stockRecords).find(
+        ([id, record]) =>
+            coachKey(record?.coachNo) === key
+    ) || null;
+}
 
 /* =========================================================
    COACH IDENTITY
@@ -164,28 +178,16 @@ function getStockStatuses() {
 }
 
 
-/* =========================================================
-   SEARCH COACH STOCK BY PARTIAL COACH NUMBER
-========================================================= */
-
 window.getStockCoachMatches = function (typedNumber) {
 
-    const query = String(typedNumber || "")
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, "")
-        .replace(/\/C$/, "");
+    const query = coachKey(typedNumber);
 
     if (query.length < 3) return [];
 
     return Object.entries(stockRecords)
         .filter(([id, record]) => {
 
-            const number = String(record?.coachNo || "")
-                .trim()
-                .toUpperCase()
-                .replace(/\s+/g, "")
-                .replace(/\/C$/, "");
+            const number = coachKey(record?.coachNo);
 
             return number.startsWith(query);
         })
@@ -193,9 +195,18 @@ window.getStockCoachMatches = function (typedNumber) {
         .map(([id, record]) => ({
             id,
             coachNo: record.coachNo || "",
-            coachCode: record.coachCode || record.coachType || "",
-            coachType: record.coachType || record.coachCode || "",
-            status: record.currentVisit?.status || record.status || "",
+            coachCode:
+                record.coachCode ||
+                record.coachType ||
+                "",
+            coachType:
+                record.coachType ||
+                record.coachCode ||
+                "",
+            status:
+                record.currentVisit?.status ||
+                record.status ||
+                "",
             classification:
                 record.currentShop ||
                 record.currentVisit?.shop ||
