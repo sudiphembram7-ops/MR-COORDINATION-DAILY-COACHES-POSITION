@@ -163,36 +163,46 @@ function getStockStatuses() {
     )].sort();
 }
 
+
 /* =========================================================
-   BOARD ENTRY: LOOKUP COACH FROM STOCK
+   SEARCH COACH STOCK BY PARTIAL COACH NUMBER
 ========================================================= */
 
-window.getStockCoachForBoard = function (coachNo) {
+window.getStockCoachMatches = function (typedNumber) {
 
-    const key = coachKey(coachNo);
+    const query = String(typedNumber || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .replace(/\/C$/, "");
 
-    if (!key) return null;
+    if (query.length < 3) return [];
 
-    const entry = Object.entries(stockRecords).find(
-        ([id, record]) => coachKey(record?.coachNo) === key
-    );
+    return Object.entries(stockRecords)
+        .filter(([id, record]) => {
 
-    if (!entry) return null;
+            const number = String(record?.coachNo || "")
+                .trim()
+                .toUpperCase()
+                .replace(/\s+/g, "")
+                .replace(/\/C$/, "");
 
-    const [id, record] = entry;
-
-    return {
-        id,
-        coachNo: record.coachNo || "",
-        coachCode: record.coachCode || record.coachType || "",
-        coachType: record.coachType || record.coachCode || "",
-        status: record.currentVisit?.status || record.status || "",
-        classification:
-            record.currentShop ||
-            record.currentVisit?.shop ||
-            ""
-    };
+            return number.startsWith(query);
+        })
+        .slice(0, 15)
+        .map(([id, record]) => ({
+            id,
+            coachNo: record.coachNo || "",
+            coachCode: record.coachCode || record.coachType || "",
+            coachType: record.coachType || record.coachCode || "",
+            status: record.currentVisit?.status || record.status || "",
+            classification:
+                record.currentShop ||
+                record.currentVisit?.shop ||
+                ""
+        }));
 };
+
 
 
 /* =========================================================
