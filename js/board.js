@@ -2096,22 +2096,6 @@ async function updateCoach(event) {
 
 const stockChoice =
     document.getElementById("stockShopChoice")?.value || "";
-
-const stockClassification =
-    window.getBoardStockClassification?.(
-        clean(el.line?.value),
-        stockChoice
-    );
-
-if (stockClassification === "") {
-    showMessage(
-        "Please select Coach Stock classification.",
-        "warning"
-    );
-
-    document.getElementById("stockShopChoice")?.focus();
-    return;
-}
     const coach = {
 
         shop:
@@ -2182,27 +2166,31 @@ if (stockClassification === "") {
 
 let stockSyncWarning = "";
 
-try {
-    const syncResult =
-        await window.syncCoachStockFromBoard({
-            coachNo: coach.coachNo,
-            line: coach.line,
-            classification: stockChoice,
-            status: coach.status
-        });
+if (stockChoice) {
+    try {
+        const syncResult =
+            await window.syncCoachStockFromBoard({
+                coachNo: coach.coachNo,
+                line: coach.line,
+                classification: stockChoice,
+                status: coach.status
+            });
 
-    if (syncResult?.skipped &&
-        syncResult.reason === "STOCK RECORD NOT FOUND") {
+        if (
+            syncResult?.skipped &&
+            syncResult.reason === "STOCK RECORD NOT FOUND"
+        ) {
+            stockSyncWarning =
+                " Board updated; Coach Stock record not found.";
+        }
+
+    } catch (stockError) {
+        console.error("Stock Sync Error:", stockError);
+
         stockSyncWarning =
-            " Board updated; Coach Stock record not found.";
+            " Board updated, but Stock sync failed: " +
+            stockError.message;
     }
-
-} catch (stockError) {
-    console.error("Stock Sync Error:", stockError);
-
-    stockSyncWarning =
-        " Board updated, but Stock sync failed: " +
-        stockError.message;
 }
         await writeLocalHistory(
             "UPDATE_COACH",
