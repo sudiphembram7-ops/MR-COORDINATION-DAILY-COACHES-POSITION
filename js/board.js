@@ -306,6 +306,126 @@ function initializeModal() {
         }
     );
 
+/* =========================================================
+   AUTO FILL COACH DETAILS FROM COACH STOCK
+   TYPE COACH NUMBER → AUTO FILL CODE / STATUS / SHOP
+========================================================= */
+
+let stockLookupTimer = null;
+
+const coachNoInput = document.getElementById("modalCoachNo");
+
+if (coachNoInput && !coachNoInput.dataset.stockLookupReady) {
+
+    coachNoInput.dataset.stockLookupReady = "true";
+
+    coachNoInput.addEventListener("input", () => {
+
+        clearTimeout(stockLookupTimer);
+
+        stockLookupTimer = setTimeout(async () => {
+
+            if (editingMode || returnMode || selectedPulledOutCoach) {
+                return;
+            }
+
+            const typedNumber = coachNoInput.value.trim();
+
+            if (!typedNumber) return;
+
+            const lookup = window.getStockCoachForBoard;
+
+            if (typeof lookup !== "function") {
+                console.warn("Coach Stock lookup function not available.");
+                return;
+            }
+
+            const stock = lookup(typedNumber);
+
+            // Stock-এ নম্বর না থাকলে কিছু পরিবর্তন হবে না
+            if (!stock) {
+                console.log("Coach not found in Stock:", typedNumber);
+                return;
+            }
+
+            // Typing চলাকালীন নম্বর পরিবর্তন হলে পুরনো ফল বসাবে না
+            if (coachNoInput.value.trim() !== typedNumber) return;
+
+            const fields = getModalElements();
+
+            // COACH CODE / TYPE
+            const code = stock.coachCode || stock.coachType || "";
+
+            if (fields.coachType && code) {
+
+                if (
+                    fields.coachType.tagName === "SELECT" &&
+                    !Array.from(fields.coachType.options).some(
+                        option => option.value === code
+                    )
+                ) {
+                    fields.coachType.add(new Option(code, code));
+                }
+
+                fields.coachType.value = code;
+
+                fields.coachType.dispatchEvent(
+                    new Event("change", { bubbles: true })
+                );
+            }
+
+            // STATUS
+            if (fields.status) {
+
+                const status = stock.status || "";
+
+                if (
+                    fields.status.tagName === "SELECT" &&
+                    status &&
+                    !Array.from(fields.status.options).some(
+                        option => option.value === status
+                    )
+                ) {
+                    fields.status.add(new Option(status, status));
+                }
+
+                fields.status.value = status;
+
+                fields.status.dispatchEvent(
+                    new Event("change", { bubbles: true })
+                );
+            }
+
+            // STOCK CLASSIFICATION
+            const stockSelect =
+                document.getElementById("stockShopChoice");
+
+            if (stockSelect && stock.classification) {
+
+                const classification = stock.classification;
+
+                const matchingOption = Array.from(
+                    stockSelect.options
+                ).find(option =>
+                    option.value.trim().toUpperCase() ===
+                    classification.trim().toUpperCase()
+                );
+
+                if (matchingOption) {
+                    stockSelect.value = matchingOption.value;
+
+                    stockSelect.dispatchEvent(
+                        new Event("change", { bubbles: true })
+                    );
+                }
+            }
+
+            console.log("COACH STOCK AUTO FILL SUCCESS:", stock);
+
+        }, 400);
+    });
+}
+
 }
 
 
