@@ -689,6 +689,7 @@ function createPanel() {
 }
 
 
+
 /* =========================================================
    COMBINED LIST
    SAME COACH = ONE CARD
@@ -698,58 +699,49 @@ function getCombinedList() {
 
     const combined = new Map();
 
-    // First add Stock records
+    // 1. First add all Coach Stock records
     Object.entries(stockRecords).forEach(([id, record]) => {
 
         const key = coachKey(record?.coachNo);
+
         if (!key) return;
 
         combined.set(key, {
             source: "STOCK",
             displaySource: "STOCK",
             id,
+
             coachNo: record?.coachNo || "",
             stockCoachNo: record?.coachNo || "",
+
             coachCode: record?.coachCode || "",
-            coachType: record?.coachType || record?.coachCode || "",
+            coachType:
+                record?.coachType ||
+                record?.coachCode ||
+                "",
+
             status: record?.currentVisit?.status || "",
             shop: record?.currentShop || "",
+
             record
         });
     });
 
-    // Merge Board records into matching Stock records
+    // 2. Merge Board records
     boardRecords.forEach(coach => {
 
-        const key = coachKey(coach.coachNo);
+        const key = coachKey(coach?.coachNo);
+
         if (!key) return;
 
         const existing = combined.get(key);
 
-        
-if (existing) {
+        if (existing) {
 
-    // Matching Stock + Board coach
-    // Must be treated as BOARD for MOVE operation
-    existing.source = "BOARD";
-    existing.boardSource = true;
-    existing.displaySource = "BOARD + STOCK";
-
-    existing.boardCoachNo = coach.coachNo;
-    existing.coachNo = coach.coachNo;
-
-    existing.line = coach.line;
-    existing.position = coach.position;
-
-    existing.coachCode =
-        coach.coachCode || existing.coachCode;
-
-    existing.coachType =
-        coach.coachType || existing.coachType;
-
-    existing.boardRecord = coach;
-
-} else {
+            // Same coach exists in both Stock and Board
+            existing.source = "BOARD";
+            existing.boardSource = true;
+            existing.displaySource = "BOARD + STOCK";
 
             existing.boardCoachNo = coach.coachNo;
             existing.coachNo = coach.coachNo;
@@ -758,28 +750,34 @@ if (existing) {
             existing.position = coach.position;
 
             existing.coachCode =
-                coach.coachCode || existing.coachCode;
+                coach.coachCode ||
+                existing.coachCode;
 
             existing.coachType =
-                coach.coachType || existing.coachType;
+                coach.coachType ||
+                existing.coachType;
 
             existing.boardRecord = coach;
 
         } else {
 
+            // Coach exists only on Board
             combined.set(key, {
                 ...coach,
+
                 source: "BOARD",
                 displaySource: "BOARD",
+
                 boardCoachNo: coach.coachNo,
-                coachNo: coach.coachNo
+                coachNo: coach.coachNo,
+
+                boardRecord: coach
             });
         }
     });
 
     return [...combined.values()];
 }
-
 
 /* =========================================================
    SEARCH RESULTS
