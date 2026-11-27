@@ -1754,6 +1754,7 @@ function startBoardListener() {
         }
     );
 }
+
 /* =========================================================
    BOARD LINE → COACH STOCK CLASSIFICATION
 ========================================================= */
@@ -1764,7 +1765,6 @@ const BOARD_STOCK_LINE_MAP = {
 
     "F9": "CORROSION:POH:M SHOP",
     "F10": "CORROSION:POH:M SHOP",
-
     "J5": "CORROSION:POH:M SHOP",
 
     "M2": "CORROSION:POH:M SHOP",
@@ -1781,7 +1781,7 @@ const BOARD_STOCK_LINE_MAP = {
     "F7": "CORROSION:POH:CR SHOP",
     "F8": "CORROSION:POH:CR SHOP",
 
-    "J1": "CORROSION:POH:L-SHOP",
+    "J1": "CORROSION:POH:L-SHOP","LHB RA INSPECTION:POH",
     "J2": "CORROSION:POH:L-SHOP"
 };
 
@@ -1796,6 +1796,7 @@ const N_STOCK_LINES = [
 ];
 
 function getBoardStockClassification(line, choice = "") {
+
     const key = upper(line);
     const selected = upper(choice);
 
@@ -1804,19 +1805,25 @@ function getBoardStockClassification(line, choice = "") {
     }
 
     if (SCR_STOCK_LINES.includes(key)) {
+
         if (
             selected === "CORROSION:POH:SCR NAC" ||
             selected === "CORROSION:POH:SCR AC"
-        ) return selected;
+        ) {
+            return selected;
+        }
 
         return "";
     }
 
     if (N_STOCK_LINES.includes(key)) {
+
         if (
             selected === "PAINT:POH:LHB" ||
             selected === "PAINT:POH:NON LHB"
-        ) return selected;
+        ) {
+            return selected;
+        }
 
         return "";
     }
