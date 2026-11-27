@@ -163,6 +163,37 @@ function getStockStatuses() {
     )].sort();
 }
 
+/* =========================================================
+   BOARD ENTRY: LOOKUP COACH FROM STOCK
+========================================================= */
+
+window.getStockCoachForBoard = function (coachNo) {
+
+    const key = coachKey(coachNo);
+
+    if (!key) return null;
+
+    const entry = Object.entries(stockRecords).find(
+        ([id, record]) => coachKey(record?.coachNo) === key
+    );
+
+    if (!entry) return null;
+
+    const [id, record] = entry;
+
+    return {
+        id,
+        coachNo: record.coachNo || "",
+        coachCode: record.coachCode || record.coachType || "",
+        coachType: record.coachType || record.coachCode || "",
+        status: record.currentVisit?.status || record.status || "",
+        classification:
+            record.currentShop ||
+            record.currentVisit?.shop ||
+            ""
+    };
+};
+
 
 /* =========================================================
    STYLES
