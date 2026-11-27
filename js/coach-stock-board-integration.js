@@ -1621,6 +1621,277 @@ async function enterOrMoveCoach(target) {
     openMoveModal(item, target);
 }
 
+/* =========================================================
+   EMPTY CELL - COACH SELECTION POPUP
+========================================================= */
+
+function openCellCoachPicker(target) {
+
+    const oldModal = document.getElementById("cellCoachPicker");
+    if (oldModal) oldModal.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "cellCoachPicker";
+
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:1000020;
+        background:rgba(0,0,0,.75);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:12px;
+        box-sizing:border-box;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            width:100%;
+            max-width:520px;
+            max-height:90vh;
+            overflow:auto;
+            background:white;
+            color:#26364b;
+            border-radius:15px;
+            padding:18px;
+            box-sizing:border-box;
+        ">
+
+            <h2 style="margin-top:0">
+                SELECT COACH
+            </h2>
+
+            <p>
+                Destination:
+                <strong>${escapeHTML(target.line)}
+                / ${escapeHTML(target.position)}</strong>
+            </p>
+
+            <input
+                id="cellStockSearch"
+                type="search"
+                placeholder="Search Coach Number / Coach Code"
+                style="
+                    width:100%;
+                    padding:14px;
+                    border:2px solid #bbb;
+                    border-radius:9px;
+                    box-sizing:border-box;
+                    font-size:16px;
+                "
+            >
+
+            <div id="cellStockList"
+                style="margin-top:12px;max-height:45vh;overflow:auto">
+            </div>
+
+            <button id="cellNewCoachEntry"
+                type="button"
+                style="
+                    width:100%;
+                    padding:15px;
+                    margin-top:14px;
+                    border:0;
+                    border-radius:9px;
+                    background:#0870ed;
+                    color:white;
+                    font-weight:bold;
+                    font-size:16px;
+                ">
+                + NEW COACH ENTRY
+            </button>
+
+            <button id="cellPickerClose"
+                type="button"
+                style="
+                    width:100%;
+                    padding:13px;
+                    margin-top:9px;
+                    border:0;
+                    border-radius:9px;
+                    background:#64748b;
+                    color:white;
+                    font-weight:bold;
+                ">
+                CANCEL
+            </button>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const search = modal.querySelector("#cellStockSearch");
+    const list = modal.querySelector("#cellStockList");
+
+    function renderStockList() {
+
+        const query = normal(search.value);
+
+        list.innerHTML = "";
+
+        const entries = Object.entries(stockRecords)
+            .filter(([id, record]) => {
+
+                const coachNo = record?.coachNo || "";
+
+                if (!coachKey(coachNo)) return false;
+
+                // Do not show Coaches already on Board
+                const alreadyOnBoard = boardRecords.some(coach =>
+                    coachKey(coach.coachNo) === coachKey(coachNo)
+                );
+
+                if (alreadyOnBoard) return false;
+
+                const searchable = [
+                    coachNo,
+                    record?.coachCode,
+                    record?.coachType,
+                    record?.currentShop,
+                    record?.currentVisit?.status
+                ].map(normal).join(" ");
+
+                return searchable.includes(query);
+            });
+
+        if (!entries.length) {
+            list.innerHTML = `
+                <p style="padding:15px;text-align:center">
+                    No available Coach found.
+                </p>
+            `;
+            return;
+        }
+
+        entries.slice(0, 100).forEach(([id, record]) => {
+
+            const coachNo = record.coachNo || "";
+
+            const card = document.createElement("div");
+
+            card.style.cssText = `
+                padding:13px;
+                margin:8px 0;
+                border:1px solid #cbd5e1;
+                border-radius:9px;
+                background:#f8fafc;
+            `;
+
+            const info = document.createElement("div");
+
+            info.innerHTML = `
+                <strong style="font-size:17px;color:#075fc7">
+                    ${escapeHTML(coachNo)}
+                </strong>
+                <div style="font-size:13px;line-height:1.8">
+                    Coach Code: ${escapeHTML(
+                        record.coachCode || record.coachType || "-"
+                    )}
+                    <br>
+                    Current Shop: ${escapeHTML(
+                        record.currentShop || "-"
+                    )}
+                    <br>
+                    Status: ${escapeHTML(
+                        record.currentVisit?.status || "-"
+                    )}
+                </div>
+            `;
+
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.textContent = "SELECT THIS COACH";
+
+            button.style.cssText = `
+                width:100%;
+                padding:11px;
+                margin-top:9px;
+                background:#16834b;
+                color:white;
+                border:0;
+                border-radius:7px;
+                font-weight:bold;
+            `;
+
+            button.onclick = () => {
+
+                const coachType =
+                    record.coachType ||
+                    record.coachCode ||
+                    "";
+
+                const status =
+                    record.currentVisit?.status ||
+                    record.status ||
+                    "";
+
+                const entryData = {
+                    line: target.line,
+                    position: target.position,
+                    coachNo: formatBoardCoachNo({
+                        coachNo,
+                        coachType,
+                        coachCode: record.coachCode,
+                        record
+                    }),
+                    coachType,
+                    status
+                };
+
+                if (
+                    typeof window.openStockCoachEntryModal !== "function"
+                ) {
+                    alert("Board Entry Modal function not found.");
+                    return;
+                }
+
+                modal.remove();
+
+                window.openStockCoachEntryModal(entryData);
+            };
+
+            card.append(info, button);
+            list.appendChild(card);
+        });
+    }
+
+    search.addEventListener("input", renderStockList);
+
+    modal.querySelector("#cellNewCoachEntry").onclick = () => {
+
+        if (
+            typeof window.openStockCoachEntryModal !== "function"
+        ) {
+            alert("Board Entry Modal function not found.");
+            return;
+        }
+
+        modal.remove();
+
+        window.openStockCoachEntryModal({
+            line: target.line,
+            position: target.position,
+            coachNo: "",
+            coachType: "",
+            status: ""
+        });
+    };
+
+    modal.querySelector("#cellPickerClose").onclick =
+        () => modal.remove();
+
+    modal.addEventListener("click", event => {
+        if (event.target === modal) modal.remove();
+    });
+
+    renderStockList();
+
+    setTimeout(() => search.focus(), 100);
+}
+
 
 /* =========================================================
    POSITION CLICK
@@ -1629,11 +1900,13 @@ async function enterOrMoveCoach(target) {
 
 
 function installPositionClick() {
+
     if (window.stockBoardPositionClickInstalled) return;
 
     window.stockBoardPositionClickInstalled = true;
 
     document.addEventListener("click", async event => {
+
         const clickedCell = event.target.closest("td[id]");
 
         if (!clickedCell) return;
@@ -1649,45 +1922,50 @@ function installPositionClick() {
             position: id.slice(separator + 1)
         };
 
-        console.log("BOARD CELL CLICKED:", target);
-
         const occupiedCoach = boardRecords.find(coach =>
             clean(coach.line).toUpperCase() === target.line.toUpperCase() &&
             clean(coach.position).toUpperCase() === target.position.toUpperCase()
         );
 
-        if (!selectedCoach) {
-            if (!occupiedCoach) {
-                event.preventDefault();
-                event.stopPropagation();
-                event.stopImmediatePropagation();
-                console.log("MANUAL BOARD ENTRY BLOCKED");
+        // Selected Coach from Search Panel:
+        // MOVE / SWAP
+        if (selectedCoach) {
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            try {
+                await enterOrMoveCoach(target);
+            } catch (error) {
+                console.error("Coach Move Error:", error);
+                alert(error.message || "Coach Move Failed");
             }
+
             return;
         }
 
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
+        // Empty Cell:
+        // Open Stock Coach Selection Popup
+        if (!occupiedCoach) {
 
-        console.log("SELECTED STOCK COACH:", selectedCoach);
-        console.log("TARGET:", target.line, target.position);
-        console.log(
-            "MODAL FUNCTION:",
-            typeof window.openStockCoachEntryModal
-        );
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
 
-        try {
-            await enterOrMoveCoach(target);
-        } catch (error) {
-            console.error("STOCK BOARD ERROR:", error);
-            alert(error.message || "Coach Entry Failed");
+            openCellCoachPicker(target);
+
+            return;
         }
+
+        // Occupied Cell:
+        // Allow existing Board Edit Popup
+        return;
+
     }, true);
 
-    console.log("STOCK BOARD CLICK LISTENER INSTALLED");
+    console.log("BOARD CELL COACH PICKER INSTALLED");
 }
-
 
 /* =========================================================
    REFRESH BOARD
