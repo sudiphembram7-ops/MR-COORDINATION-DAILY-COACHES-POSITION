@@ -94,26 +94,14 @@ function getHistoryList(history) {
    SER194373 = SER194373/C
 ========================================================= */
 
+
 function coachKey(value) {
-    let number = upper(value).replace(/\s+/g, "");
-
-    // Remove LHB suffix
-    number = number.replace(/\/C$/i, "");
-
-    // Remove Railway prefix
-    number = number.replace(/^(EC|ER|SW|NR|NE|WR|SR|SE)(?=\d)/i, "");
-
-    return number;
-}
-function findStockRecord(coachNo) {
-    const target = coachKey(coachNo);
-
-    if (!target) return null;
-
-    return Object.entries(stockRecords).find(
-        ([id, record]) =>
-            coachKey(record?.coachNo) === target
-    ) || null;
+    return String(value ?? "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .replace(/\/C$/, "")
+        .replace(/^ER(?=\d)/, "");
 }
 
 
@@ -738,10 +726,31 @@ function getCombinedList() {
 
         const existing = combined.get(key);
 
-        if (existing) {
+        
+if (existing) {
 
-            existing.boardSource = true;
-existing.displaySource = "BOARD + STOCK";
+    // Matching Stock + Board coach
+    // Must be treated as BOARD for MOVE operation
+    existing.source = "BOARD";
+    existing.boardSource = true;
+    existing.displaySource = "BOARD + STOCK";
+
+    existing.boardCoachNo = coach.coachNo;
+    existing.coachNo = coach.coachNo;
+
+    existing.line = coach.line;
+    existing.position = coach.position;
+
+    existing.coachCode =
+        coach.coachCode || existing.coachCode;
+
+    existing.coachType =
+        coach.coachType || existing.coachType;
+
+    existing.boardRecord = coach;
+
+} else {
+
             existing.boardCoachNo = coach.coachNo;
             existing.coachNo = coach.coachNo;
 
