@@ -1973,3 +1973,162 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 startIntegration();
+
+/* =========================================================
+   BOARD MOVE STOCK CLASSIFICATION CHOICE
+========================================================= */
+
+window.chooseBoardStockClassification = function(line, coachNo) {
+
+    const key = String(line || "").trim().toUpperCase();
+
+    // Automatic classification lines
+    const automatic = getBoardStockClassification(key);
+
+    if (automatic !== null && automatic !== "") {
+        return Promise.resolve(automatic);
+    }
+
+    let options = [];
+
+    if (SCR_STOCK_LINES.includes(key)) {
+        options = [
+            "CORROSION:POH:SCR NAC",
+            "CORROSION:POH:SCR AC"
+        ];
+    } else if (N_STOCK_LINES.includes(key)) {
+        options = [
+            "PAINT:POH:LHB",
+            "PAINT:POH:NON LHB"
+        ];
+    } else {
+        // Unmapped line: preserve existing Stock Shop
+        return Promise.resolve("");
+    }
+
+    return new Promise(resolve => {
+
+        const overlay = document.createElement("div");
+
+        overlay.style.cssText = `
+            position:fixed;
+            inset:0;
+            z-index:1000010;
+            background:rgba(0,0,0,.75);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:15px;
+        `;
+
+        const box = document.createElement("div");
+
+        box.style.cssText = `
+            background:white;
+            color:#222;
+            width:100%;
+            max-width:420px;
+            padding:22px;
+            border-radius:14px;
+            box-sizing:border-box;
+        `;
+
+        const heading = document.createElement("h3");
+        heading.textContent = "SELECT STOCK CLASSIFICATION";
+
+        const info = document.createElement("p");
+        info.textContent =
+            "Coach: " + coachNo + " | Destination: " + key;
+
+        const select = document.createElement("select");
+
+        select.style.cssText = `
+            width:100%;
+            padding:14px;
+            font-size:16px;
+            margin:12px 0;
+            border:1px solid #aaa;
+            border-radius:8px;
+        `;
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select Classification";
+        select.appendChild(placeholder);
+
+        options.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        });
+
+        const buttons = document.createElement("div");
+
+        buttons.style.cssText = `
+            display:flex;
+            gap:10px;
+            margin-top:15px;
+        `;
+
+        const cancel = document.createElement("button");
+        cancel.type = "button";
+        cancel.textContent = "CANCEL";
+
+        cancel.style.cssText = `
+            flex:1;
+            padding:14px;
+            background:#64748b;
+            color:white;
+            border:0;
+            border-radius:8px;
+        `;
+
+        const confirm = document.createElement("button");
+        confirm.type = "button";
+        confirm.textContent = "CONFIRM";
+
+        confirm.style.cssText = `
+            flex:1;
+            padding:14px;
+            background:#16834b;
+            color:white;
+            border:0;
+            border-radius:8px;
+        `;
+
+        let finished = false;
+
+        function close(value) {
+            if (finished) return;
+            finished = true;
+            overlay.remove();
+            resolve(value);
+        }
+
+        cancel.onclick = () => close(null);
+
+        confirm.onclick = () => {
+            if (!select.value) {
+                alert("Please select a classification.");
+                return;
+            }
+
+            close(select.value);
+        };
+
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) {
+                close(null);
+            }
+        });
+
+        buttons.append(cancel, confirm);
+        box.append(heading, info, select, buttons);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    });
+};
+
+
+
