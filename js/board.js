@@ -647,10 +647,15 @@ window.openStockCoachEntryModal = function (data) {
     const coachType = clean(data.coachType);
     const status = clean(data.status);
 
-    if (!line || !position || !coachNo) {
-        showMessage("Coach Number, Line and Position are required.", "warning");
-        return;
-    }
+    
+if (!line || !position) {
+    showMessage(
+        "Line and Position are required.",
+        "warning"
+    );
+    return;
+}
+
 
     resetModal();
 
