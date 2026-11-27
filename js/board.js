@@ -132,6 +132,8 @@ let dragSource = null;
 let longPressTimer = null;
 
 let isLongPress = false;
+let mobileDragHandler = null;
+let mobileDragTimeout = null;
 
 
 /* =========================================================
@@ -4376,137 +4378,125 @@ async function moveCoachFromDrag(source, target) {
 }
 
 
+
 /* =========================================================
-   MOBILE DRAG
+   MOBILE DRAG - IPHONE SAFARI FIX
+   VERSION 15.7 FINAL
 ========================================================= */
 
-function startMobileDrag(
-    cell
-) {
+function startMobileDrag(cell) {
 
-    if (!adminLoggedIn)
+    if (!requireAdmin()) return;
+
+    if (returnMode) {
+        showMessage(
+            "Please exit RETURN MODE before moving a coach.",
+            "warning"
+        );
         return;
+    }
 
+    const source = getCellLocation(cell);
 
-    if (returnMode)
-        return;
+    if (!source) return;
 
+    const sourceCoach =
+        boardData?.[source.line]?.[source.position];
 
-    const location =
-        getCellLocation(
-            cell
+    if (!sourceCoach) return;
+
+    // Remove previous pending move
+    if (mobileDragHandler) {
+        document.removeEventListener(
+            "click",
+            mobileDragHandler,
+            true
         );
 
+        mobileDragHandler = null;
+    }
 
-    if (!location)
-        return;
+    clearTimeout(mobileDragTimeout);
 
-
-    const coach =
-        boardData?.[
-            location.line
-        ]?.[
-            location.position
-        ];
-
-
-    if (!coach)
-        return;
-
-
-    dragSource = location;
-
+    dragSource = source;
 
     showMessage(
-        `Coach ${coach.coachNo}: now tap target cell.`,
+        `Coach ${sourceCoach.coachNo}: selected. Now tap the destination cell.`,
         "info"
     );
 
+    // Listen immediately for iPhone Safari click
+    mobileDragHandler = event => {
 
-    const handler =
-        event => {
+        const targetElement =
+            event.target?.closest?.("td[id]");
 
-            const targetElement =
-                event.target.closest?.(
-                    "td[id]"
-                );
+        if (!targetElement) return;
 
+        if (!isBoardCell(targetElement)) return;
 
-            if (!targetElement)
-                return;
+        const target = getCellLocation(targetElement);
 
+        if (!target || !dragSource) return;
 
-            if (
-                !isBoardCell(
-                    targetElement
-                )
-            )
-                return;
+        // Ignore source cell click
+        if (
+            target.line === dragSource.line &&
+            target.position === dragSource.position
+        ) {
+            return;
+        }
 
+        // Stop destination click from opening edit modal
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
-            const target =
-                getCellLocation(
-                    targetElement
-                );
+        const moveFrom = dragSource;
 
+        dragSource = null;
 
-            if (!target)
-                return;
+        document.removeEventListener(
+            "click",
+            mobileDragHandler,
+            true
+        );
 
+        mobileDragHandler = null;
+
+        clearTimeout(mobileDragTimeout);
+
+        // Perform MOVE / SWAP
+        void moveCoachFromDrag(moveFrom, target);
+    };
+
+    document.addEventListener(
+        "click",
+        mobileDragHandler,
+        true
+    );
+
+    // Cancel if destination is not selected within 30 seconds
+    mobileDragTimeout = setTimeout(() => {
+
+        if (mobileDragHandler) {
 
             document.removeEventListener(
                 "click",
-                handler,
+                mobileDragHandler,
                 true
             );
 
-
-            if (!dragSource)
-                return;
-
-
-            if (
-                target.line ===
-                    dragSource.line &&
-                target.position ===
-                    dragSource.position
-            ) {
-
-                dragSource = null;
-
-                return;
-
-            }
-
-
-            const source =
-                dragSource;
-
-
+            mobileDragHandler = null;
             dragSource = null;
 
-
-            moveCoachFromDrag(
-                source,
-                target
+            showMessage(
+                "Coach move cancelled. Please long-press again.",
+                "warning"
             );
+        }
 
-        };
-
-
-    setTimeout(
-        () => {
-
-            document.addEventListener(
-                "click",
-                handler,
-                true
-            );
-
-        },
-        100
-    );
-
+    }, 30000);
 }
 
 
