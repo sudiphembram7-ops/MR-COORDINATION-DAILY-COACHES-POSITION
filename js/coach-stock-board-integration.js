@@ -2474,5 +2474,78 @@ window.chooseBoardStockClassification = function(line, coachNo) {
     });
 };
 
+/* =========================================================
+   PULL OUT DESTINATION → COACH STOCK
+   VERSION 1.0
+========================================================= */
+
+const PULL_OUT_DESTINATIONS = [
+    "AW CORROSION:POH:LHB",
+    "AW CORROSION:POH:NON LHB",
+    "BAHAR LINE:POH:NON LHB",
+    "CORROSION:POH:L SHOP",
+    "LHB:POH:BAHAR LINE",
+    "LIFTING BAY:POH:LHB",
+    "POH:NOMINATION:CONV:RCC/NMG",
+    "POWER CAR:POH",
+    "POH:NOMINATION FOR MLR",
+    "WIP:MLR:LHB"
+];
+
+window.getPullOutDestinations = function () {
+    return [...PULL_OUT_DESTINATIONS];
+};
+
+/*
+ Prepare Stock update without writing separately.
+ Board and Stock will be saved together.
+*/
+
+window.prepareCoachStockPullOut = function ({
+    coachNo,
+    newShop,
+    movementDate
+}) {
+    const entry = findStockRecord(coachNo);
+
+    if (!entry) {
+        throw new Error(
+            "Coach Stock record not found: " + coachNo
+        );
+    }
+
+    const [stockId, record] = entry;
+    const oldVisit = record.currentVisit || {};
+    const history = getHistoryList(record.history);
+
+    history.push({
+        ...oldVisit,
+        shop: record.currentShop || oldVisit.shop || "",
+        dateOut: movementDate,
+        movementType: "PULLED OUT FROM BOARD",
+        recordedAt: new Date().toISOString()
+    });
+
+    const newVisit = {
+        ...oldVisit,
+        shop: newShop,
+        datePlaced: movementDate,
+        dateIn: movementDate,
+        dateOut: "",
+        status: "POH",
+        remarks: "Pulled Out from MR Coordination Board"
+    };
+
+    const base = `${STOCK_PATH}/${stockId}`;
+
+    return {
+        [`${base}/currentShop`]: newShop,
+        [`${base}/currentVisit`]: newVisit,
+        [`${base}/history`]: history,
+        [`${base}/updatedAt`]: new Date().toISOString(),
+        [`${base}/updatedBy`]: "Board Pull Out"
+    };
+};
+
 
 
