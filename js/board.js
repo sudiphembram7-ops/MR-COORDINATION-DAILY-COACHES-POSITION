@@ -2660,186 +2660,301 @@ async function deleteCoach(event) {
 }
 
 
+
 /* =========================================================
-   PULL OUT COACH
+   PULL OUT COACH + AUTOMATIC STOCK UPDATE
 ========================================================= */
 
 async function pullOutCoach(event) {
 
     if (event) {
-
         event.preventDefault();
-
         event.stopPropagation();
-
     }
 
+    if (!requireAdmin()) return;
 
-    if (!requireAdmin())
+    if (!selectedLine || !selectedPosition) {
+        showMessage("Coach position missing.", "warning");
         return;
-
-
-    if (
-        !selectedLine ||
-        !selectedPosition
-    ) {
-
-        showMessage(
-            "Coach position missing.",
-            "warning"
-        );
-
-        return;
-
     }
-
 
     const coach =
-        boardData?.[
-            selectedLine
-        ]?.[
-            selectedPosition
-        ];
-
+        boardData?.[selectedLine]?.[selectedPosition];
 
     if (!coach) {
-
-        showMessage(
-            "Coach not found.",
-            "danger"
-        );
-
+        showMessage("Coach not found.", "danger");
         return;
-
     }
 
+    if (
+        typeof window.getPullOutDestinations !== "function" ||
+        typeof window.prepareCoachStockPullOut !== "function"
+    ) {
+        showMessage(
+            "Coach Stock Integration not loaded.",
+            "danger"
+        );
+        return;
+    }
 
-    const now =
-        new Date().toISOString();
+    const destinations = window.getPullOutDestinations();
 
+    const oldModal = document.getElementById(
+        "pullOutDestinationModal"
+    );
 
-    const pulledCoach = {
+    if (oldModal) oldModal.remove();
 
-        ...coach,
+    const modal = document.createElement("div");
+    modal.id = "pullOutDestinationModal";
 
-        shop:
-            coach.shop ||
-            getShopFromLine(
-                selectedLine
-            ),
+    modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:1000050;
+        background:rgba(0,0,0,.75);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:15px;
+        box-sizing:border-box;
+    `;
 
-        line:
-            selectedLine,
+    modal.innerHTML = `
+        <div style="
+            background:white;
+            color:#26364b;
+            width:100%;
+            max-width:480px;
+            max-height:90vh;
+            overflow:auto;
+            padding:22px;
+            border-radius:16px;
+            box-sizing:border-box;
+        ">
+            <h2 style="margin-top:0">
+                🚆 PULL OUT DESTINATION
+            </h2>
 
-        position:
-            selectedPosition,
+            <p>
+                Coach Number:
+                <strong>${String(coach.coachNo || "")}</strong>
+            </p>
 
-        originalShop:
-            coach.originalShop ||
-            getShopFromLine(
-                selectedLine
-            ),
+            <p>
+                Current Shop:
+                <strong>${String(coach.shop || getShopFromLine(selectedLine))}</strong>
+            </p>
 
-        originalLine:
-            selectedLine,
+            <label style="display:block;font-weight:bold;margin:15px 0 8px">
+                SELECT DESTINATION SHOP
+            </label>
 
-        originalPosition:
-            selectedPosition,
+            <select id="pullOutDestination"
+                style="
+                    width:100%;
+                    padding:15px;
+                    border:2px solid #cbd5e1;
+                    border-radius:9px;
+                    font-size:15px;
+                    background:white;
+                ">
+                <option value="">Select Destination</option>
+                ${destinations.map(shop =>
+                    `<option value="${shop}">${shop}</option>`
+                ).join("")}
+            </select>
 
-        pulledOutAt:
-            now,
+            <label style="display:block;font-weight:bold;margin:15px 0 8px">
+                PULL OUT DATE
+            </label>
 
-        updatedAt:
-            now
+            <input id="pullOutDate"
+                type="date"
+                value="${(() => {
+                    const d = new Date();
+                    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                    return d.toISOString().slice(0,10);
+                })()}"
+                style="
+                    width:100%;
+                    padding:14px;
+                    box-sizing:border-box;
+                    border:1px solid #cbd5e1;
+                    border-radius:9px;
+                    font-size:16px;
+                ">
 
-    };
+            <div style="display:flex;gap:10px;margin-top:22px">
+                <button id="cancelPullOut"
+                    type="button"
+                    style="
+                        flex:1;
+                        padding:14px;
+                        border:0;
+                        border-radius:9px;
+                        background:#64748b;
+                        color:white;
+                        font-weight:bold;
+                    ">
+                    CANCEL
+                </button>
 
+                <button id="confirmPullOut"
+                    type="button"
+                    style="
+                        flex:1;
+                        padding:14px;
+                        border:0;
+                        border-radius:9px;
+                        background:#16834b;
+                        color:white;
+                        font-weight:bold;
+                    ">
+                    CONFIRM PULL OUT
+                </button>
+            </div>
+        </div>
+    `;
 
-    try {
+    document.body.appendChild(modal);
 
-        const updates = {};
+    modal.querySelector("#cancelPullOut").onclick =
+        () => modal.remove();
 
+    modal.addEventListener("click", e => {
+        if (e.target === modal) modal.remove();
+    });
 
-        updates[
-            `${BOARD_PATH}/${selectedLine}/${selectedPosition}`
-        ] = null;
+    modal.querySelector("#confirmPullOut").onclick =
+        async () => {
 
+            const newShop = modal.querySelector(
+                "#pullOutDestination"
+            ).value;
 
-        const newPulledRef =
-            push(
-                ref(
-                    database,
-                    PULLED_OUT_PATH
-                )
+            const movementDate = modal.querySelector(
+                "#pullOutDate"
+            ).value;
+
+            if (!newShop || !movementDate) {
+                alert("Please select Destination and Date.");
+                return;
+            }
+
+            const button = modal.querySelector(
+                "#confirmPullOut"
             );
 
+            button.disabled = true;
+            button.textContent = "PLEASE WAIT...";
 
-        updates[
-            `${PULLED_OUT_PATH}/${newPulledRef.key}`
-        ] =
-            pulledCoach;
+            try {
 
+                const now = new Date().toISOString();
 
-        await update(
-            ref(database),
-            updates
-        );
+                const originalShop =
+                    coach.shop ||
+                    getShopFromLine(selectedLine);
 
+                const pulledCoach = {
+                    ...coach,
 
-        await writeLocalHistory(
-            "PULL_OUT",
-            pulledCoach
-        );
+                    shop: originalShop,
 
+                    line: selectedLine,
+                    position: selectedPosition,
 
-        showMessage(
-            `Coach ${coach.coachNo} pulled out successfully.`,
-            "success"
-        );
+                    originalShop,
+                    originalLine: selectedLine,
+                    originalPosition: selectedPosition,
 
+                    destinationShop: newShop,
+                    pulledOutAt: now,
+                    pullOutDate: movementDate,
+                    updatedAt: now
+                };
 
-        returnMode = false;
+                /*
+                 Prepare Coach Stock update.
+                 Missing Stock record will stop Pull Out.
+                */
 
-        selectedPulledOutKey = "";
+                const stockUpdates =
+                    window.prepareCoachStockPullOut({
+                        coachNo: coach.coachNo,
+                        newShop,
+                        movementDate
+                    });
 
-        selectedPulledOutCoach = null;
+                const updates = {};
 
-        selectedLine = "";
+                // Remove from Board
+                updates[
+                    `${BOARD_PATH}/${selectedLine}/${selectedPosition}`
+                ] = null;
 
-        selectedPosition = "";
+                // Add to Pulled Out
+                const newPulledRef = push(
+                    ref(database, PULLED_OUT_PATH)
+                );
 
-        editingMode = false;
+                updates[
+                    `${PULLED_OUT_PATH}/${newPulledRef.key}`
+                ] = pulledCoach;
 
+                // Update Coach Stock in SAME Firebase operation
+                Object.assign(updates, stockUpdates);
 
-        removeEmptyCellHighlight();
+                // Atomic multi-location update
+                await update(ref(database), updates);
 
-        closeModal();
+                await writeLocalHistory(
+                    "PULL_OUT",
+                    {
+                        ...pulledCoach,
+                        destinationShop: newShop
+                    }
+                );
 
+                modal.remove();
 
-        await loadBoardOnce();
+                showMessage(
+                    `Coach ${coach.coachNo} pulled out successfully. Stock Shop: ${newShop}`,
+                    "success"
+                );
 
-        await loadPulledOutOnce();
+                returnMode = false;
+                selectedPulledOutKey = "";
+                selectedPulledOutCoach = null;
+                selectedLine = "";
+                selectedPosition = "";
+                editingMode = false;
 
-        updateEditButtons();
+                removeEmptyCellHighlight();
+                closeModal();
 
-    }
-    catch (error) {
+                await loadBoardOnce();
+                await loadPulledOutOnce();
 
-        console.error(
-            "PULL OUT ERROR:",
-            error
-        );
+                updateEditButtons();
 
+            } catch (error) {
 
-        showMessage(
-            error?.message ||
-            "Pull out failed.",
-            "danger"
-        );
+                console.error("PULL OUT ERROR:", error);
 
-    }
+                alert(
+                    "Pull Out Failed:\n" +
+                    (error.message || "Unknown error")
+                );
 
+                button.disabled = false;
+                button.textContent = "CONFIRM PULL OUT";
+            }
+        };
 }
+
 
 
 /* =========================================================
