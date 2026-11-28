@@ -2751,20 +2751,29 @@ async function pullOutCoach(event) {
                 SELECT DESTINATION SHOP
             </label>
 
-            <select id="pullOutDestination"
-                style="
-                    width:100%;
-                    padding:15px;
-                    border:2px solid #cbd5e1;
-                    border-radius:9px;
-                    font-size:15px;
-                    background:white;
-                ">
-                <option value="">Select Destination</option>
-                ${destinations.map(shop =>
-                    `<option value="${shop}">${shop}</option>`
-                ).join("")}
-            </select>
+           <input
+    type="hidden"
+    id="pullOutDestination"
+    value=""
+>
+
+<button
+    type="button"
+    id="pullOutDestinationButton"
+    style="
+        width:100%;
+        padding:17px;
+        border:2px solid #cbd5e1;
+        border-radius:10px;
+        background:white;
+        color:#222;
+        font-size:17px;
+        text-align:left;
+        cursor:pointer;
+    "
+>
+    Select Destination ▼
+</button>
 
             <label style="display:block;font-weight:bold;margin:15px 0 8px">
                 PULL OUT DATE
@@ -2819,6 +2828,134 @@ async function pullOutCoach(event) {
     `;
 
     document.body.appendChild(modal);
+    /* =========================================
+   IPHONE SAFE DESTINATION PICKER
+========================================= */
+
+const destinationButton = modal.querySelector(
+    "#pullOutDestinationButton"
+);
+
+const destinationInput = modal.querySelector(
+    "#pullOutDestination"
+);
+
+destinationButton.addEventListener("click", () => {
+
+    const oldPicker = document.getElementById(
+        "pullOutShopPicker"
+    );
+
+    if (oldPicker) oldPicker.remove();
+
+    const picker = document.createElement("div");
+
+    picker.id = "pullOutShopPicker";
+
+    picker.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:1000060;
+        background:rgba(0,0,0,.75);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:15px;
+        box-sizing:border-box;
+    `;
+
+    picker.innerHTML = `
+        <div style="
+            width:100%;
+            max-width:480px;
+            max-height:85vh;
+            overflow-y:auto;
+            background:white;
+            border-radius:15px;
+            padding:18px;
+            box-sizing:border-box;
+            color:#26364b;
+        ">
+
+            <h2 style="margin-top:0">
+                SELECT DESTINATION SHOP
+            </h2>
+
+            <div id="pullOutShopOptions"></div>
+
+            <button
+                type="button"
+                id="closePullOutShopPicker"
+                style="
+                    width:100%;
+                    padding:14px;
+                    margin-top:12px;
+                    border:0;
+                    border-radius:9px;
+                    background:#64748b;
+                    color:white;
+                    font-weight:bold;
+                "
+            >
+                CANCEL
+            </button>
+
+        </div>
+    `;
+
+    document.body.appendChild(picker);
+
+    const optionsBox = picker.querySelector(
+        "#pullOutShopOptions"
+    );
+
+    destinations.forEach(shop => {
+
+        const option = document.createElement("button");
+
+        option.type = "button";
+        option.textContent = shop;
+
+        option.style.cssText = `
+            display:block;
+            width:100%;
+            padding:16px 12px;
+            margin:7px 0;
+            border:1px solid #cbd5e1;
+            border-radius:9px;
+            background:#f8fafc;
+            color:#26364b;
+            font-size:15px;
+            font-weight:bold;
+            text-align:left;
+            cursor:pointer;
+        `;
+
+        option.addEventListener("click", () => {
+
+            destinationInput.value = shop;
+
+            destinationButton.textContent = shop + " ▼";
+
+            destinationButton.style.background = "#e8f5e9";
+            destinationButton.style.borderColor = "#16834b";
+
+            picker.remove();
+
+        });
+
+        optionsBox.appendChild(option);
+    });
+
+    picker.querySelector(
+        "#closePullOutShopPicker"
+    ).onclick = () => picker.remove();
+
+    picker.addEventListener("click", event => {
+        if (event.target === picker) picker.remove();
+    });
+
+});
 
     modal.querySelector("#cancelPullOut").onclick =
         () => modal.remove();
@@ -2830,9 +2967,9 @@ async function pullOutCoach(event) {
     modal.querySelector("#confirmPullOut").onclick =
         async () => {
 
-            const newShop = modal.querySelector(
-                "#pullOutDestination"
-            ).value;
+           const newShop = modal.querySelector(
+    "#pullOutDestination"
+).value.trim();
 
             const movementDate = modal.querySelector(
                 "#pullOutDate"
